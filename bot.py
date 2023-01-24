@@ -1198,4 +1198,4 @@ async def bj(ctx, bet: int):
         json.dump(data, f, indent=4)
 """
 
-bot.run("OTM1OTQ1Njg3NTU4OTQyNzYy.GHS71g.cJhuWCJyeHBgbEZ5ZzxAcLFILEj199iXLA7lRo")
+bot.run("")
