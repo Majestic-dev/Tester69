@@ -20,7 +20,7 @@ Start = discord.Embed(
         description = "You need to execute the `'start` command before executing any other commands",
         colour = discord.Colour.dark_orange())
 
-intents = discord.Intents.default()
+intents = discord.Intents.all()
 intents.members = True
 whitelist = ["705435835306213418"]
 
@@ -28,14 +28,16 @@ bot_prefix = "'"
 bot = commands.Bot(command_prefix = bot_prefix, intents = intents)
 bot.remove_command("help")
 
+""""
 @bot.event
 async def on_ready():
     await bot.change_presence(status=discord.Status.online, activity=discord.Game(f"'help - https://discord.gg/VsDDf8YKBV"))
+    await bot.load_extension("test")
+"""
 
 @bot.command()
 async def ping(ctx):
     await ctx.reply(f"Pong! My ping is currently {round(bot.latency * 1000)}ms")
-
 @bot.command()
 async def prefix(ctx):
     await ctx.reply("Tester69's prefix is `'`")
@@ -1196,4 +1198,4 @@ async def bj(ctx, bet: int):
         json.dump(data, f, indent=4)
 """
 
-bot.run("")
+bot.run("OTM1OTQ1Njg3NTU4OTQyNzYy.GHS71g.cJhuWCJyeHBgbEZ5ZzxAcLFILEj199iXLA7lRo")
