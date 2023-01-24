@@ -4,3 +4,4 @@
 
 - [ ] Add more commands for the economy.
 - [ ] Make the code cleaner (spread everything across more files).
+- [x] Prepare for code cleanup
