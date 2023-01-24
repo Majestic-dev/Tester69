@@ -28,79 +28,11 @@ bot_prefix = "'"
 bot = commands.Bot(command_prefix = bot_prefix, intents = intents)
 bot.remove_command("help")
 
-""""
+
 @bot.event
 async def on_ready():
     await bot.change_presence(status=discord.Status.online, activity=discord.Game(f"'help - https://discord.gg/VsDDf8YKBV"))
-    await bot.load_extension("test")
-"""
-
-@bot.command()
-async def ping(ctx):
-    await ctx.reply(f"Pong! My ping is currently {round(bot.latency * 1000)}ms")
-@bot.command()
-async def prefix(ctx):
-    await ctx.reply("Tester69's prefix is `'`")
-
-@bot.command()
-async def help(ctx):
-    help = discord.Embed(
-        title = "Tetser69's command list",
-        colour = discord.Colour.light_gray())
-        
-    help.add_field(
-        name = "Moderation", value = "`'moderation`", inline=True)
-    help.add_field(
-        name = "Economy", value = "`'economy`")
-    await ctx.reply(embed = help)
-
-@bot.command()
-async def moderation(ctx):
-    moderation = discord.Embed(
-        title = "Tester69's moderation commands",
-        colour = discord.Colour.darker_gray())
-    moderation.add_field(
-        name = "Kick", value = "`'kick`", inline = True)
-    moderation.add_field(
-        name = "Mute", value = "`'mute`", inline = True)
-    moderation.add_field(
-        name = "Unmute", value = "`'unmute`", inline = True)
-    moderation.add_field(
-        name = "RandomBan", value = "`'randomban`", inline = True)
-    moderation.add_field(
-        name = "Ban", value = "`'ban`", inline = True)
-    moderation.add_field(
-        name = "Unban", value = "`'unban`", inline = True)
-    moderation.add_field(
-        name = "Warn", value = "`'warn`", inline = True)
-    moderation.add_field(
-        name = "Delwarn", value = "`'delwarn`", inline = True)
-    await ctx.reply(embed = moderation)
-
-@bot.command()
-async def economy(ctx):
-    economy = discord.Embed(
-        title = "Tester69's economy commands",
-        colour = discord.Colour.darker_grey())
-    economy.add_field(
-        name = "Add", value = "`'add`", inline = True)
-    economy.add_field(
-        name = "Subtract", value = "`'subtract`", inline = True)
-    economy.add_field(
-        name = "Balance", value = "`'balance`", inline = True)
-    economy.add_field(
-        name = "Inventory", value = "`'inventory`", inline = True)
-    economy.add_field(
-        name = "Fish", value = "`'fish`", inline = True)
-    economy.add_field(
-        name = "Hourly", value = "`'hourly`", inline = True)
-    economy.add_field(
-        name = "Sell", value = "`'sell`", inline = True)
-    economy.add_field(
-        name = "Gamble", value = "`'gamble`", inline = True)
-    await ctx.reply(embed = economy)
-
-#Basic shit above
+    bot.load_extension("extensions.commands.MainStuff")
 
 #Warning system below
 
