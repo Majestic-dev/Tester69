@@ -1196,4 +1196,4 @@ async def bj(ctx, bet: int):
         json.dump(data, f, indent=4)
 """
 
-bot.run("OTM1OTQ1Njg3NTU4OTQyNzYy.GTPiPW.abJI1DN6s9cEAZ8FRp1Nc_ylPIQd1drunIHVdM")
+bot.run("<Your bot token here>")
