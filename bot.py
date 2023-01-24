@@ -2,6 +2,8 @@ from discord.ext import commands
 from discord.ext.commands import has_permissions
 from datetime import datetime, timedelta
 from datetime import datetime
+#from discord import app_commands
+#soon slash commands...
 import json
 import os
 import discord
@@ -1079,5 +1081,119 @@ async def _gamble(ctx, bet:int = None):
             await ctx.reply(embed = BetLoss)
     else:
         await ctx.reply(embed = NoFunds2)
+
+""""
+
+@bot.command()
+async def bj(ctx, bet: int):
+    player_cards = []
+    dealer_cards = []
+    player_score = 0
+    dealer_score = 0
+    user_id = str(ctx.author.id)
+    with open("data/users.json", "r") as f:
+        data = json.load(f)
+    if user_id not in data:
+        await ctx.send(embed = Start)
+        return
+    if bet > data[user_id]['balance']:
+
+        NoCoins = discord.Embed(
+            title = "Not Enough Coins", 
+            description = "You don't have enough coins.", 
+            color = discord.Color.orange())
+        await ctx.send(embed = NoCoins)
+
+        return
+    data[user_id]['balance'] -= bet
+    for i in range(2):
+        card = random.randint(1, 11)
+        player_cards.append(card)
+        player_score += card
+        card = random.randint(1, 11)
+        dealer_cards.append(card)
+        dealer_score += card
+
+    YourCards = discord.Embed(
+        title = "Your Cards And Score", 
+        description = f"Cards: {player_cards}\nScore: {player_score}", 
+        color = discord.Color.dark_grey())
+
+    await ctx.send(embed = YourCards)
+    while player_score < 21:
+        action = await bot.wait_for("message", check = lambda message: message.author == ctx.author)
+        if action.content.lower() == "hit":
+            card = random.randint(1, 11)
+            player_cards.append(card)
+            player_score += card
+
+            YourCards2 = discord.Embed(
+                title = "Your Cards And Score", 
+                description = f"Cards: {player_cards}\nScore: {player_score}", 
+                color = discord.Color.darker_grey())
+
+            await ctx.send(embed = YourCards2)
+        elif action.content.lower() == "stand":
+            break
+        else:
+
+            InvalidAction = discord.Embed(
+                title = "Error", 
+                description = "Invalid action. Please type 'hit' or 'stand'.", 
+                color = discord.Color.red())
+
+            await ctx.send(embed = InvalidAction)
+        
+    while dealer_score < 17:
+        dealer_card = random.randint(1, 11)
+        dealer_cards.append(dealer_card)
+        dealer_score += dealer_card
+    if player_score > 21:
+
+        PlayerBust = discord.Embed(
+            title = "You Lose!", 
+            description = f"Your score: {player_score}\nDealer's cards: {dealer_cards}\nDealer's score: {dealer_score}", 
+            color = discord.Color.red())
+
+        await ctx.send(embed = PlayerBust)
+        data[user_id]['balance'] -= bet
+    elif dealer_score > 21:
+
+        DealerBust = discord.Embed(
+        title = "You Win!", 
+        description = f"Your score: {player_score}\nDealer's cards: {dealer_cards}\nDealer's score: {dealer_score}", 
+        color = discord.Color.green())
+
+        await ctx.send(embed = DealerBust)
+        data[user_id]['balance'] += bet
+    elif dealer_score > player_score:
+
+        PlayerLost = discord.Embed(
+            title = "You Lose!", 
+            description = f"Your score: {player_score}\nDealer's cards: {dealer_cards}\nDealer's score: {dealer_score}", 
+            color = discord.Color.red())
+
+        await ctx.send(embed = PlayerLost)
+        data[user_id]['balance'] -= bet
+    elif dealer_score < player_score:
+
+        PlayerWon = discord.Embed(
+            title = "You Win!", 
+            description = f"Your score: {player_score}\nDealer's cards: {dealer_cards}\nDealer's score: {dealer_score}", 
+            color = discord.Color.green())
+
+        await ctx.send(embed = PlayerWon)
+        data[user_id]['balance'] += bet
+    else:
+
+        PlayerTie = discord.Embed(
+            title = "Tie!", 
+            description = f"Your score: {player_score}\nDealer's cards: {dealer_cards}\nDealer's score: {dealer_score}", 
+            color = discord.Color.blue())
+
+        await ctx.send(embed = PlayerTie)
+    with open("data/users.json", "w") as f:
+        json.dump(data, f, indent=4)
+"""
 
 bot.run("OTM1OTQ1Njg3NTU4OTQyNzYy.GTPiPW.abJI1DN6s9cEAZ8FRp1Nc_ylPIQd1drunIHVdM")
