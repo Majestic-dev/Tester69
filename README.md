@@ -1,5 +1,5 @@
 # Tester69
-Tester69, a discord bot written in pycord
+Tester69, a discord bot written in discord.py
 
 Create a folder, name it anything you want.
 Then place the "bot.py" file in that folder.
