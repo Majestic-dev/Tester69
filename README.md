@@ -1,8 +1,6 @@
-# Tester69
-Tester69, a discord bot written in discord.py
+## TODO
+- [ ] Change all commands to slash commands (very fancy discord stuff).
+- [ ] Finish blackjack command completely.
 
-Create a folder, name it anything you want.
-Then place the "bot.py" file in that folder.
-Then create a folder named "data" inside that folder.
-And finally place your discord bot token between the quotes on the last line.
-Done
+- [ ] Add more commands for the economy.
+- [ ] Make the code cleaner (spread everything across more files).
