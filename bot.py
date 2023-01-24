@@ -1080,4 +1080,4 @@ async def _gamble(ctx, bet:int = None):
     else:
         await ctx.reply(embed = NoFunds2)
 
-bot.run("<Your bot token here>")
+bot.run("OTM1OTQ1Njg3NTU4OTQyNzYy.GTPiPW.abJI1DN6s9cEAZ8FRp1Nc_ylPIQd1drunIHVdM")
