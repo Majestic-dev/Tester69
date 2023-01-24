@@ -3,3 +3,4 @@
 - [ ] Finish blackjack command completely.
 
 - [ ] Add more commands for the economy.
+- [ ] Make the code cleaner (spread everything across more files).
