@@ -16,7 +16,7 @@ class MainStuff(commands.Cog):
         await ctx.reply(embed = Ping)
 
     @commands.command()
-    async def prefix(ctx):
+    async def prefix(self, ctx):
 
         Prefix = discord.Embed(
             title = "Prefix",
@@ -89,5 +89,5 @@ class MainStuff(commands.Cog):
             
         await ctx.reply(embed = economy)
 
-def setup(bot):
-    bot.add_cog(MainStuff(bot))
+async def setup(bot):
+   await bot.add_cog(MainStuff(bot))

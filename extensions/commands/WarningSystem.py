@@ -184,5 +184,5 @@ class WarningSystem(commands.Cog):
                 await message.channel.send(embed=e)
                 self.registerWarning(id = message.author.id, reason = "Posting \"uwu\"", content = content)
 
-def setup(bot):
-    bot.add_cog(WarningSystem(bot))
+async def setup(bot):
+    await bot.add_cog(WarningSystem(bot))
