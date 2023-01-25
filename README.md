@@ -5,7 +5,7 @@
 3. Create a .env file in the copied repository and add your bot token there like this:
 TOKEN = Your bot token
 4. Replace "Your bot token" with your actual bot token. (No quotes needed, but you can add them)
-Done
+5. Done
 
 ## TODO
 - [ ] Change all commands to slash commands (very fancy discord stuff).
