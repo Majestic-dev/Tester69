@@ -26,7 +26,7 @@ class MainStuff(commands.Cog):
         await ctx.reply(embed = Prefix)
 
     @commands.command()
-    async def help(ctx):
+    async def help(self, ctx):
 
         help = discord.Embed(
             title = "Tetser69's command list",
@@ -40,7 +40,7 @@ class MainStuff(commands.Cog):
         await ctx.reply(embed = help)
 
     @commands.command()
-    async def moderation(ctx):
+    async def moderation(self, ctx):
 
         moderation = discord.Embed(
             title = "Tester69's moderation commands",
@@ -65,7 +65,7 @@ class MainStuff(commands.Cog):
         await ctx.reply(embed = moderation)
 
     @commands.command()
-    async def economy(ctx):
+    async def economy(self, ctx):
 
         economy = discord.Embed(
             title = "Tester69's economy commands",
