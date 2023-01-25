@@ -8,7 +8,7 @@ TOKEN = Your bot token
 5. Done
 
 ## TODO
-- [ ] Change all commands to slash commands (very fancy discord stuff).
+- [ ] Change all commands to slash commands (very fancy discord stuff). - Coming this week with cone cleanup! (Partially added already)
 - [ ] Finish blackjack command completely.
 
 - [ ] Add more commands for the economy.
