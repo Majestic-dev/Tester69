@@ -9,6 +9,8 @@ import os
 import discord
 import random
 import time
+from dotenv import load_dotenv
+load_dotenv()
 
 if not os.path.isfile("data/users.json"):
     with open("data/users.json", "w") as f:
@@ -31,8 +33,8 @@ bot.remove_command("help")
 @bot.event
 async def on_ready():
     await bot.change_presence(status=discord.Status.online, activity=discord.Game(f"'help - https://discord.gg/VsDDf8YKBV"))
-    bot.load_extension("extensions.commands.MainStuff")
-    bot.load_extension("extensions.commands.WarningSystem")
+    await bot.load_extension("extensions.commands.MainStuff")
+    await bot.load_extension("extensions.commands.WarningSystem")
 
 #Moderation commands below
 
@@ -393,23 +395,25 @@ async def add(ctx, amount: int = None):
         await ctx.reply(embed = NoNumber)
         return
 
-    add = discord.Embed(
-        title = "Added Coins",
-        description = (f'Added {amount} coins to your balance. Your new balance is {users[user_id]["balance"]}'),
-        colour = discord.Colour.green())
-
-    add2 = discord.Embed(
-        title = "Added Coins",
-        description = (f'Added {amount} coins to your balance. Your new balance is {users[user_id]["balance"]}'),
-        colour = discord.Colour.green())
-
     if user_id in users:
         users[user_id]["balance"] += amount
         save_data()
+
+        add = discord.Embed(
+            title = "Added Coins",
+            description = (f'Added {amount} coins to your balance. Your new balance is {users[user_id]["balance"]}'),
+            colour = discord.Colour.green())
+        
         await ctx.reply(embed = add)
     else:
         users[user_id] = {"balance": amount}
         save_data()
+
+        add2 = discord.Embed(
+            title = "Added Coins",
+            description = (f'Added {amount} coins to your balance. Your new balance is {users[user_id]["balance"]}'),
+            colour = discord.Colour.green())
+
         await ctx.reply(embed = add2)
 
 @bot.command()
@@ -436,14 +440,9 @@ async def subtract(ctx, amount: int = None):
         return
 
     SubtractFail = discord.Embed(
-        title = "Coin Subtraction Failed",
-        description = (f'You do not have enough coins. Your new balance is {users[user_id]["balance"]}'),
-        colour = discord.Colour.red())
-
-    SubtractSuccess = discord.Embed(
-        title = "Coin Subtraction Succeeded",
-        description = (f'Subtracted {amount} from your balance. Your new balance is {users[user_id]["balance"]}'),
-        colour = discord.Color.green())
+                title = "Coin Subtraction Failed",
+                description = (f'You do not have enough coins. Your new balance is {users[user_id]["balance"]}'),
+                colour = discord.Colour.red())
     
     NoCoins = discord.Embed(
         title = "No Coins",
@@ -456,6 +455,12 @@ async def subtract(ctx, amount: int = None):
         else:
             users[user_id]["balance"] -= amount
             save_data()
+
+            SubtractSuccess = discord.Embed(
+                title = "Coin Subtraction Succeeded",
+                description = (f'Subtracted {amount} from your balance. Your new balance is {users[user_id]["balance"]}'),
+                colour = discord.Color.green())
+
             await ctx.reply(embed = SubtractSuccess)
     else:
         await ctx.reply(embed = NoCoins)
@@ -930,4 +935,4 @@ async def bj(ctx, bet: int):
         json.dump(data, f, indent=4)
 """
 
-bot.run("")
+bot.run(os.getenv('TOKEN'))
