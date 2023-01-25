@@ -1,32 +1,33 @@
 from discord.ext import commands
+from discord import app_commands
 import discord
 
 class MainStuff(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.command()
-    async def ping(self, ctx):
+    @app_commands.command(name = "ping", description = "Show my ping")
+    async def ping(self, interaction: discord.Interaction):
 
         Ping = discord.Embed(
             title = "Pong!",
             description = f"🏓 My ping is {round(self.bot.latency * 1000)}ms 🏓",
             colour = discord.Colour.green())
 
-        await ctx.reply(embed = Ping)
+        await interaction.response.send_message(embed = Ping, ephemeral = True)
 
-    @commands.command()
-    async def prefix(self, ctx):
+    @app_commands.command(name = "prefix", description = "Show my prefix")
+    async def prefix(self, interaction: discord.Interaction):
 
         Prefix = discord.Embed(
             title = "Prefix",
             description = "Tester69's prefix is `'`",
             colour = discord.Colour.light_gray())
 
-        await ctx.reply(embed = Prefix)
+        await interaction.response.send_message(embed = Prefix, ephemeral = True)
 
-    @commands.command()
-    async def help(self, ctx):
+    @app_commands.command(name = "help", description = "Get the basic help for commands")
+    async def help(self, interaction: discord.Interaction):
 
         help = discord.Embed(
             title = "Tetser69's command list",
@@ -37,10 +38,10 @@ class MainStuff(commands.Cog):
         help.add_field(
             name = "Economy", value = "`'economy`")
         
-        await ctx.reply(embed = help)
+        await interaction.respone.send_message(embed = help, ephemeral = True)
 
-    @commands.command()
-    async def moderation(self, ctx):
+    @app_commands.command(name = "moderation", description = "Get all current moderation commands")
+    async def moderation(self, interaction: discord.Interaction):
 
         moderation = discord.Embed(
             title = "Tester69's moderation commands",
@@ -62,18 +63,14 @@ class MainStuff(commands.Cog):
         moderation.add_field(
             name = "Delwarn", value = "`'delwarn`", inline = True)
 
-        await ctx.reply(embed = moderation)
+        await interaction.response.send_message(embed = moderation, ephemeral = True)
 
-    @commands.command()
-    async def economy(self, ctx):
+    @app_commands.command(name = "economy", description = "Get all current economy commands")
+    async def economy(self, interaction: discord.Interaction):
 
         economy = discord.Embed(
             title = "Tester69's economy commands",
             colour = discord.Colour.darker_grey())
-        economy.add_field(
-            name = "Add", value = "`'add`", inline = True)
-        economy.add_field(
-            name = "Subtract", value = "`'subtract`", inline = True)
         economy.add_field(
             name = "Balance", value = "`'balance`", inline = True)
         economy.add_field(
@@ -87,7 +84,7 @@ class MainStuff(commands.Cog):
         economy.add_field(
             name = "Gamble", value = "`'gamble`", inline = True)
             
-        await ctx.reply(embed = economy)
+        await interaction.response.send_message(embed = economy, ephemeral = True)
 
-async def setup(bot):
-   await bot.add_cog(MainStuff(bot))
+async def setup(bot: commands.Bot):
+    await bot.add_cog(MainStuff(bot))
