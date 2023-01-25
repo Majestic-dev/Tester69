@@ -1,6 +1,8 @@
 ## Guide
 
-THE ONLY THING YOU NEED TO DO IS COPY THE REPOSITORY AND ADD A FOLDER NAMED "data" THERE AND REPLACE THE EMPTY SPACE BETWEEN THE QUOTES (on the last line) WITH YOUR OWN BOT TOKEN. THATS IT.
+1. Copy the repository
+2. Create a folder named "data" inside the copied repository
+3. Replace "os.getenv('TOKEN')" with your discord bot token. Note that the token has to be inside quotes!
 
 ## TODO
 - [ ] Change all commands to slash commands (very fancy discord stuff).
