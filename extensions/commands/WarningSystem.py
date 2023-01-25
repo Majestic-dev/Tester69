@@ -1,5 +1,6 @@
 from discord.ext import commands
 from datetime import datetime
+from discord import app_commands
 import discord
 import json
 import uuid
@@ -7,7 +8,7 @@ import random
 import os
 
 class WarningSystem(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
 
     def registerWarning(self, id, reason, content):
@@ -32,21 +33,21 @@ class WarningSystem(commands.Cog):
 
                 json.dump(d8a, w, indent=4)
 
-    @commands.command()
+    @app_commands.command(name = "warn", description = "Warns the mentioned user with a custom warning reason")
     @commands.has_permissions(manage_messages = True)
-    async def warn(self, ctx, user: discord.User, *, reason: str):
+    async def warn(self, interaction:discord.Interaction, user: discord.User, *, reason: str):
         user_id = str(user.id)
-        self.registerWarning(user_id, reason, f"Warned by {ctx.author.name} on {datetime.now()}")
+        self.registerWarning(user_id, reason, f"Warned by {interaction.user} on {datetime.now()}")
 
         warn = discord.Embed(
             title = "Warning",
             description = (f"{user.name} has been warned for: ```{reason}```"),
             colour = discord.Colour.red())
-        await ctx.reply(embed = warn)
+        await interaction.response.send_message(embed = warn)
 
-    @commands.command()
+    @app_commands.command(name = "delwarn", description = "Deletes the warning by UUID")
     @commands.has_permissions(manage_messages=True)
-    async def delwarn(self, ctx, uuid):
+    async def delwarn(self, interaction:discord.Interaction, uuid: str):
         found = False
 
         DeletedWarning = discord.Embed(
@@ -76,18 +77,18 @@ class WarningSystem(commands.Cog):
                 with open(f"./data/{file}", "w") as w:
                     json.dump(d8a, w, indent=4)
 
-                await ctx.reply(embed = DeletedWarning)
+                await interaction.response.send_message(embed = DeletedWarning)
                 found = True
 
             elif uuid not in d8a["warnings"]:
-                await ctx.reply(embed = NotFound)
+                await interaction.response.send_message(embed = NotFound)
 
         if found != True:
-            ctx.reply(embed = WarningNotFound)
+            interaction.response.send_message(embed = WarningNotFound)
 
-    @commands.command()
+    @app_commands.command(name = "warnings", description = "get the warning list of the user")
     @commands.has_permissions(manage_messages = True)
-    async def warnings(self, ctx, member : discord.Member):
+    async def warnings(self, interaction: discord.Interaction, member : discord.Member):
 
         if f"{member.id}.json" in os.listdir("./data/"):
 
@@ -106,9 +107,9 @@ class WarningSystem(commands.Cog):
                 description = f"{member.mention} has no warnings",
                 colour = discord.Colour.green())
 
-                e.set_author(name = member.name, icon_url = member.avatar_url)
+                e.set_author(name = member.name, icon_url = member.avatar.url)
 
-                await ctx.reply(embed=e)
+                await interaction.response.send_message(embed=e)
                 return
 
             for warning in warnings:
@@ -117,8 +118,8 @@ class WarningSystem(commands.Cog):
                     value = "Reason: " + warnings[warning]["reason"] + "\nContent: " + warnings[warning]["content"],
                     inline = False)
 
-            e.set_author(name = member.name, icon_url = member.avatar_url)
-            await ctx.reply(embed=e)
+            e.set_author(name = member.name, icon_url = member.avatar.url)
+            await interaction.response.send_message(embed=e)
 
         else:
             e = discord.Embed(
@@ -126,9 +127,9 @@ class WarningSystem(commands.Cog):
                 description = f"{member.mention} has no warnings",
                 colour = discord.Colour.green())
 
-            e.set_author(name = member.name, icon_url = member.avatar_url)
+            e.set_author(name = member.name, icon_url = member.avatar.url)
 
-            await ctx.reply(embed=e)
+            await interaction.response.send_message(embed=e)
 
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -184,5 +185,5 @@ class WarningSystem(commands.Cog):
                 await message.channel.send(embed=e)
                 self.registerWarning(id = message.author.id, reason = "Posting \"uwu\"", content = content)
 
-async def setup(bot):
+async def setup(bot: commands.Bot):
     await bot.add_cog(WarningSystem(bot))
