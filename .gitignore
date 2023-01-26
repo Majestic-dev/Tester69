@@ -2,3 +2,4 @@ data
 data/users.json
 __pycache__
 .env
+randomban.txt
