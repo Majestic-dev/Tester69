@@ -9,7 +9,7 @@ TOKEN = Your bot token
 
 ## TODO
 - [x] Change all commands to slash commands.
-- [ ] Finish blackjack command completely.
-
-- [ ] Add more commands for the economy.
 - [x] Make the code cleaner (spread everything into cogs).
+
+- [ ] Finish blackjack command completely.
+- [ ] Add more commands for the economy.
