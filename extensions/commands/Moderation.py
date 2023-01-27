@@ -1,8 +1,6 @@
 from discord.ext import commands
 from discord import app_commands
 import discord
-import json
-import random
 
 whitelist = [ 705435835306213418 ]
 
