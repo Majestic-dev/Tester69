@@ -345,7 +345,7 @@ class Economy(commands.Cog):
         return [
         app_commands.Choice(name=item, value=item)
         for item in items_in_inventory
-        if item.lower().startswith(current.lower()) or len(current) < 2]
+        if item.lower().startswith(current.lower()) or len(current) < 2 and user_data["inventory"][item] > 0]
 
     @app_commands.command(name = "sell", description = "Sell your loot for coins")
     @app_commands.autocomplete(item = item_autocomplete)
