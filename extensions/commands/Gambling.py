@@ -25,7 +25,7 @@ class Gambling(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-
+"""
     @app_commands.command(name = "gamble", description = "Gamble your set amount of coins")
     async def _gamble(self, interaction:discord.Interaction, bet:int = None):
         user_id = str(interaction.user.id)
@@ -101,5 +101,60 @@ class Gambling(commands.Cog):
         else:
             await interaction.response.send_message(embed = NoFunds2)
 
+    @app_commands.command(name = "snakeeyes", description = "Gamble your coins in a snake eyes game for a chance to win big!")
+    async def snakeeyes(self, interaction:discord.Interaction, bet: int):
+
+        Nocoins = discord.Embed(
+            title = "Not Enough Coins",
+            description = "You do not have enough coins for that bet",
+            colour = discord.Colour.orange())
+
+        user_id = str(interaction.user.id)
+        with open("data/users.json", "r") as f:
+            data = json.load(f)
+        if user_id not in data:
+            await interaction.response.send_message(embed = Start)
+            return
+
+
+        if bet > users[user_id]['balance']:
+            await interaction.response.send_message(embed = Nocoins)
+            return
+
+
+        roll1 = random.randint(1, 6)
+        roll2 = random.randint(1, 6)
+        if roll1 == 1 and roll2 == 1:
+            data[user_id]['balance'] += 30 * bet
+            save_data()
+
+            Snakeeyes = discord.Embed(
+                title = "SNAKE EYES!",
+                description = (f'You rolled Snake Eyes! You won {30 * bet} coins!'),
+                colour = discord.Colour.green())
+        
+            await interaction.response.send_message(embed = Snakeeyes)
+
+        elif roll1 == 1 or roll2 == 1:
+            data[user_id]['balance'] += 1.5 * bet
+            save_data()
+
+            Snakeeye = discord.Embed(
+                title = "Snake Eye!",
+                description = (f'You rolled 1 snake eye! You won {1.5 * bet} coins!'),
+                colour = discord.Colour.green())
+
+            await interaction.response.send_message(embed = Snakeeye)
+        else:
+            data[user_id]['balance'] -= bet
+            save_data()
+
+            Betloss = discord.Embed(
+                title = "You lost",
+                description = (f'You rolled a {roll1} and a {roll2}. You lost {bet} coins.'),
+                colour = discord.Colour.orange())
+
+            await interaction.response.send_message(embed = Betloss)
+"""
 async def setup(bot: commands.Bot):
     await bot.add_cog(Gambling(bot))
