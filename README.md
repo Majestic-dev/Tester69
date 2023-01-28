@@ -11,5 +11,4 @@ TOKEN = Your bot token
 - [x] Change all commands to slash commands.
 - [x] Make the code cleaner (spread everything into cogs).
 
-- [ ] Finish blackjack command completely.
 - [ ] Add more commands for the economy.
