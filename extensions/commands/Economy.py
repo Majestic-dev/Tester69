@@ -11,7 +11,7 @@ owners = [705435835306213418]
 
 Start = discord.Embed(
     title="ERROR",
-    description="You need to execute the `'start` command before executing any other commands",
+    description="You need to execute the `/start` command before executing any other commands",
     colour=discord.Colour.dark_orange(),)
 
 fish_cooldown = {}

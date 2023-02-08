@@ -75,5 +75,4 @@ except:
 def save_data():
     with open('data/users.json', 'w') as f:
         json.dump(users, f, indent=4)
-
 bot.run(os.getenv('TOKEN'))
