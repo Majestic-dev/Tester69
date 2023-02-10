@@ -61,7 +61,7 @@ bot.remove_command("help")
 async def on_ready():
     await bot.change_presence(
         status=discord.Status.online,
-        activity=discord.Game(f"'help - https://discord.gg/VsDDf8YKBV"),
+        activity=discord.Game(f"/help - https://discord.gg/VsDDf8YKBV"),
     )
 
     for root, _, files in os.walk("extensions"):
