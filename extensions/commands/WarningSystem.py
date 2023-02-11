@@ -48,6 +48,7 @@ class WarningSystem(commands.Cog):
         warn = discord.Embed(
             title="Warning",
             description=(f"{user.name} has been warned for: ```{reason}```"),
+            timestamp=datetime.now(),
             colour=discord.Colour.red(),
         )
         await interaction.response.send_message(embed=warn)
@@ -60,18 +61,21 @@ class WarningSystem(commands.Cog):
         DeletedWarning = discord.Embed(
             title="Warning Deleted",
             description=(f"Deleted warning ```{uuid}```"),
+            timestamp=datetime.now(),
             colour=discord.Colour.green(),
         )
 
         NotFound = discord.Embed(
             title="Not Found",
             description=(f"Couldn't find ```{uuid}```"),
+            timestamp=datetime.now(),
             colour=discord.Colour.orange(),
         )
 
         WarningNotFound = discord.Embed(
             title="Warning Not Found",
             description=(f"Couldn't find warning ID ```{uuid}```"),
+            timestamp=datetime.now(),
             colour=discord.Colour.orange(),
         )
 
@@ -104,7 +108,9 @@ class WarningSystem(commands.Cog):
 
         if f"{member.id}.json" in os.listdir("./data/"):
 
-            e = discord.Embed(title="Warnings", colour=discord.Colour.orange())
+            e = discord.Embed(title="Warnings", 
+                              timestamp=datetime.now(),
+                              colour=discord.Colour.orange())
 
             with open(f"./data/{member.id}.json", "r") as r:
                 d8a = json.load(r)
@@ -115,6 +121,7 @@ class WarningSystem(commands.Cog):
                 e = discord.Embed(
                     title="Warnings",
                     description=f"{member.mention} has no warnings",
+                    timestamp=datetime.now(),
                     colour=discord.Colour.green(),
                 )
 
@@ -140,6 +147,7 @@ class WarningSystem(commands.Cog):
             e = discord.Embed(
                 title="Warnings",
                 description=f"{member.mention} has no warnings",
+                timestamp=datetime.now(),
                 colour=discord.Colour.green(),
             )
 
@@ -156,6 +164,7 @@ class WarningSystem(commands.Cog):
             e = discord.Embed(
                 title="Warning",
                 description=f"{message.author.mention} has been warned for posting a link",
+                timestamp=datetime.now(),
                 colour=discord.Colour.red(),
             )
 
@@ -169,6 +178,7 @@ class WarningSystem(commands.Cog):
             e = discord.Embed(
                 title="Warning",
                 description=f"{message.author.mention} has been warned for posting a link",
+                timestamp=datetime.now(),
                 colour=discord.Colour.red(),
             )
 
@@ -182,6 +192,7 @@ class WarningSystem(commands.Cog):
             e = discord.Embed(
                 title="Warning",
                 description=f"{message.author.mention} has been warned for posting a link",
+                timestamp=datetime.now(),
                 colour=discord.Colour.red(),
             )
 
@@ -195,6 +206,7 @@ class WarningSystem(commands.Cog):
             e = discord.Embed(
                 title="Warning",
                 description=f"{message.author.mention} has been warned for posting a link",
+                timestamp=datetime.now(),
                 colour=discord.Colour.red(),
             )
 
@@ -208,6 +220,7 @@ class WarningSystem(commands.Cog):
             e = discord.Embed(
                 title="Warning",
                 description=f'{message.author.mention} has been warned for posting "uwu"',
+                timestamp=datetime.now(),
                 colour=discord.Colour.red(),
             )
 

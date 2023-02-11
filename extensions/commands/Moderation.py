@@ -1,4 +1,5 @@
 import discord
+from datetime import datetime
 from discord import app_commands
 from discord.ext import commands
 
@@ -22,6 +23,7 @@ class Moderation(commands.Cog):
             Mute = discord.Embed(
                 title="Mute",
                 description="Mutes the user by their discord user ID \n Example: `'Mute 705435835306213418 Not cool`",
+                timestamp=datetime.now(),
                 colour=discord.Colour.light_gray(),
             )
 
@@ -32,12 +34,14 @@ class Moderation(commands.Cog):
             MuteA = discord.Embed(
                 title=":warning: Error :warning:",
                 description=(f"Could not mute {member} because they are already muted"),
+                timestamp=datetime.now(),
                 colour=discord.Colour.dark_orange(),
             )
 
             MuteB = discord.Embed(
                 title=":white_check_mark: Mute Successful :white_check_mark:",
                 description=(f"Successfully muted {member}"),
+                timestamp=datetime.now(),
                 colour=discord.Colour.red(),
             )
 
@@ -58,6 +62,7 @@ class Moderation(commands.Cog):
             Unmute = discord.Embed(
                 title="Unmute",
                 description="Unmutes the user by their discord user ID \n Example: `'Unmute 705435835306213418 Very cool`",
+                timestamp=datetime.now(),
                 colour=discord.Colour.light_gray(),
             )
 
@@ -68,12 +73,14 @@ class Moderation(commands.Cog):
             UnmuteA = discord.Embed(
                 title=":warning: Error :warning:",
                 description=(f"Could not unmute {member} because they are not muted"),
+                timestamp=datetime.now(),
                 colour=discord.Colour.dark_orange(),
             )
 
             UnmuteB = discord.Embed(
                 title=":white_check_mark: Unmute Successful :white_check_mark:",
                 description=(f"Successfully unmuted {member}"),
+                timestamp=datetime.now(),
                 colour=discord.Colour.green(),
             )
 
@@ -97,6 +104,7 @@ class Moderation(commands.Cog):
             Kick = discord.Embed(
                 title="Kick",
                 description="kicks the user by their discord user ID \n Example: `'Kick 705435835306213418 Not cool`",
+                timestamp=datetime.now(),
                 colour=discord.Colour.light_gray(),
             )
 
@@ -107,6 +115,7 @@ class Moderation(commands.Cog):
             KickA = discord.Embed(
                 title=":white_check_mark: Kick Successful :white_check_mark:",
                 description=(f"Successfully kicked {member}"),
+                timestamp=datetime.now(),
                 colour=discord.Colour.red(),
             )
 
@@ -115,6 +124,7 @@ class Moderation(commands.Cog):
                 description=(
                     f"Couldn't kick {member}, they might be higher than me or not in the server"
                 ),
+                timestamp=datetime.now(),
                 colour=discord.Colour.dark_orange(),
             )
 
@@ -142,6 +152,7 @@ class Moderation(commands.Cog):
             Ban = discord.Embed(
                 title="Ban",
                 description="Bans the user by their discord user ID \n Example: `'ban 705435835306213418 Not cool`",
+                timestamp=datetime.now(),
                 colour=discord.Colour.light_gray(),
             )
 
@@ -152,6 +163,7 @@ class Moderation(commands.Cog):
             BanA = discord.Embed(
                 title=":white_check_mark: Ban Successful :white_check_mark:",
                 description=(f"Successfully banned {member}"),
+                timestamp=datetime.now(),
                 colour=discord.Colour.red(),
             )
 
@@ -160,6 +172,7 @@ class Moderation(commands.Cog):
                 description=(
                     f"Could not ban {member}, they might be higher than me or not in the server"
                 ),
+                timestamp=datetime.now(),
                 colour=discord.Colour.dark_orange(),
             )
 
@@ -185,6 +198,7 @@ class Moderation(commands.Cog):
             Unban = discord.Embed(
                 title="Unban",
                 description="Unbans the user by their discord user ID \n Example: `'unban 705435835306213418 Very cool`",
+                timestamp=datetime.now(),
                 colour=discord.Colour.light_gray(),
             )
 
@@ -195,6 +209,7 @@ class Moderation(commands.Cog):
             UnbanA = discord.Embed(
                 title=":white_check_mark: Unban Successful :white_check_mark:",
                 description=(f"Successfully unbanned <@{member}>"),
+                timestamp=datetime.now(),
                 colour=discord.Colour.green(),
             )
 
@@ -203,6 +218,7 @@ class Moderation(commands.Cog):
                 description=(
                     f"Could not unban <@{member}> because they are not banned"
                 ),
+                timestamp=datetime.now(),
                 colour=discord.Colour.dark_orange(),
             )
 

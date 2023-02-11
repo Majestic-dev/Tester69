@@ -1,4 +1,5 @@
 import discord
+from datetime import datetime
 from discord import app_commands
 from discord.ext import commands
 
@@ -13,6 +14,7 @@ class MainStuff(commands.Cog):
         Ping = discord.Embed(
             title="Pong!",
             description=f"🏓 My ping is {round(self.bot.latency * 1000)}ms 🏓",
+            timestamp=datetime.now(),
             colour=discord.Colour.green(),
         )
 
@@ -24,6 +26,7 @@ class MainStuff(commands.Cog):
         Prefix = discord.Embed(
             title="Prefix",
             description="Tester69's prefix is `'`",
+            timestamp=datetime.now(),
             colour=discord.Colour.light_gray(),
         )
 
@@ -33,13 +36,15 @@ class MainStuff(commands.Cog):
     async def help(self, interaction: discord.Interaction):
 
         help = discord.Embed(
-            title="Tetser69's command list", colour=discord.Colour.light_gray()
+            title="Tetser69's command list", 
+            timestamp=datetime.now(),
+            colour=discord.Colour.light_gray()
         )
 
         help.add_field(name="Moderation", value="`'moderation`", inline=True)
         help.add_field(name="Economy", value="`'economy`")
 
-        await interaction.respone.send_message(embed=help, ephemeral=True)
+        await interaction.response.send_message(embed=help, ephemeral=True)
 
     @app_commands.command(
         name="moderation", description="Get all current moderation commands"
@@ -47,7 +52,9 @@ class MainStuff(commands.Cog):
     async def moderation(self, interaction: discord.Interaction):
 
         moderation = discord.Embed(
-            title="Tester69's moderation commands", colour=discord.Colour.darker_gray()
+            title="Tester69's moderation commands", 
+            timestamp=datetime.now(),
+            colour=discord.Colour.darker_gray()
         )
         moderation.add_field(name="Kick", value="`'kick`", inline=True)
         moderation.add_field(name="Mute", value="`'mute`", inline=True)
@@ -66,7 +73,9 @@ class MainStuff(commands.Cog):
     async def economy(self, interaction: discord.Interaction):
 
         economy = discord.Embed(
-            title="Tester69's economy commands", colour=discord.Colour.darker_grey()
+            title="Tester69's economy commands", 
+            timestamp=datetime.now(),
+            colour=discord.Colour.darker_grey()
         )
         economy.add_field(name="Balance", value="`'balance`", inline=True)
         economy.add_field(name="Inventory", value="`'inventory`", inline=True)
