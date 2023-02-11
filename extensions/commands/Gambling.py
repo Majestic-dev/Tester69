@@ -1,5 +1,6 @@
 import json
 import random
+from datetime import datetime
 
 import discord
 from discord import app_commands
@@ -21,6 +22,7 @@ class Gambling(commands.Cog):
                 embed=discord.Embed(
                     title="Bet Failed",
                     description="You have to add a bet between 0 and 10000000, for example `'gamble 10`",
+                    timestamp=datetime.now(),
                     colour=discord.Colour.orange(),
                 )
             )
@@ -31,6 +33,7 @@ class Gambling(commands.Cog):
                 embed=discord.Embed(
                     title="Too High Bet",
                     description=(f"You cannot bet more than 10 million coins"),
+                    timestamp=datetime.now(),
                     colour=discord.Colour.orange(),
                 )
             )
@@ -42,6 +45,7 @@ class Gambling(commands.Cog):
                     description=(
                         f'You do not have enough funds to gamble. Your balance is {user_data["balance"]}'
                     ),
+                    timestamp=datetime.now(),
                     colour=discord.Colour.orange(),
                 )
             )
@@ -79,6 +83,7 @@ class Gambling(commands.Cog):
                     description=(
                         f'Congratulations! You won {winnings - bet} and your new balance is {user_data["balance"] + winnings}'
                     ),
+                    timestamp=datetime.now(),
                     colour=discord.Colour.green(),
                 )
             )
@@ -89,6 +94,7 @@ class Gambling(commands.Cog):
                 description=(
                     f'Sorry, you lost {bet}. Your new balance is {user_data["balance"] - bet}'
                 ),
+                timestamp=datetime.now(),
                 colour=discord.Colour.red(),
             )
         )
@@ -105,6 +111,7 @@ class Gambling(commands.Cog):
                 embed=discord.Embed(
                     title="Not Enough Coins",
                     description="You do not have enough coins for that bet",
+                    timestamp=datetime.now(),
                     colour=discord.Colour.orange(),
                 )
             )
@@ -121,6 +128,7 @@ class Gambling(commands.Cog):
                 embed=discord.Embed(
                     title="SNAKE EYES!",
                     description=(f"You rolled Snake Eyes! You won {30 * bet} coins!"),
+                    timestamp=datetime.now(),
                     colour=discord.Colour.green(),
                 )
             )
@@ -134,6 +142,7 @@ class Gambling(commands.Cog):
                 embed=discord.Embed(
                     title="Snake Eye!",
                     description=(f"You rolled 1 snake eye! You won {1.5 * bet} coins!"),
+                    timestamp=datetime.now(),
                     colour=discord.Colour.green(),
                 )
             )
@@ -148,6 +157,7 @@ class Gambling(commands.Cog):
                     description=(
                         f"You rolled a {roll1} and a {roll2}. You lost {bet} coins."
                     ),
+                    timestamp=datetime.now(),
                     colour=discord.Colour.orange(),
                 )
             )
