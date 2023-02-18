@@ -25,7 +25,7 @@ class MainStuff(commands.Cog):
 
         Prefix = discord.Embed(
             title="Prefix",
-            description="Tester69's prefix is `'`",
+            description="Tester69 uses slash commands, enter `/` or `/help` and you will see all the available commands",
             timestamp=datetime.now(),
             colour=discord.Colour.light_gray(),
         )
@@ -41,8 +41,8 @@ class MainStuff(commands.Cog):
             colour=discord.Colour.light_gray()
         )
 
-        help.add_field(name="Moderation", value="`'moderation`", inline=True)
-        help.add_field(name="Economy", value="`'economy`")
+        help.add_field(name="Moderation", value="`/moderation`", inline=True)
+        help.add_field(name="Economy", value="`/economy`")
 
         await interaction.response.send_message(embed=help, ephemeral=True)
 
@@ -56,14 +56,14 @@ class MainStuff(commands.Cog):
             timestamp=datetime.now(),
             colour=discord.Colour.darker_gray()
         )
-        moderation.add_field(name="Kick", value="`'kick`", inline=True)
-        moderation.add_field(name="Mute", value="`'mute`", inline=True)
-        moderation.add_field(name="Unmute", value="`'unmute`", inline=True)
-        moderation.add_field(name="RandomBan", value="`'randomban`", inline=True)
-        moderation.add_field(name="Ban", value="`'ban`", inline=True)
-        moderation.add_field(name="Unban", value="`'unban`", inline=True)
-        moderation.add_field(name="Warn", value="`'warn`", inline=True)
-        moderation.add_field(name="Delwarn", value="`'delwarn`", inline=True)
+        moderation.add_field(name="Kick", value="`/kick`", inline=True)
+        moderation.add_field(name="Mute", value="`/mute`", inline=True)
+        moderation.add_field(name="Unmute", value="`/unmute`", inline=True)
+        moderation.add_field(name="RandomBan", value="`/randomban`", inline=True)
+        moderation.add_field(name="Ban", value="`/ban`", inline=True)
+        moderation.add_field(name="Unban", value="`/unban`", inline=True)
+        moderation.add_field(name="Warn", value="`/warn`", inline=True)
+        moderation.add_field(name="Delwarn", value="`/delwarn`", inline=True)
 
         await interaction.response.send_message(embed=moderation, ephemeral=True)
 
@@ -77,12 +77,15 @@ class MainStuff(commands.Cog):
             timestamp=datetime.now(),
             colour=discord.Colour.darker_grey()
         )
-        economy.add_field(name="Balance", value="`'balance`", inline=True)
-        economy.add_field(name="Inventory", value="`'inventory`", inline=True)
-        economy.add_field(name="Fish", value="`'fish`", inline=True)
-        economy.add_field(name="Hourly", value="`'hourly`", inline=True)
-        economy.add_field(name="Sell", value="`'sell`", inline=True)
-        economy.add_field(name="Gamble", value="`'gamble`", inline=True)
+        economy.add_field(name="Balance", value="`/balance`", inline=True)
+        economy.add_field(name="Inventory", value="`/inventory`", inline=True)
+        economy.add_field(name="Fish", value="`/fish`", inline=True)
+        economy.add_field(name="Hourly", value="`/hourly`", inline=True)
+        economy.add_field(name="Monthly", value="`/monthly`", inline = True)
+        economy.add_field(name="Sell", value="`/sell`", inline=True)
+        economy.add_field(name="Gamble", value="`/gamble`", inline=True)
+        economy.add_field(name="Snakeeyes", value="`/snakeeyes`", inline=True)
+        economy.add_field(name="Blackjack", value="`/blackjack`", inline=True)
 
         await interaction.response.send_message(embed=economy, ephemeral=True)
 
