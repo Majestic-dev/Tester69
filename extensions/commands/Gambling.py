@@ -9,9 +9,15 @@ from utils import DataManager
 
 
 class Choices(discord.ui.View):
-    def __init__(self):
+    def __init__(self, bet, disabled_ddown=None, disabled_forfeit=None):
         super().__init__()
         self.choice = None
+
+        self.ddown.disabled = disabled_ddown
+        self.forfeit.disabled = disabled_forfeit
+
+        self.ddown.label = f"Double Down ({bet})"
+        self.forfeit.label = f"Forfeit (Return {bet // 2})"
 
     @discord.ui.button(label="Hit", style=discord.ButtonStyle.blurple)
     async def hit(self, interaction: discord.Interaction, _: discord.ui.Button):
@@ -51,7 +57,7 @@ def sum_of_hand(hand: list):
         elif value == "A":
             if sum + 11 > 21:
                 sum += 1
-            else:
+            elif sum + 11 <= 21:
                 sum += 11
         else:
             sum += value
@@ -61,10 +67,13 @@ def sum_of_hand(hand: list):
 
 def prettify_cards(hand: list):
     res = ""
-    for suit, value in hand:
-        res += f"{suit}{value} "
-
-    return res
+    for group in [hand[i : i + 3] for i in range(0, len(hand), 3)]:
+        for card in group:
+            res += (
+                f"[``{card[0]} {card[1]}``](https://github.com/MajesticCodes/Tester69)"
+            )
+        res += "\n"
+    return res[:-1]
 
 
 class Gambling(commands.Cog):
@@ -232,7 +241,7 @@ class Gambling(commands.Cog):
             return await interaction.response.send_message(
                 embed=discord.Embed(
                     title="Bet Failed",
-                    description="You have to add a bet between 10 and 250000",
+                    description="You have to add a bet between 10 and 10000000.",
                     timestamp=datetime.now(),
                     colour=discord.Colour.orange(),
                 )
@@ -269,7 +278,7 @@ class Gambling(commands.Cog):
                 content=None,
                 embed=discord.Embed(
                     title="Blackjack",
-                    description=f"You got blackjack! You won {int(bet * 1.5)} coins",
+                    description=f"You got blackjack! You won {int(bet * 1.5)} coins.",
                     timestamp=datetime.now(),
                     colour=discord.Colour.green(),
                 ),
@@ -284,7 +293,7 @@ class Gambling(commands.Cog):
 
         dealer_hand = [dealer_first_card := deck.pop(), deck.pop()]
 
-        if sum_of_hand(dealer_hand) <= 16:
+        while sum_of_hand(dealer_hand) <= 16:
             dealer_hand.append(deck.pop())
 
         e = discord.Embed(
@@ -301,10 +310,10 @@ class Gambling(commands.Cog):
 
         e.add_field(
             name="Dealer Hand",
-            value=f"{dealer_first_card[0]} {dealer_first_card[1]} ??\nSum: ?",
+            value=f"[``{dealer_first_card[0]}{dealer_first_card[1]}``](https://github.com/MajesticCodes/Tester69) ??\nSum: ?",
         )
 
-        view = Choices()
+        view = Choices(bet)
 
         if user_data["balance"] - bet * 2 < 0:
             view.ddown.disabled = True
@@ -322,7 +331,7 @@ class Gambling(commands.Cog):
                 if player_hand_value > 21:
                     e = discord.Embed(
                         title="Blackjack",
-                        description=f"You busted! You lost {bet} coins",
+                        description=f"You busted! You lost {bet} coins.",
                         timestamp=datetime.now(),
                         colour=discord.Colour.red(),
                     )
@@ -350,7 +359,7 @@ class Gambling(commands.Cog):
                 if dealer_hand_value > 21:
                     e = discord.Embed(
                         title="Blackjack",
-                        description=f"The dealer busted! You won {bet} coins",
+                        description=f"The dealer busted! You won {bet} coins.",
                         timestamp=datetime.now(),
                         colour=discord.Colour.green(),
                     )
@@ -378,7 +387,7 @@ class Gambling(commands.Cog):
                 if player_hand_value > dealer_hand_value:
                     e = discord.Embed(
                         title="Blackjack",
-                        description=f"You won! You won {bet} coins",
+                        description=f"You won! You won {bet} coins.",
                         timestamp=datetime.now(),
                         colour=discord.Colour.green(),
                     )
@@ -406,7 +415,7 @@ class Gambling(commands.Cog):
                 if player_hand_value == dealer_hand_value:
                     e = discord.Embed(
                         title="Blackjack",
-                        description=f"You tied! You got your bet back",
+                        description=f"You tied! You got your bet back.",
                         timestamp=datetime.now(),
                         colour=discord.Colour.orange(),
                     )
@@ -430,7 +439,7 @@ class Gambling(commands.Cog):
                 if player_hand_value < dealer_hand_value:
                     e = discord.Embed(
                         title="Blackjack",
-                        description=f"You lost! You lost {bet} coins",
+                        description=f"You lost! You lost {bet} coins.",
                         timestamp=datetime.now(),
                         colour=discord.Colour.red(),
                     )
@@ -458,7 +467,7 @@ class Gambling(commands.Cog):
             elif view.choice == "forfeit":
                 e = discord.Embed(
                     title="Blackjack",
-                    description=f"You forfeited! You lost {bet / 2} coins. 50% of your bet was returned",
+                    description=f"You forfeited! You lost {bet / 2} coins. 50% of your bet was returned.",
                     timestamp=datetime.now(),
                     colour=discord.Colour.red(),
                 )
@@ -495,7 +504,7 @@ class Gambling(commands.Cog):
                 if player_hand_value > 21:
                     e = discord.Embed(
                         title="Blackjack",
-                        description=f"You busted! You lost {bet} coins",
+                        description=f"You busted! You lost {bet} coins.",
                         timestamp=datetime.now(),
                         colour=discord.Colour.red(),
                     )
@@ -523,7 +532,7 @@ class Gambling(commands.Cog):
                 if dealer_hand_value > 21:
                     e = discord.Embed(
                         title="Blackjack",
-                        description=f"The dealer busted! You won {bet} coins",
+                        description=f"The dealer busted! You won {bet} coins.",
                         timestamp=datetime.now(),
                         colour=discord.Colour.green(),
                     )
@@ -551,7 +560,7 @@ class Gambling(commands.Cog):
                 if player_hand_value > dealer_hand_value:
                     e = discord.Embed(
                         title="Blackjack",
-                        description=f"You won! You won {bet} coins",
+                        description=f"You won! You won {bet} coins.",
                         timestamp=datetime.now(),
                         colour=discord.Colour.green(),
                     )
@@ -579,7 +588,7 @@ class Gambling(commands.Cog):
                 if player_hand_value == dealer_hand_value:
                     e = discord.Embed(
                         title="Blackjack",
-                        description=f"You tied! You got your bet back",
+                        description=f"You tied! You got your bet back.",
                         timestamp=datetime.now(),
                         colour=discord.Colour.orange(),
                     )
@@ -603,7 +612,7 @@ class Gambling(commands.Cog):
                 if player_hand_value < dealer_hand_value:
                     e = discord.Embed(
                         title="Blackjack",
-                        description=f"You lost! You lost {bet} coins",
+                        description=f"You lost! You lost {bet} coins.",
                         timestamp=datetime.now(),
                         colour=discord.Colour.red(),
                     )
@@ -635,7 +644,7 @@ class Gambling(commands.Cog):
                 if player_hand_value > 21:
                     e = discord.Embed(
                         title="Blackjack",
-                        description=f"You busted! You lost {bet} coins",
+                        description=f"You busted! You lost {bet} coins.",
                         timestamp=datetime.now(),
                         colour=discord.Colour.red(),
                     )
@@ -677,7 +686,7 @@ class Gambling(commands.Cog):
                     value=f"{dealer_first_card[0]} {dealer_first_card[1]} ??\nSum: ?",
                 )
 
-                view = Choices()
+                view = Choices(bet, True, True)
 
                 await interaction.edit_original_response(
                     content=None, embed=e, view=view
