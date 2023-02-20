@@ -21,6 +21,5 @@
 
 
 ## TODO
-- [x] Change all commands to slash commands.
-- [x] Make the code cleaner (spread everything into cogs).
-- [x] Add more commands for the economy.
+- [ ] Add more miscellaneous commands.
+- [ ] Add EVEN more commands for the economy.
