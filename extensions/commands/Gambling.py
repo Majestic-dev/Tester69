@@ -49,20 +49,18 @@ class Choices(discord.ui.View):
 
 
 def sum_of_hand(hand: list):
-    sum = 0
+    _sum = sum(
+        [card[1] for card in hand if card[1] not in ["J", "Q", "K", "A"]]
+        + [10 for card in hand if card[1] in ["J", "Q", "K"]]
+    )
 
-    for _, value in hand:
-        if value == "J" or value == "Q" or value == "K":
-            sum += 10
-        elif value == "A":
-            if sum + 11 > 21:
-                sum += 1
-            elif sum + 11 <= 21:
-                sum += 11
+    for _ in [card for card in hand if card[1] == "A"]:
+        if _sum + 11 <= 21:
+            _sum += 11
         else:
-            sum += value
+            _sum += 1
 
-    return sum
+    return _sum
 
 
 def prettify_cards(hand: list):
@@ -70,7 +68,7 @@ def prettify_cards(hand: list):
     for group in [hand[i : i + 3] for i in range(0, len(hand), 3)]:
         for card in group:
             res += (
-                f"[``{card[0]} {card[1]}``](https://github.com/MajesticCodes/Tester69)"
+                f"[``{card[0]}{card[1]}``](https://github.com/MajesticCodes/Tester69)"
             )
         res += "\n"
     return res[:-1]
@@ -272,16 +270,32 @@ class Gambling(commands.Cog):
         random.shuffle(deck)
 
         player_hand = [deck.pop(), deck.pop()]
+        dealer_hand = [dealer_first_card := deck.pop(), deck.pop()]
+
+        while sum_of_hand(dealer_hand) <= 16:
+            dealer_hand.append(deck.pop())
 
         if sum_of_hand(player_hand) == 21:
+            e = discord.Embed(
+                title="Blackjack",
+                description=f"You got blackjack! You won {int(bet * 1.5)} coins.",
+                timestamp=datetime.now(),
+                colour=discord.Colour.green(),
+            )
+
+            e.add_field(
+                name="Your Hand",
+                value=f"{prettify_cards(player_hand)}\nSum: {sum_of_hand(player_hand)}",
+            )
+
+            e.add_field(
+                name="Dealer Hand",
+                value=f"{prettify_cards(dealer_hand)}\nSum: {sum_of_hand(dealer_hand)}",
+            )
+
             await interaction.edit_original_response(
                 content=None,
-                embed=discord.Embed(
-                    title="Blackjack",
-                    description=f"You got blackjack! You won {int(bet * 1.5)} coins.",
-                    timestamp=datetime.now(),
-                    colour=discord.Colour.green(),
-                ),
+                embed=e,
                 view=None,
             )
 
@@ -290,11 +304,6 @@ class Gambling(commands.Cog):
             )
 
             return
-
-        dealer_hand = [dealer_first_card := deck.pop(), deck.pop()]
-
-        while sum_of_hand(dealer_hand) <= 16:
-            dealer_hand.append(deck.pop())
 
         e = discord.Embed(
             title="Blackjack",
@@ -683,7 +692,7 @@ class Gambling(commands.Cog):
 
                 e.add_field(
                     name="Dealer Hand",
-                    value=f"{dealer_first_card[0]} {dealer_first_card[1]} ??\nSum: ?",
+                    value=f"[``{dealer_first_card[0]}{dealer_first_card[1]}``](https://github.com/MajesticCodes/Tester69) ??\nSum: ?",
                 )
 
                 view = Choices(bet, True, True)
