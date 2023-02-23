@@ -28,6 +28,45 @@ class DataManager:
         cls.save(path)
 
     @classmethod
+    def add_guild_data(cls, guild_id: int) -> None:
+        if str(guild_id) not in cls.__data["guilds"]:
+            cls.__data["guilds"][str(guild_id)] = {
+                "verification_role_id": None,
+                "verification_channel_id": None,
+                "verification_logs_channel_id": None,
+            }
+
+        cls.save("guilds")
+
+    @classmethod
+    def get_guild_data(cls, guild_id: int) -> Optional[dict]:
+        if str(guild_id) not in cls.__data["guilds"]:
+            cls.add_guild_data(guild_id)
+
+        return cls.__data["guilds"].get(str(guild_id), None)
+
+    @classmethod
+    def edit_guild_data(cls, guild_id: int, key: str, value: Any) -> None:
+        if str(guild_id) not in cls.__data["guilds"]:
+            cls.add_guild_data(guild_id)
+
+        cls.__data["guilds"][str(guild_id)][key] = value
+        cls.save("guilds")
+
+    @classmethod
+    def edit_guild_user_data(
+        cls, guild_id: int, user_id: int, key: str, value: Any
+    ) -> None:
+        if str(guild_id) not in cls.__data["guilds"]:
+            cls.add_guild_data(guild_id)
+
+        if str(user_id) not in cls.__data["guilds"][str(guild_id)]["users"]:
+            cls.__data["guilds"][str(guild_id)]["users"].append(str(user_id))
+
+        cls.__data["guilds"][str(guild_id)][key] = value
+        cls.save("guilds")
+
+    @classmethod
     def add_user_data(cls, user_id: int) -> None:
         if str(user_id) not in cls.__data["users"]:
             cls.__data["users"][str(user_id)] = {"inventory": {}, "balance": 0}
