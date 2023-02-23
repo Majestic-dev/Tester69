@@ -21,5 +21,5 @@
 
 
 ## TODO
-- [ ] Add more miscellaneous commands.
+- [ ] Add more miscellaneous stuff.
 - [ ] Add EVEN more commands for the economy.
