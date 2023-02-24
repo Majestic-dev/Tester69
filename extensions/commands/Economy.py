@@ -17,7 +17,7 @@ def random_choice_from_dict(d):
         rand -= item_data["chance"]
 
 
-class Economy(commands.Cog):
+class Economy(commands.GroupCog, group_name="economy"):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
@@ -25,6 +25,7 @@ class Economy(commands.Cog):
         self.hunt_cooldown = {}
         self.hourly_cooldown = {}
         self.monthly_cooldown = {}
+        self.yearly_cooldown = {}
 
     @app_commands.command(name="balance", description="Check your coin balance")
     async def balance(self, interaction: discord.Interaction):
@@ -309,6 +310,44 @@ class Economy(commands.Cog):
         )
 
         self.monthly_cooldown[interaction.user.id] = datetime.now() + timedelta(hours=720)
+
+    @app_commands.command(
+            name="yearly", description="Get 36000 coins every year"
+    )
+    async def yearly(self, interaction:discord.Interaction):
+        if (
+            interaction.user.id in self.yearly_cooldown
+            and self.yearly_cooldown[interaction.user.id] > datetime.now()
+            and interaction.user.id not in DataManager.get("config", "whitelist")
+        ):
+            remaining = self.yearly_cooldown[interaction.user.id]
+
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    title="Cooldown",
+                    description=(
+                        f"Your cooldown will end <t:{int(remaining.timestamp())}:R>"
+                    ),
+                    timestamp=datetime.now(),
+                    colour=discord.Colour.orange(),
+                )
+            )
+        
+        user_data = DataManager.get_user_data(interaction.user.id)
+        DataManager.edit_user_data(
+            interaction.user.id, "balance", user_data["balance"] + 36000
+        )
+
+        await interaction.response.send_message(
+            embed = discord.Embed(
+                title="Yearly Pay",
+                description="You received 36000 coins!",
+                timestamp=datetime.now(),
+                colour=discord.Colour.green(),
+            )
+        )
+
+        self.monthly_cooldown[interaction.user.id] = datetime.now() + timedelta(days=365)
 
     @app_commands.command(name="inventory", description="See your inventory")
     async def inventory(self, interaction: discord.Interaction):
