@@ -6,7 +6,7 @@ from discord.ext import commands
 from utils import DataManager
 
 
-class Moderation(commands.Cog):
+class Moderation(commands.GroupCog, group_name="moderation"):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 

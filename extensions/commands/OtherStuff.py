@@ -8,7 +8,7 @@ from discord import app_commands
 from utils import DataManager
 
 
-class Verification(commands.Cog):
+class Verification(commands.GroupCog, group_name="verification"):
     def __init__(self, bot):
         self.bot = bot
 

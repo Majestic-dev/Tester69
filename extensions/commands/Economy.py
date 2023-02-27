@@ -400,6 +400,10 @@ class Economy(commands.GroupCog, group_name="economy"):
         if user.id in self.monthly_cooldown:
             self.monthly_cooldown.pop(user.id)
             skip.add_field(name="Monthly cooldown", value="Skipped", inline=False)
+        
+        if user.id in self.yearly_cooldown:
+            self.yearly_cooldown.pop(user.id)
+            skip.add_field(name="Yearly cooldown", value="Skipped", inline=True)
 
         if len(skip.fields) == 0:
             return await interaction.response.send_message(

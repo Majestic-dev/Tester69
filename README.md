@@ -22,4 +22,4 @@
 
 ## TODO
 - [ ] Add more miscellaneous stuff.
-- [ ] Add EVEN more commands for the economy.
+- [ ] Add more commands for the economy.

@@ -4,7 +4,7 @@ from discord import app_commands
 from discord.ext import commands
 
 
-class MainStuff(commands.Cog):
+class MainStuff(commands.GroupCog, group_name="main"):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
@@ -77,15 +77,17 @@ class MainStuff(commands.Cog):
             timestamp=datetime.now(),
             colour=discord.Colour.darker_grey()
         )
-        economy.add_field(name="Balance", value="`/balance`", inline=True)
-        economy.add_field(name="Inventory", value="`/inventory`", inline=True)
-        economy.add_field(name="Fish", value="`/fish`", inline=True)
-        economy.add_field(name="Hourly", value="`/hourly`", inline=True)
-        economy.add_field(name="Monthly", value="`/monthly`", inline = True)
-        economy.add_field(name="Sell", value="`/sell`", inline=True)
-        economy.add_field(name="Gamble", value="`/gamble`", inline=True)
-        economy.add_field(name="Snakeeyes", value="`/snakeeyes`", inline=True)
-        economy.add_field(name="Blackjack", value="`/blackjack`", inline=True)
+        economy.add_field(name="Balance", value="`/economy balance`", inline=True)
+        economy.add_field(name="Inventory", value="`/economy inventory`", inline=True)
+        economy.add_field(name="Fish", value="`/economy fish`", inline=True)
+        economy.add_field(name="Hourly", value="`/economy hourly`", inline=True)
+        economy.add_field(name="Monthly", value="`/economy monthly`", inline = True)
+        economy.add_field(name="Yearly", value="/economy yearly", inline=True)
+        economy.add_field(name="Sell", value="`/economy sell`", inline=True)
+        economy.add_field(name="Gamble", value="`/gambling gamble`", inline=True)
+        economy.add_field(name="Snakeeyes", value="`/gambling snakeeyes`", inline=True)
+        economy.add_field(name="Blackjack", value="`/gambling blackjack`", inline=True)
+        
 
         await interaction.response.send_message(embed=economy, ephemeral=True)
 

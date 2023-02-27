@@ -74,7 +74,7 @@ def prettify_cards(hand: list):
     return res[:-1]
 
 
-class Gambling(commands.Cog):
+class Gambling(commands.GroupCog, group_name="gambling"):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
