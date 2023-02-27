@@ -39,6 +39,9 @@ This project is licensed under the Apache License - see the [LICENSE](LICENSE.md
     - A moderation system
     - Slash commands 
 
+## Major Changes
+There are no major changes in this version. This is the inital release.
+
 # TODO
 - [ ] Add more miscellaneous stuff.
 - [ ] Add more commands for the economy.
