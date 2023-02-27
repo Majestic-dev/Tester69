@@ -1,15 +1,15 @@
 import datetime
 import os
 from typing import Literal, Optional
-from discord import app_commands
 
 import discord
+from discord import app_commands
 from discord.ext import commands
 
 from utils import DataManager
 
 DataManager(
-    [   
+    [
         ("guilds", "data/guilds.json", {}),
         ("users", "data/users.json", {}),
         ("config", "data/config.json", {"token": None, "whitelist": [], "owners": []}),
@@ -59,6 +59,7 @@ DataManager(
 bot = commands.Bot(command_prefix="'", intents=discord.Intents.all())
 bot.remove_command("help")
 
+
 @bot.event
 async def on_ready():
     await bot.change_presence(
@@ -72,6 +73,7 @@ async def on_ready():
                 await bot.load_extension(root.replace("\\", ".") + "." + file[:-3])
 
     await bot.tree.sync()
+
 
 @commands.guild_only()
 @commands.is_owner()
@@ -108,6 +110,7 @@ async def sync(
             ret += 1
 
     await ctx.send(f"Synced the tree to {ret}/{len(guilds)}.")
+
 
 if DataManager.get("config", "token") is None:
     print("Please set your bot's token in data/config.json.")

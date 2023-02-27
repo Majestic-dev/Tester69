@@ -7,6 +7,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
+
 class WarningSystem(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -104,12 +105,12 @@ class WarningSystem(commands.Cog):
     )
     @commands.has_permissions(manage_messages=True)
     async def warnings(self, interaction: discord.Interaction, member: discord.Member):
-
         if f"{member.id}.json" in os.listdir("./data/"):
-
-            e = discord.Embed(title="Warnings", 
-                              timestamp=datetime.now(),
-                              colour=discord.Colour.orange())
+            e = discord.Embed(
+                title="Warnings",
+                timestamp=datetime.now(),
+                colour=discord.Colour.orange(),
+            )
 
             with open(f"./data/{member.id}.json", "r") as r:
                 d8a = json.load(r)

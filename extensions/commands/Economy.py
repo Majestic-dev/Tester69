@@ -272,7 +272,7 @@ class Economy(commands.GroupCog, group_name="economy"):
         )
 
         self.hourly_cooldown[interaction.user.id] = datetime.now() + timedelta(hours=1)
-    
+
     @app_commands.command(
         name="monthly", description="Gain 3000 coins every time you use the command"
     )
@@ -301,7 +301,7 @@ class Economy(commands.GroupCog, group_name="economy"):
         )
 
         await interaction.response.send_message(
-            embed = discord.Embed(
+            embed=discord.Embed(
                 title="Monthly Pay",
                 description="You received 3000 coins!",
                 timestamp=datetime.now(),
@@ -309,12 +309,12 @@ class Economy(commands.GroupCog, group_name="economy"):
             )
         )
 
-        self.monthly_cooldown[interaction.user.id] = datetime.now() + timedelta(hours=720)
+        self.monthly_cooldown[interaction.user.id] = datetime.now() + timedelta(
+            hours=720
+        )
 
-    @app_commands.command(
-            name="yearly", description="Get 36000 coins every year"
-    )
-    async def yearly(self, interaction:discord.Interaction):
+    @app_commands.command(name="yearly", description="Get 36000 coins every year")
+    async def yearly(self, interaction: discord.Interaction):
         if (
             interaction.user.id in self.yearly_cooldown
             and self.yearly_cooldown[interaction.user.id] > datetime.now()
@@ -332,14 +332,14 @@ class Economy(commands.GroupCog, group_name="economy"):
                     colour=discord.Colour.orange(),
                 )
             )
-        
+
         user_data = DataManager.get_user_data(interaction.user.id)
         DataManager.edit_user_data(
             interaction.user.id, "balance", user_data["balance"] + 36000
         )
 
         await interaction.response.send_message(
-            embed = discord.Embed(
+            embed=discord.Embed(
                 title="Yearly Pay",
                 description="You received 36000 coins!",
                 timestamp=datetime.now(),
@@ -347,7 +347,9 @@ class Economy(commands.GroupCog, group_name="economy"):
             )
         )
 
-        self.monthly_cooldown[interaction.user.id] = datetime.now() + timedelta(days=365)
+        self.monthly_cooldown[interaction.user.id] = datetime.now() + timedelta(
+            days=365
+        )
 
     @app_commands.command(name="inventory", description="See your inventory")
     async def inventory(self, interaction: discord.Interaction):
@@ -396,11 +398,11 @@ class Economy(commands.GroupCog, group_name="economy"):
         if user.id in self.hunt_cooldown:
             self.hunt_cooldown.pop(user.id)
             skip.add_field(name="Hunting cooldown", value="Skipped", inline=False)
-        
+
         if user.id in self.monthly_cooldown:
             self.monthly_cooldown.pop(user.id)
             skip.add_field(name="Monthly cooldown", value="Skipped", inline=False)
-        
+
         if user.id in self.yearly_cooldown:
             self.yearly_cooldown.pop(user.id)
             skip.add_field(name="Yearly cooldown", value="Skipped", inline=True)

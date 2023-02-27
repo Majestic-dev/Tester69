@@ -1,5 +1,6 @@
-import discord
 from datetime import datetime
+
+import discord
 from discord import app_commands
 from discord.ext import commands
 
@@ -30,7 +31,6 @@ class Moderation(commands.GroupCog, group_name="moderation"):
             await interaction.response.send_message(embed=Mute)
 
         else:
-
             MuteA = discord.Embed(
                 title=":warning: Error :warning:",
                 description=(f"Could not mute {member} because they are already muted"),
@@ -69,7 +69,6 @@ class Moderation(commands.GroupCog, group_name="moderation"):
             await interaction.response.send_message(embed=Unmute)
 
         else:
-
             UnmuteA = discord.Embed(
                 title=":warning: Error :warning:",
                 description=(f"Could not unmute {member} because they are not muted"),
@@ -111,7 +110,6 @@ class Moderation(commands.GroupCog, group_name="moderation"):
             await interaction.response.send_message(embed=Kick)
 
         else:
-
             KickA = discord.Embed(
                 title=":white_check_mark: Kick Successful :white_check_mark:",
                 description=(f"Successfully kicked {member}"),
@@ -148,7 +146,6 @@ class Moderation(commands.GroupCog, group_name="moderation"):
         reason: str = "Unspecified",
     ):
         if member == None:
-
             Ban = discord.Embed(
                 title="Ban",
                 description="Bans the user by their discord user ID \n Example: `'ban 705435835306213418 Not cool`",
@@ -159,7 +156,6 @@ class Moderation(commands.GroupCog, group_name="moderation"):
             await interaction.response.send_message(embed=Ban)
 
         else:
-
             BanA = discord.Embed(
                 title=":white_check_mark: Ban Successful :white_check_mark:",
                 description=(f"Successfully banned {member}"),
@@ -194,7 +190,6 @@ class Moderation(commands.GroupCog, group_name="moderation"):
     async def unban(self, interaction: discord.Interaction, member: str):
         member = int(member)
         if member == None:
-
             Unban = discord.Embed(
                 title="Unban",
                 description="Unbans the user by their discord user ID \n Example: `'unban 705435835306213418 Very cool`",
@@ -205,7 +200,6 @@ class Moderation(commands.GroupCog, group_name="moderation"):
             await interaction.response.send_message(embed=Unban)
 
         else:
-
             UnbanA = discord.Embed(
                 title=":white_check_mark: Unban Successful :white_check_mark:",
                 description=(f"Successfully unbanned <@{member}>"),

@@ -1,5 +1,6 @@
-import discord
 from datetime import datetime
+
+import discord
 from discord import app_commands
 from discord.ext import commands
 
@@ -10,7 +11,6 @@ class MainStuff(commands.GroupCog, group_name="main"):
 
     @app_commands.command(name="ping", description="Show my ping")
     async def ping(self, interaction: discord.Interaction):
-
         Ping = discord.Embed(
             title="Pong!",
             description=f"🏓 My ping is {round(self.bot.latency * 1000)}ms 🏓",
@@ -22,7 +22,6 @@ class MainStuff(commands.GroupCog, group_name="main"):
 
     @app_commands.command(name="prefix", description="Show my prefix")
     async def prefix(self, interaction: discord.Interaction):
-
         Prefix = discord.Embed(
             title="Prefix",
             description="Tester69 uses slash commands, enter `/` or `/help` and you will see all the available commands",
@@ -34,11 +33,10 @@ class MainStuff(commands.GroupCog, group_name="main"):
 
     @app_commands.command(name="help", description="Get the basic help for commands")
     async def help(self, interaction: discord.Interaction):
-
         help = discord.Embed(
-            title="Tetser69's command list", 
+            title="Tetser69's command list",
             timestamp=datetime.now(),
-            colour=discord.Colour.light_gray()
+            colour=discord.Colour.light_gray(),
         )
 
         help.add_field(name="Moderation", value="`/moderation`", inline=True)
@@ -50,11 +48,10 @@ class MainStuff(commands.GroupCog, group_name="main"):
         name="moderation", description="Get all current moderation commands"
     )
     async def moderation(self, interaction: discord.Interaction):
-
         moderation = discord.Embed(
-            title="Tester69's moderation commands", 
+            title="Tester69's moderation commands",
             timestamp=datetime.now(),
-            colour=discord.Colour.darker_gray()
+            colour=discord.Colour.darker_gray(),
         )
         moderation.add_field(name="Kick", value="`/kick`", inline=True)
         moderation.add_field(name="Mute", value="`/mute`", inline=True)
@@ -71,23 +68,21 @@ class MainStuff(commands.GroupCog, group_name="main"):
         name="economy", description="Get all current economy commands"
     )
     async def economy(self, interaction: discord.Interaction):
-
         economy = discord.Embed(
-            title="Tester69's economy commands", 
+            title="Tester69's economy commands",
             timestamp=datetime.now(),
-            colour=discord.Colour.darker_grey()
+            colour=discord.Colour.darker_grey(),
         )
         economy.add_field(name="Balance", value="`/economy balance`", inline=True)
         economy.add_field(name="Inventory", value="`/economy inventory`", inline=True)
         economy.add_field(name="Fish", value="`/economy fish`", inline=True)
         economy.add_field(name="Hourly", value="`/economy hourly`", inline=True)
-        economy.add_field(name="Monthly", value="`/economy monthly`", inline = True)
+        economy.add_field(name="Monthly", value="`/economy monthly`", inline=True)
         economy.add_field(name="Yearly", value="/economy yearly", inline=True)
         economy.add_field(name="Sell", value="`/economy sell`", inline=True)
         economy.add_field(name="Gamble", value="`/gambling gamble`", inline=True)
         economy.add_field(name="Snakeeyes", value="`/gambling snakeeyes`", inline=True)
         economy.add_field(name="Blackjack", value="`/gambling blackjack`", inline=True)
-        
 
         await interaction.response.send_message(embed=economy, ephemeral=True)
 
