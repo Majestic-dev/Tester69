@@ -3,7 +3,6 @@
 [![](https://discord.com/api/guilds/733219077744754750/embed.png)](https://discord.gg/VsDDf8YKBV)
 
 A general-use discord bot coded in discord.py
-#Installation
 
 # Installation
 ### Requirements
