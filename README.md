@@ -11,12 +11,10 @@ A general-use discord bot coded in discord.py
     ```bash
     # WINDOWS 
     python -m pip install -U discord.py
-    ```
-    ```bash
+
     # LINUX
     python3 -m pip install -U discord.py
-    ```
-    ```bash
+
     # MACOS
     python3 -m pip install -U discord.py
     ```
