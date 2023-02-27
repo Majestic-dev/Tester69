@@ -24,7 +24,7 @@ A general-use discord bot coded in discord.py
 1. Clone the repository
 2. Run the main.py file
 
-    Running the main.py file for the first time will create a new directory named "data" and 3 new files in it. It should then ask you to enter your bot token. Enter your bot token in the data/config.json file and save the file. Then run the main.py file again. It should now work.
+    Running the main.py file for the first time will create a new directory named "data" and 3 new files in it. It should then ask you to enter your bot token. You can see how to get a bot token [here](https://www.youtube.com/watch?v=aI4OmIbkJH8). Enter your bot token in the data/config.json file and save the file. Then run the main.py file again. It should now work.
 
 # Contributing 
 All contributions are welcome! If you'd like to contribute, please make a pull request.
