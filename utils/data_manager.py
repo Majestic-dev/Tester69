@@ -34,6 +34,7 @@ class DataManager:
                 "verification_role_id": None,
                 "verification_channel_id": None,
                 "verification_logs_channel_id": None,
+                "logs_channel_id": None,
             }
 
         cls.save("guilds")
