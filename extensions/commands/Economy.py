@@ -17,7 +17,7 @@ def random_choice_from_dict(d):
         rand -= item_data["chance"]
 
 
-class Economy(commands.GroupCog, group_name="economy"):
+class Economy(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
@@ -384,7 +384,7 @@ class Economy(commands.GroupCog, group_name="economy"):
         skip = discord.Embed(
             title="Cooldown Skipped",
             timestamp=datetime.now(),
-            colour=discord.Color.green(),
+            colour=discord.Colour.green(),
         )
 
         if user.id in self.fish_cooldown:
