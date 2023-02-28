@@ -204,10 +204,10 @@ class ServerManagement(commands.Cog):
         await interaction.response.send_message(embed=VoiceChannel)
 
     @app_commands.command(
-        name="delete_channel", description="Delete the mentioned channel"
+        name="delete_text_channel", description="Delete the mentioned text channel"
     )
     @commands.has_permissions(manage_channels=True)
-    async def delete_channel(
+    async def delete_text_channel(
         self,
         interaction: discord.Interaction,
         channel: discord.TextChannel,
@@ -247,7 +247,51 @@ class ServerManagement(commands.Cog):
 
         await logs_channel.send(embed=ChannelDelete)
         await interaction.response.send_message(embed=ChannelDelete)
+    
+    @app_commands.command(
+        name="delete_voice_channel", description="Delete the mentioned voice channel"
+    )
+    @commands.has_permissions(manage_channels=True)
+    async def delete_voice_channel(
+        self,
+        interaction: discord.Interaction,
+        channel: discord.VoiceChannel,
+        reason: str = None,
+    ):
+        guild_data = DataManager.get_guild_data(interaction.guild.id)
+        logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
+        
+        await channel.delete(reason=reason)
+        ChannelDelete = discord.Embed(
+            title="Channel Deleted!",
+            description=f"{interaction.user.mention} Successfully deleted `{channel}` channel",
+            timestamp=datetime.now(),
+            colour=discord.Colour.green(),
+        )
 
+        if not (reason) == None:
+            ChannelDelete.add_field(name="Reason", value=f"{reason}", inline=True)
+
+        if len(ChannelDelete.fields) == 0:
+            await interaction.response.send_message(
+                embed=discord.Embed(
+                    title="Channel Deleted!",
+                    description=f"Successfully deleted `{channel}` channel with no reason provided",
+                    timestamp=datetime.now(),
+                    colour=discord.Colour.green(),
+                )
+            )
+            return await logs_channel.send(
+                embed=discord.Embed(
+                    title="Channel Deleted",
+                    description=f"{interaction.user.mention} deleted `{channel}` channel with no reason provided",
+                    timestamp=datetime.now(),
+                    colour=discord.Colour.green(),
+                )
+            )
+
+        await logs_channel.send(embed=ChannelDelete)
+        await interaction.response.send_message(embed=ChannelDelete)
 
 async def setup(bot):
     await bot.add_cog(ServerManagement(bot))
