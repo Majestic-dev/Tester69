@@ -1,6 +1,7 @@
 import asyncio
 import random
 from datetime import datetime
+from typing import Optional
 
 import discord
 from discord import app_commands
@@ -9,7 +10,7 @@ from discord.ext import commands
 from utils import DataManager
 
 
-class Verification(commands.GroupCog, group_name="verification"):
+class VerificationSystem(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -210,4 +211,4 @@ class Verification(commands.GroupCog, group_name="verification"):
 
 
 async def setup(bot):
-    await bot.add_cog(Verification(bot))
+    await bot.add_cog(VerificationSystem(bot))
