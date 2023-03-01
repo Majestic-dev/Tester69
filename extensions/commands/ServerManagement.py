@@ -44,8 +44,18 @@ class ServerManagement(commands.Cog):
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
         await channel.edit(reason="Slowmode command", slowmode_delay=slowmode)
 
+        if logs_channel == None:
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    title="No Logs Channel",
+                    description="Please set a channel where all logs will be sent. `/set_logs_channel`",
+                    timestamp=datetime.now(),
+                    colour=discord.Colour.orange(),
+                )
+            )
+
         if slowmode == 0:
-            await interaction.response.send_message(
+            return await interaction.response.send_message(
                 embed=discord.Embed(
                     title="Slowmode Disabled!",
                     description=f"Successfully disabled slowmode in {channel.mention}",
@@ -53,30 +63,11 @@ class ServerManagement(commands.Cog):
                     colour=discord.Colour.green(),
                 )
             )
-            await logs_channel.send(
-                embed=discord.Embed(
-                    title="Slowmode Disabled!",
-                    description=f"{interaction.user.mention} Disabled slowmode in {channel.mention}",
-                    timestamp=datetime.now(),
-                    colour=discord.Colour.green(),
-                )
-            )
-
-            return
 
         await interaction.response.send_message(
             embed=discord.Embed(
                 title="Slowmode Set!",
                 description=f"Successfully set the slowmode to {slowmode} seconds in {channel.mention}",
-                timestamp=datetime.now(),
-                colour=discord.Colour.green(),
-            )
-        )
-
-        await logs_channel.send(
-            embed=discord.Embed(
-                title="Slowmode Set!",
-                description=f"{interaction.user.mention} Set the slowmode to {slowmode} seconds in {channel.mention}",
                 timestamp=datetime.now(),
                 colour=discord.Colour.green(),
             )
@@ -97,12 +88,22 @@ class ServerManagement(commands.Cog):
         guild_data = DataManager.get_guild_data(interaction.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
 
+        if logs_channel == None:
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    title="No Logs Channel",
+                    description="Please set a channel where all logs will be sent. `/set_logs_channel`",
+                    timestamp=datetime.now(),
+                    colour=discord.Colour.orange(),
+                )
+            )
+
         await interaction.guild.create_text_channel(
-            name, category=category, slowmode_delay=slowmode
+            name=name, category=category, slowmode_delay=slowmode
         )
         TextChannel = discord.Embed(
             title="Channel Created!",
-            description=f"{interaction.user.mention} Successfully created a text channel named `{name}`",
+            description=f"Successfully created a text channel named `{name}`",
             timestamp=datetime.now(),
             colour=discord.Colour.green(),
         )
@@ -123,7 +124,7 @@ class ServerManagement(commands.Cog):
             )
 
         if len(TextChannel.fields) == 0:
-            await interaction.response.send_message(
+            return await interaction.response.send_message(
                 embed=discord.Embed(
                     title="Channel Created!",
                     description=f"Successfully created a text channel named `{name}`",
@@ -131,16 +132,7 @@ class ServerManagement(commands.Cog):
                     colour=discord.Colour.green(),
                 )
             )
-            return await logs_channel.send(
-                embed=discord.Embed(
-                    title="Channel Created!",
-                    description=f"{interaction.user.mention} created a text channel named `{name}`",
-                    timestamp=datetime.now(),
-                    colour=discord.Colour.green(),
-                )
-            )
 
-        await logs_channel.send(embed=TextChannel)
         await interaction.response.send_message(embed=TextChannel)
 
     @app_commands.command(
@@ -153,37 +145,48 @@ class ServerManagement(commands.Cog):
         interaction: discord.Interaction,
         name: str,
         category: Optional[discord.CategoryChannel],
-        user_limit: Optional[int],
+        userlimit: Optional[int],
     ):
         guild_data = DataManager.get_guild_data(interaction.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
+
+        if logs_channel == None:
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    title="No Logs Channel",
+                    description="Please set a channel where all logs will be sent. `/set_logs_channel`",
+                    timestamp=datetime.now(),
+                    colour=discord.Colour.orange(),
+                )
+            )
+
         await interaction.guild.create_voice_channel(
-            name, category=category, user_limit=user_limit
+            name, category=category, user_limit=userlimit
         )
         VoiceChannel = discord.Embed(
             title="Voice Channel Created!",
-            description=f"{interaction.user.mention} Successfully created a voice channel named `{name}`",
+            description=f"Successfully created a voice channel named `{name}`",
             timestamp=datetime.now(),
             colour=discord.Colour.green(),
         )
 
         if not (category is None):
             VoiceChannel.add_field(name="Category", value=f"{category}", inline=True)
-        if user_limit == 0:
+        if userlimit == 0:
             VoiceChannel.add_field(
                 name="User Limit", value="No user limit", inline=True
             )
-        if user_limit == 1:
+        if userlimit == 1:
             VoiceChannel.add_field(
-                name="User Limit", value=f"{user_limit} user", inline=True
+                name="User Limit", value=f"{userlimit} user", inline=True
             )
-        if user_limit != 1 and 0:
+        if userlimit != 1 and 0:
             VoiceChannel.add_field(
-                name="User Limit", value=f"{user_limit} users", inline=True
+                name="User Limit", value=f"{userlimit} users", inline=True
             )
 
         if len(VoiceChannel.fields) == 0:
-            await interaction.response.send_message(
+            return await interaction.response.send_message(
                 embed=discord.Embed(
                     title="Voice Channel Created!",
                     description=f"Successfully created a voice channel named `{name}`",
@@ -191,16 +194,7 @@ class ServerManagement(commands.Cog):
                     colour=discord.Colour.green(),
                 )
             )
-            return await logs_channel.send(
-                embed=discord.Embed(
-                    title="Voice Channel Created",
-                    description=f"{interaction.user.mention} created a voice channel named `{name}`",
-                    timestamp=datetime.now(),
-                    colour=discord.Colour.green(),
-                )
-            )
 
-        await logs_channel.send(embed=VoiceChannel)
         await interaction.response.send_message(embed=VoiceChannel)
 
     @app_commands.command(
@@ -216,10 +210,20 @@ class ServerManagement(commands.Cog):
         guild_data = DataManager.get_guild_data(interaction.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
 
+        if logs_channel == None:
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    title="No Logs Channel",
+                    description="Please set a channel where all logs will be sent. `/set_logs_channel`",
+                    timestamp=datetime.now(),
+                    colour=discord.Colour.orange(),
+                )
+            )
+
         await channel.delete(reason=reason)
         ChannelDelete = discord.Embed(
             title="Channel Deleted!",
-            description=f"{interaction.user.mention} Successfully deleted `{channel}` channel",
+            description=f"Successfully deleted `{channel}` channel",
             timestamp=datetime.now(),
             colour=discord.Colour.green(),
         )
@@ -228,7 +232,7 @@ class ServerManagement(commands.Cog):
             ChannelDelete.add_field(name="Reason", value=f"{reason}", inline=True)
 
         if len(ChannelDelete.fields) == 0:
-            await interaction.response.send_message(
+            return await interaction.response.send_message(
                 embed=discord.Embed(
                     title="Channel Deleted!",
                     description=f"Successfully deleted `{channel}` channel with no reason provided",
@@ -236,18 +240,9 @@ class ServerManagement(commands.Cog):
                     colour=discord.Colour.green(),
                 )
             )
-            return await logs_channel.send(
-                embed=discord.Embed(
-                    title="Channel Deleted",
-                    description=f"{interaction.user.mention} deleted `{channel}` channel with no reason provided",
-                    timestamp=datetime.now(),
-                    colour=discord.Colour.green(),
-                )
-            )
 
-        await logs_channel.send(embed=ChannelDelete)
         await interaction.response.send_message(embed=ChannelDelete)
-    
+
     @app_commands.command(
         name="delete_voice_channel", description="Delete the mentioned voice channel"
     )
@@ -260,11 +255,21 @@ class ServerManagement(commands.Cog):
     ):
         guild_data = DataManager.get_guild_data(interaction.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
-        
+
+        if logs_channel == None:
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    title="No Logs Channel",
+                    description="Please set a channel where all logs will be sent. `/set_logs_channel`",
+                    timestamp=datetime.now(),
+                    colour=discord.Colour.orange(),
+                )
+            )
+
         await channel.delete(reason=reason)
         ChannelDelete = discord.Embed(
             title="Channel Deleted!",
-            description=f"{interaction.user.mention} Successfully deleted `{channel}` channel",
+            description=f"Successfully deleted `{channel}` channel",
             timestamp=datetime.now(),
             colour=discord.Colour.green(),
         )
@@ -273,7 +278,7 @@ class ServerManagement(commands.Cog):
             ChannelDelete.add_field(name="Reason", value=f"{reason}", inline=True)
 
         if len(ChannelDelete.fields) == 0:
-            await interaction.response.send_message(
+            return await interaction.response.send_message(
                 embed=discord.Embed(
                     title="Channel Deleted!",
                     description=f"Successfully deleted `{channel}` channel with no reason provided",
@@ -281,17 +286,9 @@ class ServerManagement(commands.Cog):
                     colour=discord.Colour.green(),
                 )
             )
-            return await logs_channel.send(
-                embed=discord.Embed(
-                    title="Channel Deleted",
-                    description=f"{interaction.user.mention} deleted `{channel}` channel with no reason provided",
-                    timestamp=datetime.now(),
-                    colour=discord.Colour.green(),
-                )
-            )
 
-        await logs_channel.send(embed=ChannelDelete)
         await interaction.response.send_message(embed=ChannelDelete)
+
 
 async def setup(bot):
     await bot.add_cog(ServerManagement(bot))
