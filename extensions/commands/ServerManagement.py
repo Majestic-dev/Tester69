@@ -98,12 +98,12 @@ class ServerManagement(commands.Cog):
                 )
             )
 
-        await interaction.guild.create_text_channel(
+        textchannel = await interaction.guild.create_text_channel(
             name=name, category=category, slowmode_delay=slowmode
         )
         TextChannel = discord.Embed(
             title="Channel Created!",
-            description=f"Successfully created a text channel named `{name}`",
+            description=f"Successfully created text channel {textchannel.mention}",
             timestamp=datetime.now(),
             colour=discord.Colour.green(),
         )
@@ -127,7 +127,7 @@ class ServerManagement(commands.Cog):
             return await interaction.response.send_message(
                 embed=discord.Embed(
                     title="Channel Created!",
-                    description=f"Successfully created a text channel named `{name}`",
+                    description=f"Successfully created text channel {textchannel.mention}",
                     timestamp=datetime.now(),
                     colour=discord.Colour.green(),
                 )
@@ -160,18 +160,18 @@ class ServerManagement(commands.Cog):
                 )
             )
 
-        await interaction.guild.create_voice_channel(
+        voicechannel = await interaction.guild.create_voice_channel(
             name, category=category, user_limit=userlimit
         )
         VoiceChannel = discord.Embed(
             title="Voice Channel Created!",
-            description=f"Successfully created a voice channel named `{name}`",
+            description=f"Successfully created voice channel {voicechannel.mention}",
             timestamp=datetime.now(),
-            colour=discord.Colour.green(),
+            colour=discord.Colour.green()
         )
 
         if not (category is None):
-            VoiceChannel.add_field(name="Category", value=f"{category}", inline=True)
+            VoiceChannel.add_field(name="Category", value=f"{category.mention}", inline=True)
         if userlimit == 0:
             VoiceChannel.add_field(
                 name="User Limit", value="No user limit", inline=True
@@ -189,7 +189,7 @@ class ServerManagement(commands.Cog):
             return await interaction.response.send_message(
                 embed=discord.Embed(
                     title="Voice Channel Created!",
-                    description=f"Successfully created a voice channel named `{name}`",
+                    description=f"Successfully created voice channel {voicechannel.mention}",
                     timestamp=datetime.now(),
                     colour=discord.Colour.green(),
                 )
@@ -223,7 +223,7 @@ class ServerManagement(commands.Cog):
         await channel.delete(reason=reason)
         ChannelDelete = discord.Embed(
             title="Channel Deleted!",
-            description=f"Successfully deleted `{channel}` channel",
+            description=f"Successfully deleted `{channel}` text channel",
             timestamp=datetime.now(),
             colour=discord.Colour.green(),
         )
@@ -235,7 +235,7 @@ class ServerManagement(commands.Cog):
             return await interaction.response.send_message(
                 embed=discord.Embed(
                     title="Channel Deleted!",
-                    description=f"Successfully deleted `{channel}` channel with no reason provided",
+                    description=f"Successfully deleted `{channel}` text channel with no reason provided",
                     timestamp=datetime.now(),
                     colour=discord.Colour.green(),
                 )
@@ -269,7 +269,7 @@ class ServerManagement(commands.Cog):
         await channel.delete(reason=reason)
         ChannelDelete = discord.Embed(
             title="Channel Deleted!",
-            description=f"Successfully deleted `{channel}` channel",
+            description=f"Successfully deleted `{channel}` voice channel",
             timestamp=datetime.now(),
             colour=discord.Colour.green(),
         )
@@ -281,7 +281,7 @@ class ServerManagement(commands.Cog):
             return await interaction.response.send_message(
                 embed=discord.Embed(
                     title="Channel Deleted!",
-                    description=f"Successfully deleted `{channel}` channel with no reason provided",
+                    description=f"Successfully deleted `{channel}` voice channel with no reason provided",
                     timestamp=datetime.now(),
                     colour=discord.Colour.green(),
                 )

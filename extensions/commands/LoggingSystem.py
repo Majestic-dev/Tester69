@@ -48,7 +48,7 @@ class LoggingSystem(commands.Cog):
         if command.name == "create_text_channel":
             TextChannel = discord.Embed(
                 title="Text Channel Created",
-                description=f"{interaction.user.mention} created a text channel named `{interaction.namespace.name}`",
+                description=f"{interaction.user.mention} created a text channel named {interaction.namespace.name}",
                 timestamp=datetime.now(),
                 colour=discord.Colour.green(),
             )
@@ -78,7 +78,7 @@ class LoggingSystem(commands.Cog):
                 return await logs_channel.send(
                     embed=discord.Embed(
                         title="Text Channel Created",
-                        description=f"{interaction.user.mention} created a text channel named `{interaction.namespace.name}`",
+                        description=f"{interaction.user.mention} created a text channel named {interaction.namespace.name}",
                         timestamp=datetime.now(),
                         colour=discord.Colour.green(),
                     )
