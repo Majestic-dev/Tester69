@@ -229,7 +229,7 @@ class ServerManagement(commands.Cog):
         )
 
         if not (reason) == None:
-            ChannelDelete.add_field(name="Reason", value=f"{reason}", inline=True)
+            ChannelDelete.add_field(name="Reason", value=f"```{reason}```", inline=True)
 
         if len(ChannelDelete.fields) == 0:
             return await interaction.response.send_message(
@@ -275,7 +275,7 @@ class ServerManagement(commands.Cog):
         )
 
         if not (reason) == None:
-            ChannelDelete.add_field(name="Reason", value=f"{reason}", inline=True)
+            ChannelDelete.add_field(name="Reason", value=f"```{reason}```", inline=True)
 
         if len(ChannelDelete.fields) == 0:
             return await interaction.response.send_message(

@@ -45,7 +45,7 @@ class LoggingSystem(commands.Cog):
                 )
             )
 
-        elif command.name == "create_text_channel":
+        if command.name == "create_text_channel":
             TextChannel = discord.Embed(
                 title="Text Channel Created",
                 description=f"{interaction.user.mention} created a text channel named `{interaction.namespace.name}`",
@@ -138,7 +138,9 @@ class LoggingSystem(commands.Cog):
 
             if not (interaction.namespace.reason) == None:
                 ChannelDelete.add_field(
-                    name="Reason", value=f"{interaction.namespace.reason}", inline=True
+                    name="Reason",
+                    value=f"```{interaction.namespace.reason}```",
+                    inline=True,
                 )
 
             if len(ChannelDelete.fields) == 0:
@@ -163,7 +165,9 @@ class LoggingSystem(commands.Cog):
 
             if not (interaction.namespace.reason) == None:
                 ChannelDelete.add_field(
-                    name="Reason", value=f"{interaction.namespace.reason}", inline=True
+                    name="Reason",
+                    value=f"```{interaction.namespace.reason}```",
+                    inline=True,
                 )
 
             if len(ChannelDelete.fields) == 0:
