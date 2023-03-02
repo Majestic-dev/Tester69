@@ -22,8 +22,8 @@ class ServerManagement(commands.Cog):
         await interaction.response.send_message(
             embed=discord.Embed(
                 title="Logs Channel Set!",
-                description=f"Logs channel set to {channel.mention}.",
-                timestamp=datetime.now(),
+                description=f"Logs channel set to {channel.mention}",
+                timestamp=datetime.utcnow(),
                 colour=discord.Colour.green(),
             )
         )
@@ -49,7 +49,7 @@ class ServerManagement(commands.Cog):
                 embed=discord.Embed(
                     title="No Logs Channel",
                     description="Please set a channel where all logs will be sent. `/set_logs_channel`",
-                    timestamp=datetime.now(),
+                    timestamp=datetime.utcnow(),
                     colour=discord.Colour.orange(),
                 )
             )
@@ -59,7 +59,7 @@ class ServerManagement(commands.Cog):
                 embed=discord.Embed(
                     title="Slowmode Disabled!",
                     description=f"Successfully disabled slowmode in {channel.mention}",
-                    timestamp=datetime.now(),
+                    timestamp=datetime.utcnow(),
                     colour=discord.Colour.green(),
                 )
             )
@@ -68,7 +68,7 @@ class ServerManagement(commands.Cog):
             embed=discord.Embed(
                 title="Slowmode Set!",
                 description=f"Successfully set the slowmode to {slowmode} seconds in {channel.mention}",
-                timestamp=datetime.now(),
+                timestamp=datetime.utcnow(),
                 colour=discord.Colour.green(),
             )
         )
@@ -93,7 +93,7 @@ class ServerManagement(commands.Cog):
                 embed=discord.Embed(
                     title="No Logs Channel",
                     description="Please set a channel where all logs will be sent. `/set_logs_channel`",
-                    timestamp=datetime.now(),
+                    timestamp=datetime.utcnow(),
                     colour=discord.Colour.orange(),
                 )
             )
@@ -104,7 +104,7 @@ class ServerManagement(commands.Cog):
         TextChannel = discord.Embed(
             title="Channel Created!",
             description=f"Successfully created text channel {textchannel.mention}",
-            timestamp=datetime.now(),
+            timestamp=datetime.utcnow(),
             colour=discord.Colour.green(),
         )
 
@@ -128,7 +128,7 @@ class ServerManagement(commands.Cog):
                 embed=discord.Embed(
                     title="Channel Created!",
                     description=f"Successfully created text channel {textchannel.mention}",
-                    timestamp=datetime.now(),
+                    timestamp=datetime.utcnow(),
                     colour=discord.Colour.green(),
                 )
             )
@@ -155,7 +155,7 @@ class ServerManagement(commands.Cog):
                 embed=discord.Embed(
                     title="No Logs Channel",
                     description="Please set a channel where all logs will be sent. `/set_logs_channel`",
-                    timestamp=datetime.now(),
+                    timestamp=datetime.utcnow(),
                     colour=discord.Colour.orange(),
                 )
             )
@@ -166,12 +166,14 @@ class ServerManagement(commands.Cog):
         VoiceChannel = discord.Embed(
             title="Voice Channel Created!",
             description=f"Successfully created voice channel {voicechannel.mention}",
-            timestamp=datetime.now(),
-            colour=discord.Colour.green()
+            timestamp=datetime.utcnow(),
+            colour=discord.Colour.green(),
         )
 
         if not (category is None):
-            VoiceChannel.add_field(name="Category", value=f"{category.mention}", inline=True)
+            VoiceChannel.add_field(
+                name="Category", value=f"{category.mention}", inline=True
+            )
         if userlimit == 0:
             VoiceChannel.add_field(
                 name="User Limit", value="No user limit", inline=True
@@ -190,7 +192,7 @@ class ServerManagement(commands.Cog):
                 embed=discord.Embed(
                     title="Voice Channel Created!",
                     description=f"Successfully created voice channel {voicechannel.mention}",
-                    timestamp=datetime.now(),
+                    timestamp=datetime.utcnow(),
                     colour=discord.Colour.green(),
                 )
             )
@@ -215,7 +217,7 @@ class ServerManagement(commands.Cog):
                 embed=discord.Embed(
                     title="No Logs Channel",
                     description="Please set a channel where all logs will be sent. `/set_logs_channel`",
-                    timestamp=datetime.now(),
+                    timestamp=datetime.utcnow(),
                     colour=discord.Colour.orange(),
                 )
             )
@@ -224,7 +226,7 @@ class ServerManagement(commands.Cog):
         ChannelDelete = discord.Embed(
             title="Channel Deleted!",
             description=f"Successfully deleted `{channel}` text channel",
-            timestamp=datetime.now(),
+            timestamp=datetime.utcnow(),
             colour=discord.Colour.green(),
         )
 
@@ -236,7 +238,7 @@ class ServerManagement(commands.Cog):
                 embed=discord.Embed(
                     title="Channel Deleted!",
                     description=f"Successfully deleted `{channel}` text channel with no reason provided",
-                    timestamp=datetime.now(),
+                    timestamp=datetime.utcnow(),
                     colour=discord.Colour.green(),
                 )
             )
@@ -261,7 +263,7 @@ class ServerManagement(commands.Cog):
                 embed=discord.Embed(
                     title="No Logs Channel",
                     description="Please set a channel where all logs will be sent. `/set_logs_channel`",
-                    timestamp=datetime.now(),
+                    timestamp=datetime.utcnow(),
                     colour=discord.Colour.orange(),
                 )
             )
@@ -270,7 +272,7 @@ class ServerManagement(commands.Cog):
         ChannelDelete = discord.Embed(
             title="Channel Deleted!",
             description=f"Successfully deleted `{channel}` voice channel",
-            timestamp=datetime.now(),
+            timestamp=datetime.utcnow(),
             colour=discord.Colour.green(),
         )
 
@@ -282,7 +284,7 @@ class ServerManagement(commands.Cog):
                 embed=discord.Embed(
                     title="Channel Deleted!",
                     description=f"Successfully deleted `{channel}` voice channel with no reason provided",
-                    timestamp=datetime.now(),
+                    timestamp=datetime.utcnow(),
                     colour=discord.Colour.green(),
                 )
             )

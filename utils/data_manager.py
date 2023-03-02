@@ -31,7 +31,7 @@ class DataManager:
     def add_guild_data(cls, guild_id: int) -> None:
         if str(guild_id) not in cls.__data["guilds"]:
             cls.__data["guilds"][str(guild_id)] = {
-                "verification_role_id": None,
+                "unverified_role_id": None,
                 "verification_channel_id": None,
                 "verification_logs_channel_id": None,
                 "logs_channel_id": None,

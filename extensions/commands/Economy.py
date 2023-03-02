@@ -35,7 +35,7 @@ class Economy(commands.Cog):
                 description=(
                     f'Your balance is {DataManager.get_user_data(interaction.user.id)["balance"]} coins'
                 ),
-                timestamp=datetime.now(),
+                timestamp=datetime.utcnow(),
                 colour=discord.Colour.green(),
             )
         )
@@ -60,7 +60,7 @@ class Economy(commands.Cog):
                 description=(
                     f'Added {amount} coins to your balance. Your new balance is {user_data["balance"]}'
                 ),
-                timestamp=datetime.now(),
+                timestamp=datetime.utcnow(),
                 colour=discord.Colour.green(),
             )
         )
@@ -83,7 +83,7 @@ class Economy(commands.Cog):
                     description=(
                         f'You do not have enough coins. Your balance is {user_data["balance"]}, after the subtraction you would have {user_data["balance"] - amount}.'
                     ),
-                    timestamp=datetime.now(),
+                    timestamp=datetime.utcnow(),
                     colour=discord.Colour.red(),
                 )
             )
@@ -98,7 +98,7 @@ class Economy(commands.Cog):
                 description=(
                     f'Subtracted {amount} from your balance. Your new balance is {user_data["balance"] - amount}'
                 ),
-                timestamp=datetime.now(),
+                timestamp=datetime.utcnow(),
                 colour=discord.Color.green(),
             )
         )
@@ -107,7 +107,7 @@ class Economy(commands.Cog):
     async def hunt(self, interaction: discord.Interaction):
         if (
             interaction.user.id in self.hunt_cooldown
-            and self.hunt_cooldown[interaction.user.id] > datetime.now()
+            and self.hunt_cooldown[interaction.user.id] > datetime.utcnow()
             and interaction.user.id not in DataManager.get("config", "whitelist")
         ):
             remaining = self.hunt_cooldown[interaction.user.id]
@@ -118,7 +118,7 @@ class Economy(commands.Cog):
                     description=(
                         f"Your cooldown will end <t:{int(remaining.timestamp())}:R>"
                     ),
-                    timestamp=datetime.now(),
+                    timestamp=datetime.utcnow(),
                     colour=discord.Colour.orange(),
                 )
             )
@@ -130,18 +130,20 @@ class Economy(commands.Cog):
             embed=discord.Embed(
                 title="Item Caught",
                 description=(f"You hunted down a {item_name}!"),
-                timestamp=datetime.now(),
+                timestamp=datetime.utcnow(),
                 colour=discord.Colour.green(),
             )
         )
 
-        self.hunt_cooldown[interaction.user.id] = datetime.now() + timedelta(minutes=10)
+        self.hunt_cooldown[interaction.user.id] = datetime.utcnow() + timedelta(
+            minutes=10
+        )
 
     @app_commands.command(name="fish", description="Fish for some loot")
     async def fish(self, interaction: discord.Interaction):
         if (
             interaction.user.id in self.fish_cooldown
-            and self.fish_cooldown[interaction.user.id] > datetime.now()
+            and self.fish_cooldown[interaction.user.id] > datetime.utcnow()
             and interaction.user.id not in DataManager.get("config", "whitelist")
         ):
             remaining = self.fish_cooldown[interaction.user.id]
@@ -152,7 +154,7 @@ class Economy(commands.Cog):
                     description=(
                         f"Your cooldown will end <t:{int(remaining.timestamp())}:R>"
                     ),
-                    timestamp=datetime.now(),
+                    timestamp=datetime.utcnow(),
                     colour=discord.Colour.orange(),
                 )
             )
@@ -164,12 +166,14 @@ class Economy(commands.Cog):
             embed=discord.Embed(
                 title="Item Caught",
                 description=(f"You caught a {item_name}!"),
-                timestamp=datetime.now(),
+                timestamp=datetime.utcnow(),
                 colour=discord.Colour.green(),
             )
         )
 
-        self.fish_cooldown[interaction.user.id] = datetime.now() + timedelta(minutes=10)
+        self.fish_cooldown[interaction.user.id] = datetime.utcnow() + timedelta(
+            minutes=10
+        )
 
     async def item_autocomplete(
         self, interaction: discord.Interaction, current: str
@@ -194,8 +198,8 @@ class Economy(commands.Cog):
             return await interaction.response.send_message(
                 embed=discord.Embed(
                     title="No Item",
-                    description="You don't have any of that item.",
-                    timestamp=datetime.now(),
+                    description="You don't have any of that item",
+                    timestamp=datetime.utcnow(),
                     colour=discord.Colour.orange(),
                 )
             )
@@ -204,8 +208,8 @@ class Economy(commands.Cog):
             return await interaction.response.send_message(
                 embed=discord.Embed(
                     title="No Item",
-                    description="You don't have any of that item.",
-                    timestamp=datetime.now(),
+                    description="You don't have any of that item",
+                    timestamp=datetime.utcnow(),
                     colour=discord.Colour.orange(),
                 )
             )
@@ -215,7 +219,7 @@ class Economy(commands.Cog):
                 embed=discord.Embed(
                     title="Can't Sell",
                     description="I can't sell that item, because it doesn't exist",
-                    timestamp=datetime.now(),
+                    timestamp=datetime.utcnow(),
                     colour=discord.Colour.red(),
                 )
             )
@@ -230,7 +234,7 @@ class Economy(commands.Cog):
             embed=discord.Embed(
                 title="Item Sold",
                 description=(f"You sold a {item} for {price} coins!"),
-                timestamp=datetime.now(),
+                timestamp=datetime.utcnow(),
                 colour=discord.Colour.green(),
             )
         )
@@ -241,7 +245,7 @@ class Economy(commands.Cog):
     async def hourly(self, interaction: discord.Interaction):
         if (
             interaction.user.id in self.hourly_cooldown
-            and self.hourly_cooldown[interaction.user.id] > datetime.now()
+            and self.hourly_cooldown[interaction.user.id] > datetime.utcnow()
             and interaction.user.id not in DataManager.get("config", "whitelist")
         ):
             remaining = self.hourly_cooldown[interaction.user.id]
@@ -252,7 +256,7 @@ class Economy(commands.Cog):
                     description=(
                         f"Your cooldown will end <t:{int(remaining.timestamp())}:R>"
                     ),
-                    timestamp=datetime.now(),
+                    timestamp=datetime.utcnow(),
                     colour=discord.Colour.orange(),
                 )
             )
@@ -266,12 +270,14 @@ class Economy(commands.Cog):
             embed=discord.Embed(
                 title="Hourly Pay",
                 description="You received 10 coins!",
-                timestamp=datetime.now(),
+                timestamp=datetime.utcnow(),
                 colour=discord.Colour.green(),
             )
         )
 
-        self.hourly_cooldown[interaction.user.id] = datetime.now() + timedelta(hours=1)
+        self.hourly_cooldown[interaction.user.id] = datetime.utcnow() + timedelta(
+            hours=1
+        )
 
     @app_commands.command(
         name="monthly", description="Gain 3000 coins every time you use the command"
@@ -279,7 +285,7 @@ class Economy(commands.Cog):
     async def monthly(self, interaction: discord.Interaction):
         if (
             interaction.user.id in self.monthly_cooldown
-            and self.monthly_cooldown[interaction.user.id] > datetime.now()
+            and self.monthly_cooldown[interaction.user.id] > datetime.utcnow()
             and interaction.user.id not in DataManager.get("config", "whitelist")
         ):
             remaining = self.monthly_cooldown[interaction.user.id]
@@ -290,7 +296,7 @@ class Economy(commands.Cog):
                     description=(
                         f"Your cooldown will end <t:{int(remaining.timestamp())}:R>"
                     ),
-                    timestamp=datetime.now(),
+                    timestamp=datetime.utcnow(),
                     colour=discord.Colour.orange(),
                 )
             )
@@ -304,12 +310,12 @@ class Economy(commands.Cog):
             embed=discord.Embed(
                 title="Monthly Pay",
                 description="You received 3000 coins!",
-                timestamp=datetime.now(),
+                timestamp=datetime.utcnow(),
                 colour=discord.Colour.green(),
             )
         )
 
-        self.monthly_cooldown[interaction.user.id] = datetime.now() + timedelta(
+        self.monthly_cooldown[interaction.user.id] = datetime.utcnow() + timedelta(
             hours=720
         )
 
@@ -317,7 +323,7 @@ class Economy(commands.Cog):
     async def yearly(self, interaction: discord.Interaction):
         if (
             interaction.user.id in self.yearly_cooldown
-            and self.yearly_cooldown[interaction.user.id] > datetime.now()
+            and self.yearly_cooldown[interaction.user.id] > datetime.utcnow()
             and interaction.user.id not in DataManager.get("config", "whitelist")
         ):
             remaining = self.yearly_cooldown[interaction.user.id]
@@ -328,7 +334,7 @@ class Economy(commands.Cog):
                     description=(
                         f"Your cooldown will end <t:{int(remaining.timestamp())}:R>"
                     ),
-                    timestamp=datetime.now(),
+                    timestamp=datetime.utcnow(),
                     colour=discord.Colour.orange(),
                 )
             )
@@ -342,12 +348,12 @@ class Economy(commands.Cog):
             embed=discord.Embed(
                 title="Yearly Pay",
                 description="You received 36000 coins!",
-                timestamp=datetime.now(),
+                timestamp=datetime.utcnow(),
                 colour=discord.Colour.green(),
             )
         )
 
-        self.monthly_cooldown[interaction.user.id] = datetime.now() + timedelta(
+        self.monthly_cooldown[interaction.user.id] = datetime.utcnow() + timedelta(
             days=365
         )
 
@@ -357,7 +363,7 @@ class Economy(commands.Cog):
 
         inv_embed = discord.Embed(
             title="Inventory",
-            timestamp=datetime.now(),
+            timestamp=datetime.utcnow(),
             colour=discord.Colour.green(),
         )
 
@@ -368,8 +374,8 @@ class Economy(commands.Cog):
             return await interaction.response.send_message(
                 embed=discord.Embed(
                     title="Empty Inventory",
-                    description="You don't have any items in your inventory.",
-                    timestamp=datetime.now(),
+                    description="You don't have any items in your inventory",
+                    timestamp=datetime.utcnow(),
                     colour=discord.Colour.orange(),
                 )
             )
@@ -383,7 +389,7 @@ class Economy(commands.Cog):
     async def devskip(self, interaction: discord.Interaction, user: discord.User):
         skip = discord.Embed(
             title="Cooldown Skipped",
-            timestamp=datetime.now(),
+            timestamp=datetime.utcnow(),
             colour=discord.Colour.green(),
         )
 
@@ -412,7 +418,7 @@ class Economy(commands.Cog):
                 embed=discord.Embed(
                     title="No Cooldowns",
                     description=(f"{user.name} doesn't have any active cooldowns"),
-                    timestamp=datetime.now(),
+                    timestamp=datetime.utcnow(),
                     colour=discord.Color.orange(),
                 )
             )
