@@ -23,6 +23,39 @@ class LoggingSystem(commands.Cog):
         guild_data = DataManager.get_guild_data(interaction.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
 
+        if command.name == "set_verification_channel":
+            channel = interaction.namespace.channel
+            return await logs_channel.send(
+                embed=discord.Embed(
+                    title="Verification Channel Set",
+                    description=f"{interaction.user.mention} Set the verification channel to {channel.mention}",
+                    timestamp=datetime.utcnow(),
+                    colour=discord.Colour.green(),
+                )
+            )
+
+        if command.name == "set_verification_logs_channel":
+            channel = interaction.namespace.channel
+            return await logs_channel.send(
+                embed=discord.Embed(
+                    title="Verification Logs Channel Set",
+                    description=f"{interaction.user.mention} Set the verification logs channel to {channel.mention}",
+                    timestamp=datetime.utcnow(),
+                    colour=discord.Colour.green(),
+                )
+            )
+
+        if command.name == "set_unverified_role":
+            role = interaction.namespace.role
+            return await logs_channel.send(
+                embed=discord.Embed(
+                    title="Unverified Role Set",
+                    description=f"{interaction.user.mention} Set the unverified role to {role.mention}",
+                    timestamp=datetime.utcnow(),
+                    colour=discord.Colour.green(),
+                )
+            )
+
         if command.name == "slowmode":
             channel = interaction.namespace.channel
             slowmode = interaction.namespace.slowmode
@@ -31,7 +64,7 @@ class LoggingSystem(commands.Cog):
                     embed=discord.Embed(
                         title="Slowmode Disabled",
                         description=f"{interaction.user.mention} Disabled slowmode in {channel.mention}",
-                        timestamp=datetime.now(),
+                        timestamp=datetime.utcnow(),
                         colour=discord.Colour.green(),
                     )
                 )
@@ -40,7 +73,7 @@ class LoggingSystem(commands.Cog):
                 embed=discord.Embed(
                     title="Slowmode Set",
                     description=f"{interaction.user.mention} Set the slowmode to {slowmode} seconds in {channel.mention}",
-                    timestamp=datetime.now(),
+                    timestamp=datetime.utcnow(),
                     colour=discord.Colour.green(),
                 )
             )
@@ -49,7 +82,7 @@ class LoggingSystem(commands.Cog):
             TextChannel = discord.Embed(
                 title="Text Channel Created",
                 description=f"{interaction.user.mention} created a text channel named {interaction.namespace.name}",
-                timestamp=datetime.now(),
+                timestamp=datetime.utcnow(),
                 colour=discord.Colour.green(),
             )
 
@@ -79,7 +112,7 @@ class LoggingSystem(commands.Cog):
                     embed=discord.Embed(
                         title="Text Channel Created",
                         description=f"{interaction.user.mention} created a text channel named {interaction.namespace.name}",
-                        timestamp=datetime.now(),
+                        timestamp=datetime.utcnow(),
                         colour=discord.Colour.green(),
                     )
                 )
@@ -89,7 +122,7 @@ class LoggingSystem(commands.Cog):
             VoiceChannel = discord.Embed(
                 title="Voice Channel Created",
                 description=f"{interaction.user.mention} created a voice channel named `{interaction.namespace.name}`",
-                timestamp=datetime.now(),
+                timestamp=datetime.utcnow(),
                 colour=discord.Colour.green(),
             )
 
@@ -121,7 +154,7 @@ class LoggingSystem(commands.Cog):
                     embed=discord.Embed(
                         title="Voice Channel Created",
                         description=f"{interaction.user.mention} created a voice channel named `{interaction.namespace.name}`",
-                        timestamp=datetime.now(),
+                        timestamp=datetime.utcnow(),
                         colour=discord.Colour.green(),
                     )
                 )
@@ -132,7 +165,7 @@ class LoggingSystem(commands.Cog):
             ChannelDelete = discord.Embed(
                 title="Channel Deleted",
                 description=f"{interaction.user.mention} deleted `{interaction.namespace.channel}` channel",
-                timestamp=datetime.now(),
+                timestamp=datetime.utcnow(),
                 colour=discord.Colour.green(),
             )
 
@@ -148,7 +181,7 @@ class LoggingSystem(commands.Cog):
                     embed=discord.Embed(
                         title="Channel Deleted",
                         description=f"{interaction.user.mention} deleted `{interaction.namespace.channel}` channel with no reason provided",
-                        timestamp=datetime.now(),
+                        timestamp=datetime.utcnow(),
                         colour=discord.Colour.green(),
                     )
                 )
@@ -159,7 +192,7 @@ class LoggingSystem(commands.Cog):
             ChannelDelete = discord.Embed(
                 title="Channel Deleted",
                 description=f"{interaction.user.mention} deleted `{interaction.namespace.channel}` voice channel",
-                timestamp=datetime.now(),
+                timestamp=datetime.utcnow(),
                 colour=discord.Colour.green(),
             )
 
@@ -175,7 +208,7 @@ class LoggingSystem(commands.Cog):
                     embed=discord.Embed(
                         title="Channel Deleted",
                         description=f"{interaction.user.mention} deleted `{interaction.namespace.channel}` voice channel with no reason provided",
-                        timestamp=datetime.now(),
+                        timestamp=datetime.utcnow(),
                         colour=discord.Colour.green(),
                     )
                 )
