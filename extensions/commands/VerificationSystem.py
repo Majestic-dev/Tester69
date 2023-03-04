@@ -18,7 +18,7 @@ class VerificationSystem(commands.Cog):
         name="set_verification_channel",
         description="Set the channel where users should send their verification code",
     )
-    @commands.has_permissions(administrator=True)
+    @app_commands.default_permissions(administrator=True)
     async def set_verification_channel(
         self, interaction: discord.Interaction, channel: discord.TextChannel
     ):
@@ -51,7 +51,7 @@ class VerificationSystem(commands.Cog):
         name="set_verification_logs_channel",
         description="Set the channel where all verification logs are sent",
     )
-    @commands.has_permissions(administrator=True)
+    @app_commands.default_permissions(administrator=True)
     async def set_verification_logs_channel(
         self, interaction: discord.Interaction, channel: discord.TextChannel
     ):
@@ -84,7 +84,7 @@ class VerificationSystem(commands.Cog):
         name="set_unverified_role",
         description="Set the unverified role that will be assigned to members when they join",
     )
-    @commands.has_permissions(administrator=True)
+    @app_commands.default_permissions(administrator=True)
     async def set_verification_role(
         self, interaction: discord.Interaction, role: discord.Role
     ):
@@ -118,7 +118,7 @@ class VerificationSystem(commands.Cog):
 
         verification_role = discord.utils.get(
             member.guild.roles,
-            id=guild_data["verification_role_id"],
+            id=guild_data["unverified_role_id"],
         )
 
         if verification_role is None:
