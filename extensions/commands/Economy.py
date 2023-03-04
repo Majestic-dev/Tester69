@@ -96,7 +96,7 @@ class Economy(commands.Cog):
             embed=discord.Embed(
                 title="Coin Subtraction Succeeded",
                 description=(
-                    f'Subtracted {amount} from your balance. Your new balance is {user_data["balance"] - amount}'
+                    f'Subtracted {amount} from your balance. Your new balance is {user_data["balance"]}'
                 ),
                 timestamp=datetime.utcnow(),
                 colour=discord.Color.green(),
