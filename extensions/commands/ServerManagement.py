@@ -4,6 +4,7 @@ from typing import Optional
 import discord
 from discord import app_commands
 from discord.abc import GuildChannel
+from discord.enums import ChannelType
 from discord.ext import commands
 
 from utils import DataManager
@@ -78,17 +79,28 @@ class ServerManagement(commands.Cog):
         name="create_channel",
         description="Create a channel with the name of your choice",
     )
+    @app_commands.choices(
+        channeltype=[
+            app_commands.Choice(name="text", value=0),
+            app_commands.Choice(name="voice", value=2),
+            app_commands.Choice(name="category", value=4),
+            app_commands.Choice(name="news", value=5),
+            app_commands.Choice(name="stage_voice", value=13),
+            app_commands.Choice(name="forum", value=15),
+        ]
+    )
     @app_commands.default_permissions(manage_channels=True)
     async def create_channel(
         self,
         interaction: discord.Interaction,
-        channeltype: discord.ChannelType,
+        channeltype: app_commands.Choice[int],
         name: str,
         category: Optional[discord.CategoryChannel],
         slowmode: Optional[int],
     ):
         guild_data = DataManager.get_guild_data(interaction.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
+        channeltype = ChannelType(interaction.namespace.channeltype)
 
         if logs_channel == None:
             return await interaction.response.send_message(
@@ -150,6 +162,7 @@ class ServerManagement(commands.Cog):
     ):
         guild_data = DataManager.get_guild_data(interaction.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
+        channeltype = discord.ChannelType
 
         if logs_channel == None:
             return await interaction.response.send_message(
@@ -165,7 +178,7 @@ class ServerManagement(commands.Cog):
 
         ChannelDelete = discord.Embed(
             title="Channel Deleted!",
-            description=f"Successfully deleted `{channel}` channel",
+            description=f"Successfully deleted {channeltype} channel {channel} ",
             timestamp=datetime.utcnow(),
             colour=discord.Colour.green(),
         )

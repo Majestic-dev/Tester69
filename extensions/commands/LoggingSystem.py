@@ -20,7 +20,6 @@ class LoggingSystem(commands.Cog):
         interaction: discord.Interaction,
         command: Union[app_commands.Command, app_commands.ContextMenu],
     ):
-        ChannelType(interaction.namespace.channeltype)
         guild_data = DataManager.get_guild_data(interaction.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
 
@@ -82,7 +81,7 @@ class LoggingSystem(commands.Cog):
         if command.name == "create_channel":
             TextChannel = discord.Embed(
                 title=f"{str(ChannelType(interaction.namespace.channeltype)).capitalize()} Channel Created",
-                description=f"{interaction.user.mention} created a {ChannelType(interaction.namespace.channeltype)} channel named {interaction.namespace.name}",
+                description=f"{interaction.user.mention} created a {ChannelType(interaction.namespace.channeltype)} channel `{interaction.namespace.name}`",
                 timestamp=datetime.utcnow(),
                 colour=discord.Colour.green(),
             )
@@ -119,7 +118,7 @@ class LoggingSystem(commands.Cog):
                 colour=discord.Colour.green(),
             )
 
-            if not (interaction.namespace.reason) == None:
+            if not interaction.namespace.reason == None:
                 ChannelDelete.add_field(
                     name="Reason",
                     value=f"```{interaction.namespace.reason}```",
