@@ -12,7 +12,7 @@ class Moderation(commands.Cog):
         self.bot = bot
 
     @app_commands.command(name="mute", description="Mutes the mentioned user")
-    @commands.has_permissions(kick_members=True)
+    @app_commands.default_permissions(kick_members=True)
     async def mute(
         self,
         interaction: discord.Interaction,
@@ -54,7 +54,7 @@ class Moderation(commands.Cog):
                 await interaction.response.send_message(embed=MuteB)
 
     @app_commands.command(name="unmute", description="Unmutes the mentioned user")
-    @commands.has_permissions(kick_members=True)
+    @app_commands.default_permissions(kick_members=True)
     async def unmute(
         self, interaction: discord.Interaction, member: discord.Member = None
     ):
@@ -92,7 +92,7 @@ class Moderation(commands.Cog):
                 await interaction.response.send_message(embed=UnmuteA)
 
     @app_commands.command(name="kick", description="Kicks the mentioned user")
-    @commands.has_permissions(kick_members=True)
+    @app_commands.default_permissions(kick_members=True)
     async def kick(
         self,
         interaction: discord.Interaction,
@@ -138,7 +138,7 @@ class Moderation(commands.Cog):
                     await interaction.response.send_message(embed=KickB)
 
     @app_commands.command(name="ban", description="Bans the mentioned user")
-    @commands.has_permissions(ban_members=True)
+    @app_commands.default_permissions(ban_members=True)
     async def ban(
         self,
         interaction: discord.Interaction,
@@ -186,7 +186,7 @@ class Moderation(commands.Cog):
         name="unban",
         description="Unbans the mentioned user (Has to be discord user ID)",
     )
-    @commands.has_permissions(ban_members=True)
+    @app_commands.default_permissions(ban_members=True)
     async def unban(self, interaction: discord.Interaction, member: str):
         member = int(member)
         if member == None:

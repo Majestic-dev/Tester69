@@ -36,7 +36,7 @@ class WarningSystem(commands.Cog):
     @app_commands.command(
         name="warn", description="Warns the mentioned user with a custom warning reason"
     )
-    @commands.has_permissions(manage_messages=True)
+    @app_commands.default_permissions(manage_messages=True)
     async def warn(
         self, interaction: discord.Interaction, user: discord.User, *, reason: str
     ):
@@ -54,7 +54,7 @@ class WarningSystem(commands.Cog):
         await interaction.response.send_message(embed=warn)
 
     @app_commands.command(name="delwarn", description="Deletes the warning by UUID")
-    @commands.has_permissions(manage_messages=True)
+    @app_commands.default_permissions(manage_messages=True)
     async def delwarn(self, interaction: discord.Interaction, uuid: str):
         found = False
 
@@ -103,7 +103,7 @@ class WarningSystem(commands.Cog):
     @app_commands.command(
         name="warnings", description="get the warning list of the user"
     )
-    @commands.has_permissions(manage_messages=True)
+    @app_commands.default_permissions(manage_messages=True)
     async def warnings(self, interaction: discord.Interaction, member: discord.Member):
         if f"{member.id}.json" in os.listdir("./data/"):
             e = discord.Embed(
