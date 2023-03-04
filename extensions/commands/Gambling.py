@@ -239,7 +239,7 @@ class Gambling(commands.Cog):
             return await interaction.response.send_message(
                 embed=discord.Embed(
                     title="Bet Failed",
-                    description="You have to add a bet between 10 and 10000000.",
+                    description="You have to add a bet between 10 and 250000.",
                     timestamp=datetime.utcnow(),
                     colour=discord.Colour.orange(),
                 )
@@ -701,6 +701,60 @@ class Gambling(commands.Cog):
                     content=None, embed=e, view=view
                 )
 
+    @app_commands.command(name="coinflip", description="Bet your coins in a game of coinflip")
+    @app_commands.choices(choices=[
+    app_commands.Choice(name="Heads", value="heads"),
+    app_commands.Choice(name="Tails", value="tails"),
+    ])
+    async def coinflip(self, interaction: discord.Interaction, bet: int, choices: app_commands.Choice[str]):
+        user_data = DataManager.get_user_data(interaction.user.id)
+
+        if bet < 10 or bet > 250000:
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                title="Bet Failed",
+                description="You have to add a bet between 10 and 250000",
+                timestamp=datetime.utcnow(),
+                colour=discord.Colour.orange()
+                )
+            )
+        
+        if bet > user_data["balance"]:
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                title="Bet Failed",
+                description="You do not have enough coins for that bet",
+                timestamp=datetime.utcnow(),
+                colour=discord.Colour.orange()
+                )
+            )
+        
+        DataManager.edit_user_data(
+            interaction.user.id, "balance", user_data["balance"] - bet
+        )
+
+        result = random.choices(("heads", "tails"))[0]
+
+        if choices.value != result:
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                title="You Lose!",
+                description=f"The coin landed on {result}, you lose {bet} coins!",
+                timestamp=datetime.utcnow(),
+                colour=discord.Colour.red()
+                )
+            )
+        
+        DataManager.edit_user_data(interaction.user.id, "balance", user_data["balance"] + bet*2)
+        
+        await interaction.response.send_message(
+            embed=discord.Embed(
+            title="You Won!",
+            description=f"The coin landed on {result}, you win {bet} coins!",
+            timestamp=datetime.utcnow(),
+            colour=discord.Colour.green()
+            )
+        )
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Gambling(bot))
