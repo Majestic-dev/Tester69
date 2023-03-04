@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Union
 
 import discord
-from discord import app_commands
+from discord import app_commands, ChannelType
 from discord.ext import commands
 
 from utils import DataManager
@@ -20,6 +20,7 @@ class LoggingSystem(commands.Cog):
         interaction: discord.Interaction,
         command: Union[app_commands.Command, app_commands.ContextMenu],
     ):
+        ChannelType(interaction.namespace.channeltype)
         guild_data = DataManager.get_guild_data(interaction.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
 
@@ -78,90 +79,37 @@ class LoggingSystem(commands.Cog):
                 )
             )
 
-        if command.name == "create_text_channel":
+        if command.name == "create_channel":
             TextChannel = discord.Embed(
-                title="Text Channel Created",
-                description=f"{interaction.user.mention} created a text channel named {interaction.namespace.name}",
+                title=f"{str(ChannelType(interaction.namespace.channeltype)).capitalize()} Channel Created",
+                description=f"{interaction.user.mention} created a {ChannelType(interaction.namespace.channeltype)} channel named {interaction.namespace.name}",
                 timestamp=datetime.utcnow(),
                 colour=discord.Colour.green(),
             )
 
-            if not (interaction.namespace.category) is None:
-                TextChannel.add_field(
-                    name="Category",
-                    value=f"{interaction.namespace.category}",
-                    inline=True,
+            TextChannel.add_field(
+                name="Category",
+                value=f"{interaction.namespace.category}",
+                inline=True,
                 )
-            if (interaction.namespace.slowmode) == 0:
+            if (interaction.namespace.slowmode) == None or 0:
                 TextChannel.add_field(
-                    name="Slowmode", value="Slowmode disabled", inline=True
+                    name="Slowmode", value="No slowmode set", inline=True
                 )
             if (interaction.namespace.slowmode) == 1:
                 TextChannel.add_field(
                     name="Slowmode", value=f"{slowmode} second", inline=True
                 )
-            if (interaction.namespace.slowmode) != 1 and 0:
+            if (interaction.namespace.slowmode) != 1 and (interaction.namespace.slowmode) == 0:
                 TextChannel.add_field(
                     name="Slowmode",
                     value=f"{interaction.namespace.slowmode} seconds",
                     inline=True,
                 )
 
-            if len(TextChannel.fields) == 0:
-                return await logs_channel.send(
-                    embed=discord.Embed(
-                        title="Text Channel Created",
-                        description=f"{interaction.user.mention} created a text channel named {interaction.namespace.name}",
-                        timestamp=datetime.utcnow(),
-                        colour=discord.Colour.green(),
-                    )
-                )
             await logs_channel.send(embed=TextChannel)
 
-        if command.name == "create_voice_channel":
-            VoiceChannel = discord.Embed(
-                title="Voice Channel Created",
-                description=f"{interaction.user.mention} created a voice channel named `{interaction.namespace.name}`",
-                timestamp=datetime.utcnow(),
-                colour=discord.Colour.green(),
-            )
-
-            if not (interaction.namespace.category is None):
-                VoiceChannel.add_field(
-                    name="Category",
-                    value=f"{interaction.namespace.category}",
-                    inline=True,
-                )
-            if (interaction.namespace.userlimit) == 0:
-                VoiceChannel.add_field(
-                    name="User Limit", value="No user limit", inline=True
-                )
-            if (interaction.namespace.userlimit) == 1:
-                VoiceChannel.add_field(
-                    name="User Limit",
-                    value=f"{interaction.namespace.userlimit} user",
-                    inline=True,
-                )
-            if (interaction.namespace.userlimit) != 1 and 0:
-                VoiceChannel.add_field(
-                    name="User Limit",
-                    value=f"{interaction.namespace.userlimit} users",
-                    inline=True,
-                )
-
-            if len(VoiceChannel.fields) == 0:
-                return await logs_channel.send(
-                    embed=discord.Embed(
-                        title="Voice Channel Created",
-                        description=f"{interaction.user.mention} created a voice channel named `{interaction.namespace.name}`",
-                        timestamp=datetime.utcnow(),
-                        colour=discord.Colour.green(),
-                    )
-                )
-
-            await logs_channel.send(embed=VoiceChannel)
-
-        if command.name == "delete_text_channel":
+        if command.name == "delete_channel":
             ChannelDelete = discord.Embed(
                 title="Channel Deleted",
                 description=f"{interaction.user.mention} deleted `{interaction.namespace.channel}` channel",
@@ -188,33 +136,29 @@ class LoggingSystem(commands.Cog):
 
             await logs_channel.send(embed=ChannelDelete)
 
-        if command.name == "delete_voice_channel":
-            ChannelDelete = discord.Embed(
-                title="Channel Deleted",
-                description=f"{interaction.user.mention} deleted `{interaction.namespace.channel}` voice channel",
+        if command.name == "purge":
+            return await logs_channel.send(
+                embed=discord.Embed(
+                title="Messages Purged",
+                description=f"{interaction.user.mention} purged {interaction.namespace.count} messages",
                 timestamp=datetime.utcnow(),
-                colour=discord.Colour.green(),
+                colour=discord.Colour.green()
             )
+        )
 
-            if not (interaction.namespace.reason) == None:
-                ChannelDelete.add_field(
-                    name="Reason",
-                    value=f"```{interaction.namespace.reason}```",
-                    inline=True,
+    @commands.Cog.listener()
+    async def on_guild_channel_create(self, channel):
+        guild_data = DataManager.get_guild_data(channel.guild.id)
+        logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
+            
+        await logs_channel.send(
+                embed=discord.Embed(
+                title="Channel Created",
+                description=f"Created {channel.mention} channel",
+                timestamp=datetime.utcnow(),
+                colour=discord.Colour.green()
                 )
-
-            if len(ChannelDelete.fields) == 0:
-                return await logs_channel.send(
-                    embed=discord.Embed(
-                        title="Channel Deleted",
-                        description=f"{interaction.user.mention} deleted `{interaction.namespace.channel}` voice channel with no reason provided",
-                        timestamp=datetime.utcnow(),
-                        colour=discord.Colour.green(),
-                    )
-                )
-
-            await logs_channel.send(embed=ChannelDelete)
-
+            )
 
 async def setup(bot):
     await bot.add_cog(LoggingSystem(bot))
