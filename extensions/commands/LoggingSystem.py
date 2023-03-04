@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Union
 
 import discord
-from discord import app_commands, ChannelType
+from discord import ChannelType, app_commands
 from discord.ext import commands
 
 from utils import DataManager
@@ -91,7 +91,7 @@ class LoggingSystem(commands.Cog):
                 name="Category",
                 value=f"{interaction.namespace.category}",
                 inline=True,
-                )
+            )
             if (interaction.namespace.slowmode) == None or 0:
                 TextChannel.add_field(
                     name="Slowmode", value="No slowmode set", inline=True
@@ -100,7 +100,9 @@ class LoggingSystem(commands.Cog):
                 TextChannel.add_field(
                     name="Slowmode", value=f"{slowmode} second", inline=True
                 )
-            if (interaction.namespace.slowmode) != 1 and (interaction.namespace.slowmode) == 0:
+            if (interaction.namespace.slowmode) != 1 and (
+                interaction.namespace.slowmode
+            ) == 0:
                 TextChannel.add_field(
                     name="Slowmode",
                     value=f"{interaction.namespace.slowmode} seconds",
@@ -139,26 +141,27 @@ class LoggingSystem(commands.Cog):
         if command.name == "purge":
             return await logs_channel.send(
                 embed=discord.Embed(
-                title="Messages Purged",
-                description=f"{interaction.user.mention} purged {interaction.namespace.count} messages",
-                timestamp=datetime.utcnow(),
-                colour=discord.Colour.green()
+                    title="Messages Purged",
+                    description=f"{interaction.user.mention} purged {interaction.namespace.count} messages",
+                    timestamp=datetime.utcnow(),
+                    colour=discord.Colour.green(),
+                )
             )
-        )
 
     @commands.Cog.listener()
     async def on_guild_channel_create(self, channel):
         guild_data = DataManager.get_guild_data(channel.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
-            
+
         await logs_channel.send(
-                embed=discord.Embed(
+            embed=discord.Embed(
                 title="Channel Created",
                 description=f"Created {channel.mention} channel",
                 timestamp=datetime.utcnow(),
-                colour=discord.Colour.green()
-                )
+                colour=discord.Colour.green(),
             )
+        )
+
 
 async def setup(bot):
     await bot.add_cog(LoggingSystem(bot))
