@@ -203,7 +203,7 @@ class ServerManagement(commands.Cog):
     )
     @app_commands.default_permissions(manage_channels=True)
     async def purge(self, interaction: discord.Interaction, count: int):
-        await interaction.response.defer()
+        await interaction.response.defer(ephemeral=True)
         await interaction.channel.purge(limit=count + 1)
 
         e = discord.Embed(
