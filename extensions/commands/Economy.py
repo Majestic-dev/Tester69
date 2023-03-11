@@ -240,6 +240,67 @@ class Economy(commands.Cog):
         )
 
     @app_commands.command(
+        name="rob", description="Rob the mentioned user out of their coins"
+    )
+    async def rob(self, interaction: discord.Interaction, user: discord.User):
+        robber_data = DataManager.get_user_data(interaction.user.id)
+        robber_id = interaction.user.id
+        robber_balance = DataManager.get_user_data(interaction.user.id)["balance"]
+        victim_id = user.id
+        victim_balance = DataManager.get_user_data(user.id)["balance"]
+
+        if interaction.user.id == user.id:
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    title="You Can Not Rob Yourself!",
+                    description="You can't rob yourself, try mentioning another user",
+                    timestamp=datetime.utcnow(),
+                    colour=discord.Colour.orange(),
+                )
+            )
+        elif victim_balance == 0:
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    title="This User Does Not Have Any Coins!",
+                    description=f"You can't rob <@{victim_id}> since they do not have any coins to rob!",
+                    timestamp=datetime.utcnow(),
+                    colour=discord.Colour.orange(),
+                )
+            )
+        successfulrob = random.choices([True, False])[0]
+        if successfulrob:
+            percentage = random.randint(10, 75) / 100
+            cash = int(victim_balance * percentage)
+            victim_data = DataManager.get_user_data(victim_id)
+            DataManager.edit_user_data(
+                victim_id, "balance", victim_data["balance"] - cash
+            )
+            DataManager.edit_user_data(
+                robber_id, "balance", robber_data["balance"] + cash
+            )
+
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    title=f"Rob Successful",
+                    description=f"Successfully robbed <@{user.id}> {cash} coins",
+                    timestamp=datetime.utcnow(),
+                    colour=discord.Colour.green(),
+                )
+            )
+
+        percentage = random.randint(10, 33) / 100
+        cash = int(robber_balance * percentage)
+        DataManager.edit_user_data(robber_id, "balance", robber_data["balance"] - cash)
+        await interaction.response.send_message(
+            embed=discord.Embed(
+                title="Rob Unsuccessful",
+                description=f"Failed to rob <@{user.id}>",
+                timestamp=datetime.utcnow(),
+                colour=discord.Colour.red(),
+            )
+        )
+
+    @app_commands.command(
         name="hourly", description="Gain 10 coins every time you use this command"
     )
     async def hourly(self, interaction: discord.Interaction):
