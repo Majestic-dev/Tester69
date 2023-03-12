@@ -45,4 +45,4 @@ There are no major changes in this version. This is the inital release.
 # TODO
 - [x] Add more miscellaneous stuff.
 - [x] Add more commands for the economy.
-- [ ] Migrate from json to a binary database.s
+- [ ] Migrate from json to a binary database.
