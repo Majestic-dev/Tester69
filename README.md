@@ -47,3 +47,4 @@ There are no major changes in this version. This is the inital release.
 - [x] Add more commands for the economy.
 - [ ] Add a fully functioning Roulette command.
 - [ ] Migrate from json to a binary database.
+- [ ] Fix Blackjack game
