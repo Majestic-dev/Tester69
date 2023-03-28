@@ -53,15 +53,17 @@ There are no major changes in this version. This is the inital release.
 - [ ] Migrate from json to a binary database.
 - [ ] Redo registering warnings (Make them per server, not global).
 
-## v1.2 Focused On Economy
+## v1.2 Focused On Economy And Some Fixes/Reworking To Moderation
 
 - [ ] Add a shop for economy.
 - [ ] Redo fishing and hunting.
 - [ ] Add a way to auction things (basically like Dank Memer).
 - [ ] More gambling games.
+- [ ] Add some customization to the moderation system (for example setting the muted role).
 
 ## V1.3 Focused On Miscellaneous/Fun
 
+- [ ] Rework verification system.
 - [ ] Add a way to make a poll.
 - [ ] Add a way to make a giveaway.
 - [ ] Add a way to make a suggestion.
