@@ -108,7 +108,7 @@ class Economy(commands.Cog):
         if (
             interaction.user.id in self.hunt_cooldown
             and self.hunt_cooldown[interaction.user.id] > datetime.utcnow()
-            and interaction.user.id not in DataManager.get("config", "whitelist")
+            and interaction.user.id not in DataManager.get("config", "global_whitelist")
         ):
             remaining = self.hunt_cooldown[interaction.user.id]
 
@@ -144,7 +144,7 @@ class Economy(commands.Cog):
         if (
             interaction.user.id in self.fish_cooldown
             and self.fish_cooldown[interaction.user.id] > datetime.utcnow()
-            and interaction.user.id not in DataManager.get("config", "whitelist")
+            and interaction.user.id not in DataManager.get("config", "global_whitelist")
         ):
             remaining = self.fish_cooldown[interaction.user.id]
 
@@ -307,7 +307,7 @@ class Economy(commands.Cog):
         if (
             interaction.user.id in self.hourly_cooldown
             and self.hourly_cooldown[interaction.user.id] > datetime.utcnow()
-            and interaction.user.id not in DataManager.get("config", "whitelist")
+            and interaction.user.id not in DataManager.get("config", "global_whitelist")
         ):
             remaining = self.hourly_cooldown[interaction.user.id]
 
@@ -347,7 +347,7 @@ class Economy(commands.Cog):
         if (
             interaction.user.id in self.monthly_cooldown
             and self.monthly_cooldown[interaction.user.id] > datetime.utcnow()
-            and interaction.user.id not in DataManager.get("config", "whitelist")
+            and interaction.user.id not in DataManager.get("config", "global_whitelist")
         ):
             remaining = self.monthly_cooldown[interaction.user.id]
 
@@ -385,7 +385,7 @@ class Economy(commands.Cog):
         if (
             interaction.user.id in self.yearly_cooldown
             and self.yearly_cooldown[interaction.user.id] > datetime.utcnow()
-            and interaction.user.id not in DataManager.get("config", "whitelist")
+            and interaction.user.id not in DataManager.get("config", "global_whitelist")
         ):
             remaining = self.yearly_cooldown[interaction.user.id]
 
