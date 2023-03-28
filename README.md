@@ -43,9 +43,42 @@ This project is licensed under the Apache License - see the [LICENSE](LICENSE.md
 There are no major changes in this version. This is the inital release.
 
 # TODO
+
+## v1.1 Focused On Fixes, Improvements, And Some New Features
+
 - [x] Add more miscellaneous stuff.
 - [x] Add more commands for the economy.
 - [ ] Fix Blackjack game
 - [ ] Add a fully functioning Roulette command.
 - [ ] Migrate from json to a binary database.
 - [ ] Redo registering warnings (Make them per server, not global).
+
+<<<<<<< HEAD
+## v1.2 Focused On Economy
+=======
+## v1.2 Focused On Economy And Some Fixes/Reworking To Moderation
+>>>>>>> 8fda82dca687f527005fb5e1ea13265c8eebede7
+
+- [ ] Add a shop for economy.
+- [ ] Redo fishing and hunting.
+- [ ] Add a way to auction things (basically like Dank Memer).
+- [ ] More gambling games.
+<<<<<<< HEAD
+
+## V1.3 Focused On Miscellaneous/Fun
+
+=======
+- [ ] Add some customization to the moderation system (for example setting the muted role).
+
+## V1.3 Focused On Miscellaneous/Fun
+
+- [ ] Rework verification system.
+>>>>>>> 8fda82dca687f527005fb5e1ea13265c8eebede7
+- [ ] Add a way to make a poll.
+- [ ] Add a way to make a giveaway.
+- [ ] Add a way to make a suggestion.
+- [ ] Add a way to make a ticket.
+- [ ] Add a way to make a ticket category.
+- [ ] Add a way to make a ticket channel.
+- [ ] Add a way to make a ticket message.
+- [ ] Add a way to make a ticket role.
