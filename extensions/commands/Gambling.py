@@ -1,3 +1,4 @@
+import asyncio
 import random
 from datetime import datetime
 
@@ -9,9 +10,10 @@ from utils import DataManager
 
 
 class Choices(discord.ui.View):
-    def __init__(self, bet, disabled_ddown=None, disabled_forfeit=None):
+    def __init__(self, executer, bet, disabled_ddown=None, disabled_forfeit=None):
         super().__init__()
         self.choice = None
+        self.executer = executer
 
         self.ddown.disabled = disabled_ddown
         self.forfeit.disabled = disabled_forfeit
@@ -21,6 +23,11 @@ class Choices(discord.ui.View):
 
     @discord.ui.button(label="Hit", style=discord.ButtonStyle.blurple)
     async def hit(self, interaction: discord.Interaction, _: discord.ui.Button):
+        if interaction.user.id != self.executer:
+            return await interaction.response.send_message(
+                "This isn't yours!", ephemeral=True
+            )
+
         self.choice = "hit"
         await interaction.response.defer()
 
@@ -28,6 +35,11 @@ class Choices(discord.ui.View):
 
     @discord.ui.button(label="Stand", style=discord.ButtonStyle.primary)
     async def stand(self, interaction: discord.Interaction, _: discord.ui.Button):
+        if interaction.user.id != self.executer:
+            return await interaction.response.send_message(
+                "This isn't yours!", ephemeral=True
+            )
+
         self.choice = "stand"
         await interaction.response.defer()
 
@@ -35,6 +47,11 @@ class Choices(discord.ui.View):
 
     @discord.ui.button(label="Double Down", style=discord.ButtonStyle.green)
     async def ddown(self, interaction: discord.Interaction, _: discord.ui.Button):
+        if interaction.user.id != self.executer:
+            return await interaction.response.send_message(
+                "This isn't yours!", ephemeral=True
+            )
+
         self.choice = "ddown"
         await interaction.response.defer()
 
@@ -42,6 +59,11 @@ class Choices(discord.ui.View):
 
     @discord.ui.button(label="Forfeit", style=discord.ButtonStyle.danger)
     async def forfeit(self, interaction: discord.Interaction, _: discord.ui.Button):
+        if interaction.user.id != self.executer:
+            return await interaction.response.send_message(
+                "This isn't yours!", ephemeral=True
+            )
+
         self.choice = "forfeit"
         await interaction.response.defer()
 
@@ -278,7 +300,7 @@ class Gambling(commands.Cog):
         if sum_of_hand(player_hand) == 21:
             e = discord.Embed(
                 title="Blackjack",
-                description=f"You got blackjack! You won {int(bet * 1.5)} coins.",
+                description=f"You got blackjack! You won {int(bet * 2.5)} coins.",
                 timestamp=datetime.utcnow(),
                 colour=discord.Colour.green(),
             )
@@ -319,10 +341,10 @@ class Gambling(commands.Cog):
 
         e.add_field(
             name="Dealer Hand",
-            value=f"[``{dealer_first_card[0]}{dealer_first_card[1]}``](https://github.com/MajesticCodes/Tester69) ??\nSum: ?",
+            value=f"[``{dealer_first_card[0]}{dealer_first_card[1]}``](https://github.com/Majestic-dev/Tester69) ??\nSum: ?",
         )
 
-        view = Choices(bet)
+        view = Choices(interaction.user.id, bet)
 
         if user_data["balance"] - bet * 2 < 0:
             view.ddown.disabled = True
@@ -505,6 +527,8 @@ class Gambling(commands.Cog):
                 player_hand.append(deck.pop())
 
                 bet *= 2
+                if player_hand_value == 21:
+                    break
 
                 player_hand_value, dealer_hand_value = sum_of_hand(
                     player_hand
@@ -650,6 +674,9 @@ class Gambling(commands.Cog):
                 player_hand.append(random.choice(deck))
                 player_hand_value = sum_of_hand(player_hand)
 
+                if player_hand_value == 21:
+                    break
+
                 if player_hand_value > 21:
                     e = discord.Embed(
                         title="Blackjack",
@@ -695,7 +722,7 @@ class Gambling(commands.Cog):
                     value=f"[``{dealer_first_card[0]}{dealer_first_card[1]}``](https://github.com/MajesticCodes/Tester69) ??\nSum: ?",
                 )
 
-                view = Choices(bet, True, True)
+                view = Choices(interaction.user.id, bet, True, True)
 
                 await interaction.edit_original_response(
                     content=None, embed=e, view=view
@@ -744,8 +771,18 @@ class Gambling(commands.Cog):
 
         result = random.choices(("heads", "tails"))[0]
 
+        await interaction.response.send_message(
+            embed=discord.Embed(
+                title="Flipping A Coin!",
+                description="Flipping a coin <a:coinflip:1088886954713694398>",
+                timestamp=datetime.utcnow(),
+                colour=discord.Colour.green(),
+            )
+        )
+        await asyncio.sleep(3)
+
         if choices.value != result:
-            return await interaction.response.send_message(
+            return await interaction.edit_original_response(
                 embed=discord.Embed(
                     title="You Lose!",
                     description=f"The coin landed on {result}, you lose {bet} coins!",
@@ -758,7 +795,7 @@ class Gambling(commands.Cog):
             interaction.user.id, "balance", user_data["balance"] + bet * 2
         )
 
-        await interaction.response.send_message(
+        await interaction.edit_original_response(
             embed=discord.Embed(
                 title="You Won!",
                 description=f"The coin landed on {result}, you win {bet} coins!",
