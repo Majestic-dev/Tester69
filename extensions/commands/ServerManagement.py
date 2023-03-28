@@ -199,6 +199,183 @@ class ServerManagement(commands.Cog):
         await interaction.response.send_message(embed=ChannelDelete)
 
     @app_commands.command(
+        name="add_blacklisted_word",
+        description="Add a word to the blacklisted words list.",
+    )
+    @app_commands.default_permissions(administrator=True)
+    async def add_blacklisted_word(self, interaction: discord.Interaction, word: str):
+        blacklisted_words = DataManager.get_guild_data(interaction.guild.id)[
+            "blacklisted_words"
+        ]
+
+        if word.lower() in blacklisted_words:
+            return await interaction.response.send_message(
+                ephemeral=True,
+                embed=discord.Embed(
+                    title="Word Is Already In Blacklist",
+                    description=f'Could not add "{word.lower()}" to blacklisted words list, because it already exists there',
+                    timestamp=datetime.utcnow(),
+                    colour=discord.Colour.orange(),
+                ),
+            )
+
+        await interaction.response.send_message(
+            ephemeral=True,
+            embed=discord.Embed(
+                title="Added Word To Blacklist",
+                description=f'Successfully added "{word.lower()}" to blacklisted words list',
+                timestamp=datetime.utcnow(),
+                colour=discord.Colour.green(),
+            ),
+        )
+
+        blacklisted_words.append(word.lower())
+        DataManager.edit_guild_data(
+            interaction.guild.id, "blacklisted_words", blacklisted_words
+        )
+
+    async def word_autocomplete(
+        self, interaction: discord.Interaction, current: str
+    ) -> list[app_commands.Choice[str]]:
+        guild_data = DataManager.get_guild_data(interaction.guild.id)
+        words_in_blacklist = guild_data["blacklisted_words"]
+
+        return [
+            app_commands.Choice(name=word, value=word) for word in words_in_blacklist
+        ]
+
+    @app_commands.command(
+        name="remove_blacklisted_word",
+        description="Remove a blacklisted word from the blacklisted words list.",
+    )
+    @app_commands.default_permissions(administrator=True)
+    @app_commands.autocomplete(word=word_autocomplete)
+    async def remove_blacklisted_word(
+        self, interaction: discord.Interaction, word: str
+    ):
+        blacklisted_words = DataManager.get_guild_data(interaction.guild.id)[
+            "blacklisted_words"
+        ]
+
+        if word not in blacklisted_words:
+            return await interaction.response.send_message(
+                ephemeral=True,
+                embed=discord.Embed(
+                    title="Could Not Remove Word From Blacklist",
+                    description=f'Could not remove "{word.lower()}" from blacklisted words list, because it does not exist there',
+                    timestamp=datetime.utcnow(),
+                    colour=discord.Colour.orange(),
+                ),
+            )
+
+        await interaction.response.send_message(
+            ephemeral=True,
+            embed=discord.Embed(
+                title="Removed Word From Blacklist",
+                description=f'Successfully removed "{word.lower()}" from blacklisted words list',
+                timestamp=datetime.utcnow(),
+                colour=discord.Colour.green(),
+            ),
+        )
+
+        blacklisted_words.remove(word.lower())
+        DataManager.edit_guild_data(
+            interaction.guild.id, "blacklisted_words", blacklisted_words
+        )
+
+    @app_commands.command(
+        name="whitelist_add", description="Add a user in the whitelist"
+    )
+    @app_commands.default_permissions(administrator=True)
+    async def whitelist_add(
+        self, interaction: discord.Interaction, whitelist: discord.User | discord.Role
+    ):
+        wlist = DataManager.get_guild_data(interaction.guild.id)["whitelist"]
+
+        if whitelist.id in wlist:
+            return await interaction.response.send_message(
+                ephemeral=True,
+                embed=discord.Embed(
+                    title="User Already In Whitelist",
+                    description=f"Could not add {whitelist.mention} to the whitelist because they already are in the whitelist",
+                    timestamp=datetime.utcnow(),
+                    colour=discord.Colour.orange(),
+                ),
+            )
+
+        await interaction.response.send_message(
+            ephemeral=True,
+            embed=discord.Embed(
+                title="Added Person To Whitelist",
+                description=f"Successfully added {whitelist.mention} to whitelist",
+                timestamp=datetime.utcnow(),
+                colour=discord.Colour.green(),
+            ),
+        )
+
+        wlist.append(whitelist.id)
+        DataManager.edit_guild_data(interaction.guild.id, "whitelist", wlist)
+
+        if isinstance(whitelist, discord.Role):
+            return
+
+        dm_channel = await whitelist.create_dm()
+        await dm_channel.send(
+            embed=discord.Embed(
+                title="You Have Been Whitelisted!",
+                description=f"You have been whitelisted in {interaction.guild.name} by {interaction.user.mention}",
+                timestamp=datetime.utcnow(),
+                colour=discord.Colour.green(),
+            )
+        )
+
+    @app_commands.command(
+        name="whitelist_remove", description="Remove a user from the whitelist"
+    )
+    @app_commands.default_permissions(administrator=True)
+    async def whitelist_remove(
+        self, interaction: discord.Interaction, whitelist: discord.User | discord.Role
+    ):
+        wlist = DataManager.get_guild_data(interaction.guild.id)["whitelist"]
+
+        if whitelist.id not in wlist:
+            return await interaction.response.send_message(
+                ephemeral=True,
+                embed=discord.Embed(
+                    title="Could Not Remove User From Whitelist",
+                    description=f"Could not remove {whitelist.mention} from the whitelist because they are not in it",
+                    timestamp=datetime.utcnow(),
+                    colour=discord.Colour.orange(),
+                ),
+            )
+
+        await interaction.response.send_message(
+            ephemeral=True,
+            embed=discord.Embed(
+                title="Removed User From Whitelist",
+                description=f"Successfully removed {whitelist.mention} from whitelist",
+                timestamp=datetime.utcnow(),
+                colour=discord.Colour.green(),
+            ),
+        )
+
+        wlist.remove(whitelist.id)
+        DataManager.edit_guild_data(interaction.guild.id, "whitelist", wlist)
+
+        if isinstance(whitelist, discord.Role):
+            return
+
+        dm_channel = await whitelist.create_dm()
+        await dm_channel.send(
+            embed=discord.Embed(
+                title="You Have Been Removed From The Whitelist!",
+                description=f"You have been removed from the whitelist in {interaction.guild.name} by {interaction.user.mention}",
+                timestamp=datetime.utcnow(),
+                colour=discord.Colour.red(),
+            )
+        )
+
+    @app_commands.command(
         name="purge", description="Purge a custom amount of messages from this channel"
     )
     @app_commands.default_permissions(manage_channels=True)

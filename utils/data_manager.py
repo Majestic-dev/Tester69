@@ -35,6 +35,8 @@ class DataManager:
                 "verification_channel_id": None,
                 "verification_logs_channel_id": None,
                 "logs_channel_id": None,
+                "blacklisted_words": [],
+                "whitelist": [],
             }
 
         cls.save("guilds")

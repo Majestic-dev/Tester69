@@ -15,6 +15,105 @@ class VerificationSystem(commands.Cog):
         self.bot = bot
 
     @app_commands.command(
+        name="disable_verification",
+        description="Disable the verification system",
+    )
+    @app_commands.default_permissions(administrator=True)
+    async def disable_verification(self, interaction: discord.Interaction):
+        verification_channel = DataManager.get_guild_data(interaction.guild.id)[
+            "verification_channel_id"
+        ]
+        verification_logs_channel = DataManager.get_guild_data(interaction.guild.id)[
+            "verification_logs_channel_id"
+        ]
+        unverified_role = DataManager.get_guild_data(interaction.guild.id)[
+            "unverified_role_id"
+        ]
+
+        if (
+            verification_channel
+            and verification_logs_channel
+            and unverified_role == ("disabled")
+        ):
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    title="Verification Disabled",
+                    description="Verification is already disabled",
+                    timestamp=datetime.utcnow(),
+                    colour=discord.Colour.orange(),
+                )
+            )
+
+        await interaction.response.send_message(
+            embed=discord.Embed(
+                title="Verification Disabled",
+                description="Verification has been disabled",
+                timestamp=datetime.utcnow(),
+                colour=discord.Colour.green(),
+            )
+        )
+
+        DataManager.edit_guild_data(
+            interaction.guild.id, "verification_channel_id", "disabled"
+        )
+        DataManager.edit_guild_data(
+            interaction.guild.id, "verification_logs_channel_id", "disabled"
+        )
+        DataManager.edit_guild_data(
+            interaction.guild.id, "unverified_role_id", "disabled"
+        )
+
+    @app_commands.command(
+        name="enable_verification", description="Enable the verification system"
+    )
+    @app_commands.default_permissions(administrator=True)
+    async def enable_verification(self, interaction: discord.Interaction):
+        verification_channel = DataManager.get_guild_data(interaction.guild.id)[
+            "verification_channel_id"
+        ]
+        verification_logs_channel = DataManager.get_guild_data(interaction.guild.id)[
+            "verification_logs_channel_id"
+        ]
+        unverified_role = DataManager.get_guild_data(interaction.guild.id)[
+            "unverified_role_id"
+        ]
+        disabled = "disabled"
+
+        if (
+            verification_channel
+            and verification_logs_channel
+            and unverified_role == disabled
+        ):
+            DataManager.edit_guild_data(
+                interaction.guild.id, "verification_channel_id", None
+            )
+            DataManager.edit_guild_data(
+                interaction.guild.id, "verification_logs_channel_id", None
+            )
+            DataManager.edit_guild_data(
+                interaction.guild.id, "unverified_role_id", None
+            )
+
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    title="Verification Enabled",
+                    description="Verification has been enabled",
+                    timestamp=datetime.utcnow(),
+                    colour=discord.Colour.green(),
+                )
+            )
+
+        else:
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    title="Verification Enabled",
+                    description="Verification is already enabled",
+                    timestamp=datetime.utcnow(),
+                    colour=discord.Colour.orange(),
+                )
+            )
+
+    @app_commands.command(
         name="set_verification_channel",
         description="Set the channel where users should send their verification code",
     )
@@ -22,26 +121,40 @@ class VerificationSystem(commands.Cog):
     async def set_verification_channel(
         self, interaction: discord.Interaction, channel: discord.TextChannel
     ):
+        verification_channel = DataManager.get_guild_data(interaction.guild.id)[
+            "verification_channel_id"
+        ]
         guild_data = DataManager.get_guild_data(interaction.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
 
-        if logs_channel == None:
+        if verification_channel == ("disabled"):
             return await interaction.response.send_message(
                 embed=discord.Embed(
-                    title="No Logs Channel",
-                    description="Please set a channel where all logs will be sent. `/set_logs_channel`",
+                    title="Verification Disabled",
+                    description="Verification is disabled, please enable it using `/enable_verification`",
                     timestamp=datetime.utcnow(),
                     colour=discord.Colour.orange(),
                 )
             )
-        await interaction.response.send_message(
-            embed=discord.Embed(
-                title="Verification Channel Set!",
-                description=f"Verification channel set to {channel.mention}",
-                timestamp=datetime.utcnow(),
-                colour=discord.Colour.green(),
+
+        if logs_channel == None:
+            await interaction.channel.send_message(
+                embed=discord.Embed(
+                    title="No Logs Channel",
+                    description="If you wish to log your actions please set a logging channel `/set_logs_channel`",
+                    timestamp=datetime.utcnow(),
+                    colour=discord.Colour.orange(),
+                )
             )
-        )
+
+            await interaction.response.send_message(
+                embed=discord.Embed(
+                    title="Verification Channel Set!",
+                    description=f"Verification channel set to {channel.mention}",
+                    timestamp=datetime.utcnow(),
+                    colour=discord.Colour.green(),
+                )
+            )
 
         DataManager.edit_guild_data(
             interaction.guild.id, "verification_channel_id", channel.id
@@ -55,26 +168,40 @@ class VerificationSystem(commands.Cog):
     async def set_verification_logs_channel(
         self, interaction: discord.Interaction, channel: discord.TextChannel
     ):
+        verification_logs_channel = DataManager.get_guild_data(interaction.guild.id)[
+            "verification_logs_channel_id"
+        ]
         guild_data = DataManager.get_guild_data(interaction.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
 
-        if logs_channel == None:
+        if verification_logs_channel == ("disabled"):
             return await interaction.response.send_message(
                 embed=discord.Embed(
-                    title="No Logs Channel",
-                    description="Please set a channel where all logs will be sent. `/set_logs_channel`",
+                    title="Verification Disabled",
+                    description="Verification is disabled, please enable it using `/enable_verification`",
                     timestamp=datetime.utcnow(),
                     colour=discord.Colour.orange(),
                 )
             )
-        await interaction.response.send_message(
-            embed=discord.Embed(
-                title="Verification Logs Channel Set!",
-                description=f"Verification logs channel set to {channel.mention}",
-                timestamp=datetime.utcnow(),
-                colour=discord.Colour.green(),
+
+        if logs_channel == None:
+            await interaction.channel.send_message(
+                embed=discord.Embed(
+                    title="No Logs Channel",
+                    description="If you wish to log your actions please set a logging channel `/set_logs_channel`",
+                    timestamp=datetime.utcnow(),
+                    colour=discord.Colour.orange(),
+                )
             )
-        )
+
+            await interaction.response.send_message(
+                embed=discord.Embed(
+                    title="Verification Logs Channel Set!",
+                    description=f"Verification logs channel set to {channel.mention}",
+                    timestamp=datetime.utcnow(),
+                    colour=discord.Colour.green(),
+                )
+            )
 
         DataManager.edit_guild_data(
             interaction.guild.id, "verification_logs_channel_id", channel.id
@@ -88,27 +215,40 @@ class VerificationSystem(commands.Cog):
     async def set_verification_role(
         self, interaction: discord.Interaction, role: discord.Role
     ):
+        unverified_role = DataManager.get_guild_data(interaction.guild.id)[
+            "unverified_role_id"
+        ]
         guild_data = DataManager.get_guild_data(interaction.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
 
-        if logs_channel == None:
+        if unverified_role == ("disabled"):
             return await interaction.response.send_message(
                 embed=discord.Embed(
-                    title="No Logs Channel",
-                    description="Please set a channel where all logs will be sent. `/set_logs_channel`",
+                    title="Verification Disabled",
+                    description="Verification is disabled, please enable it using `/enable_verification`",
                     timestamp=datetime.utcnow(),
                     colour=discord.Colour.orange(),
                 )
             )
 
-        await interaction.response.send_message(
-            embed=discord.Embed(
-                title="New Member Role Set!",
-                description=f"All new members will now receive the {role.mention} role",
-                timestamp=datetime.utcnow(),
-                colour=discord.Colour.green(),
+        if logs_channel == None:
+            await interaction.channel.send_message(
+                embed=discord.Embed(
+                    title="No Logs Channel",
+                    description="If you wish to log your actions please set a logging channel `/set_logs_channel`",
+                    timestamp=datetime.utcnow(),
+                    colour=discord.Colour.orange(),
+                )
             )
-        )
+
+            await interaction.response.send_message(
+                embed=discord.Embed(
+                    title="New Member Role Set!",
+                    description=f"All new members will now receive the {role.mention} role",
+                    timestamp=datetime.utcnow(),
+                    colour=discord.Colour.green(),
+                )
+            )
 
         DataManager.edit_guild_data(interaction.guild.id, "unverified_role_id", role.id)
 
@@ -122,7 +262,14 @@ class VerificationSystem(commands.Cog):
         )
 
         if verification_role is None:
-            return print("Role couldn't be found")
+            return await message.channel.send(
+                embed=discord.Embed(
+                    title="No Unverified Role",
+                    description="Please set a role that will be assigned to new members. `/set_unverified_role`",
+                    timestamp=datetime.utcnow(),
+                    colour=discord.Colour.orange(),
+                )
+            )
 
         await member.add_roles(verification_role)
         dm_channel = await member.create_dm()
@@ -134,7 +281,7 @@ class VerificationSystem(commands.Cog):
         await dm_channel.send(
             embed=discord.Embed(
                 title="Verification",
-                description=f"Welcome to the server! Your verification code is: `{code}` please enter it in the <#{verification_channel}>\nYou may cancel this request by typing 'cancel' in <#{verification_channel}>",
+                description=f"Welcome to the server! Your verification code is: `{code}` \n please enter it in the <#{verification_channel.id}> channel \n You may cancel this request by typing 'cancel' in <#{verification_channel.id}>",
                 timestamp=datetime.utcnow(),
                 colour=discord.Colour.blue(),
             )
@@ -151,16 +298,21 @@ class VerificationSystem(commands.Cog):
                         "message", check=check, timeout=300
                     )
                 except asyncio.TimeoutError:
+                    await member.kick()
+                    server = member.guild
+                    invite = await server.text_channels[0].create_invite(
+                        max_age=0, max_uses=1, unique=True
+                    )
                     return await dm_channel.send(
                         embed=discord.Embed(
                             title="Timeout",
-                            description=f"You took too long to enter the verification code. Please rejoin the server and try again",
+                            description=f"You took too long to enter the verification code. Please rejoin the server and try again: {invite}",
                             timestamp=datetime.utcnow(),
                             colour=discord.Colour.orange(),
                         )
                     )
 
-                if message.content == code:
+                if code in message.content:
                     await member.remove_roles(verification_role)
                     await message.delete()
                     await dm_channel.send(
@@ -226,7 +378,7 @@ class VerificationSystem(commands.Cog):
             await dm_channel.send(
                 embed=discord.Embed(
                     title="Code Reset",
-                    description=f"You have used all your attempts. Your new verification code is: {code}",
+                    description=f"You have used all your attempts. Your new verification code is: `{code}`",
                     timestamp=datetime.utcnow(),
                     colour=discord.Colour.red(),
                 )

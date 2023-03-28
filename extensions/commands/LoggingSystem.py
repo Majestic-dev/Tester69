@@ -23,8 +23,18 @@ class LoggingSystem(commands.Cog):
         guild_data = DataManager.get_guild_data(interaction.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
 
+        if logs_channel is None:
+            return
+
         if command.name == "set_verification_channel":
             channel = interaction.namespace.channel
+
+            verification_channel = self.bot.get_channel(
+                guild_data["verification_channel_id"]
+            )
+            if verification_channel == None:
+                return
+
             return await logs_channel.send(
                 embed=discord.Embed(
                     title="Verification Channel Set",
@@ -36,6 +46,13 @@ class LoggingSystem(commands.Cog):
 
         if command.name == "set_verification_logs_channel":
             channel = interaction.namespace.channel
+
+            verification_logs_channel = self.bot.get_channel(
+                guild_data["verification_logs_channel_id"]
+            )
+            if verification_logs_channel == None:
+                return
+
             return await logs_channel.send(
                 embed=discord.Embed(
                     title="Verification Logs Channel Set",
@@ -47,6 +64,13 @@ class LoggingSystem(commands.Cog):
 
         if command.name == "set_unverified_role":
             role = interaction.namespace.role
+
+            unverified_role = self.bot.get_guild(interaction.guild.id).get_role(
+                guild_data["unverified_role_id"]
+            )
+            if unverified_role == None:
+                return
+
             return await logs_channel.send(
                 embed=discord.Embed(
                     title="Unverified Role Set",
