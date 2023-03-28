@@ -1,9 +1,7 @@
-import datetime
 import os
 from typing import Literal, Optional
 
 import discord
-from discord import app_commands
 from discord.ext import commands
 
 from utils import DataManager
@@ -12,7 +10,11 @@ DataManager(
     [
         ("guilds", "data/guilds.json", {}),
         ("users", "data/users.json", {}),
-        ("config", "data/config.json", {"token": None, "whitelist": [], "owners": []}),
+        (
+            "config",
+            "data/config.json",
+            {"token": None, "global_whitelist": [], "owners": []},
+        ),
         (
             "economy",
             "data/economy.json",

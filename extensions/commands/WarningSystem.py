@@ -7,6 +7,8 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
+from utils import DataManager
+
 
 class WarningSystem(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -156,77 +158,34 @@ class WarningSystem(commands.Cog):
             await interaction.response.send_message(embed=e)
 
     @commands.Cog.listener()
-    async def on_message(self, message):
+    async def on_message(self, message: discord.Message):
+        if message.author.bot:
+            return
+        guild_data = DataManager.get_guild_data(message.guild.id)
+        words_in_blacklist = guild_data["blacklisted_words"]
+
+        if message.author.id in guild_data["whitelist"] or any(
+            role.id in guild_data["whitelist"] for role in message.author.roles
+        ):
+            return
+
         content = message.content.lower()
 
-        if "https" in content:
+        if any(word in words_in_blacklist for word in message.content.split(" ")):
             await message.delete()
-            e = discord.Embed(
-                title="Warning",
-                description=f"{message.author.mention} has been warned for posting a link",
-                timestamp=datetime.utcnow(),
-                colour=discord.Colour.red(),
+            await message.channel.send(
+                embed=discord.Embed(
+                    title="Warning",
+                    description=f"{message.author.mention} has been warned for posting a blacklisted word",
+                    timestamp=datetime.utcnow(),
+                    colour=discord.Colour.red(),
+                )
             )
 
-            await message.channel.send(embed=e)
             self.registerWarning(
-                id=message.author.id, reason="Posting a link", content=content
-            )
-
-        elif "http" in content:
-            await message.delete()
-            e = discord.Embed(
-                title="Warning",
-                description=f"{message.author.mention} has been warned for posting a link",
-                timestamp=datetime.utcnow(),
-                colour=discord.Colour.red(),
-            )
-
-            await message.channel.send(embed=e)
-            self.registerWarning(
-                id=message.author.id, reason="Posting a link", content=content
-            )
-
-        elif "discord.gg" in content:
-            await message.delete()
-            e = discord.Embed(
-                title="Warning",
-                description=f"{message.author.mention} has been warned for posting a link",
-                timestamp=datetime.utcnow(),
-                colour=discord.Colour.red(),
-            )
-
-            await message.channel.send(embed=e)
-            self.registerWarning(
-                id=message.author.id, reason="Posting a link", content=content
-            )
-
-        elif ".com" in content:
-            await message.delete()
-            e = discord.Embed(
-                title="Warning",
-                description=f"{message.author.mention} has been warned for posting a link",
-                timestamp=datetime.utcnow(),
-                colour=discord.Colour.red(),
-            )
-
-            await message.channel.send(embed=e)
-            self.registerWarning(
-                id=message.author.id, reason="Posting a link", content=content
-            )
-
-        elif "uwu" in content:
-            await message.delete()
-            e = discord.Embed(
-                title="Warning",
-                description=f'{message.author.mention} has been warned for posting "uwu"',
-                timestamp=datetime.utcnow(),
-                colour=discord.Colour.red(),
-            )
-
-            await message.channel.send(embed=e)
-            self.registerWarning(
-                id=message.author.id, reason='Posting "uwu"', content=content
+                id=message.author.id,
+                reason="Posting a blacklisted word",
+                content=content,
             )
 
 
