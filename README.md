@@ -61,8 +61,7 @@ There are no major changes in this version. This is the inital release.
 
 - [x] Add more miscellaneous stuff.
 - [x] Add more commands for the economy.
-- [x] Fix Blackjack game
-- [ ] Add a fully functioning Roulette command.
+- [x] Fix Blackjack game.
 - [ ] Migrate from json to a binary database.
 - [ ] Redo registering warnings (Make them per server, not global).
 
