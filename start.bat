@@ -1,4 +1,2 @@
 @echo
-
-
 python main.py

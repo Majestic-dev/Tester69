@@ -4,6 +4,8 @@
 
 A general-use discord bot coded in discord.py
 
+# Big shoutout to kaJob-dev on github (Jakob#2222 on discord) for guiding me on this project!
+
 # Installation
 ### Requirements
 - [Python 3.8 or higher](https://www.python.org/downloads/)
@@ -17,6 +19,17 @@ A general-use discord bot coded in discord.py
 
     # MACOS
     python3 -m pip install -U discord.py
+    ```
+- Python Pillow (Install with pip)
+    ```bash
+    # WINDOWS 
+    pip install pillow
+
+    # LINUX
+    pip3 install pillow
+
+    # MACOS
+    pip3 install pillow
     ```
 
 ### Guide
