@@ -1,5 +1,6 @@
 import json
 import os
+import uuid
 from typing import Any, Optional
 
 
@@ -28,6 +29,17 @@ class DataManager:
         cls.save(path)
 
     @classmethod
+    def register_warning(cls, guild_id, user_id, warning) -> None:
+        guild_data = cls.get_guild_data(guild_id)
+
+        if str(user_id) in guild_data["warned_users"]:
+            guild_data["warned_users"][str(user_id)].append({f"{uuid.uuid4()}": f"{warning}"})
+        else:
+            guild_data["warned_users"][str(user_id)] = [{f"{uuid.uuid4()}": f"{warning}"}]
+
+        cls.save("guilds")
+
+    @classmethod
     def add_guild_data(cls, guild_id: int) -> None:
         if str(guild_id) not in cls.__data["guilds"]:
             cls.__data["guilds"][str(guild_id)] = {
@@ -37,6 +49,8 @@ class DataManager:
                 "logs_channel_id": None,
                 "blacklisted_words": [],
                 "whitelist": [],
+                "welcome_message": None,
+                "warned_users": {},
             }
 
         cls.save("guilds")
