@@ -59,7 +59,7 @@ DataManager(
 )
 
 if "fonts" not in os.listdir("."):
-  os.mkdir("fonts")
+    os.mkdir("fonts")
 
 bot = commands.Bot(command_prefix="'", intents=discord.Intents.all())
 bot.remove_command("help")
