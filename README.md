@@ -47,26 +47,52 @@ Please make sure that your code is formatted correctly before making a new pull 
 This project is licensed under the Apache License - see the [LICENSE](LICENSE.md) file for details
 
 # Versions and changelogs
+
 ## v1.0
+
     - An economy with many ways to earn coins
     - A moderation system
     - Slash commands 
+
+## v1.1
+
+    - Verification System
+        * Optimised verification system setup (now only requires 1 command)
+        * Made the verification system more secure (code will be on images that are noisy and blurred)
+        * After the first startup you can add more fonts to the fonts folder (has to be a .ttf file)
+        * You can now disable verification if you wish to
+    
+    - Warning System
+        * Warnings are now per server, not global
+    
+    - Server Management
+        * Added a word blacklist (blacklist the words you don't want being sent)
+        * Added a user/role whitelist (whitelist the users/roles you want to be able to bypass the word blacklist)
+        * Added a welcome message that will be sent to users when they join the server (if a server has enabled verification, it will be sent after they verify)
+    
+    - Main Commands
+        * Updated the help command to list all the commands
+
+    - Economy
+        * Changed the add and subtract commands to text commands, because a way to abuse it was found (change the guild permissions of that command)
+    
+    - Logging System
+        * More things are now logged (message deletion, message editing). This will be improved and updated
+
+    - Main
+        * On first startup, a new folder (fonts) will be created
+
+    - Listeners
+        * Moved some listeners to another file to make other files smaller in size
 
 ## Major Changes
 There are no major changes in this version. This is the inital release.
 
 # TODO
 
-## v1.1 Focused On Fixes, Improvements, And Some New Features
-
-- [x] Add more miscellaneous stuff.
-- [x] Add more commands for the economy.
-- [x] Fix Blackjack game.
-- [ ] Migrate from json to a binary database.
-- [ ] Redo registering warnings (Make them per server, not global).
-
 ## v1.2 Focused On Economy And Some Fixes/Reworking To Moderation
 
+- [ ] Migrate from json to a binary database.
 - [ ] Add a shop for economy.
 - [ ] Redo fishing and hunting.
 - [ ] Add a way to auction things (basically like Dank Memer).
