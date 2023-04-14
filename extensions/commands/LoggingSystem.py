@@ -10,9 +10,56 @@ from utils import DataManager
 from .ServerManagement import ServerManagement
 
 
-class LoggingSystem(commands.Cog):
+class Logging(commands.GroupCog):
     def __init__(self, bot):
         self.bot = bot
+
+    @app_commands.command(
+        name="set_channel", description="Set where all server logs will be sent"
+    )
+    @app_commands.default_permissions(administrator=True)
+    async def set_logs_channel(
+        self, interaction: discord.Interaction, channel: discord.TextChannel
+    ):
+        await interaction.response.send_message(
+            embed=discord.Embed(
+                title="Logging Channel Set!",
+                description=f"Logging channel set to {channel.mention}",
+                timestamp=datetime.utcnow(),
+                colour=discord.Colour.green(),
+            )
+        )
+
+        DataManager.edit_guild_data(interaction.guild.id, "logs_channel_id", channel.id)
+
+    @app_commands.command(name="disable", description="Disable logging for this server")
+    @app_commands.default_permissions(administrator=True)
+    async def disable_logs(self, interaction: discord.Interaction):
+        guild_data = DataManager.get_guild_data(interaction.guild.id)
+        logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
+
+        if logs_channel == None:
+            return await interaction.response.send_message(
+                ephemeral=True,
+                embed=discord.Embed(
+                    title="Logging Already Disabled",
+                    description="Logging is already disabled",
+                    timestamp=datetime.utcnow(),
+                    colour=discord.Colour.red(),
+                ),
+            )
+
+        else:
+            DataManager.edit_guild_data(interaction.guild.id, "logs_channel_id", None)
+            return await interaction.response.send_message(
+                ephemeral=True,
+                embed=discord.Embed(
+                    title="Logging Disabled",
+                    description="Logging has been disabled for this server",
+                    timestamp=datetime.utcnow(),
+                    colour=discord.Colour.red(),
+                ),
+            )
 
     @commands.Cog.listener()
     async def on_app_command_completion(
@@ -102,65 +149,6 @@ class LoggingSystem(commands.Cog):
                 )
             )
 
-        if command.name == "create_channel":
-            TextChannel = discord.Embed(
-                title=f"{str(ChannelType(interaction.namespace.channeltype)).capitalize()} Channel Created",
-                description=f"{interaction.user.mention} created a {ChannelType(interaction.namespace.channeltype)} channel `{interaction.namespace.name}`",
-                timestamp=datetime.utcnow(),
-                colour=discord.Colour.green(),
-            )
-
-            TextChannel.add_field(
-                name="Category",
-                value=f"{interaction.namespace.category}",
-                inline=True,
-            )
-            if (interaction.namespace.slowmode) == None or 0:
-                TextChannel.add_field(
-                    name="Slowmode", value="No slowmode set", inline=True
-                )
-            if (interaction.namespace.slowmode) == 1:
-                TextChannel.add_field(
-                    name="Slowmode", value=f"{slowmode} second", inline=True
-                )
-            if (interaction.namespace.slowmode) != 1 and (
-                interaction.namespace.slowmode
-            ) == 0:
-                TextChannel.add_field(
-                    name="Slowmode",
-                    value=f"{interaction.namespace.slowmode} seconds",
-                    inline=True,
-                )
-
-            await logs_channel.send(embed=TextChannel)
-
-        if command.name == "delete_channel":
-            ChannelDelete = discord.Embed(
-                title="Channel Deleted",
-                description=f"{interaction.user.mention} deleted `{interaction.namespace.channel}` channel",
-                timestamp=datetime.utcnow(),
-                colour=discord.Colour.green(),
-            )
-
-            if not interaction.namespace.reason == None:
-                ChannelDelete.add_field(
-                    name="Reason",
-                    value=f"```{interaction.namespace.reason}```",
-                    inline=True,
-                )
-
-            if len(ChannelDelete.fields) == 0:
-                return await logs_channel.send(
-                    embed=discord.Embed(
-                        title="Channel Deleted",
-                        description=f"{interaction.user.mention} deleted `{interaction.namespace.channel}` channel with no reason provided",
-                        timestamp=datetime.utcnow(),
-                        colour=discord.Colour.green(),
-                    )
-                )
-
-            await logs_channel.send(embed=ChannelDelete)
-
         if command.name == "purge":
             return await logs_channel.send(
                 embed=discord.Embed(
@@ -171,20 +159,6 @@ class LoggingSystem(commands.Cog):
                 )
             )
 
-    @commands.Cog.listener()
-    async def on_guild_channel_create(self, channel):
-        guild_data = DataManager.get_guild_data(channel.guild.id)
-        logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
-
-        await logs_channel.send(
-            embed=discord.Embed(
-                title="Channel Created",
-                description=f"Created {channel.mention} channel",
-                timestamp=datetime.utcnow(),
-                colour=discord.Colour.green(),
-            )
-        )
-
 
 async def setup(bot):
-    await bot.add_cog(LoggingSystem(bot))
+    await bot.add_cog(Logging(bot))
