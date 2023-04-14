@@ -1,3 +1,4 @@
+import asyncio
 from datetime import datetime
 from typing import Optional
 
@@ -13,24 +14,6 @@ from utils import DataManager
 class ServerManagement(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-
-    @app_commands.command(
-        name="set_logs_channel", description="Set where all logs will be sent"
-    )
-    @app_commands.default_permissions(administrator=True)
-    async def set_logs_channel(
-        self, interaction: discord.Interaction, channel: discord.TextChannel
-    ):
-        await interaction.response.send_message(
-            embed=discord.Embed(
-                title="Logs Channel Set!",
-                description=f"Logs channel set to {channel.mention}",
-                timestamp=datetime.utcnow(),
-                colour=discord.Colour.green(),
-            )
-        )
-
-        DataManager.edit_guild_data(interaction.guild.id, "logs_channel_id", channel.id)
 
     @app_commands.command(
         name="slowmode", description="Set the slowmode in the channel of your choice"
@@ -197,6 +180,25 @@ class ServerManagement(commands.Cog):
             )
 
         await interaction.response.send_message(embed=ChannelDelete)
+
+    @app_commands.command(
+        name="purge", description="Purge a custom amount of messages from this channel"
+    )
+    @app_commands.default_permissions(manage_channels=True)
+    async def purge(self, interaction: discord.Interaction, count: int):
+        await interaction.response.defer()
+        await interaction.channel.purge(limit=count + 1)
+
+        await asyncio.sleep(3)
+
+        return await interaction.edit_original_response(
+            embed=discord.Embed(
+                title="Messages Purged!",
+                description=f"Successfully purged {count} messages!",
+                timestamp=datetime.utcnow(),
+                colour=discord.Colour.green(),
+            )
+        )
 
     @app_commands.command(
         name="add_blacklisted_word",
@@ -376,21 +378,38 @@ class ServerManagement(commands.Cog):
         )
 
     @app_commands.command(
-        name="purge", description="Purge a custom amount of messages from this channel"
+        name="set_welcome_message",
+        description="Add a welcome message that will be sent to users DMs when they join the server",
     )
-    @app_commands.default_permissions(manage_channels=True)
-    async def purge(self, interaction: discord.Interaction, count: int):
-        await interaction.response.defer(ephemeral=True)
-        await interaction.channel.purge(limit=count + 1)
-
-        e = discord.Embed(
-            title="Messages Purged!",
-            description=f"Successfully purged {count} messages!",
-            timestamp=datetime.utcnow(),
-            colour=discord.Colour.green(),
+    @app_commands.default_permissions(administrator=True)
+    async def set_welcome_message(self, interaction: discord.Interaction, message: str):
+        await interaction.response.send_message(
+            embed=discord.Embed(
+                title="Welcome Message Set",
+                description=f"Welcome message set to: \n {message}",
+                timestamp=datetime.utcnow(),
+                colour=discord.Colour.green(),
+            )
         )
 
-        return await interaction.edit_original_response(embed=e)
+        DataManager.edit_guild_data(interaction.guild.id, "welcome_message", message)
+
+    @app_commands.command(
+        name="disable_welcome_message",
+        description="Disable the welcome message that is sent to users DMs when they join the server",
+    )
+    @app_commands.default_permissions(administrator=True)
+    async def disable_welcome_message(self, interaction: discord.Interaction):
+        DataManager.edit_guild_data(interaction.guild.id, "welcome_message", None)
+
+        await interaction.response.send_message(
+            embed=discord.Embed(
+                title="Welcome Message Disabled",
+                description=f"Welcome message has been disabled",
+                timestamp=datetime.utcnow(),
+                colour=discord.Colour.green(),
+            )
+        )
 
 
 async def setup(bot):
