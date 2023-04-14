@@ -1,5 +1,6 @@
 import random
 from datetime import datetime, timedelta
+from typing import Optional
 
 import discord
 from discord import app_commands
@@ -27,57 +28,79 @@ class Economy(commands.Cog):
         self.monthly_cooldown = {}
         self.yearly_cooldown = {}
 
-    @app_commands.command(name="balance", description="Check your coin balance")
-    async def balance(self, interaction: discord.Interaction):
-        await interaction.response.send_message(
-            embed=discord.Embed(
-                title="Balance",
-                description=(
-                    f'Your balance is {DataManager.get_user_data(interaction.user.id)["balance"]} coins'
-                ),
-                timestamp=datetime.utcnow(),
-                colour=discord.Colour.green(),
-            )
-        )
-
-    @app_commands.command(
-        name="add", description="Add set amount of coins to your balance"
-    )
+    @commands.command(name="add", description="Add set amount of coins to your balance")
     @commands.is_owner()
     async def add(
-        self,
+        ctx,
         interaction: discord.Interaction,
         amount: int,
+        member: Optional[discord.Member] = None,
     ):
-        user_data = DataManager.get_user_data(interaction.user.id)
-        DataManager.edit_user_data(
-            interaction.user.id, "balance", user_data["balance"] + amount
-        )
+        if isinstance(commands.errors.NotOwner, Exception):
+            return await ctx.reply(
+                embed=discord.Embed(
+                    title="Coin Addition Failed",
+                    description=f"You do not have permission to use this command.",
+                    timestamp=datetime.utcnow(),
+                    colour=discord.Colour.red(),
+                )
+            )
 
-        await interaction.response.send_message(
+        if member == None:
+            user_data = DataManager.get_user_data(ctx.member.id)
+            DataManager.edit_user_data(
+                ctx.member.id, "balance", user_data["balance"] + amount
+            )
+
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    title="Added Coins",
+                    description=(
+                        f'Added {amount} coins to your balance. Your new balance is {user_data["balance"]}'
+                    ),
+                    timestamp=datetime.utcnow(),
+                    colour=discord.Colour.green(),
+                )
+            )
+
+        else:
+            user_data = DataManager.get_user_data(ctx.member.id)
+        DataManager.edit_user_data(member.id, "balance", user_data["balance"] + amount)
+        return await interaction.response.send_message(
             embed=discord.Embed(
                 title="Added Coins",
                 description=(
-                    f'Added {amount} coins to your balance. Your new balance is {user_data["balance"]}'
+                    f'Added {amount} coins to {member.name}\'s balance. Their new balance is {user_data["balance"]}'
                 ),
                 timestamp=datetime.utcnow(),
                 colour=discord.Colour.green(),
             )
         )
 
-    @app_commands.command(
+    @commands.command(
         name="subtract", description="Subtract set amount of coins from your balance"
     )
     @commands.is_owner()
     async def subtract(
-        self,
+        ctx,
         interaction: discord.Interaction,
         amount: int,
+        member: Optional[discord.Member] = None,
     ):
-        user_data = DataManager.get_user_data(interaction.user.id)
+        user_data = DataManager.get_user_data(ctx.member.id)
+
+        if isinstance(commands.errors.NotOwner, Exception):
+            return await ctx.reply(
+                embed=discord.Embed(
+                    title="Coin Subtraction Failed",
+                    description=f"You do not have permission to use this command.",
+                    timestamp=datetime.utcnow(),
+                    colour=discord.Colour.red(),
+                )
+            )
 
         if user_data["balance"] - amount < 0:
-            return await interaction.response.send_message(
+            return await ctx.reply(
                 embed=discord.Embed(
                     title="Coin Subtraction Failed",
                     description=(
@@ -89,19 +112,64 @@ class Economy(commands.Cog):
             )
 
         DataManager.edit_user_data(
-            interaction.user.id, "balance", user_data["balance"] - amount
+            ctx.member.id, "balance", user_data["balance"] - amount
         )
 
-        await interaction.response.send_message(
+        if member == None:
+            DataManager.edit_user_data(
+                ctx.user.id, "balance", user_data["balance"] - amount
+            )
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    title="Removed Coins",
+                    description=(
+                        f'Removed {amount} coins from your balance. Your new balance is {user_data["balance"]}'
+                    ),
+                    timestamp=datetime.utcnow(),
+                    colour=discord.Colour.green(),
+                )
+            )
+
+        else:
+            user_data = DataManager.get_user_data(member.id)
+        DataManager.edit_user_data(member.id, "balance", user_data["balance"] - amount)
+        return await interaction.response.send_message(
             embed=discord.Embed(
-                title="Coin Subtraction Succeeded",
+                title="Removed Coins",
                 description=(
-                    f'Subtracted {amount} from your balance. Your new balance is {user_data["balance"]}'
+                    f'Removed {amount} coins from {member.name}\'s balance. Their new balance is {user_data["balance"]}'
                 ),
                 timestamp=datetime.utcnow(),
-                colour=discord.Color.green(),
+                colour=discord.Colour.green(),
             )
         )
+
+    @app_commands.command(name="balance", description="Check your coin balance")
+    async def balance(
+        self, interaction: discord.Interaction, user: Optional[discord.User] = None
+    ):
+        if user == None:
+            await interaction.response.send_message(
+                embed=discord.Embed(
+                    title="Balance",
+                    description=(
+                        f'Your balance is {DataManager.get_user_data(interaction.user.id)["balance"]} coins'
+                    ),
+                    timestamp=datetime.utcnow(),
+                    colour=discord.Colour.green(),
+                )
+            )
+        else:
+            await interaction.response.send_message(
+                embed=discord.Embed(
+                    title="Balance",
+                    description=(
+                        f'{user.name}\'s balance is {DataManager.get_user_data(user.id)["balance"]} coins'
+                    ),
+                    timestamp=datetime.utcnow(),
+                    colour=discord.Colour.green(),
+                )
+            )
 
     @app_commands.command(name="hunt", description="Hunt for some loot")
     async def hunt(self, interaction: discord.Interaction):
@@ -480,7 +548,7 @@ class Economy(commands.Cog):
                     title="No Cooldowns",
                     description=(f"{user.name} doesn't have any active cooldowns"),
                     timestamp=datetime.utcnow(),
-                    colour=discord.Color.orange(),
+                    colour=discord.Colour.orange(),
                 )
             )
 
