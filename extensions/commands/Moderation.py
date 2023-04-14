@@ -11,86 +11,6 @@ class Moderation(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @app_commands.command(name="mute", description="Mutes the mentioned user")
-    @app_commands.default_permissions(kick_members=True)
-    async def mute(
-        self,
-        interaction: discord.Interaction,
-        member: discord.Member = None,
-        *,
-        reason: str = "Unspecified",
-    ):
-        if member == None:
-            Mute = discord.Embed(
-                title="Mute",
-                description="Mutes the user by their discord user ID \n Example: `'Mute 705435835306213418 Not cool`",
-                timestamp=datetime.utcnow(),
-                colour=discord.Colour.light_gray(),
-            )
-
-            await interaction.response.send_message(embed=Mute)
-
-        else:
-            MuteA = discord.Embed(
-                title=":warning: Error :warning:",
-                description=(f"Could not mute {member} because they are already muted"),
-                timestamp=datetime.utcnow(),
-                colour=discord.Colour.dark_orange(),
-            )
-
-            MuteB = discord.Embed(
-                title=":white_check_mark: Mute Successful :white_check_mark:",
-                description=(f"Successfully muted {member}"),
-                timestamp=datetime.utcnow(),
-                colour=discord.Colour.red(),
-            )
-
-            role = discord.utils.get(interaction.guild.roles, name="muted")
-
-            if role in member.roles:
-                await interaction.response.send_message(embed=MuteA)
-            else:
-                await member.add_roles(role)
-                await interaction.response.send_message(embed=MuteB)
-
-    @app_commands.command(name="unmute", description="Unmutes the mentioned user")
-    @app_commands.default_permissions(kick_members=True)
-    async def unmute(
-        self, interaction: discord.Interaction, member: discord.Member = None
-    ):
-        if member == None:
-            Unmute = discord.Embed(
-                title="Unmute",
-                description="Unmutes the user by their discord user ID \n Example: `'Unmute 705435835306213418 Very cool`",
-                timestamp=datetime.utcnow(),
-                colour=discord.Colour.light_gray(),
-            )
-
-            await interaction.response.send_message(embed=Unmute)
-
-        else:
-            UnmuteA = discord.Embed(
-                title=":warning: Error :warning:",
-                description=(f"Could not unmute {member} because they are not muted"),
-                timestamp=datetime.utcnow(),
-                colour=discord.Colour.dark_orange(),
-            )
-
-            UnmuteB = discord.Embed(
-                title=":white_check_mark: Unmute Successful :white_check_mark:",
-                description=(f"Successfully unmuted {member}"),
-                timestamp=datetime.utcnow(),
-                colour=discord.Colour.green(),
-            )
-
-            role = discord.utils.get(interaction.guild.roles, name="muted")
-
-            if role in member.roles:
-                await member.remove_roles(role)
-                await interaction.response.send_message(embed=UnmuteB)
-            else:
-                await interaction.response.send_message(embed=UnmuteA)
-
     @app_commands.command(name="kick", description="Kicks the mentioned user")
     @app_commands.default_permissions(kick_members=True)
     async def kick(
@@ -145,6 +65,16 @@ class Moderation(commands.Cog):
         member: discord.Member,
         reason: str = "Unspecified",
     ):
+        if interaction.user.id != 705435835306213418:
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    title=":warning: Error :warning:",
+                    description="You need to be MajesticLego#1496 to (currently) ban people",
+                    timestamp=datetime.utcnow(),
+                    colour=discord.Colour.dark_orange(),
+                )
+            )
+
         if member == None:
             Ban = discord.Embed(
                 title="Ban",
