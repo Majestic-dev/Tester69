@@ -25,8 +25,8 @@ class Economy(commands.Cog):
         self.fish_cooldown = {}
         self.hunt_cooldown = {}
         self.hourly_cooldown = {}
+        self.daily_cooldown = {}
         self.monthly_cooldown = {}
-        self.yearly_cooldown = {}
 
     @commands.command(name="add", description="Add set amount of coins to your balance")
     @commands.is_owner()
@@ -369,7 +369,7 @@ class Economy(commands.Cog):
         )
 
     @app_commands.command(
-        name="hourly", description="Gain 10 coins every time you use this command"
+        name="hourly", description="Gain 100 coins every time you use this command"
     )
     async def hourly(self, interaction: discord.Interaction):
         if (
@@ -407,9 +407,49 @@ class Economy(commands.Cog):
         self.hourly_cooldown[interaction.user.id] = datetime.utcnow() + timedelta(
             hours=1
         )
+    
+    @app_commands.command(
+        name="daily", description="Gain 1000 coins every time you use this command"
+    )
+    async def daily(self, interaction: discord.Interaction):
+        if (
+            interaction.user.id in self.daily_cooldown
+            and self.daily_cooldown[interaction.user.id] > datetime.utcnow()
+            and interaction.user.id not in DataManager.get("config", "global_whitelist")
+        ):
+            remaining = self.daily_cooldown[interaction.user.id]
+
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    title="Cooldown",
+                    description=(
+                        f"Your cooldown will end <t:{int(remaining.timestamp())}:R>"
+                    ),
+                    timestamp=datetime.utcnow(),
+                    colour=discord.Colour.orange(),
+                )
+            )
+
+        user_data = DataManager.get_user_data(interaction.user.id)
+        DataManager.edit_user_data(
+            interaction.user.id, "balance", user_data["balance"] + 100
+        )
+
+        await interaction.response.send_message(
+            embed=discord.Embed(
+                title="Daily Pay",
+                description="You received 100 coins!",
+                timestamp=datetime.utcnow(),
+                colour=discord.Colour.green(),
+            )
+        )
+
+        self.daily_cooldown[interaction.user.id] = datetime.utcnow() + timedelta(
+            hours=24
+        )
 
     @app_commands.command(
-        name="monthly", description="Gain 3000 coins every time you use the command"
+        name="monthly", description="Gain 20000 coins every time you use the command"
     )
     async def monthly(self, interaction: discord.Interaction):
         if (
@@ -446,44 +486,6 @@ class Economy(commands.Cog):
 
         self.monthly_cooldown[interaction.user.id] = datetime.utcnow() + timedelta(
             hours=720
-        )
-
-    @app_commands.command(name="yearly", description="Get 36000 coins every year")
-    async def yearly(self, interaction: discord.Interaction):
-        if (
-            interaction.user.id in self.yearly_cooldown
-            and self.yearly_cooldown[interaction.user.id] > datetime.utcnow()
-            and interaction.user.id not in DataManager.get("config", "global_whitelist")
-        ):
-            remaining = self.yearly_cooldown[interaction.user.id]
-
-            return await interaction.response.send_message(
-                embed=discord.Embed(
-                    title="Cooldown",
-                    description=(
-                        f"Your cooldown will end <t:{int(remaining.timestamp())}:R>"
-                    ),
-                    timestamp=datetime.utcnow(),
-                    colour=discord.Colour.orange(),
-                )
-            )
-
-        user_data = DataManager.get_user_data(interaction.user.id)
-        DataManager.edit_user_data(
-            interaction.user.id, "balance", user_data["balance"] + 36000
-        )
-
-        await interaction.response.send_message(
-            embed=discord.Embed(
-                title="Yearly Pay",
-                description="You received 36000 coins!",
-                timestamp=datetime.utcnow(),
-                colour=discord.Colour.green(),
-            )
-        )
-
-        self.monthly_cooldown[interaction.user.id] = datetime.utcnow() + timedelta(
-            days=365
         )
 
     @app_commands.command(name="inventory", description="See your inventory")
