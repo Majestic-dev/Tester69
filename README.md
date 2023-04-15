@@ -92,12 +92,12 @@ There are no major changes in this version. This is the inital release.
 
 ## v1.2 Focused On Economy And Some Fixes/Reworking To Moderation
 
+- [x] Add some customization to the moderation system (for example setting the muted role).
 - [ ] Migrate from json to a binary database.
 - [ ] Add a shop for economy.
 - [ ] Redo fishing and hunting.
 - [ ] Add a way to auction things (basically like Dank Memer).
 - [ ] More gambling games.
-- [ ] Add some customization to the moderation system (for example setting the muted role).
 
 ## V1.3 Focused On Miscellaneous/Fun
 
