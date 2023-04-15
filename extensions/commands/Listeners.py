@@ -1,6 +1,7 @@
 from datetime import datetime
-from discord.ext import commands
+
 import discord
+from discord.ext import commands
 
 from utils import DataManager
 
@@ -9,8 +10,7 @@ class Listeners(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-
-    #Blacklisted Word Listener
+    # Blacklisted Word Listener
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
         guild_data = DataManager.get_guild_data(message.guild.id)
@@ -40,9 +40,8 @@ class Listeners(commands.Cog):
                     colour=discord.Colour.red(),
                 )
             )
-    
 
-    #Delete Logs
+    # Delete Logs
     @commands.Cog.listener()
     async def on_message_delete(self, message: discord.Message):
         guild_data = DataManager.get_guild_data(message.guild.id)
@@ -66,11 +65,9 @@ class Listeners(commands.Cog):
         embed.timestamp = datetime.now()
         await logs_channel.send(embed=embed)
 
-
-    #Message Edit Logs
+    # Message Edit Logs
     @commands.Cog.listener()
     async def on_message_edit(self, before: discord.Message, after: discord.Message):
-
         guild_data = DataManager.get_guild_data(before.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
 
@@ -104,7 +101,7 @@ class Listeners(commands.Cog):
                 colour=discord.Colour.green(),
             )
         )
-        
-            
+
+
 async def setup(bot: commands.Bot):
     await bot.add_cog(Listeners(bot))
