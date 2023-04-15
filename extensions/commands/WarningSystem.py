@@ -22,7 +22,7 @@ class WarningSystem(commands.Cog):
             return await interaction.response.send_message(
                 embed=discord.Embed(
                     description="<:white_cross:1096791282023669860> You can't warn yourself",
-                    colour=discord.Colour.orange(),
+                    colour=discord.Colour.red(),
                 )
             )
 
@@ -30,7 +30,7 @@ class WarningSystem(commands.Cog):
             return await interaction.response.send_message(
                 embed=discord.Embed(
                     description="<:white_cross:1096791282023669860> You can't warn your superiors",
-                    colour=discord.Colour.orange(),
+                    colour=discord.Colour.red(),
                 )
             )
 
