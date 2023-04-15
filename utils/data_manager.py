@@ -33,9 +33,24 @@ class DataManager:
         guild_data = cls.get_guild_data(guild_id)
 
         if str(user_id) in guild_data["warned_users"]:
-            guild_data["warned_users"][str(user_id)].append({f"{uuid.uuid4()}": f"{warning}"})
+            guild_data["warned_users"][str(user_id)].append(
+                {f"{uuid.uuid4()}": f"{warning}"}
+            )
         else:
-            guild_data["warned_users"][str(user_id)] = [{f"{uuid.uuid4()}": f"{warning}"}]
+            guild_data["warned_users"][str(user_id)] = [
+                {f"{uuid.uuid4()}": f"{warning}"}
+            ]
+
+        cls.save("guilds")
+
+    @classmethod
+    def save_roles(cls, guild_id, user_id, roles) -> None:
+        guild_data = cls.get_guild_data(guild_id)
+
+        if str(user_id) in guild_data["muted_user_roles"]:
+            guild_data["muted_user_roles"][str(user_id)].append(roles)
+        else:
+            guild_data["muted_user_roles"][str(user_id)] = [roles]
 
         cls.save("guilds")
 
@@ -43,6 +58,8 @@ class DataManager:
     def add_guild_data(cls, guild_id: int) -> None:
         if str(guild_id) not in cls.__data["guilds"]:
             cls.__data["guilds"][str(guild_id)] = {
+                "muted_role_id": None,
+                "muted_user_roles": {},
                 "unverified_role_id": None,
                 "verification_channel_id": None,
                 "verification_logs_channel_id": None,
