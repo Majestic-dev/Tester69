@@ -21,9 +21,7 @@ class WarningSystem(commands.Cog):
         if user.id == interaction.user.id:
             return await interaction.response.send_message(
                 embed=discord.Embed(
-                    title="Error",
-                    description="You can't warn yourself",
-                    timestamp=datetime.utcnow(),
+                    description="<:white_cross:1096791282023669860> You can't warn yourself",
                     colour=discord.Colour.orange(),
                 )
             )
@@ -31,9 +29,7 @@ class WarningSystem(commands.Cog):
         if interaction.user.top_role.position <= user.top_role.position:
             return await interaction.response.send_message(
                 embed=discord.Embed(
-                    title="Error",
-                    description="You can't warn someone with a higher role than you",
-                    timestamp=datetime.utcnow(),
+                    description="<:white_cross:1096791282023669860> You can't warn your superiors",
                     colour=discord.Colour.orange(),
                 )
             )
@@ -47,10 +43,8 @@ class WarningSystem(commands.Cog):
 
         return await interaction.response.send_message(
             embed=discord.Embed(
-                title="Warning",
-                description=(f"{user.name} has been warned for: ```{reason}```"),
-                timestamp=datetime.utcnow(),
-                colour=discord.Colour.red(),
+                description=f"<:white_checkmark:1096793014287995061> {user.name} has been warned for: ```{reason}```",
+                colour=discord.Colour.green(),
             )
         )
 
@@ -68,8 +62,7 @@ class WarningSystem(commands.Cog):
                     DataManager.save("guilds")
                     return await interaction.response.send_message(
                         embed=discord.Embed(
-                            title="Warning Deleted",
-                            description=(f"Deleted warning ```{uuid}```"),
+                            description=f"<:white_checkmark:1096793014287995061> Deleted warning ```{uuid}```",
                             timestamp=datetime.utcnow(),
                             colour=discord.Colour.green(),
                         )
@@ -77,9 +70,7 @@ class WarningSystem(commands.Cog):
 
         return await interaction.response.send_message(
             embed=discord.Embed(
-                title="Warning Not Found",
-                description=(f"Couldn't find warning with the UUID ```{uuid}```"),
-                timestamp=datetime.utcnow(),
+                description=f"<:white_cross:1096791282023669860> Couldn't find warning with the UUID ```{uuid}```",
                 colour=discord.Colour.orange(),
             )
         )
@@ -94,9 +85,7 @@ class WarningSystem(commands.Cog):
         if len(warnings) == 0:
             return await interaction.response.send_message(
                 embed=discord.Embed(
-                    title="Warnings",
-                    description=f"{member.mention} has no warnings",
-                    timestamp=datetime.utcnow(),
+                    description=f"<:white_checkmark:1096793014287995061> {member.mention} has no warnings",
                     colour=discord.Colour.green(),
                 )
             )
