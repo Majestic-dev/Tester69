@@ -13,15 +13,16 @@ class Listeners(commands.Cog):
     # Blacklisted Word Listener
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
-        guild_data = DataManager.get_guild_data(message.guild.id)
-        logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
-        words_in_blacklist = guild_data["blacklisted_words"]
-
-        if isinstance(message.channel.type, discord.DMChannel):
-            return
 
         if message.author.bot:
             return
+        
+        if isinstance(message.channel.type, discord.DMChannel):
+            return
+        
+        guild_data = DataManager.get_guild_data(message.guild.id)
+        logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
+        words_in_blacklist = guild_data["blacklisted_words"]
 
         if message.author.id in guild_data["whitelist"] or any(
             role.id in guild_data["whitelist"] for role in message.author.roles
