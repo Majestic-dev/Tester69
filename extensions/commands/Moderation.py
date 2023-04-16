@@ -35,6 +35,7 @@ class Moderation(commands.Cog):
         duration: int,
         reason: str = "Unspecified",
     ):
+        await interaction.response.defer(ephemeral=True)
         muted_role = DataManager.get_guild_data(interaction.guild.id)["muted_role_id"]
 
         if muted_role == None:
@@ -89,7 +90,7 @@ class Moderation(commands.Cog):
 
         role = interaction.guild.get_role(muted_role)
         if role in member.roles:
-            await interaction.response.send_message(
+            await interaction.edit_original_response(
                 embed=discord.Embed(
                     description=f"<:white_cross:1096791282023669860> Could not mute {member.mention} because they are already muted",
                     colour=discord.Colour.orange(),
@@ -97,12 +98,22 @@ class Moderation(commands.Cog):
             )
         else:
             await member.edit(roles=[role])
-            await interaction.response.send_message(
+            await interaction.edit_original_response(
                 embed=discord.Embed(
                     description=f"<:white_checkmark:1096793014287995061> Muted {member.mention} for {duration} seconds",
                     colour=discord.Colour.green(),
                 )
             )
+            try:
+                await member.create_dm()
+                await member.dm_channel.send(
+                    embed=discord.Embed(
+                        description=f'You have been muted in {interaction.guild.name} for {duration} seconds for "{reason}"',
+                        colour=discord.Colour.orange(),
+                    )
+                )
+            except:
+                pass
             if duration == 0:
                 return
             await asyncio.sleep(duration)
@@ -149,6 +160,7 @@ class Moderation(commands.Cog):
         member: discord.Member,
         reason: str = "Unspecified",
     ):
+
         if member.id == interaction.user.id:
             return await interaction.response.send_message(
                 embed=discord.Embed(
@@ -183,6 +195,18 @@ class Moderation(commands.Cog):
                         colour=discord.Colour.green(),
                     )
                 )
+
+                try:
+                    member.create_dm()
+                    await member.dm_channel.send(
+                        embed=discord.Embed(
+                            description=f'You have been kicked from {interaction.guild.name} for "{reason}"',
+                            colour=discord.Colour.red(),
+                        )
+                    )
+                except:
+                    pass
+
             except Exception as exc:
                 print(exc)
                 await interaction.response.send_message(
@@ -200,6 +224,7 @@ class Moderation(commands.Cog):
         member: discord.Member,
         reason: str = "Unspecified",
     ):
+        
         if member.id == interaction.user.id:
             return await interaction.response.send_message(
                 embed=discord.Embed(
@@ -242,6 +267,18 @@ class Moderation(commands.Cog):
                         colour=discord.Colour.green(),
                     )
                 )
+
+                try:
+                    member.create_dm()
+                    await member.dm_channel.send(
+                        embed=discord.Embed(
+                            description=f'You have been banned from {interaction.guild.name} for "{reason}"',
+                            colour=discord.Colour.red(),
+                        )
+                    )
+                except:
+                    pass
+
             except:
                 await interaction.response.send_message(
                     embed=discord.Embed(
@@ -261,6 +298,18 @@ class Moderation(commands.Cog):
         async for ban in interaction.guild.bans():
             if ban.user.id == int(member):
                 await interaction.guild.unban(ban.user)
+
+                try:
+                    member.create_dm()
+                    await member.dm_channel.send(
+                        embed=discord.Embed(
+                            description=f"You have been unbanned from {interaction.guild.name} for ",
+                            colour=discord.Colour.red(),
+                        )
+                    )
+                except:
+                    pass
+
                 return await interaction.response.send_message(
                     embed=discord.Embed(
                         description=f"<:white_checkmark:1096793014287995061> unbanned {member.mention}",
