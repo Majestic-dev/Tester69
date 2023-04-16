@@ -57,8 +57,8 @@ class Logging(commands.GroupCog):
                     colour=discord.Colour.red(),
                 ),
             )
-        
-    #Member Join Listener
+
+    # Member Join Listener
     @commands.Cog.listener()
     async def on_member_join(self, member):
         guild_data = DataManager.get_guild_data(member.guild.id)
@@ -66,13 +66,16 @@ class Logging(commands.GroupCog):
 
         if logs_channel == None:
             return
-        
+
         join = discord.Embed(
             title="Member Joined",
             description=f"{member.mention} has joined the server",
             colour=discord.Colour.green(),
         )
-        join.add_field(name="Account Created", value=discord.utils.format_dt(member.created_at, style="F"))
+        join.add_field(
+            name="Account Created",
+            value=discord.utils.format_dt(member.created_at, style="F"),
+        )
         join.set_author(icon_url=member.avatar, name=member)
         join.set_footer(text=f"ID: {member.id}")
         join.timestamp = datetime.now()
@@ -83,10 +86,10 @@ class Logging(commands.GroupCog):
     async def on_member_remove(self, member):
         guild_data = DataManager.get_guild_data(member.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
-        
+
         if logs_channel == None:
             return
-        
+
         leave = discord.Embed(
             title="Member Left",
             description=f"{member.mention} has left the server",
@@ -102,10 +105,10 @@ class Logging(commands.GroupCog):
     async def on_member_ban(self, guild, user):
         guild_data = DataManager.get_guild_data(guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
-        
+
         if logs_channel == None:
             return
-        
+
         ban = discord.Embed(
             title="Member Banned",
             description=f"{user.mention} has been banned from the server",
@@ -121,10 +124,10 @@ class Logging(commands.GroupCog):
     async def on_member_unban(self, guild, user):
         guild_data = DataManager.get_guild_data(guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
-        
+
         if logs_channel == None:
             return
-        
+
         unban = discord.Embed(
             title="Member Unbanned",
             description=f"{user.mention} has been unbanned from the server",
@@ -140,10 +143,10 @@ class Logging(commands.GroupCog):
     async def on_member_update(self, before, after):
         guild_data = DataManager.get_guild_data(before.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
-        
+
         if logs_channel == None:
             return
-        
+
         update = discord.Embed(
             title="Member Updated",
             description=f"{before.mention}'s profile has been updated",
@@ -156,29 +159,34 @@ class Logging(commands.GroupCog):
         nick2 = after.nick
         if nick2 == None:
             nick2 = after.name
-        
+
         if before.roles != after.roles:
-            update.add_field(name="Roles", value=f"Before: {', '.join([role.name for role in before.roles])}\nAfter: {', '.join([role.name for role in after.roles])}")
+            update.add_field(
+                name="Roles",
+                value=f"Before: {', '.join([role.name for role in before.roles])}\nAfter: {', '.join([role.name for role in after.roles])}",
+            )
         if before.nick != after.nick:
             update.add_field(name="Nickname", value=f"Before: {nick} \nAfter: {nick2}")
         if before.name != after.name:
-            update.add_field(name="Username", value=f"Before: {before.name} \nAfter: {after.name}")
+            update.add_field(
+                name="Username", value=f"Before: {before.name} \nAfter: {after.name}"
+            )
         if len(update.fields) <= 0:
             return
         update.set_author(icon_url=before.avatar, name=before)
         update.set_footer(text=f"ID: {before.id}")
         update.timestamp = datetime.now()
         return await logs_channel.send(embed=update)
-    
+
     # Role Create Listener
     @commands.Cog.listener()
     async def on_guild_role_create(self, role):
         guild_data = DataManager.get_guild_data(role.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
-        
+
         if logs_channel == None:
             return
-        
+
         create = discord.Embed(
             title="Role Created",
             description=f"{role.mention} has been created",
@@ -194,10 +202,10 @@ class Logging(commands.GroupCog):
     async def on_guild_role_delete(self, role):
         guild_data = DataManager.get_guild_data(role.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
-        
+
         if logs_channel == None:
             return
-        
+
         delete = discord.Embed(
             title="Role Deleted",
             description=f"{role.name} has been deleted",
@@ -213,10 +221,10 @@ class Logging(commands.GroupCog):
     async def on_guild_role_update(self, before, after):
         guild_data = DataManager.get_guild_data(before.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
-        
+
         if logs_channel == None:
             return
-        
+
         update = discord.Embed(
             title="Role Updated",
             description=f"{before.mention} has been updated",
@@ -224,24 +232,41 @@ class Logging(commands.GroupCog):
         )
 
         if before.name != after.name:
-            update.add_field(name="Name", value=f"Before: {before.name} \nAfter: {after.name}")
+            update.add_field(
+                name="Name", value=f"Before: {before.name} \nAfter: {after.name}"
+            )
         if before.colour != after.colour:
-            update.add_field(name="Colour RGB Value", value=f"Before: {before.colour} \nAfter: {after.colour}")
+            update.add_field(
+                name="Colour RGB Value",
+                value=f"Before: {before.colour} \nAfter: {after.colour}",
+            )
         if before.hoist != after.hoist:
-            update.add_field(name="Displayed Separately From Others", value=f"Before: {before.hoist} \nAfter: {after.hoist}")
+            update.add_field(
+                name="Displayed Separately From Others",
+                value=f"Before: {before.hoist} \nAfter: {after.hoist}",
+            )
         if before.mentionable != after.mentionable:
-            update.add_field(name="Mentionable By Anyone", value=f"Before: {before.mentionable} \nAfter: {after.mentionable}")
+            update.add_field(
+                name="Mentionable By Anyone",
+                value=f"Before: {before.mentionable} \nAfter: {after.mentionable}",
+            )
         if before.display_icon != after.display_icon:
-            update.add_field(name="Display Icon", value=f"Before: {before.display_icon} \nAfter: {after.display_icon}")
+            update.add_field(
+                name="Display Icon",
+                value=f"Before: {before.display_icon} \nAfter: {after.display_icon}",
+            )
         if before.position != after.position:
-            update.add_field(name="Position", value=f"Before: {before.position} \nAfter: {after.position}") 
+            update.add_field(
+                name="Position",
+                value=f"Before: {before.position} \nAfter: {after.position}",
+            )
         if len(update.fields) <= 0:
             return
         update.set_author(icon_url=before.guild.icon, name=before.guild)
         update.set_footer(text=f"Role ID: {before.id}")
         update.timestamp = datetime.now()
         return await logs_channel.send(embed=update)
-    
+
     # Voice Channel Listener
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
@@ -250,7 +275,7 @@ class Logging(commands.GroupCog):
 
         if logs_channel == None:
             return
-        
+
         voice = discord.Embed(
             title="Voice Channel Update",
             description=f"{member.mention} has updated their voice channel",
@@ -258,28 +283,36 @@ class Logging(commands.GroupCog):
         )
 
         if before.channel != after.channel:
-            voice.add_field(name="Voice Channel", value=f"Before: {before.channel} \nAfter: {after.channel}")
+            voice.add_field(
+                name="Voice Channel",
+                value=f"Before: {before.channel} \nAfter: {after.channel}",
+            )
         if before.mute != after.mute:
-            voice.add_field(name="Muted By Admin", value=f"Before: {before.mute} \nAfter: {after.mute}")
+            voice.add_field(
+                name="Muted By Admin",
+                value=f"Before: {before.mute} \nAfter: {after.mute}",
+            )
         if before.deaf != after.deaf:
-            voice.add_field(name="Deafened By Admin", value=f"Before: {before.deaf} \nAfter: {after.deaf}")
+            voice.add_field(
+                name="Deafened By Admin",
+                value=f"Before: {before.deaf} \nAfter: {after.deaf}",
+            )
         if len(voice.fields) <= 0:
             return
         voice.set_author(icon_url=member.avatar, name=member)
         voice.set_footer(text=f"ID: {member.id}")
         voice.timestamp = datetime.now()
         return await logs_channel.send(embed=voice)
-        
+
     # Blacklisted Word Listener
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
-
         if message.author.bot:
             return
-        
+
         if isinstance(message.channel.type, discord.DMChannel):
             return
-        
+
         guild_data = DataManager.get_guild_data(message.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
         words_in_blacklist = guild_data["blacklisted_words"]
@@ -304,7 +337,7 @@ class Logging(commands.GroupCog):
                     colour=discord.Colour.red(),
                 )
             )
-        
+
     # Message Edit Logs
     @commands.Cog.listener()
     async def on_message_edit(self, before: discord.Message, after: discord.Message):
@@ -316,7 +349,7 @@ class Logging(commands.GroupCog):
 
         if before.author.bot:
             return
-        
+
         if before.attachments:
             return
 
@@ -346,7 +379,7 @@ class Logging(commands.GroupCog):
         embed = discord.Embed(
             description=f"**Message sent by {message.author.mention} Deleted in {message.channel.mention}**",
             colour=discord.Colour.orange(),
-        ) 
+        )
         if len(message.attachments) > 1:
             embed.add_field(
                 name="Attachments",
@@ -388,11 +421,12 @@ class Logging(commands.GroupCog):
         await logs_channel.send(
             embed=discord.Embed(
                 title="Channel Deleted",
-                description=f'Deleted {channel} channel',
+                description=f"Deleted {channel} channel",
                 timestamp=datetime.utcnow(),
                 colour=discord.Colour.red(),
             )
         )
+
 
 async def setup(bot):
     await bot.add_cog(Logging(bot))
