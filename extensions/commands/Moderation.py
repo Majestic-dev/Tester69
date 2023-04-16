@@ -35,6 +35,16 @@ class Moderation(commands.Cog):
         duration: int,
         reason: str = "Unspecified",
     ):
+        muted_role = DataManager.get_guild_data(interaction.guild.id)["muted_role_id"]
+
+        if muted_role == None:
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    description="<:white_cross:1096791282023669860> Please set a muted role first",
+                    colour=discord.Colour.orange(),
+                )
+            )
+
         if member.id == interaction.user.id:
             return await interaction.response.send_message(
                 embed=discord.Embed(
@@ -66,7 +76,6 @@ class Moderation(commands.Cog):
         if str(member.id) not in muted_user_roles:
             muted_user_roles[str(member.id)] = []
 
-        muted_role = DataManager.get_guild_data(interaction.guild.id)["muted_role_id"]
         saved_roles = DataManager.get_guild_data(interaction.guild.id)[
             "muted_user_roles"
         ][str(member.id)]
