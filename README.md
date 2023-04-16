@@ -46,15 +46,7 @@ Please make sure that your code is formatted correctly before making a new pull 
 # License 
 This project is licensed under the Apache License - see the [LICENSE](LICENSE) file for details
 
-# Versions and changelogs
-
-## v1.0
-
-    - An economy with many ways to earn coins
-    - A moderation system
-    - Slash commands 
-
-## v1.1
+# Current Version Changelogs
 
     - Verification System
         * Optimised verification system setup (now only requires 1 command)
@@ -84,9 +76,6 @@ This project is licensed under the Apache License - see the [LICENSE](LICENSE) f
 
     - Listeners
         * Moved some listeners to another file to make other files smaller in size
-
-## Major Changes
-The major changes in this update are the verification system and the logging system. The verification system is now more secure and easier to setup. The logging system is now more detailed and logs more things. This version was focused on rehauling the verification system and improving the logging system.
 
 # TODO
 
