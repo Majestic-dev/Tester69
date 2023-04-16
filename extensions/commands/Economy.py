@@ -407,7 +407,7 @@ class Economy(commands.Cog):
         self.hourly_cooldown[interaction.user.id] = datetime.utcnow() + timedelta(
             hours=1
         )
-    
+
     @app_commands.command(
         name="daily", description="Gain 1000 coins every time you use this command"
     )
