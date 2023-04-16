@@ -46,13 +46,7 @@ Please make sure that your code is formatted correctly before making a new pull 
 # License 
 This project is licensed under the Apache License - see the [LICENSE](LICENSE) file for details
 
-# Versions and changelogs
-
-## v1.0
-
-    - An economy with many ways to earn coins
-    - A moderation system
-    - Slash commands 
+# Version Changelogs
 
 ## v1.1
 
@@ -85,8 +79,14 @@ This project is licensed under the Apache License - see the [LICENSE](LICENSE) f
     - Listeners
         * Moved some listeners to another file to make other files smaller in size
 
-## Major Changes
-There are no major changes in this version. This is the inital release.
+## v1.2
+
+    - Moderation System
+        * Made muting and unmuting more efficient
+            * Muted role will be set using a command (/set_muted_role)
+            * Before a member gets muted, their roles get saved, when muted their roles will be replaced with the set muted role
+            * When unmuted, their roles will be replaced with the roles they had before they got muted
+    
 
 # TODO
 
