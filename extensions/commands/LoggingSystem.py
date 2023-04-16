@@ -92,7 +92,7 @@ class Logging(commands.GroupCog):
 
         leave = discord.Embed(
             title="Member Left",
-            description=f"{member.mention} has left the server",
+            description=f"{member.mention} Has left the server",
             colour=discord.Colour.red(),
         )
         leave.set_author(icon_url=member.avatar, name=member)
@@ -111,7 +111,7 @@ class Logging(commands.GroupCog):
 
         ban = discord.Embed(
             title="Member Banned",
-            description=f"{user.mention} has been banned from the server",
+            description=f"{user.mention} Has been banned from the server",
             colour=discord.Colour.red(),
         )
         ban.set_author(icon_url=user.avatar, name=user)
@@ -130,7 +130,7 @@ class Logging(commands.GroupCog):
 
         unban = discord.Embed(
             title="Member Unbanned",
-            description=f"{user.mention} has been unbanned from the server",
+            description=f"{user.mention} Has been unbanned from the server",
             colour=discord.Colour.green(),
         )
         unban.set_author(icon_url=user.avatar, name=user)
@@ -149,7 +149,7 @@ class Logging(commands.GroupCog):
 
         update = discord.Embed(
             title="Member Updated",
-            description=f"{before.mention}'s profile has been updated",
+            description=f"{before.mention}'s Profile has been updated",
             colour=discord.Colour.gold(),
         )
 
@@ -189,7 +189,7 @@ class Logging(commands.GroupCog):
 
         create = discord.Embed(
             title="Role Created",
-            description=f"{role.mention} has been created",
+            description=f"{role.mention} Role has been created",
             colour=discord.Colour.green(),
         )
         create.set_author(icon_url=role.guild.icon, name=role.guild)
@@ -208,7 +208,7 @@ class Logging(commands.GroupCog):
 
         delete = discord.Embed(
             title="Role Deleted",
-            description=f"{role.name} has been deleted",
+            description=f"{role.name} Role has been deleted",
             colour=discord.Colour.red(),
         )
         delete.set_author(icon_url=role.guild.icon, name=role.guild)
@@ -226,38 +226,36 @@ class Logging(commands.GroupCog):
             return
 
         update = discord.Embed(
-            title="Role Updated",
-            description=f"{before.mention} has been updated",
             colour=discord.Colour.gold(),
         )
 
         if before.name != after.name:
             update.add_field(
-                name="Name", value=f"Before: {before.name} \nAfter: {after.name}"
+                name="Role Name", value=f"Before: {before.name} \nAfter: {after.name}"
             )
         if before.colour != after.colour:
             update.add_field(
-                name="Colour RGB Value",
+                name="Role Colour RGB Value",
                 value=f"Before: {before.colour} \nAfter: {after.colour}",
             )
         if before.hoist != after.hoist:
             update.add_field(
-                name="Displayed Separately From Others",
+                name="Role Displayed Separately From Others",
                 value=f"Before: {before.hoist} \nAfter: {after.hoist}",
             )
         if before.mentionable != after.mentionable:
             update.add_field(
-                name="Mentionable By Anyone",
+                name="Role Mentionable By Anyone",
                 value=f"Before: {before.mentionable} \nAfter: {after.mentionable}",
             )
         if before.display_icon != after.display_icon:
             update.add_field(
-                name="Display Icon",
+                name="Role Display Icon",
                 value=f"Before: {before.display_icon} \nAfter: {after.display_icon}",
             )
         if before.position != after.position:
             update.add_field(
-                name="Position",
+                name="Role Position",
                 value=f"Before: {before.position} \nAfter: {after.position}",
             )
         if len(update.fields) <= 0:
@@ -277,25 +275,43 @@ class Logging(commands.GroupCog):
             return
 
         voice = discord.Embed(
-            title="Voice Channel Update",
-            description=f"{member.mention} has updated their voice channel",
             colour=discord.Colour.gold(),
         )
 
-        if before.channel != after.channel:
+        if before.channel == None and after.channel != None:
             voice.add_field(
-                name="Voice Channel",
-                value=f"Before: {before.channel} \nAfter: {after.channel}",
+                name="Voice Channel Joined",
+                value=f"**{member.mention} Joined {after.channel.mention} voice channel**",
             )
-        if before.mute != after.mute:
+        if before.channel != None and after.channel == None:
             voice.add_field(
-                name="Muted By Admin",
-                value=f"Before: {before.mute} \nAfter: {after.mute}",
+                name="Voice Channel Left",
+                value=f"**{member.mention} Left {before.channel.mention} voice channel**",
             )
-        if before.deaf != after.deaf:
+        if before.channel != None and before.channel != after.channel and after.channel != None:
             voice.add_field(
-                name="Deafened By Admin",
-                value=f"Before: {before.deaf} \nAfter: {after.deaf}",
+                name="Voice Channel Moved",
+                value=f"**{member.mention} Swithced voice channels {before.channel.mention} -> {after.channel.mention}**",
+            )
+        if before.mute == False and after.mute == True:
+            voice.add_field(
+                name="Voice Muted By Admin",
+                value=f"**{member.mention} Was muted by an admin**",
+            )
+        if before.mute == True and after.mute == False:
+            voice.add_field(
+                name="Voice Unmuted By Admin",
+                value=f"**{member.mention} Was unmuted by an admin**",
+            )
+        if before.deaf == False and after.deaf == True:
+            voice.add_field(
+                name="Voice Deafened By Admin",
+                value=f"**{member.mention} Was deafened by an admin**",
+            )
+        if before.deaf == True and after.deaf == False:
+            voice.add_field(
+                name="Voice Undeafened By Admin",
+                value=f"**{member.mention} Was undeafened by an admin**",
             )
         if len(voice.fields) <= 0:
             return
@@ -341,16 +357,17 @@ class Logging(commands.GroupCog):
     # Message Edit Logs
     @commands.Cog.listener()
     async def on_message_edit(self, before: discord.Message, after: discord.Message):
-        guild_data = DataManager.get_guild_data(before.guild.id)
-        logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
-
-        if logs_channel == None:
-            return
 
         if before.author.bot:
             return
 
         if before.attachments:
+            return
+
+        guild_data = DataManager.get_guild_data(before.guild.id)
+        logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
+
+        if logs_channel == None:
             return
 
         delete = discord.Embed(
