@@ -36,7 +36,7 @@ A general-use discord bot coded in discord.py
 1. Clone the repository
 2. Run the main.py file
 
-    Running the main.py file for the first time will create a new directory named "data" and 3 new files in it. It should then ask you to enter your bot token. You can see how to get a bot token [here](https://www.youtube.com/watch?v=aI4OmIbkJH8). There will also be a new directory named "fonts", there you can place any fonts you'd like that have the .ttf extension. This will be used for [Pillow](https://pillow.readthedocs.io/en/stable/index.html#) image generation for the verification system. Enter your bot token in the data/config.json file and save the file. Then run the main.py file again. It should now work. If you don't want to run the main file in a code editor 
+    Running the main.py file for the first time will create a new directory named "data" and 3 new files in it. It should then ask you to enter your bot token. You can see how to get a bot token [here](https://www.youtube.com/watch?v=aI4OmIbkJH8). There will also be a new directory named "fonts", there you can place any fonts you'd like that have the .ttf extension. This will be used for [Pillow](https://pillow.readthedocs.io/en/stable/index.html#) image generation for the verification system. Enter your bot token in the data/config.json file and save the file. Then run the main.py file again. It should now work. If you don't want to run the main file in a code editor you can run it using the [start.bat](start.bat) file.
 
 # Contributing 
 All contributions are welcome! If you'd like to contribute, please make a pull request.
