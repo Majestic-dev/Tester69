@@ -101,7 +101,7 @@ class Gambling(commands.Cog):
         self.bot = bot
 
     @app_commands.command(name="gamble", description="Gamble your set amount of coins")
-    async def _gamble(self, interaction: discord.Interaction, bet: int = None):
+    async def _gamble(self, interaction: discord.Interaction, bet: int):
         user_data = DataManager.get_user_data(interaction.user.id)
 
         if bet < 10 or bet > 250000:
@@ -132,24 +132,9 @@ class Gambling(commands.Cog):
         )
 
         win = random.choices([True, False], [45, 55])[0]
+        random1 = random.randint(1, 3)
+        winnings = (bet * random1)
         if win:
-            multipliers = [
-                1,
-                1.1,
-                1.2,
-                1.3,
-                1.4,
-                1.5,
-                1.6,
-                1.7,
-                1.8,
-                1.9,
-                2,
-            ]
-            chances = [11, 10, 10, 9, 8, 7, 6, 5, 4, 3, 2]
-            multiplier = random.choices(multipliers, chances)[0]
-            winnings = int(bet * multiplier)
-
             DataManager.edit_user_data(
                 interaction.user.id, "balance", user_data["balance"] + winnings
             )
@@ -158,7 +143,7 @@ class Gambling(commands.Cog):
                 embed=discord.Embed(
                     title="Bet Results",
                     description=(
-                        f'Congratulations! You won {winnings - bet} and your new balance is {user_data["balance"] + winnings}'
+                        f'Congratulations! You won {winnings} and your new balance is {user_data["balance"]}'
                     ),
                     timestamp=datetime.utcnow(),
                     colour=discord.Colour.green(),
@@ -169,7 +154,7 @@ class Gambling(commands.Cog):
             embed=discord.Embed(
                 title="Bet Results",
                 description=(
-                    f'Sorry, you lost {bet}. Your new balance is {user_data["balance"] - bet}'
+                    f'Sorry, you lost {bet}. Your new balance is {user_data["balance"]}'
                 ),
                 timestamp=datetime.utcnow(),
                 colour=discord.Colour.red(),
