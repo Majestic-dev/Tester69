@@ -182,12 +182,99 @@ class ServerManagement(commands.Cog):
         await interaction.response.send_message(embed=ChannelDelete)
 
     @app_commands.command(
+            name="add_role", description="Add a role to the mentioned user"
+    )
+    @app_commands.default_permissions(manage_roles=True)
+    async def add_role(
+        self,
+        interaction: discord.Interaction,
+        user: discord.Member,
+        role: discord.Role,
+    ):
+        
+        if role in user.roles:
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    description="<:white_cross:1096791282023669860> That user already has that role",
+                    colour=discord.Colour.red(),
+                )
+            )
+        
+        bot = interaction.guild.get_member(self.bot.user.id)
+        if bot.top_role.position < role.position or bot.top_role.position == role.position:
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    description="<:white_cross:1096791282023669860> I cannot add a role higher than my highest role",
+                    colour=discord.Colour.red(),
+                )
+            )
+
+        if interaction.user.top_role.position < role.position:
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    description="<:white_cross:1096791282023669860> You cannot add a role higher than your highest role",
+                    colour=discord.Colour.red(),
+                )
+            )
+        
+        await interaction.response.send_message(
+            embed=discord.Embed(
+                description=f"<:white_checkmark:1096793014287995061> added {role.mention} to {user.mention}",
+                colour=discord.Colour.green(),
+            )
+        )
+        await user.add_roles(role)  
+
+    @app_commands.command(
+        name="remove_role", description="Remove a role from the mentioned user"
+    )
+    @app_commands.default_permissions(manage_roles=True)
+    async def remove_role(
+        self,
+        interaction: discord.Interaction,
+        user: discord.Member,
+        role: discord.Role,
+    ):
+        if role not in user.roles:
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    description="<:white_cross:1096791282023669860> That user does not have that role.",
+                    colour=discord.Colour.red(),
+                )
+            )
+        
+        bot = interaction.guild.get_member(self.bot.user.id)
+        if bot.top_role.position < role.position or bot.top_role.position == role.position:
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    description="<:white_cross:1096791282023669860> I cannot remove a role that is higher than my highest role.",
+                    colour=discord.Colour.red(),
+                )
+            )
+        
+        if interaction.user.top_role.position < role.position:
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    description="<:white_cross:1096791282023669860> You cannot remove a role that is higher than your highest role.",
+                    colour=discord.Colour.red(),
+                )
+            )
+        
+        await interaction.response.send_message(
+            embed=discord.Embed(
+                description=f"<:white_checkmark:1096793014287995061> removed {role.mention} from {user.mention}",
+                colour=discord.Colour.green(),
+            )
+        )
+        await user.remove_roles(role)
+
+    @app_commands.command(
         name="purge", description="Purge a custom amount of messages from this channel"
     )
     @app_commands.default_permissions(manage_channels=True)
     async def purge(self, interaction: discord.Interaction, count: int):
         await interaction.response.defer(ephemeral=True)
-        await interaction.channel.purge(limit=count + 1)
+        await interaction.channel.purge(limit=count)
 
         await asyncio.sleep(3)
 
