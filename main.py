@@ -61,9 +61,8 @@ DataManager(
 if "fonts" not in os.listdir("."):
     os.mkdir("fonts")
 
-bot = commands.Bot(command_prefix="'", intents=discord.Intents.all())
+bot = commands.Bot(command_prefix="'", owner_id=705435835306213418, intents=discord.Intents.all())
 bot.remove_command("help")
-
 
 @bot.event
 async def on_ready():
