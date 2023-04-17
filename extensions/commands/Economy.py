@@ -29,50 +29,42 @@ class Economy(commands.Cog):
         self.monthly_cooldown = {}
 
     @commands.command(name="add", description="Add set amount of coins to your balance")
-    @commands.is_owner()
     async def add(
+        self,
         ctx,
-        interaction: discord.Interaction,
         amount: int,
         member: Optional[discord.Member] = None,
     ):
-        if isinstance(commands.errors.NotOwner, Exception):
+        if self.bot.owner_id != ctx.author.id:
             return await ctx.reply(
                 embed=discord.Embed(
-                    title="Coin Addition Failed",
-                    description=f"You do not have permission to use this command.",
-                    timestamp=datetime.utcnow(),
+                    description="<:white_cross:1096791282023669860> You are not the owner of this bot.",
                     colour=discord.Colour.red(),
                 )
             )
-
+        
         if member == None:
-            user_data = DataManager.get_user_data(ctx.member.id)
+            user_data = DataManager.get_user_data(ctx.author.id)
             DataManager.edit_user_data(
-                ctx.member.id, "balance", user_data["balance"] + amount
+                ctx.author.id, "balance", user_data["balance"] + amount
             )
-
-            return await interaction.response.send_message(
+            return await ctx.reply(
                 embed=discord.Embed(
-                    title="Added Coins",
                     description=(
-                        f'Added {amount} coins to your balance. Your new balance is {user_data["balance"]}'
+                        f'<:white_checkmark:1096793014287995061> Added {amount} :coin: to your balance. Your new balance is {user_data["balance"]} :coin:'
                     ),
-                    timestamp=datetime.utcnow(),
                     colour=discord.Colour.green(),
                 )
             )
 
         else:
-            user_data = DataManager.get_user_data(ctx.member.id)
+            user_data = DataManager.get_user_data(member.id)
         DataManager.edit_user_data(member.id, "balance", user_data["balance"] + amount)
-        return await interaction.response.send_message(
+        return await ctx.reply(
             embed=discord.Embed(
-                title="Added Coins",
                 description=(
-                    f'Added {amount} coins to {member.name}\'s balance. Their new balance is {user_data["balance"]}'
+                    f'<:white_checkmark:1096793014287995061> Added {amount} :coin: to {member.name}\'s balance. Their new balance is {user_data["balance"]} :coin:'
                 ),
-                timestamp=datetime.utcnow(),
                 colour=discord.Colour.green(),
             )
         )
@@ -80,52 +72,32 @@ class Economy(commands.Cog):
     @commands.command(
         name="subtract", description="Subtract set amount of coins from your balance"
     )
-    @commands.is_owner()
     async def subtract(
+        self,
         ctx,
-        interaction: discord.Interaction,
         amount: int,
         member: Optional[discord.Member] = None,
     ):
-        user_data = DataManager.get_user_data(ctx.member.id)
-
-        if isinstance(commands.errors.NotOwner, Exception):
+        
+        if self.bot.owner_id != ctx.author.id:
             return await ctx.reply(
                 embed=discord.Embed(
-                    title="Coin Subtraction Failed",
-                    description=f"You do not have permission to use this command.",
-                    timestamp=datetime.utcnow(),
+                    description="<:white_cross:1096791282023669860> You are not the owner of this bot.",
                     colour=discord.Colour.red(),
                 )
             )
-
-        if user_data["balance"] - amount < 0:
-            return await ctx.reply(
-                embed=discord.Embed(
-                    title="Coin Subtraction Failed",
-                    description=(
-                        f'You do not have enough coins. Your balance is {user_data["balance"]}, after the subtraction you would have {user_data["balance"] - amount}.'
-                    ),
-                    timestamp=datetime.utcnow(),
-                    colour=discord.Colour.red(),
-                )
-            )
-
-        DataManager.edit_user_data(
-            ctx.member.id, "balance", user_data["balance"] - amount
-        )
+        
+        user_data = DataManager.get_user_data(ctx.author.id)
 
         if member == None:
             DataManager.edit_user_data(
-                ctx.user.id, "balance", user_data["balance"] - amount
+                ctx.author.id, "balance", user_data["balance"] - amount
             )
-            return await interaction.response.send_message(
+            return await ctx.reply(
                 embed=discord.Embed(
-                    title="Removed Coins",
                     description=(
-                        f'Removed {amount} coins from your balance. Your new balance is {user_data["balance"]}'
+                        f'<:white_checkmark:1096793014287995061> Removed {amount} :coin: from your balance. Your new balance is {user_data["balance"]} :coin:'
                     ),
-                    timestamp=datetime.utcnow(),
                     colour=discord.Colour.green(),
                 )
             )
@@ -133,13 +105,11 @@ class Economy(commands.Cog):
         else:
             user_data = DataManager.get_user_data(member.id)
         DataManager.edit_user_data(member.id, "balance", user_data["balance"] - amount)
-        return await interaction.response.send_message(
+        return await ctx.reply(
             embed=discord.Embed(
-                title="Removed Coins",
                 description=(
-                    f'Removed {amount} coins from {member.name}\'s balance. Their new balance is {user_data["balance"]}'
+                    f'<:white_checkmark:1096793014287995061> Removed {amount} :coin: from {member.name}\'s balance. Their new balance is {user_data["balance"]} :coin:'
                 ),
-                timestamp=datetime.utcnow(),
                 colour=discord.Colour.green(),
             )
         )
