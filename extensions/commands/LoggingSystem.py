@@ -148,8 +148,6 @@ class Logging(commands.GroupCog):
             return
 
         update = discord.Embed(
-            title="Member Updated",
-            description=f"{before.mention}'s Profile has been updated",
             colour=discord.Colour.gold(),
         )
 
@@ -162,14 +160,14 @@ class Logging(commands.GroupCog):
 
         if before.roles != after.roles:
             update.add_field(
-                name="Roles",
-                value=f"Before: {', '.join([role.name for role in before.roles])}\nAfter: {', '.join([role.name for role in after.roles])}",
+                name="Member Roles Updated",
+                value=f"**Before: `{', '.join([role.name for role in before.roles])}`\nAfter: `{', '.join([role.name for role in after.roles])}`**",
             )
         if before.nick != after.nick:
-            update.add_field(name="Nickname", value=f"Before: {nick} \nAfter: {nick2}")
+            update.add_field(name="Member Nickname Updated", value=f"**Before: {nick} \nAfter: {nick2}**")
         if before.name != after.name:
             update.add_field(
-                name="Username", value=f"Before: {before.name} \nAfter: {after.name}"
+                name="Member Username Updated", value=f"**Before: {before.name} \nAfter: {after.name}**"
             )
         if len(update.fields) <= 0:
             return
@@ -231,32 +229,33 @@ class Logging(commands.GroupCog):
 
         if before.name != after.name:
             update.add_field(
-                name="Role Name", value=f"Before: {before.name} \nAfter: {after.name}"
+                name=f"{after.mention} Role Name", 
+                value=f"**Before: {before.name} \nAfter: {after.name}**"
             )
         if before.colour != after.colour:
             update.add_field(
-                name="Role Colour RGB Value",
-                value=f"Before: {before.colour} \nAfter: {after.colour}",
+                name=f"{after.mention} Role Colour RGB Value",
+                value=f"**Before: {before.colour} \nAfter: {after.colour}**",
             )
         if before.hoist != after.hoist:
             update.add_field(
-                name="Role Displayed Separately From Others",
-                value=f"Before: {before.hoist} \nAfter: {after.hoist}",
+                name=f"{after.mention} Role Displayed Separately From Others",
+                value=f"**Before: {before.hoist} \nAfter: {after.hoist}**",
             )
         if before.mentionable != after.mentionable:
             update.add_field(
-                name="Role Mentionable By Anyone",
-                value=f"Before: {before.mentionable} \nAfter: {after.mentionable}",
+                name=f"{after.mention} Role Mentionable By Anyone",
+                value=f"**Before: {before.mentionable} \nAfter: {after.mentionable}**",
             )
         if before.display_icon != after.display_icon:
             update.add_field(
-                name="Role Display Icon",
-                value=f"Before: {before.display_icon} \nAfter: {after.display_icon}",
+                name=f"{after.mention} Role Display Icon",
+                value=f"**Before: {before.display_icon} \nAfter: {after.display_icon}**",
             )
         if before.position != after.position:
             update.add_field(
-                name="Role Position",
-                value=f"Before: {before.position} \nAfter: {after.position}",
+                name=f"{after.mention} Role Position",
+                value=f"**Before: {before.position} \nAfter: {after.position}**",
             )
         if len(update.fields) <= 0:
             return
@@ -323,10 +322,11 @@ class Logging(commands.GroupCog):
     # Blacklisted Word Listener
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
+
         if message.author.bot:
             return
 
-        if isinstance(message.channel.type, discord.DMChannel):
+        if message.channel.type == discord.channel.ChannelType.private:
             return
 
         guild_data = DataManager.get_guild_data(message.guild.id)
@@ -343,16 +343,8 @@ class Logging(commands.GroupCog):
 
         content = message.content.lower()
 
-        if any(word in words_in_blacklist for word in message.content.split(" ")):
+        if any(word in words_in_blacklist for word in content.split(" ")):
             await message.delete()
-            return await logs_channel.send(
-                embed=discord.Embed(
-                    title="Blacklisted Word",
-                    description=f"{message.author.mention} sent a blacklisted word",
-                    timestamp=datetime.utcnow(),
-                    colour=discord.Colour.red(),
-                )
-            )
 
     # Message Edit Logs
     @commands.Cog.listener()
@@ -374,8 +366,8 @@ class Logging(commands.GroupCog):
             description=f"**Message Edited in {before.channel.mention}** [Jump to Message]({before.jump_url})",
             colour=discord.Colour.orange(),
         )
-        delete.add_field(name="Before", value=f"{before.content}", inline=True)
-        delete.add_field(name="After", value=f"{after.content}", inline=True)
+        delete.add_field(name="**Before**", value=f"{before.content}", inline=True)
+        delete.add_field(name="**After**", value=f"{after.content}", inline=True)
         delete.set_author(icon_url=before.author.avatar.url, name=f"{before.author}")
         delete.set_footer(text=f"Author ID: {before.author.id}")
         delete.timestamp = datetime.now()
@@ -386,6 +378,10 @@ class Logging(commands.GroupCog):
     async def on_message_delete(self, message: discord.Message):
         guild_data = DataManager.get_guild_data(message.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
+        words_in_blacklist = guild_data["blacklisted_words"]
+        content = message.content.lower()
+        content2 = message.content.split(" ")
+        bad_words_said = "\n".join(list(set(content2) & set(words_in_blacklist)))
 
         if logs_channel == None:
             return
@@ -400,13 +396,16 @@ class Logging(commands.GroupCog):
         if len(message.attachments) > 1:
             embed.add_field(
                 name="Attachments",
-                value=f"{', '.join([attachment.url for attachment in message.attachments])}",
+                value=f"**{', '.join([attachment.url for attachment in message.attachments])}**",
                 inline=False,
             )
         elif len(message.attachments) == 1:
             embed.set_image(url=message.attachments[0].url)
         if len(message.content) > 0:
-            embed.add_field(name="Content", value=f"{message.content}", inline=True)
+            embed.add_field(name="**Content**", value=f"{message.content}")
+        if any(word in words_in_blacklist for word in content.split(" ")):
+            embed.add_field(name="**Reason**", value="Blacklisted Word")
+            embed.add_field(name="**Detailed Reason**", value=f"`{bad_words_said}`")
         embed.set_author(icon_url=message.author.avatar.url, name=f"{message.author}")
         embed.set_footer(
             text=f"Author ID: {message.author.id} | Message ID: {message.id}"
