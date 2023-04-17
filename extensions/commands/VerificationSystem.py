@@ -214,7 +214,7 @@ class Verification(commands.GroupCog):
 
             try:
                 await dm_channel.send(
-                    f'Please enter the code seen in the image. If the code is too blurry and you can not see it type "reset"',
+                    f'Please enter the code seen in the image. If the code is too blurry and you can not see it type "reset".\n By verifying yourself you accept the rules of the server you are trying to verify in',
                     file=discord.File(f"{member.id}.png"),
                 )
                 os.remove(f"{member.id}.png")
@@ -285,7 +285,7 @@ class Verification(commands.GroupCog):
                 self.generate_img(code := str(random.randint(11111, 99999)), member.id)
 
                 await dm_channel.send(
-                    f'Please enter the code seen in the image. If the code is too blurry and you can not see it type "reset"',
+                    f'Please enter the code seen in the image. If the code is too blurry and you can not see it type "reset".\n By verifying yourself you accept the rules of the server you are trying to verify in',
                     file=discord.File(f"{member.id}.png"),
                 )
 
@@ -313,7 +313,7 @@ class Verification(commands.GroupCog):
                 self.generate_img(code := str(random.randint(11111, 99999)), member.id)
 
                 await dm_channel.send(
-                    f'Please enter the code seen in the image. If the code is too blurry and you can not see it type "reset"',
+                    f'Please enter the code seen in the image. If the code is too blurry and you can not see it type "reset".\n By verifying yourself you accept the rules of the server you are trying to verify in',
                     file=discord.File(f"{member.id}.png"),
                 )
 
