@@ -94,10 +94,6 @@ This project is licensed under the Apache License - see the [LICENSE](LICENSE) f
 
 - [x] Add some customization to the moderation system (for example setting the muted role).
 - [ ] Migrate from json to a binary database.
-- [ ] Add a shop for economy.
-- [ ] Redo fishing and hunting.
-- [ ] Add a way to auction things (basically like Dank Memer).
-- [ ] More gambling games.
 
 ## V1.3 Focused On Miscellaneous/Fun
 
