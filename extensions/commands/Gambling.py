@@ -131,10 +131,10 @@ class Gambling(commands.Cog):
             interaction.user.id, "balance", user_data["balance"] - bet
         )
 
-        win = random.choices([True, False], [45, 55])[0]
+        win = random.choices([True, False])[0]
         random1 = random.randint(1, 3)
         winnings = (bet * random1)
-        if win:
+        if win == True:
             DataManager.edit_user_data(
                 interaction.user.id, "balance", user_data["balance"] + winnings
             )
@@ -149,17 +149,17 @@ class Gambling(commands.Cog):
                     colour=discord.Colour.green(),
                 )
             )
-
-        await interaction.response.send_message(
-            embed=discord.Embed(
-                title="Bet Results",
-                description=(
-                    f'Sorry, you lost {bet}. Your new balance is {user_data["balance"]}'
-                ),
-                timestamp=datetime.utcnow(),
-                colour=discord.Colour.red(),
+        else:
+            await interaction.response.send_message(
+                embed=discord.Embed(
+                    title="Bet Results",
+                    description=(
+                        f'Sorry, you lost {bet}. Your new balance is {user_data["balance"]}'
+                    ),
+                    timestamp=datetime.utcnow(),
+                    colour=discord.Colour.red(),
+                )
             )
-        )
 
     @app_commands.command(
         name="snakeeyes",
