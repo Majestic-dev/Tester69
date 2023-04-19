@@ -86,7 +86,8 @@ This project is licensed under the Apache License - see the [LICENSE](LICENSE) f
             * Muted role will be set using a command (/set_muted_role)
             * Before a member gets muted, their roles get saved, when muted their roles will be replaced with the set muted role
             * When unmuted, their roles will be replaced with the roles they had before they got muted
-    
+    - Miscellaneous
+        * Added a "search_gif" command that will search for a gif on GIPHY by the given keyword, if no keyword is given it will search for a random gif
 
 # TODO
 
