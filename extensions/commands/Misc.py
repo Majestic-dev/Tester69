@@ -7,6 +7,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 from typing import Optional
+from utils import DataManager
 
 
 class Misc(commands.Cog):
@@ -26,12 +27,12 @@ class Misc(commands.Cog):
         session = aiohttp.ClientSession()
 
         if search == None:
-            response = await session.get("https://api.giphy.com/v1/gifs/random?api_key=bAoZ2Hc2akTjTlm5Gcbh2l8qWNjc9QSw")
+            response = await session.get(f"https://api.giphy.com/v1/gifs/random?api_key="+DataManager.get("config", "token"))
             data = json.loads(await response.text())
             embed.set_image(url=data['data']['images']['original']['url'])
         else:
             search.replace(' ', '+')
-            response = await session.get(f"http://api.giphy.com/v1/gifs/search?q={search}&api_key=bAoZ2Hc2akTjTlm5Gcbh2l8qWNjc9QSw")
+            response = await session.get(f"http://api.giphy.com/v1/gifs/search?q={search}&api_key="+DataManager.get("config", "token"))
             data = json.loads(await response.text())
             gif_choice = random.randint(0, 9)
             embed.set_image(url=data['data'][gif_choice]['images']['original']['url'])
