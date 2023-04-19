@@ -113,6 +113,104 @@ class Economy(commands.Cog):
                 colour=discord.Colour.green(),
             )
         )
+    
+    @commands.command(
+        name="devskip", description="Skip all cooldowns of the mentioned user"
+    )
+    async def devskip(self, ctx, user: Optional[discord.User] = None):
+
+        if self.bot.owner_id != ctx.author.id:
+            return await ctx.reply(
+                embed=discord.Embed(
+                    description="<:white_cross:1096791282023669860> You are not the owner of this bot.",
+                    colour=discord.Colour.red(),
+                )
+            )
+        
+        if user == None:
+            user = ctx.author
+        else:
+            user = user
+
+        skip = discord.Embed(
+            title="Cooldown Skipped",
+            timestamp=datetime.utcnow(),
+            colour=discord.Colour.green(),
+        )
+
+        if user.id in self.fish_cooldown:
+            self.fish_cooldown.pop(user.id)
+            skip.add_field(name="Fishing cooldown", value="Skipped", inline=False)
+
+        if user.id in self.hunt_cooldown:
+            self.hunt_cooldown.pop(user.id)
+            skip.add_field(name="Hunting cooldown", value="Skipped", inline=False)
+
+        if user.id in self.hourly_cooldown:
+            self.hourly_cooldown.pop(user.id)
+            skip.add_field(name="Hourly cooldown", value="Skipped", inline=False)
+
+        if user.id in self.daily_cooldown:
+            self.hourly_cooldown.pop(user.id)
+            skip.add_field(name="Daily cooldown", value="Skipped", inline=False)
+
+        if user.id in self.monthly_cooldown:
+            self.monthly_cooldown.pop(user.id)
+            skip.add_field(name="Monthly cooldown", value="Skipped", inline=False)
+
+        if len(skip.fields) == 0:
+            return await ctx.reply(
+                embed=discord.Embed(
+                    title="No Cooldowns",
+                    description=(f"{user.name} doesn't have any active cooldowns"),
+                    timestamp=datetime.utcnow(),
+                    colour=discord.Colour.orange(),
+                )
+            )
+
+        await ctx.reply(embed=skip)
+    
+    @app_commands.command(name="pay", description="Pay someone some coins")
+    async def pay(self, interaction: discord.Interaction, user: discord.User, amount: int):
+        if user.id == interaction.user.id:
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    description="<:white_cross:1096791282023669860> You can't pay yourself!",
+                    colour=discord.Colour.red(),
+                )
+            )
+
+        if amount <= 0:
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    description="<:white_cross:1096791282023669860> You can't pay someone a negative amount!",
+                    colour=discord.Colour.red(),
+                )
+            )
+
+        user_data = DataManager.get_user_data(interaction.user.id)
+        if user_data["balance"] < amount:
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    description="<:white_cross:1096791282023669860> You don't have enough :coin: to pay that amount!",
+                    colour=discord.Colour.red(),
+                )
+            )
+
+        DataManager.edit_user_data(
+            interaction.user.id, "balance", user_data["balance"] - amount
+        )
+        DataManager.edit_user_data(
+            user.id, "balance", DataManager.get_user_data(user.id)["balance"] + amount
+        )
+
+        await interaction.response.send_message(
+            embed=discord.Embed(
+                description=
+                    f'<:white_checkmark:1096793014287995061> Paid {user.mention} {amount} :coin:. Your new balance is {user_data["balance"]} :coin:',
+                colour=discord.Colour.green(),
+            )
+        )
 
     @app_commands.command(name="balance", description="Check your coin balance")
     async def balance(
@@ -482,50 +580,6 @@ class Economy(commands.Cog):
             )
 
         await interaction.response.send_message(embed=inv_embed)
-
-    @app_commands.command(
-        name="devskip", description="Skip all cooldowns of the mentioned user"
-    )
-    @commands.is_owner()
-    async def devskip(self, interaction: discord.Interaction, user: discord.User):
-        skip = discord.Embed(
-            title="Cooldown Skipped",
-            timestamp=datetime.utcnow(),
-            colour=discord.Colour.green(),
-        )
-
-        if user.id in self.fish_cooldown:
-            self.fish_cooldown.pop(user.id)
-            skip.add_field(name="Fishing cooldown", value="Skipped", inline=False)
-
-        if user.id in self.hourly_cooldown:
-            self.hourly_cooldown.pop(user.id)
-            skip.add_field(name="Hourly cooldown", value="Skipped", inline=False)
-
-        if user.id in self.hunt_cooldown:
-            self.hunt_cooldown.pop(user.id)
-            skip.add_field(name="Hunting cooldown", value="Skipped", inline=False)
-
-        if user.id in self.monthly_cooldown:
-            self.monthly_cooldown.pop(user.id)
-            skip.add_field(name="Monthly cooldown", value="Skipped", inline=False)
-
-        if user.id in self.yearly_cooldown:
-            self.yearly_cooldown.pop(user.id)
-            skip.add_field(name="Yearly cooldown", value="Skipped", inline=True)
-
-        if len(skip.fields) == 0:
-            return await interaction.response.send_message(
-                embed=discord.Embed(
-                    title="No Cooldowns",
-                    description=(f"{user.name} doesn't have any active cooldowns"),
-                    timestamp=datetime.utcnow(),
-                    colour=discord.Colour.orange(),
-                )
-            )
-
-        await interaction.response.send_message(embed=skip)
-
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Economy(bot))
