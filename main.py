@@ -13,7 +13,7 @@ DataManager(
         (
             "config",
             "data/config.json",
-            {"token": None, "global_whitelist": [], "owners": []},
+            {"token": None, "giphy_key": None, "global_whitelist": [], "owners": []},
         ),
         (
             "economy",
