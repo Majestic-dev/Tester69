@@ -22,22 +22,12 @@ class ServerManagement(commands.Cog):
     async def slowmode(
         self,
         interaction: discord.Interaction,
-        channel: discord.TextChannel,
+        channel: Optional[discord.TextChannel],
         slowmode: int,
     ):
-        guild_data = DataManager.get_guild_data(interaction.guild.id)
-        logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
+        if channel == None:
+            channel = interaction.channel
         await channel.edit(reason="Slowmode command", slowmode_delay=slowmode)
-
-        if logs_channel == None:
-            return await interaction.response.send_message(
-                embed=discord.Embed(
-                    title="No Logs Channel",
-                    description="Please set a channel where all logs will be sent. `/set_logs_channel`",
-                    timestamp=datetime.utcnow(),
-                    colour=discord.Colour.orange(),
-                )
-            )
 
         if slowmode == 0:
             return await interaction.response.send_message(
@@ -84,16 +74,6 @@ class ServerManagement(commands.Cog):
         guild_data = DataManager.get_guild_data(interaction.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
         channeltype = ChannelType(interaction.namespace.channeltype)
-
-        if logs_channel == None:
-            return await interaction.response.send_message(
-                embed=discord.Embed(
-                    title="No Logs Channel",
-                    description="Please set a channel where all logs will be sent. `/set_logs_channel`",
-                    timestamp=datetime.utcnow(),
-                    colour=discord.Colour.orange(),
-                )
-            )
 
         channel = await interaction.guild._create_channel(
             name=name,
@@ -146,16 +126,6 @@ class ServerManagement(commands.Cog):
         guild_data = DataManager.get_guild_data(interaction.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
         channeltype = discord.ChannelType
-
-        if logs_channel == None:
-            return await interaction.response.send_message(
-                embed=discord.Embed(
-                    title="No Logs Channel",
-                    description="Please set a channel where all logs will be sent. `/set_logs_channel`",
-                    timestamp=datetime.utcnow(),
-                    colour=discord.Colour.orange(),
-                )
-            )
 
         await channel.delete(reason=reason)
 
