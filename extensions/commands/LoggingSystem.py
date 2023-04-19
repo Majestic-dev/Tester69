@@ -89,16 +89,20 @@ class Logging(commands.GroupCog):
 
         if logs_channel == None:
             return
-
-        leave = discord.Embed(
-            title="Member Left",
-            description=f"{member.mention} Has left the server",
-            colour=discord.Colour.red(),
-        )
-        leave.set_author(icon_url=member.avatar, name=member)
-        leave.set_footer(text=f"ID: {member.id}")
-        leave.timestamp = datetime.now()
-        await logs_channel.send(embed=leave)
+        
+        try:
+            await member.guild.fetch_ban(member)
+            return
+        except:
+            leave = discord.Embed(
+                title="Member Left",
+                description=f"{member.mention} Has left the server",
+                colour=discord.Colour.red(),
+            )
+            leave.set_author(icon_url=member.avatar, name=member)
+            leave.set_footer(text=f"ID: {member.id}")
+            leave.timestamp = datetime.now()
+            await logs_channel.send(embed=leave)
 
     # Member Ban Listener
     @commands.Cog.listener()
@@ -171,7 +175,7 @@ class Logging(commands.GroupCog):
             )
         if len(update.fields) <= 0:
             return
-        update.set_author(icon_url=before.avatar, name=before)
+        update.set_author(icon_url=after.avatar, name=before)
         update.set_footer(text=f"ID: {before.id}")
         update.timestamp = datetime.now()
         return await logs_channel.send(embed=update)
@@ -352,10 +356,7 @@ class Logging(commands.GroupCog):
 
         if before.author.bot:
             return
-
-        if before.attachments:
-            return
-
+        
         guild_data = DataManager.get_guild_data(before.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
 
@@ -368,6 +369,18 @@ class Logging(commands.GroupCog):
         )
         delete.add_field(name="**Before**", value=f"{before.content}", inline=True)
         delete.add_field(name="**After**", value=f"{after.content}", inline=True)
+        if len(after.attachments) >= 1:
+            delete.add_field(
+                name="Attachments",
+                value=f"**{', '.join([attachment.url for attachment in after.attachments])}**",
+                inline=False,
+            )
+        if len(before.stickers) >= 1:
+            delete.add_field(
+                name="Stickers",
+                value=f"**{', '.join([sticker.url for sticker in after.stickers])}**",
+                inline=False,
+            )
         delete.set_author(icon_url=before.author.avatar.url, name=f"{before.author}")
         delete.set_footer(text=f"Author ID: {before.author.id}")
         delete.timestamp = datetime.now()
@@ -388,11 +401,19 @@ class Logging(commands.GroupCog):
 
         if message.author.bot:
             return
+        
+        if message.is_system() == True:
+            return
 
         embed = discord.Embed(
             description=f"**Message sent by {message.author.mention} Deleted in {message.channel.mention}**",
             colour=discord.Colour.orange(),
         )
+        if len(message.content) > 0:
+            embed.add_field(name="**Content**", value=f"{message.content}")
+        if any(word in words_in_blacklist for word in content.split(" ")):
+            embed.add_field(name="**Reason**", value="Blacklisted Word")
+            embed.add_field(name="**Detailed Reason**", value=f"`{bad_words_said}`")
         if len(message.attachments) > 1:
             embed.add_field(
                 name="Attachments",
@@ -401,11 +422,12 @@ class Logging(commands.GroupCog):
             )
         elif len(message.attachments) == 1:
             embed.set_image(url=message.attachments[0].url)
-        if len(message.content) > 0:
-            embed.add_field(name="**Content**", value=f"{message.content}")
-        if any(word in words_in_blacklist for word in content.split(" ")):
-            embed.add_field(name="**Reason**", value="Blacklisted Word")
-            embed.add_field(name="**Detailed Reason**", value=f"`{bad_words_said}`")
+        if len(message.stickers) >= 1:
+            embed.add_field(
+                name="Stickers",
+                value=f"**{', '.join([sticker.url for sticker in message.stickers])}**",
+                inline=False,
+            )
         embed.set_author(icon_url=message.author.avatar.url, name=f"{message.author}")
         embed.set_footer(
             text=f"Author ID: {message.author.id} | Message ID: {message.id}"
