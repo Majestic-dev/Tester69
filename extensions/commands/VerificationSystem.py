@@ -130,16 +130,6 @@ class Verification(commands.GroupCog):
         guild_data = DataManager.get_guild_data(interaction.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
 
-        if logs_channel == None:
-            await interaction.channel.send_message(
-                embed=discord.Embed(
-                    title="No Logs Channel",
-                    description="If you wish to log your actions please set a logging channel `/set_logs_channel`",
-                    timestamp=datetime.utcnow(),
-                    colour=discord.Colour.orange(),
-                )
-            )
-
         verification = discord.Embed(
             title="Verification Setup",
             description="Verification has been setup for this server",
