@@ -19,6 +19,7 @@ class ServerManagement(commands.Cog):
         name="slowmode", description="Set the slowmode in the channel of your choice"
     )
     @app_commands.default_permissions(manage_channels=True)
+    @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id))
     async def slowmode(
         self,
         interaction: discord.Interaction,
@@ -32,18 +33,66 @@ class ServerManagement(commands.Cog):
         if slowmode == 0:
             return await interaction.response.send_message(
                 embed=discord.Embed(
-                    title="Slowmode Disabled!",
-                    description=f"Successfully disabled slowmode in {channel.mention}",
-                    timestamp=datetime.utcnow(),
+                    description=f"<:white_checkmark:1096793014287995061> Disabled slowmode in {channel.mention}",
                     colour=discord.Colour.green(),
                 )
             )
 
         await interaction.response.send_message(
             embed=discord.Embed(
-                title="Slowmode Set!",
-                description=f"Successfully set the slowmode to {slowmode} seconds in {channel.mention}",
+                description=f"<:white_checkmark:1096793014287995061> Set the slowmode to {slowmode} seconds in {channel.mention}",
+                colour=discord.Colour.green(),
+            )
+        )
+
+    @slowmode.error
+    async def on_slowmode_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+        if isinstance(error, app_commands.CommandOnCooldown):
+            await interaction.response.send_message(ephemeral=True,
+                embed=discord.Embed(
+                    description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
+                    colour=discord.Colour.red()
+                )
+            )
+
+    @app_commands.command(
+            name="set_appeal_link",
+            description="Set the appeal link that will be sent to users who get banned",
+    )
+    @app_commands.default_permissions(manage_guild=True)
+    @app_commands.checks.cooldown(1, 600, key=lambda i: (i.guild.id, i.user.id))
+    async def set_appeal_link(self, interaction: discord.Interaction, appeal_link: str):
+        DataManager.edit_guild_data(interaction.guild.id, "appeal_link", f"{appeal_link}")
+        await interaction.response.send_message(
+            embed=discord.Embed(
+                description=f"<:white_checkmark:1096793014287995061> Set the appeal link to {appeal_link}",
                 timestamp=datetime.utcnow(),
+                colour=discord.Colour.green(),
+            )
+        )
+
+    @set_appeal_link.error
+    async def on_set_appeal_link_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+        if isinstance(error, app_commands.CommandOnCooldown):
+            await interaction.response.send_message(ephemeral=True,
+                embed=discord.Embed(
+                    description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
+                    colour=discord.Colour.red()
+                )
+            )
+
+    @app_commands.command(
+        name="disable_appealing",
+        description="Disable the appeal link that will be sent to users who get banned",
+    )
+    @app_commands.default_permissions(manage_guild=True)
+    @app_commands.checks.cooldown(1, 600, key=lambda i: (i.guild.id, i.user.id))
+    async def disable_appealing(self, interaction: discord.Interaction):
+        guild_data = DataManager.get_guild_data(interaction.guild.id)
+        DataManager.edit_guild_data(interaction.guild.id, "appeal_link", None)
+        await interaction.response.send_message(
+            embed=discord.Embed(
+                description=f"<:white_checkmark:1096793014287995061> Disabled appealing",
                 colour=discord.Colour.green(),
             )
         )
@@ -63,6 +112,7 @@ class ServerManagement(commands.Cog):
         ]
     )
     @app_commands.default_permissions(manage_channels=True)
+    @app_commands.checks.cooldown(1, 20, key=lambda i: (i.guild.id, i.user.id))
     async def create_channel(
         self,
         interaction: discord.Interaction,
@@ -83,9 +133,7 @@ class ServerManagement(commands.Cog):
         )
         channel = interaction.guild.get_channel(int(channel["id"]))
         TextChannel = discord.Embed(
-            title="Channel Created!",
-            description=f"Successfully created text channel {channel.mention}",
-            timestamp=datetime.utcnow(),
+            description=f"<:white_checkmark:1096793014287995061> Created text channel {channel.mention}",
             colour=discord.Colour.green(),
         )
 
@@ -104,19 +152,28 @@ class ServerManagement(commands.Cog):
         if len(TextChannel.fields) == 0:
             return await interaction.response.send_message(
                 embed=discord.Embed(
-                    title="Channel Created!",
-                    description=f"Successfully created {channeltype} channel {channel.mention}",
-                    timestamp=datetime.utcnow(),
+                    description=f"<:white_checkmark:1096793014287995061> Created {channeltype} channel {channel.mention}",
                     colour=discord.Colour.green(),
                 )
             )
 
         await interaction.response.send_message(embed=TextChannel)
 
+    @create_channel.error
+    async def on_create_channel_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+        if isinstance(error, app_commands.CommandOnCooldown):
+            await interaction.response.send_message(ephemeral=True,
+                embed=discord.Embed(
+                    description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
+                    colour=discord.Colour.red()
+                )
+            )
+
     @app_commands.command(
         name="delete_channel", description="Delete the mentioned channel"
     )
     @app_commands.default_permissions(manage_channels=True)
+    @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id))
     async def delete_channel(
         self,
         interaction: discord.Interaction,
@@ -130,9 +187,7 @@ class ServerManagement(commands.Cog):
         await channel.delete(reason=reason)
 
         ChannelDelete = discord.Embed(
-            title="Channel Deleted!",
-            description=f"Successfully deleted {channeltype} channel {channel} ",
-            timestamp=datetime.utcnow(),
+            description=f"<:white_checkmark:1096793014287995061> Deleted {channeltype} channel {channel} ",
             colour=discord.Colour.green(),
         )
 
@@ -142,19 +197,28 @@ class ServerManagement(commands.Cog):
         if len(ChannelDelete.fields) == 0:
             return await interaction.response.send_message(
                 embed=discord.Embed(
-                    title="Channel Deleted!",
-                    description=f"Successfully deleted `{channel}` channel with no reason provided",
-                    timestamp=datetime.utcnow(),
+                    description=f"<:white_checkmark:1096793014287995061> Deleted `{channel}` channel with no reason provided",
                     colour=discord.Colour.green(),
                 )
             )
 
         await interaction.response.send_message(embed=ChannelDelete)
 
+    @delete_channel.error
+    async def on_delete_channel_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+        if isinstance(error, app_commands.CommandOnCooldown):
+            await interaction.response.send_message(ephemeral=True,
+                embed=discord.Embed(
+                    description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
+                    colour=discord.Colour.red()
+                )
+            )
+
     @app_commands.command(
             name="add_role", description="Add a role to the mentioned user"
     )
     @app_commands.default_permissions(manage_roles=True)
+    @app_commands.checks.cooldown(1, 7, key=lambda i: (i.guild.id, i.user.id))
     async def add_role(
         self,
         interaction: discord.Interaction,
@@ -193,12 +257,23 @@ class ServerManagement(commands.Cog):
                 colour=discord.Colour.green(),
             )
         )
-        await user.add_roles(role)  
+        await user.add_roles(role)
+
+    @add_role.error
+    async def on_add_role_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+        if isinstance(error, app_commands.CommandOnCooldown):
+            await interaction.response.send_message(ephemeral=True,
+                embed=discord.Embed(
+                    description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
+                    colour=discord.Colour.red()
+                )
+            )
 
     @app_commands.command(
         name="remove_role", description="Remove a role from the mentioned user"
     )
     @app_commands.default_permissions(manage_roles=True)
+    @app_commands.checks.cooldown(1, 7, key=lambda i: (i.guild.id, i.user.id))
     async def remove_role(
         self,
         interaction: discord.Interaction,
@@ -237,11 +312,22 @@ class ServerManagement(commands.Cog):
             )
         )
         await user.remove_roles(role)
+    
+    @remove_role.error
+    async def on_remove_role_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+        if isinstance(error, app_commands.CommandOnCooldown):
+            await interaction.response.send_message(ephemeral=True,
+                embed=discord.Embed(
+                    description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
+                    colour=discord.Colour.red()
+                )
+            )
 
     @app_commands.command(
         name="purge", description="Purge a custom amount of messages from this channel"
     )
     @app_commands.default_permissions(manage_channels=True)
+    @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id))
     async def purge(self, interaction: discord.Interaction, count: int):
         await interaction.response.defer(ephemeral=True)
         await interaction.channel.purge(limit=count)
@@ -256,6 +342,16 @@ class ServerManagement(commands.Cog):
                 colour=discord.Colour.green(),
             )
         )
+    
+    @purge.error
+    async def on_purge_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+        if isinstance(error, app_commands.CommandOnCooldown):
+            await interaction.response.send_message(ephemeral=True,
+                embed=discord.Embed(
+                    description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
+                    colour=discord.Colour.red()
+                )
+            )
 
     @app_commands.command(
         name="add_blacklisted_word",
