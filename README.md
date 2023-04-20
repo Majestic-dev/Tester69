@@ -90,7 +90,7 @@ This project is licensed under the Apache License - see the [LICENSE](LICENSE) f
         * Added a "search_gif" command that will search for a gif on GIPHY by the given keyword, if no keyword is given it will search for a random gif
         * Added a "search_image" command that will search for an image on Unsplash by the given keyword, if no keyword is given it will search for a random image
     - Commands
-        * Added a cooldown for all of the commands (except the ones located in [Mainstuff.py](cogs/mainstuff.py))
+        * Added a cooldown for all of the commands (except the ones located in MainStuff.py)
 
 # TODO
 
