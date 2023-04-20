@@ -110,6 +110,7 @@ class Verification(commands.GroupCog):
         name="setup",
         description="Setup the verification system",
     )
+    @app_commands.checks.cooldown(1, 60, key=lambda i: (i.guild.id, i.user.id))
     @app_commands.default_permissions(administrator=True)
     async def verification_setup(
         self,
@@ -163,6 +164,16 @@ class Verification(commands.GroupCog):
             interaction.guild.id, "unverified_role_id", unverified_role
         )
 
+    @verification_setup.error
+    async def verification_setup_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+        if isinstance(error, app_commands.CommandOnCooldown):
+            await interaction.response.send_message(ephemeral=True,
+                embed=discord.Embed(
+                    description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
+                    colour=discord.Colour.red()
+                )
+            )
+
     @commands.Cog.listener()
     async def on_member_join(self, member):
         guild_data = DataManager.get_guild_data(member.guild.id)
@@ -200,7 +211,7 @@ class Verification(commands.GroupCog):
             self.generate_img(code := str(random.randint(11111, 99999)), member.id)
 
             await member.add_roles(unverified_role)
-            await member.create_dm()
+            dm_channel = await member.create_dm()
 
             try:
                 await dm_channel.send(
@@ -209,11 +220,13 @@ class Verification(commands.GroupCog):
                 )
                 os.remove(f"{member.id}.png")
             except:
-                return verification_channel.send(
+                await verification_channel.send(
                     f"{member.mention} Please enable your direct messages to verify yourself, rejoin once done. Thanks!"
                 )
+                await asyncio.sleep(30)
+                return await message.delete()
 
-        check = lambda m: m.channel == dm_channel and m.author == member
+        check = lambda m: m.channel == dm_channel or verification_channel and m.author == member
         fail_count = 3
 
         while fail_count > 0:
@@ -239,7 +252,11 @@ class Verification(commands.GroupCog):
                 return await member.kick()
 
             if code in message.content:
-                await member.remove_roles(unverified_role)
+                try:
+                    await message.delete()
+                    await member.remove_roles(unverified_role)
+                except:
+                    await member.remove_roles(unverified_role)
 
                 verification_logs_channel = self.bot.get_channel(
                     guild_data["verification_logs_channel_id"]
