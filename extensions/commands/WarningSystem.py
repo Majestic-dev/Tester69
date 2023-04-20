@@ -15,6 +15,7 @@ class WarningSystem(commands.Cog):
         name="warn", description="Warns the mentioned user with a custom warning reason"
     )
     @app_commands.default_permissions(manage_messages=True)
+    @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id))
     async def warn(
         self, interaction: discord.Interaction, user: discord.User, *, reason: str
     ):
@@ -47,9 +48,20 @@ class WarningSystem(commands.Cog):
                 colour=discord.Colour.green(),
             )
         )
+    
+    @warn.error
+    async def on_warn_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+        if isinstance(error, app_commands.CommandOnCooldown):
+            await interaction.response.send_message(ephemeral=True,
+                embed=discord.Embed(
+                    description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
+                    colour=discord.Colour.red()
+                )
+            )
 
     @app_commands.command(name="delwarn", description="Deletes the warning by UUID")
     @app_commands.default_permissions(manage_messages=True)
+    @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id))
     async def delwarn(self, interaction: discord.Interaction, uuid: str):
         warnings = DataManager.get_guild_data(interaction.guild.id)["warned_users"]
 
@@ -74,11 +86,22 @@ class WarningSystem(commands.Cog):
                 colour=discord.Colour.orange(),
             )
         )
+    
+    @delwarn.error
+    async def on_delwarn_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+        if isinstance(error, app_commands.CommandOnCooldown):
+            await interaction.response.send_message(ephemeral=True,
+                embed=discord.Embed(
+                    description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
+                    colour=discord.Colour.red()
+                )
+            )
 
     @app_commands.command(
         name="warnings", description="get the warning list of the user"
     )
     @app_commands.default_permissions(manage_messages=True)
+    @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id))
     async def warnings(self, interaction: discord.Interaction, member: discord.Member):
         warnings = DataManager.get_guild_data(interaction.guild.id)["warned_users"]
 
@@ -106,6 +129,16 @@ class WarningSystem(commands.Cog):
                     )
         e.set_author(name=member.name, icon_url=member.avatar.url)
         await interaction.response.send_message(embed=e)
+
+    @warnings.error
+    async def on_warnings_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+        if isinstance(error, app_commands.CommandOnCooldown):
+            await interaction.response.send_message(ephemeral=True,
+                embed=discord.Embed(
+                    description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
+                    colour=discord.Colour.red()
+                )
+            )
 
 
 async def setup(bot: commands.Bot):
