@@ -14,6 +14,7 @@ class Moderation(commands.Cog):
 
     @app_commands.command(name="set_muted_role", description="Set the muted role")
     @app_commands.default_permissions(manage_roles=True)
+    @app_commands.checks.cooldown(1, 30, key=lambda i: (i.guild.id, i.user.id))
     async def set_muted_role(
         self, interaction: discord.Interaction, role: discord.Role
     ):
@@ -26,8 +27,19 @@ class Moderation(commands.Cog):
         )
         DataManager.edit_guild_data(interaction.guild.id, "muted_role_id", role.id)
 
+    @set_muted_role.error
+    async def on_set_muted_role_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+        if isinstance(error, app_commands.CommandOnCooldown):
+            await interaction.response.send_message(
+                embed=discord.Embed(
+                    description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
+                    colour=discord.Colour.red(),
+                )
+            )
+
     @app_commands.command(name="mute", description="Mutes the mentioned user")
     @app_commands.default_permissions(manage_roles=True)
+    @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id))
     async def mute(
         self,
         interaction: discord.Interaction,
@@ -125,15 +137,27 @@ class Moderation(commands.Cog):
             roles.pop(str(member.id))
             DataManager.save("guilds")
 
+    @mute.error
+    async def on_mute_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+        if isinstance(error, app_commands.CommandOnCooldown):
+            await interaction.response.send_message(
+                embed=discord.Embed(
+                    description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
+                    colour=discord.Colour.red(),
+                )
+            )
+
     @app_commands.command(name="unmute", description="Unmutes the mentioned user")
     @app_commands.default_permissions(manage_roles=True)
+    @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id))
     async def unmute(self, interaction: discord.Interaction, member: discord.Member):
         muted_role = DataManager.get_guild_data(interaction.guild.id)["muted_role_id"]
         saved_roles = DataManager.get_guild_data(interaction.guild.id)[
             "muted_user_roles"
         ][str(member.id)]
+        role = interaction.guild.get_role(muted_role)
 
-        if muted_role in member.roles:
+        if role in member.roles:
             saved_roles1 = []
             for role in saved_roles:
                 saved_roles1.append(interaction.guild.get_role(role))
@@ -152,8 +176,19 @@ class Moderation(commands.Cog):
                 )
             )
 
+    @unmute.error
+    async def on_unmute_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+        if isinstance(error, app_commands.CommandOnCooldown):
+            await interaction.response.send_message(
+                embed=discord.Embed(
+                    description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
+                    colour=discord.Colour.red(),
+                )
+            )
+
     @app_commands.command(name="kick", description="Kicks the mentioned user")
     @app_commands.default_permissions(kick_members=True)
+    @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id))
     async def kick(
         self,
         interaction: discord.Interaction,
@@ -215,15 +250,27 @@ class Moderation(commands.Cog):
                         colour=discord.Colour.orange(),
                     )
                 )
+    
+    @kick.error
+    async def on_kick_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+        if isinstance(error, app_commands.CommandOnCooldown):
+            await interaction.response.send_message(
+                embed=discord.Embed(
+                    description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
+                    colour=discord.Colour.red(),
+                )
+            )
 
     @app_commands.command(name="ban", description="Bans the mentioned user")
     @app_commands.default_permissions(ban_members=True)
+    @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id))
     async def ban(
         self,
         interaction: discord.Interaction,
         member: discord.Member,
         reason: str = "Unspecified",
     ):
+        await self.bot.fetch_user(member)
         
         if member.id == interaction.user.id:
             return await interaction.response.send_message(
@@ -287,11 +334,22 @@ class Moderation(commands.Cog):
                     )
                 )
 
+    @ban.error
+    async def on_ban_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+        if isinstance(error, app_commands.CommandOnCooldown):
+            await interaction.response.send_message(
+                embed=discord.Embed(
+                    description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
+                    colour=discord.Colour.red(),
+                )
+            )
+
     @app_commands.command(
         name="unban",
         description="Unbans the user by their discord ID",
     )
     @app_commands.default_permissions(ban_members=True)
+    @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id))
     async def unban(self, interaction: discord.Interaction, member: int):
         member = await self.bot.fetch_user(member)
 
@@ -323,6 +381,16 @@ class Moderation(commands.Cog):
                 colour=discord.Colour.orange(),
             )
         )
+    
+    @unban.error
+    async def on_unban_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+        if isinstance(error, app_commands.CommandOnCooldown):
+            await interaction.response.send_message(
+                embed=discord.Embed(
+                    description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
+                    colour=discord.Colour.red(),
+                )
+            )
 
 
 async def setup(bot: commands.Bot):
