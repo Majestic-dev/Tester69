@@ -64,8 +64,16 @@ class Logging(commands.GroupCog):
         guild_data = DataManager.get_guild_data(member.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
 
+        if member.guild.get_member(member.id) == None:
+            return
+
         if logs_channel == None:
             return
+        
+        if member.avatar == None:
+            member_avatar = member.default_avatar
+        else:
+            member_avatar = member.default_avatar
 
         join = discord.Embed(
             title="Member Joined",
@@ -76,7 +84,7 @@ class Logging(commands.GroupCog):
             name="Account Created",
             value=discord.utils.format_dt(member.created_at, style="F"),
         )
-        join.set_author(icon_url=member.avatar, name=member)
+        join.set_author(icon_url=member_avatar, name=member)
         join.set_footer(text=f"ID: {member.id}")
         join.timestamp = datetime.now()
         await logs_channel.send(embed=join)
@@ -90,16 +98,22 @@ class Logging(commands.GroupCog):
         if logs_channel == None:
             return
         
+        if member.avatar == None:
+            member_avatar = member.default_avatar
+        else:
+            member_avatar = member.avatar
+        
         try:
             await member.guild.fetch_ban(member)
             return
+        
         except:
             leave = discord.Embed(
                 title="Member Left",
                 description=f"{member.mention} Has left the server",
                 colour=discord.Colour.red(),
             )
-            leave.set_author(icon_url=member.avatar, name=member)
+            leave.set_author(icon_url=member_avatar, name=member)
             leave.set_footer(text=f"ID: {member.id}")
             leave.timestamp = datetime.now()
             await logs_channel.send(embed=leave)
@@ -109,16 +123,37 @@ class Logging(commands.GroupCog):
     async def on_member_ban(self, guild, user):
         guild_data = DataManager.get_guild_data(guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
+        appeal_link = guild_data["appeal_link"]
 
         if logs_channel == None:
             return
+        
+        if user.avatar == None:
+            user_avatar = user.default_avatar
+        else:
+            user_avatar = user.avatar
+        
+        if appeal_link != None:
+
+            dm_channel = await user.create_dm()
+            try:
+                await dm_channel.send(
+                    embed=discord.Embed(
+                        title="You have been banned from the server",
+                        description=f"You have been banned from {guild.name}. Appeal for unban at {appeal_link}",
+                        timestamp=datetime.utcnow(),
+                        colour=discord.Colour.red(),
+                    )
+                )
+            except:
+                pass
 
         ban = discord.Embed(
             title="Member Banned",
             description=f"{user.mention} Has been banned from the server",
             colour=discord.Colour.red(),
         )
-        ban.set_author(icon_url=user.avatar, name=user)
+        ban.set_author(icon_url=user_avatar, name=user)
         ban.set_footer(text=f"ID: {user.id}")
         ban.timestamp = datetime.now()
         await logs_channel.send(embed=ban)
@@ -131,13 +166,18 @@ class Logging(commands.GroupCog):
 
         if logs_channel == None:
             return
+        
+        if user.avatar == None:
+            user_avatar = user.default_avatar
+        else:
+            user_avatar = user.avatar
 
         unban = discord.Embed(
             title="Member Unbanned",
             description=f"{user.mention} Has been unbanned from the server",
             colour=discord.Colour.green(),
         )
-        unban.set_author(icon_url=user.avatar, name=user)
+        unban.set_author(icon_url=user_avatar, name=user)
         unban.set_footer(text=f"ID: {user.id}")
         unban.timestamp = datetime.now()
         await logs_channel.send(embed=unban)
@@ -154,6 +194,11 @@ class Logging(commands.GroupCog):
         update = discord.Embed(
             colour=discord.Colour.gold(),
         )
+
+        if after.avatar == None:
+            user_avatar = after.default_avatar
+        else:
+            user_avatar = after.avatar
 
         nick = before.nick
         if nick == None:
@@ -175,7 +220,7 @@ class Logging(commands.GroupCog):
             )
         if len(update.fields) <= 0:
             return
-        update.set_author(icon_url=after.avatar, name=before)
+        update.set_author(icon_url=user_avatar, name=before)
         update.set_footer(text=f"ID: {before.id}")
         update.timestamp = datetime.now()
         return await logs_channel.send(embed=update)
@@ -276,6 +321,11 @@ class Logging(commands.GroupCog):
 
         if logs_channel == None:
             return
+        
+        if member.avatar == None:
+            member_avatar = member.default_avatar
+        else:
+            member_avatar = member.avatar
 
         voice = discord.Embed(
             colour=discord.Colour.gold(),
@@ -318,7 +368,7 @@ class Logging(commands.GroupCog):
             )
         if len(voice.fields) <= 0:
             return
-        voice.set_author(icon_url=member.avatar, name=member)
+        voice.set_author(icon_url=member_avatar, name=member)
         voice.set_footer(text=f"ID: {member.id}")
         voice.timestamp = datetime.now()
         return await logs_channel.send(embed=voice)
@@ -362,6 +412,11 @@ class Logging(commands.GroupCog):
 
         if logs_channel == None:
             return
+        
+        if after.author.avatar == None:
+            member_avatar = after.author.default_avatar
+        else:
+            member_avatar = after.author.avatar
 
         delete = discord.Embed(
             description=f"**Message Edited in {before.channel.mention}** [Jump to Message]({before.jump_url})",
@@ -381,7 +436,7 @@ class Logging(commands.GroupCog):
                 value=f"**{', '.join([sticker.url for sticker in after.stickers])}**",
                 inline=False,
             )
-        delete.set_author(icon_url=before.author.avatar.url, name=f"{before.author}")
+        delete.set_author(icon_url=member_avatar, name=f"{before.author}")
         delete.set_footer(text=f"Author ID: {before.author.id}")
         delete.timestamp = datetime.now()
         await logs_channel.send(embed=delete)
@@ -404,6 +459,11 @@ class Logging(commands.GroupCog):
         
         if message.is_system() == True:
             return
+        
+        if message.author.avatar == None:
+            author_avatar = message.author.default_avatar
+        else:
+            author_avatar = message.author.avatar
 
         embed = discord.Embed(
             description=f"**Message sent by {message.author.mention} Deleted in {message.channel.mention}**",
@@ -428,7 +488,7 @@ class Logging(commands.GroupCog):
                 value=f"**{', '.join([sticker.url for sticker in message.stickers])}**",
                 inline=False,
             )
-        embed.set_author(icon_url=message.author.avatar.url, name=f"{message.author}")
+        embed.set_author(icon_url=author_avatar, name=f"{message.author}")
         embed.set_footer(
             text=f"Author ID: {message.author.id} | Message ID: {message.id}"
         )
