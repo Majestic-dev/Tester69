@@ -64,6 +64,7 @@ class DataManager:
                 "verification_channel_id": None,
                 "verification_logs_channel_id": None,
                 "logs_channel_id": None,
+                "appeal_link": None,
                 "blacklisted_words": [],
                 "whitelist": [],
                 "welcome_message": None,
