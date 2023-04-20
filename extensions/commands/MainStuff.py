@@ -33,9 +33,6 @@ class MainStuff(commands.Cog):
 
     @app_commands.command(name="help", description="Get the basic help for commands")
     async def help(self, interaction: discord.Interaction):
-        invite = await interaction.channel.create_invite(
-            max_age=0, max_uses=1, unique=True
-        )
 
         help = discord.Embed(
             title="Tetser69's command list",
@@ -52,7 +49,7 @@ class MainStuff(commands.Cog):
         help.add_field(name="Main", value="`/main`", inline=True)
         help.add_field(
             name="Support",
-            value=f"Need more help? Join our community [server]({invite}) to get more help",
+            value=f"Need more help? Join our community [server](https://discord.gg/VsDDf8YKBV) to get more help",
             inline=False,
         )
 
