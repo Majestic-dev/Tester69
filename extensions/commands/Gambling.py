@@ -101,7 +101,8 @@ class Gambling(commands.Cog):
         self.bot = bot
 
     @app_commands.command(name="gamble", description="Gamble your set amount of coins")
-    async def _gamble(self, interaction: discord.Interaction, bet: int):
+    @app_commands.checks.cooldown(1, 45, key=lambda i: (i.guild_id, i.user.id))
+    async def gamble(self, interaction: discord.Interaction, bet: int):
         user_data = DataManager.get_user_data(interaction.user.id)
 
         if bet < 10 or bet > 250000:
@@ -160,11 +161,23 @@ class Gambling(commands.Cog):
                     colour=discord.Colour.red(),
                 )
             )
+    
+    @gamble.error
+    async def on_gamble_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+        if isinstance(error, app_commands.CommandOnCooldown):
+            await interaction.response.send_message(ephemeral=True,
+                embed=discord.Embed(
+                    description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
+                    colour=discord.Colour.red()
+                )
+            )
+        
 
     @app_commands.command(
         name="snakeeyes",
         description="Gamble your coins in a snake eyes game for a chance to win big!",
     )
+    @app_commands.checks.cooldown(1, 45, key=lambda i: (i.guild_id, i.user.id))
     async def snakeeyes(self, interaction: discord.Interaction, bet: int):
         user_data = DataManager.get_user_data(interaction.user.id)
 
@@ -235,10 +248,21 @@ class Gambling(commands.Cog):
                 )
             )
 
+    @snakeeyes.error
+    async def on_snakeeyes_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+        if isinstance(error, app_commands.CommandOnCooldown):
+            await interaction.response.send_message(ephemeral=True,
+                embed=discord.Embed(
+                    description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
+                    colour=discord.Colour.red()
+                )
+            )
+
     @app_commands.command(
         name="blackjack",
         description="Gamble your coins in a game of blackjack",
     )
+    @app_commands.checks.cooldown(1, 45, key=lambda i: (i.guild_id, i.user.id))
     async def blackjack(self, interaction: discord.Interaction, bet: int):
         user_data = DataManager.get_user_data(interaction.user.id)
 
@@ -713,9 +737,20 @@ class Gambling(commands.Cog):
                     content=None, embed=e, view=view
                 )
 
+    @blackjack.error
+    async def on_blackjack_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+        if isinstance(error, app_commands.CommandOnCooldown):
+            await interaction.response.send_message(ephemeral=True,
+                embed=discord.Embed(
+                    description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
+                    colour=discord.Colour.red()
+                )
+            )
+
     @app_commands.command(
         name="coinflip", description="Bet your coins in a game of coinflip"
     )
+    @app_commands.checks.cooldown(1, 45, key=lambda i: (i.guild_id, i.user.id))
     @app_commands.choices(
         choices=[
             app_commands.Choice(name="Heads", value="heads"),
@@ -788,6 +823,16 @@ class Gambling(commands.Cog):
                 colour=discord.Colour.green(),
             )
         )
+
+    @coinflip.error
+    async def on_coinflip_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+        if isinstance(error, app_commands.CommandOnCooldown):
+            await interaction.response.send_message(ephemeral=True,
+                embed=discord.Embed(
+                    description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
+                    colour=discord.Colour.red()
+                )
+            )
 
 
 async def setup(bot: commands.Bot):
