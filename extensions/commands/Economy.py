@@ -22,12 +22,6 @@ class Economy(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-        self.fish_cooldown = {}
-        self.hunt_cooldown = {}
-        self.hourly_cooldown = {}
-        self.daily_cooldown = {}
-        self.monthly_cooldown = {}
-
     @commands.command(name="add", description="Add set amount of coins to your balance")
     async def add(
         self,
@@ -114,63 +108,8 @@ class Economy(commands.Cog):
             )
         )
     
-    @commands.command(
-        name="devskip", description="Skip all cooldowns of the mentioned user"
-    )
-    async def devskip(self, ctx, user: Optional[discord.User] = None):
-
-        if self.bot.owner_id != ctx.author.id:
-            return await ctx.reply(
-                embed=discord.Embed(
-                    description="<:white_cross:1096791282023669860> You are not the owner of this bot.",
-                    colour=discord.Colour.red(),
-                )
-            )
-        
-        if user == None:
-            user = ctx.author
-        else:
-            user = user
-
-        skip = discord.Embed(
-            title="Cooldown Skipped",
-            timestamp=datetime.utcnow(),
-            colour=discord.Colour.green(),
-        )
-
-        if user.id in self.fish_cooldown:
-            self.fish_cooldown.pop(user.id)
-            skip.add_field(name="Fishing cooldown", value="Skipped", inline=False)
-
-        if user.id in self.hunt_cooldown:
-            self.hunt_cooldown.pop(user.id)
-            skip.add_field(name="Hunting cooldown", value="Skipped", inline=False)
-
-        if user.id in self.hourly_cooldown:
-            self.hourly_cooldown.pop(user.id)
-            skip.add_field(name="Hourly cooldown", value="Skipped", inline=False)
-
-        if user.id in self.daily_cooldown:
-            self.hourly_cooldown.pop(user.id)
-            skip.add_field(name="Daily cooldown", value="Skipped", inline=False)
-
-        if user.id in self.monthly_cooldown:
-            self.monthly_cooldown.pop(user.id)
-            skip.add_field(name="Monthly cooldown", value="Skipped", inline=False)
-
-        if len(skip.fields) == 0:
-            return await ctx.reply(
-                embed=discord.Embed(
-                    title="No Cooldowns",
-                    description=(f"{user.name} doesn't have any active cooldowns"),
-                    timestamp=datetime.utcnow(),
-                    colour=discord.Colour.orange(),
-                )
-            )
-
-        await ctx.reply(embed=skip)
-    
     @app_commands.command(name="pay", description="Pay someone some coins")
+    @app_commands.checks.cooldown(1, 600, key=lambda i: (i.guild_id, i.user.id))
     async def pay(self, interaction: discord.Interaction, user: discord.User, amount: int):
         if user.id == interaction.user.id:
             return await interaction.response.send_message(
@@ -211,8 +150,18 @@ class Economy(commands.Cog):
                 colour=discord.Colour.green(),
             )
         )
+    @pay.error
+    async def on_pay_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+        if isinstance(error, app_commands.CommandOnCooldown):
+            await interaction.response.send_message(ephemeral=True,
+                embed=discord.Embed(
+                    description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
+                    colour=discord.Colour.red()
+                )
+            )
 
     @app_commands.command(name="balance", description="Check your coin balance")
+    @app_commands.checks.cooldown(1, 60, key=lambda i: (i.guild_id, i.user.id))
     async def balance(
         self, interaction: discord.Interaction, user: Optional[discord.User] = None
     ):
@@ -238,26 +187,19 @@ class Economy(commands.Cog):
                     colour=discord.Colour.green(),
                 )
             )
-
-    @app_commands.command(name="hunt", description="Hunt for some loot")
-    async def hunt(self, interaction: discord.Interaction):
-        if (
-            interaction.user.id in self.hunt_cooldown
-            and self.hunt_cooldown[interaction.user.id] > datetime.utcnow()
-            and interaction.user.id not in DataManager.get("config", "global_whitelist")
-        ):
-            remaining = self.hunt_cooldown[interaction.user.id]
-
-            return await interaction.response.send_message(
+    @balance.error
+    async def on_balance_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+        if isinstance(error, app_commands.CommandOnCooldown):
+            await interaction.response.send_message(ephemeral=True,
                 embed=discord.Embed(
-                    title="Cooldown",
-                    description=(
-                        f"Your cooldown will end <t:{int(remaining.timestamp())}:R>"
-                    ),
-                    timestamp=datetime.utcnow(),
-                    colour=discord.Colour.orange(),
+                    description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
+                    colour=discord.Colour.red()
                 )
             )
+
+    @app_commands.command(name="hunt", description="Hunt for some loot")
+    @app_commands.checks.cooldown(1, 600, key=lambda i: (i.guild_id, i.user.id))
+    async def hunt(self, interaction: discord.Interaction):
 
         item_name, _ = random_choice_from_dict(DataManager.get("economy", "hunt_items"))
         DataManager.edit_user_inventory(interaction.user.id, item_name, 1)
@@ -270,30 +212,20 @@ class Economy(commands.Cog):
                 colour=discord.Colour.green(),
             )
         )
-
-        self.hunt_cooldown[interaction.user.id] = datetime.utcnow() + timedelta(
-            minutes=10
-        )
-
-    @app_commands.command(name="fish", description="Fish for some loot")
-    async def fish(self, interaction: discord.Interaction):
-        if (
-            interaction.user.id in self.fish_cooldown
-            and self.fish_cooldown[interaction.user.id] > datetime.utcnow()
-            and interaction.user.id not in DataManager.get("config", "global_whitelist")
-        ):
-            remaining = self.fish_cooldown[interaction.user.id]
-
-            return await interaction.response.send_message(
+    
+    @hunt.error
+    async def on_hunt_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+        if isinstance(error, app_commands.CommandOnCooldown):
+            await interaction.response.send_message(ephemeral=True,
                 embed=discord.Embed(
-                    title="Cooldown",
-                    description=(
-                        f"Your cooldown will end <t:{int(remaining.timestamp())}:R>"
-                    ),
-                    timestamp=datetime.utcnow(),
-                    colour=discord.Colour.orange(),
+                    description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
+                    colour=discord.Colour.red()
                 )
             )
+
+    @app_commands.command(name="fish", description="Fish for some loot")
+    @app_commands.checks.cooldown(1, 600, key=lambda i: (i.guild_id, i.user.id))
+    async def fish(self, interaction: discord.Interaction):
 
         item_name, _ = random_choice_from_dict(DataManager.get("economy", "fish_items"))
         DataManager.edit_user_inventory(interaction.user.id, item_name, 1)
@@ -307,9 +239,15 @@ class Economy(commands.Cog):
             )
         )
 
-        self.fish_cooldown[interaction.user.id] = datetime.utcnow() + timedelta(
-            minutes=10
-        )
+    @fish.error
+    async def on_fish_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+        if isinstance(error, app_commands.CommandOnCooldown):
+            await interaction.response.send_message(ephemeral=True,
+                embed=discord.Embed(
+                    description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
+                    colour=discord.Colour.red()
+                )
+            )
 
     async def item_autocomplete(
         self, interaction: discord.Interaction, current: str
@@ -327,6 +265,7 @@ class Economy(commands.Cog):
 
     @app_commands.command(name="sell", description="Sell your loot for coins")
     @app_commands.autocomplete(item=item_autocomplete)
+    @app_commands.checks.cooldown(1, 60, key=lambda i: (i.guild_id, i.user.id))
     async def sell(self, interaction: discord.Interaction, item: str):
         user_data = DataManager.get_user_data(interaction.user.id)
 
@@ -374,10 +313,20 @@ class Economy(commands.Cog):
                 colour=discord.Colour.green(),
             )
         )
+    @sell.error
+    async def on_sell_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+        if isinstance(error, app_commands.CommandOnCooldown):
+            await interaction.response.send_message(ephemeral=True,
+                embed=discord.Embed(
+                    description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
+                    colour=discord.Colour.red()
+                )
+            )
 
     @app_commands.command(
         name="rob", description="Rob the mentioned user out of their coins"
     )
+    @app_commands.checks.cooldown(1, 3600, key=lambda i: (i.guild_id, i.user.id))
     async def rob(self, interaction: discord.Interaction, user: discord.User):
         robber_data = DataManager.get_user_data(interaction.user.id)
         robber_id = interaction.user.id
@@ -435,28 +384,21 @@ class Economy(commands.Cog):
                 colour=discord.Colour.red(),
             )
         )
+    @rob.error
+    async def on_rob_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+        if isinstance(error, app_commands.CommandOnCooldown):
+            await interaction.response.send_message(ephemeral=True,
+                embed=discord.Embed(
+                    description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
+                    colour=discord.Colour.red()
+                )
+            )
 
     @app_commands.command(
         name="hourly", description="Gain 100 coins every time you use this command"
     )
+    @app_commands.checks.cooldown(1, 3600, key=lambda i: (i.guild_id, i.user.id))
     async def hourly(self, interaction: discord.Interaction):
-        if (
-            interaction.user.id in self.hourly_cooldown
-            and self.hourly_cooldown[interaction.user.id] > datetime.utcnow()
-            and interaction.user.id not in DataManager.get("config", "global_whitelist")
-        ):
-            remaining = self.hourly_cooldown[interaction.user.id]
-
-            return await interaction.response.send_message(
-                embed=discord.Embed(
-                    title="Cooldown",
-                    description=(
-                        f"Your cooldown will end <t:{int(remaining.timestamp())}:R>"
-                    ),
-                    timestamp=datetime.utcnow(),
-                    colour=discord.Colour.orange(),
-                )
-            )
 
         user_data = DataManager.get_user_data(interaction.user.id)
         DataManager.edit_user_data(
@@ -472,31 +414,21 @@ class Economy(commands.Cog):
             )
         )
 
-        self.hourly_cooldown[interaction.user.id] = datetime.utcnow() + timedelta(
-            hours=1
-        )
+    @hourly.error
+    async def on_hourly_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+        if isinstance(error, app_commands.CommandOnCooldown):
+            await interaction.response.send_message(ephemeral=True,
+                embed=discord.Embed(
+                    description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
+                    colour=discord.Colour.red()
+                )
+            )
 
     @app_commands.command(
         name="daily", description="Gain 1000 coins every time you use this command"
     )
+    @app_commands.checks.cooldown(1, 86400, key=lambda i: (i.guild_id, i.user.id))
     async def daily(self, interaction: discord.Interaction):
-        if (
-            interaction.user.id in self.daily_cooldown
-            and self.daily_cooldown[interaction.user.id] > datetime.utcnow()
-            and interaction.user.id not in DataManager.get("config", "global_whitelist")
-        ):
-            remaining = self.daily_cooldown[interaction.user.id]
-
-            return await interaction.response.send_message(
-                embed=discord.Embed(
-                    title="Cooldown",
-                    description=(
-                        f"Your cooldown will end <t:{int(remaining.timestamp())}:R>"
-                    ),
-                    timestamp=datetime.utcnow(),
-                    colour=discord.Colour.orange(),
-                )
-            )
 
         user_data = DataManager.get_user_data(interaction.user.id)
         DataManager.edit_user_data(
@@ -512,31 +444,21 @@ class Economy(commands.Cog):
             )
         )
 
-        self.daily_cooldown[interaction.user.id] = datetime.utcnow() + timedelta(
-            hours=24
-        )
+    @daily.error
+    async def on_daily_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+        if isinstance(error, app_commands.CommandOnCooldown):
+            await interaction.response.send_message(ephemeral=True,
+                embed=discord.Embed(
+                    description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
+                    colour=discord.Colour.red()
+                )
+            )
 
     @app_commands.command(
         name="monthly", description="Gain 20000 coins every time you use the command"
     )
+    @app_commands.checks.cooldown(1, 2592000, key=lambda i: (i.guild_id, i.user.id))
     async def monthly(self, interaction: discord.Interaction):
-        if (
-            interaction.user.id in self.monthly_cooldown
-            and self.monthly_cooldown[interaction.user.id] > datetime.utcnow()
-            and interaction.user.id not in DataManager.get("config", "global_whitelist")
-        ):
-            remaining = self.monthly_cooldown[interaction.user.id]
-
-            return await interaction.response.send_message(
-                embed=discord.Embed(
-                    title="Cooldown",
-                    description=(
-                        f"Your cooldown will end <t:{int(remaining.timestamp())}:R>"
-                    ),
-                    timestamp=datetime.utcnow(),
-                    colour=discord.Colour.orange(),
-                )
-            )
 
         user_data = DataManager.get_user_data(interaction.user.id)
         DataManager.edit_user_data(
@@ -552,13 +474,25 @@ class Economy(commands.Cog):
             )
         )
 
-        self.monthly_cooldown[interaction.user.id] = datetime.utcnow() + timedelta(
-            hours=720
-        )
+    @monthly.error
+    async def on_monthly_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+        if isinstance(error, app_commands.CommandOnCooldown):
+            await interaction.response.send_message(ephemeral=True,
+                embed=discord.Embed(
+                    description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
+                    colour=discord.Colour.red()
+                )
+            )
 
     @app_commands.command(name="inventory", description="See your inventory")
+    @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild_id, i.user.id))
     async def inventory(self, interaction: discord.Interaction):
         user_data = DataManager.get_user_data(interaction.user.id)
+
+        if interaction.user.avatar == None:
+            author_avatar = interaction.user.default_avatar
+        else:
+            author_avatar = interaction.user.avatar
 
         inv_embed = discord.Embed(
             title="Inventory",
@@ -567,7 +501,7 @@ class Economy(commands.Cog):
         )
 
         for item, count in user_data["inventory"].items():
-            inv_embed.add_field(name=item, value=count, inline=True)
+            inv_embed.add_field(name=f"{item} - {count}", value="smth goes here (Coming Soon:tm:)", inline=False)
 
         if len(inv_embed.fields) == 0:
             return await interaction.response.send_message(
@@ -579,7 +513,20 @@ class Economy(commands.Cog):
                 )
             )
 
+        inv_embed.set_thumbnail(url=self.bot.user.avatar)
+        inv_embed.set_author(name=interaction.user.name + "'s inventory", icon_url=author_avatar)
         await interaction.response.send_message(embed=inv_embed)
+
+    @inventory.error
+    async def on_inventory_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+        if isinstance(error, app_commands.CommandOnCooldown):
+            await interaction.response.send_message(ephemeral=True,
+                embed=discord.Embed(
+                    description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
+                    colour=discord.Colour.red()
+                )
+            )
+
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Economy(bot))
