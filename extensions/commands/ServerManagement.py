@@ -247,10 +247,7 @@ class ServerManagement(commands.Cog):
             )
 
         bot = interaction.guild.get_member(self.bot.user.id)
-        if (
-            bot.top_role.position < role.position
-            or bot.top_role.position == role.position
-        ):
+        if bot.top_role < role or bot.top_role == role:
             return await interaction.response.send_message(
                 embed=discord.Embed(
                     description="<:white_cross:1096791282023669860> I cannot add a role higher than my highest role",
@@ -258,7 +255,7 @@ class ServerManagement(commands.Cog):
                 )
             )
 
-        if interaction.user.top_role.position < role.position:
+        if interaction.user.top_role < role:
             return await interaction.response.send_message(
                 embed=discord.Embed(
                     description="<:white_cross:1096791282023669860> You cannot add a role higher than your highest role",
@@ -307,10 +304,7 @@ class ServerManagement(commands.Cog):
             )
 
         bot = interaction.guild.get_member(self.bot.user.id)
-        if (
-            bot.top_role.position < role.position
-            or bot.top_role.position == role.position
-        ):
+        if bot.top_role < role or bot.top_role == role:
             return await interaction.response.send_message(
                 embed=discord.Embed(
                     description="<:white_cross:1096791282023669860> I cannot remove a role that is higher than my highest role.",
@@ -318,7 +312,7 @@ class ServerManagement(commands.Cog):
                 )
             )
 
-        if interaction.user.top_role.position < role.position:
+        if interaction.user.top_role < role:
             return await interaction.response.send_message(
                 embed=discord.Embed(
                     description="<:white_cross:1096791282023669860> You cannot remove a role that is higher than your highest role.",
