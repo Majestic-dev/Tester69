@@ -27,7 +27,7 @@ class WarningSystem(commands.Cog):
                 )
             )
 
-        if interaction.user.top_role.position <= user.top_role.position:
+        if interaction.user.top_role <= user.top_role:
             return await interaction.response.send_message(
                 embed=discord.Embed(
                     description="<:white_cross:1096791282023669860> You can't warn your superiors",
