@@ -22,7 +22,7 @@ class Economy(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.command(name="add", description="Add set amount of coins to your balance")
+    @commands.command(name="add", description="Add set amount of 🪙 to your balance")
     async def add(
         self,
         ctx,
@@ -64,7 +64,7 @@ class Economy(commands.Cog):
         )
 
     @commands.command(
-        name="subtract", description="Subtract set amount of coins from your balance"
+        name="subtract", description="Subtract set amount of 🪙 from your balance"
     )
     async def subtract(
         self,
@@ -107,7 +107,7 @@ class Economy(commands.Cog):
             )
         )
 
-    @app_commands.command(name="pay", description="Pay someone some coins")
+    @app_commands.command(name="pay", description="Pay someone some 🪙")
     @app_commands.checks.cooldown(1, 600, key=lambda i: (i.guild_id, i.user.id))
     async def pay(
         self, interaction: discord.Interaction, user: discord.User, amount: int
@@ -174,7 +174,7 @@ class Economy(commands.Cog):
                 embed=discord.Embed(
                     title="Balance",
                     description=(
-                        f'Your balance is {DataManager.get_user_data(interaction.user.id)["balance"]} coins'
+                        f'Your balance is {DataManager.get_user_data(interaction.user.id)["balance"]} :coin:'
                     ),
                     timestamp=datetime.utcnow(),
                     colour=discord.Colour.green(),
@@ -185,7 +185,7 @@ class Economy(commands.Cog):
                 embed=discord.Embed(
                     title="Balance",
                     description=(
-                        f'{user.name}\'s balance is {DataManager.get_user_data(user.id)["balance"]} coins'
+                        f'{user.name}\'s balance is {DataManager.get_user_data(user.id)["balance"]} :coin:'
                     ),
                     timestamp=datetime.utcnow(),
                     colour=discord.Colour.green(),
@@ -275,7 +275,7 @@ class Economy(commands.Cog):
             and user_data["inventory"][item] > 0
         ]
 
-    @app_commands.command(name="sell", description="Sell your loot for coins")
+    @app_commands.command(name="sell", description="Sell your loot for :coin:")
     @app_commands.autocomplete(item=item_autocomplete)
     @app_commands.checks.cooldown(1, 60, key=lambda i: (i.guild_id, i.user.id))
     async def sell(self, interaction: discord.Interaction, item: str):
@@ -320,7 +320,7 @@ class Economy(commands.Cog):
         await interaction.response.send_message(
             embed=discord.Embed(
                 title="Item Sold",
-                description=(f"You sold a {item} for {price} coins!"),
+                description=(f"You sold a {item} for {price} :coin:!"),
                 timestamp=datetime.utcnow(),
                 colour=discord.Colour.green(),
             )
@@ -340,7 +340,7 @@ class Economy(commands.Cog):
             )
 
     @app_commands.command(
-        name="rob", description="Rob the mentioned user out of their coins"
+        name="rob", description="Rob the mentioned user out of their :coin:"
     )
     @app_commands.checks.cooldown(1, 3600, key=lambda i: (i.guild_id, i.user.id))
     async def rob(self, interaction: discord.Interaction, user: discord.User):
@@ -362,8 +362,8 @@ class Economy(commands.Cog):
         elif victim_balance == 0:
             return await interaction.response.send_message(
                 embed=discord.Embed(
-                    title="This User Does Not Have Any Coins!",
-                    description=f"You can't rob <@{victim_id}> since they do not have any coins to rob!",
+                    title="This User Does Not Have Any :coin:!",
+                    description=f"You can't rob <@{victim_id}> since they do not have any :coin: to rob!",
                     timestamp=datetime.utcnow(),
                     colour=discord.Colour.orange(),
                 )
@@ -383,7 +383,7 @@ class Economy(commands.Cog):
             return await interaction.response.send_message(
                 embed=discord.Embed(
                     title=f"Rob Successful",
-                    description=f"Successfully robbed <@{user.id}> {cash} coins",
+                    description=f"Successfully robbed <@{user.id}> {cash} :coin:",
                     timestamp=datetime.utcnow(),
                     colour=discord.Colour.green(),
                 )
@@ -415,19 +415,19 @@ class Economy(commands.Cog):
             )
 
     @app_commands.command(
-        name="hourly", description="Gain 100 coins every time you use this command"
+        name="hourly", description="Gain 100 :coin: every time you use this command"
     )
     @app_commands.checks.cooldown(1, 3600, key=lambda i: (i.guild_id, i.user.id))
     async def hourly(self, interaction: discord.Interaction):
         user_data = DataManager.get_user_data(interaction.user.id)
         DataManager.edit_user_data(
-            interaction.user.id, "balance", user_data["balance"] + 10
+            interaction.user.id, "balance", user_data["balance"] + 100
         )
 
         await interaction.response.send_message(
             embed=discord.Embed(
                 title="Hourly Pay",
-                description="You received 10 coins!",
+                description="You received 100 :coin:!",
                 timestamp=datetime.utcnow(),
                 colour=discord.Colour.green(),
             )
@@ -447,19 +447,19 @@ class Economy(commands.Cog):
             )
 
     @app_commands.command(
-        name="daily", description="Gain 1000 coins every time you use this command"
+        name="daily", description="Gain 1000 🪙 every time you use this command"
     )
     @app_commands.checks.cooldown(1, 86400, key=lambda i: (i.guild_id, i.user.id))
     async def daily(self, interaction: discord.Interaction):
         user_data = DataManager.get_user_data(interaction.user.id)
         DataManager.edit_user_data(
-            interaction.user.id, "balance", user_data["balance"] + 100
+            interaction.user.id, "balance", user_data["balance"] + 1000
         )
 
         await interaction.response.send_message(
             embed=discord.Embed(
                 title="Daily Pay",
-                description="You received 100 coins!",
+                description="You received 1000 :coin:!",
                 timestamp=datetime.utcnow(),
                 colour=discord.Colour.green(),
             )
@@ -479,19 +479,19 @@ class Economy(commands.Cog):
             )
 
     @app_commands.command(
-        name="monthly", description="Gain 20000 coins every time you use the command"
+        name="monthly", description="Gain 20000 🪙 every time you use the command"
     )
     @app_commands.checks.cooldown(1, 2592000, key=lambda i: (i.guild_id, i.user.id))
     async def monthly(self, interaction: discord.Interaction):
         user_data = DataManager.get_user_data(interaction.user.id)
         DataManager.edit_user_data(
-            interaction.user.id, "balance", user_data["balance"] + 3000
+            interaction.user.id, "balance", user_data["balance"] + 20000
         )
 
         await interaction.response.send_message(
             embed=discord.Embed(
                 title="Monthly Pay",
-                description="You received 3000 coins!",
+                description="You received 20000 :coin:!",
                 timestamp=datetime.utcnow(),
                 colour=discord.Colour.green(),
             )
