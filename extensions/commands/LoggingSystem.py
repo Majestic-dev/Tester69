@@ -69,11 +69,11 @@ class Logging(commands.GroupCog):
 
         if logs_channel == None:
             return
-        
+
         if member.avatar == None:
             member_avatar = member.default_avatar
         else:
-            member_avatar = member.default_avatar
+            member_avatar = member.avatar
 
         join = discord.Embed(
             title="Member Joined",
@@ -97,16 +97,16 @@ class Logging(commands.GroupCog):
 
         if logs_channel == None:
             return
-        
+
         if member.avatar == None:
             member_avatar = member.default_avatar
         else:
             member_avatar = member.avatar
-        
+
         try:
             await member.guild.fetch_ban(member)
             return
-        
+
         except:
             leave = discord.Embed(
                 title="Member Left",
@@ -127,14 +127,13 @@ class Logging(commands.GroupCog):
 
         if logs_channel == None:
             return
-        
+
         if user.avatar == None:
             user_avatar = user.default_avatar
         else:
             user_avatar = user.avatar
-        
-        if appeal_link != None:
 
+        if appeal_link != None:
             dm_channel = await user.create_dm()
             try:
                 await dm_channel.send(
@@ -166,7 +165,7 @@ class Logging(commands.GroupCog):
 
         if logs_channel == None:
             return
-        
+
         if user.avatar == None:
             user_avatar = user.default_avatar
         else:
@@ -213,10 +212,14 @@ class Logging(commands.GroupCog):
                 value=f"**Before: `{', '.join([role.name for role in before.roles])}`\nAfter: `{', '.join([role.name for role in after.roles])}`**",
             )
         if before.nick != after.nick:
-            update.add_field(name="Member Nickname Updated", value=f"**Before: {nick} \nAfter: {nick2}**")
+            update.add_field(
+                name="Member Nickname Updated",
+                value=f"**Before: {nick} \nAfter: {nick2}**",
+            )
         if before.name != after.name:
             update.add_field(
-                name="Member Username Updated", value=f"**Before: {before.name} \nAfter: {after.name}**"
+                name="Member Username Updated",
+                value=f"**Before: {before.name} \nAfter: {after.name}**",
             )
         if len(update.fields) <= 0:
             return
@@ -278,8 +281,8 @@ class Logging(commands.GroupCog):
 
         if before.name != after.name:
             update.add_field(
-                name=f"{after.mention} Role Name", 
-                value=f"**Before: {before.name} \nAfter: {after.name}**"
+                name=f"{after.mention} Role Name",
+                value=f"**Before: {before.name} \nAfter: {after.name}**",
             )
         if before.colour != after.colour:
             update.add_field(
@@ -321,7 +324,7 @@ class Logging(commands.GroupCog):
 
         if logs_channel == None:
             return
-        
+
         if member.avatar == None:
             member_avatar = member.default_avatar
         else:
@@ -341,7 +344,11 @@ class Logging(commands.GroupCog):
                 name="Voice Channel Left",
                 value=f"**{member.mention} Left {before.channel.mention} voice channel**",
             )
-        if before.channel != None and before.channel != after.channel and after.channel != None:
+        if (
+            before.channel != None
+            and before.channel != after.channel
+            and after.channel != None
+        ):
             voice.add_field(
                 name="Voice Channel Moved",
                 value=f"**{member.mention} Swithced voice channels {before.channel.mention} -> {after.channel.mention}**",
@@ -376,7 +383,6 @@ class Logging(commands.GroupCog):
     # Blacklisted Word Listener
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
-
         if message.author.bot:
             return
 
@@ -403,16 +409,15 @@ class Logging(commands.GroupCog):
     # Message Edit Logs
     @commands.Cog.listener()
     async def on_message_edit(self, before: discord.Message, after: discord.Message):
-
         if before.author.bot:
             return
-        
+
         guild_data = DataManager.get_guild_data(before.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
 
         if logs_channel == None:
             return
-        
+
         if after.author.avatar == None:
             member_avatar = after.author.default_avatar
         else:
@@ -456,10 +461,10 @@ class Logging(commands.GroupCog):
 
         if message.author.bot:
             return
-        
+
         if message.is_system() == True:
             return
-        
+
         if message.author.avatar == None:
             author_avatar = message.author.default_avatar
         else:

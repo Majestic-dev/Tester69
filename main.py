@@ -13,7 +13,13 @@ DataManager(
         (
             "config",
             "data/config.json",
-            {"token": None, "giphy_key": None, "unsplash_key": None, "global_whitelist": [], "owners": []},
+            {
+                "token": None,
+                "giphy_key": None,
+                "unsplash_key": None,
+                "global_whitelist": [],
+                "owners": [],
+            },
         ),
         (
             "economy",
@@ -61,8 +67,11 @@ DataManager(
 if "fonts" not in os.listdir("."):
     os.mkdir("fonts")
 
-bot = commands.Bot(command_prefix="'", owner_id=705435835306213418, intents=discord.Intents.all())
+bot = commands.Bot(
+    command_prefix="'", owner_id=705435835306213418, intents=discord.Intents.all()
+)
 bot.remove_command("help")
+
 
 @bot.event
 async def on_ready():

@@ -33,7 +33,6 @@ class MainStuff(commands.Cog):
 
     @app_commands.command(name="help", description="Get the basic help for commands")
     async def help(self, interaction: discord.Interaction):
-
         help = discord.Embed(
             title="Tetser69's command list",
             timestamp=datetime.utcnow(),

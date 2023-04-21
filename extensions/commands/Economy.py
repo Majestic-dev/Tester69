@@ -36,7 +36,7 @@ class Economy(commands.Cog):
                     colour=discord.Colour.red(),
                 )
             )
-        
+
         if member == None:
             user_data = DataManager.get_user_data(ctx.author.id)
             DataManager.edit_user_data(
@@ -72,7 +72,6 @@ class Economy(commands.Cog):
         amount: int,
         member: Optional[discord.Member] = None,
     ):
-        
         if self.bot.owner_id != ctx.author.id:
             return await ctx.reply(
                 embed=discord.Embed(
@@ -80,7 +79,7 @@ class Economy(commands.Cog):
                     colour=discord.Colour.red(),
                 )
             )
-        
+
         user_data = DataManager.get_user_data(ctx.author.id)
 
         if member == None:
@@ -107,10 +106,12 @@ class Economy(commands.Cog):
                 colour=discord.Colour.green(),
             )
         )
-    
+
     @app_commands.command(name="pay", description="Pay someone some coins")
     @app_commands.checks.cooldown(1, 600, key=lambda i: (i.guild_id, i.user.id))
-    async def pay(self, interaction: discord.Interaction, user: discord.User, amount: int):
+    async def pay(
+        self, interaction: discord.Interaction, user: discord.User, amount: int
+    ):
         if user.id == interaction.user.id:
             return await interaction.response.send_message(
                 embed=discord.Embed(
@@ -145,19 +146,22 @@ class Economy(commands.Cog):
 
         await interaction.response.send_message(
             embed=discord.Embed(
-                description=
-                    f'<:white_checkmark:1096793014287995061> Paid {user.mention} {amount} :coin:. Your new balance is {user_data["balance"]} :coin:',
+                description=f'<:white_checkmark:1096793014287995061> Paid {user.mention} {amount} :coin:. Your new balance is {user_data["balance"]} :coin:',
                 colour=discord.Colour.green(),
             )
         )
+
     @pay.error
-    async def on_pay_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+    async def on_pay_error(
+        self, interaction: discord.Interaction, error: app_commands.AppCommandError
+    ):
         if isinstance(error, app_commands.CommandOnCooldown):
-            await interaction.response.send_message(ephemeral=True,
+            await interaction.response.send_message(
+                ephemeral=True,
                 embed=discord.Embed(
                     description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
-                    colour=discord.Colour.red()
-                )
+                    colour=discord.Colour.red(),
+                ),
             )
 
     @app_commands.command(name="balance", description="Check your coin balance")
@@ -187,20 +191,23 @@ class Economy(commands.Cog):
                     colour=discord.Colour.green(),
                 )
             )
+
     @balance.error
-    async def on_balance_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+    async def on_balance_error(
+        self, interaction: discord.Interaction, error: app_commands.AppCommandError
+    ):
         if isinstance(error, app_commands.CommandOnCooldown):
-            await interaction.response.send_message(ephemeral=True,
+            await interaction.response.send_message(
+                ephemeral=True,
                 embed=discord.Embed(
                     description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
-                    colour=discord.Colour.red()
-                )
+                    colour=discord.Colour.red(),
+                ),
             )
 
     @app_commands.command(name="hunt", description="Hunt for some loot")
     @app_commands.checks.cooldown(1, 600, key=lambda i: (i.guild_id, i.user.id))
     async def hunt(self, interaction: discord.Interaction):
-
         item_name, _ = random_choice_from_dict(DataManager.get("economy", "hunt_items"))
         DataManager.edit_user_inventory(interaction.user.id, item_name, 1)
 
@@ -212,21 +219,23 @@ class Economy(commands.Cog):
                 colour=discord.Colour.green(),
             )
         )
-    
+
     @hunt.error
-    async def on_hunt_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+    async def on_hunt_error(
+        self, interaction: discord.Interaction, error: app_commands.AppCommandError
+    ):
         if isinstance(error, app_commands.CommandOnCooldown):
-            await interaction.response.send_message(ephemeral=True,
+            await interaction.response.send_message(
+                ephemeral=True,
                 embed=discord.Embed(
                     description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
-                    colour=discord.Colour.red()
-                )
+                    colour=discord.Colour.red(),
+                ),
             )
 
     @app_commands.command(name="fish", description="Fish for some loot")
     @app_commands.checks.cooldown(1, 600, key=lambda i: (i.guild_id, i.user.id))
     async def fish(self, interaction: discord.Interaction):
-
         item_name, _ = random_choice_from_dict(DataManager.get("economy", "fish_items"))
         DataManager.edit_user_inventory(interaction.user.id, item_name, 1)
 
@@ -240,13 +249,16 @@ class Economy(commands.Cog):
         )
 
     @fish.error
-    async def on_fish_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+    async def on_fish_error(
+        self, interaction: discord.Interaction, error: app_commands.AppCommandError
+    ):
         if isinstance(error, app_commands.CommandOnCooldown):
-            await interaction.response.send_message(ephemeral=True,
+            await interaction.response.send_message(
+                ephemeral=True,
                 embed=discord.Embed(
                     description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
-                    colour=discord.Colour.red()
-                )
+                    colour=discord.Colour.red(),
+                ),
             )
 
     async def item_autocomplete(
@@ -313,14 +325,18 @@ class Economy(commands.Cog):
                 colour=discord.Colour.green(),
             )
         )
+
     @sell.error
-    async def on_sell_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+    async def on_sell_error(
+        self, interaction: discord.Interaction, error: app_commands.AppCommandError
+    ):
         if isinstance(error, app_commands.CommandOnCooldown):
-            await interaction.response.send_message(ephemeral=True,
+            await interaction.response.send_message(
+                ephemeral=True,
                 embed=discord.Embed(
                     description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
-                    colour=discord.Colour.red()
-                )
+                    colour=discord.Colour.red(),
+                ),
             )
 
     @app_commands.command(
@@ -384,14 +400,18 @@ class Economy(commands.Cog):
                 colour=discord.Colour.red(),
             )
         )
+
     @rob.error
-    async def on_rob_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+    async def on_rob_error(
+        self, interaction: discord.Interaction, error: app_commands.AppCommandError
+    ):
         if isinstance(error, app_commands.CommandOnCooldown):
-            await interaction.response.send_message(ephemeral=True,
+            await interaction.response.send_message(
+                ephemeral=True,
                 embed=discord.Embed(
                     description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
-                    colour=discord.Colour.red()
-                )
+                    colour=discord.Colour.red(),
+                ),
             )
 
     @app_commands.command(
@@ -399,7 +419,6 @@ class Economy(commands.Cog):
     )
     @app_commands.checks.cooldown(1, 3600, key=lambda i: (i.guild_id, i.user.id))
     async def hourly(self, interaction: discord.Interaction):
-
         user_data = DataManager.get_user_data(interaction.user.id)
         DataManager.edit_user_data(
             interaction.user.id, "balance", user_data["balance"] + 10
@@ -415,13 +434,16 @@ class Economy(commands.Cog):
         )
 
     @hourly.error
-    async def on_hourly_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+    async def on_hourly_error(
+        self, interaction: discord.Interaction, error: app_commands.AppCommandError
+    ):
         if isinstance(error, app_commands.CommandOnCooldown):
-            await interaction.response.send_message(ephemeral=True,
+            await interaction.response.send_message(
+                ephemeral=True,
                 embed=discord.Embed(
                     description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
-                    colour=discord.Colour.red()
-                )
+                    colour=discord.Colour.red(),
+                ),
             )
 
     @app_commands.command(
@@ -429,7 +451,6 @@ class Economy(commands.Cog):
     )
     @app_commands.checks.cooldown(1, 86400, key=lambda i: (i.guild_id, i.user.id))
     async def daily(self, interaction: discord.Interaction):
-
         user_data = DataManager.get_user_data(interaction.user.id)
         DataManager.edit_user_data(
             interaction.user.id, "balance", user_data["balance"] + 100
@@ -445,13 +466,16 @@ class Economy(commands.Cog):
         )
 
     @daily.error
-    async def on_daily_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+    async def on_daily_error(
+        self, interaction: discord.Interaction, error: app_commands.AppCommandError
+    ):
         if isinstance(error, app_commands.CommandOnCooldown):
-            await interaction.response.send_message(ephemeral=True,
+            await interaction.response.send_message(
+                ephemeral=True,
                 embed=discord.Embed(
                     description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
-                    colour=discord.Colour.red()
-                )
+                    colour=discord.Colour.red(),
+                ),
             )
 
     @app_commands.command(
@@ -459,7 +483,6 @@ class Economy(commands.Cog):
     )
     @app_commands.checks.cooldown(1, 2592000, key=lambda i: (i.guild_id, i.user.id))
     async def monthly(self, interaction: discord.Interaction):
-
         user_data = DataManager.get_user_data(interaction.user.id)
         DataManager.edit_user_data(
             interaction.user.id, "balance", user_data["balance"] + 3000
@@ -475,13 +498,16 @@ class Economy(commands.Cog):
         )
 
     @monthly.error
-    async def on_monthly_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+    async def on_monthly_error(
+        self, interaction: discord.Interaction, error: app_commands.AppCommandError
+    ):
         if isinstance(error, app_commands.CommandOnCooldown):
-            await interaction.response.send_message(ephemeral=True,
+            await interaction.response.send_message(
+                ephemeral=True,
                 embed=discord.Embed(
                     description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
-                    colour=discord.Colour.red()
-                )
+                    colour=discord.Colour.red(),
+                ),
             )
 
     @app_commands.command(name="inventory", description="See your inventory")
@@ -501,7 +527,11 @@ class Economy(commands.Cog):
         )
 
         for item, count in user_data["inventory"].items():
-            inv_embed.add_field(name=f"{item} - {count}", value="smth goes here (Coming Soon:tm:)", inline=False)
+            inv_embed.add_field(
+                name=f"{item} - {count}",
+                value="smth goes here (Coming Soon:tm:)",
+                inline=False,
+            )
 
         if len(inv_embed.fields) == 0:
             return await interaction.response.send_message(
@@ -514,17 +544,22 @@ class Economy(commands.Cog):
             )
 
         inv_embed.set_thumbnail(url=self.bot.user.avatar)
-        inv_embed.set_author(name=interaction.user.name + "'s inventory", icon_url=author_avatar)
+        inv_embed.set_author(
+            name=interaction.user.name + "'s inventory", icon_url=author_avatar
+        )
         await interaction.response.send_message(embed=inv_embed)
 
     @inventory.error
-    async def on_inventory_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+    async def on_inventory_error(
+        self, interaction: discord.Interaction, error: app_commands.AppCommandError
+    ):
         if isinstance(error, app_commands.CommandOnCooldown):
-            await interaction.response.send_message(ephemeral=True,
+            await interaction.response.send_message(
+                ephemeral=True,
                 embed=discord.Embed(
                     description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
-                    colour=discord.Colour.red()
-                )
+                    colour=discord.Colour.red(),
+                ),
             )
 
 

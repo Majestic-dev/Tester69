@@ -48,15 +48,18 @@ class WarningSystem(commands.Cog):
                 colour=discord.Colour.green(),
             )
         )
-    
+
     @warn.error
-    async def on_warn_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+    async def on_warn_error(
+        self, interaction: discord.Interaction, error: app_commands.AppCommandError
+    ):
         if isinstance(error, app_commands.CommandOnCooldown):
-            await interaction.response.send_message(ephemeral=True,
+            await interaction.response.send_message(
+                ephemeral=True,
                 embed=discord.Embed(
                     description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
-                    colour=discord.Colour.red()
-                )
+                    colour=discord.Colour.red(),
+                ),
             )
 
     @app_commands.command(name="delwarn", description="Deletes the warning by UUID")
@@ -86,15 +89,18 @@ class WarningSystem(commands.Cog):
                 colour=discord.Colour.orange(),
             )
         )
-    
+
     @delwarn.error
-    async def on_delwarn_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+    async def on_delwarn_error(
+        self, interaction: discord.Interaction, error: app_commands.AppCommandError
+    ):
         if isinstance(error, app_commands.CommandOnCooldown):
-            await interaction.response.send_message(ephemeral=True,
+            await interaction.response.send_message(
+                ephemeral=True,
                 embed=discord.Embed(
                     description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
-                    colour=discord.Colour.red()
-                )
+                    colour=discord.Colour.red(),
+                ),
             )
 
     @app_commands.command(
@@ -131,13 +137,16 @@ class WarningSystem(commands.Cog):
         await interaction.response.send_message(embed=e)
 
     @warnings.error
-    async def on_warnings_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+    async def on_warnings_error(
+        self, interaction: discord.Interaction, error: app_commands.AppCommandError
+    ):
         if isinstance(error, app_commands.CommandOnCooldown):
-            await interaction.response.send_message(ephemeral=True,
+            await interaction.response.send_message(
+                ephemeral=True,
                 embed=discord.Embed(
                     description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
-                    colour=discord.Colour.red()
-                )
+                    colour=discord.Colour.red(),
+                ),
             )
 
 

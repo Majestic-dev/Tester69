@@ -165,13 +165,16 @@ class Verification(commands.GroupCog):
         )
 
     @verification_setup.error
-    async def verification_setup_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+    async def verification_setup_error(
+        self, interaction: discord.Interaction, error: app_commands.AppCommandError
+    ):
         if isinstance(error, app_commands.CommandOnCooldown):
-            await interaction.response.send_message(ephemeral=True,
+            await interaction.response.send_message(
+                ephemeral=True,
                 embed=discord.Embed(
                     description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
-                    colour=discord.Colour.red()
-                )
+                    colour=discord.Colour.red(),
+                ),
             )
 
     @commands.Cog.listener()
@@ -226,7 +229,11 @@ class Verification(commands.GroupCog):
                 await asyncio.sleep(30)
                 return await message.delete()
 
-        check = lambda m: m.channel == dm_channel or verification_channel and m.author == member
+        check = (
+            lambda m: m.channel == dm_channel
+            or verification_channel
+            and m.author == member
+        )
         fail_count = 3
 
         while fail_count > 0:

@@ -134,7 +134,7 @@ class Gambling(commands.Cog):
 
         win = random.choices([True, False])[0]
         random1 = random.randint(1, 3)
-        winnings = (bet * random1)
+        winnings = bet * random1
         if win == True:
             DataManager.edit_user_data(
                 interaction.user.id, "balance", user_data["balance"] + winnings
@@ -161,17 +161,19 @@ class Gambling(commands.Cog):
                     colour=discord.Colour.red(),
                 )
             )
-    
+
     @gamble.error
-    async def on_gamble_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+    async def on_gamble_error(
+        self, interaction: discord.Interaction, error: app_commands.AppCommandError
+    ):
         if isinstance(error, app_commands.CommandOnCooldown):
-            await interaction.response.send_message(ephemeral=True,
+            await interaction.response.send_message(
+                ephemeral=True,
                 embed=discord.Embed(
                     description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
-                    colour=discord.Colour.red()
-                )
+                    colour=discord.Colour.red(),
+                ),
             )
-        
 
     @app_commands.command(
         name="snakeeyes",
@@ -249,13 +251,16 @@ class Gambling(commands.Cog):
             )
 
     @snakeeyes.error
-    async def on_snakeeyes_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+    async def on_snakeeyes_error(
+        self, interaction: discord.Interaction, error: app_commands.AppCommandError
+    ):
         if isinstance(error, app_commands.CommandOnCooldown):
-            await interaction.response.send_message(ephemeral=True,
+            await interaction.response.send_message(
+                ephemeral=True,
                 embed=discord.Embed(
                     description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
-                    colour=discord.Colour.red()
-                )
+                    colour=discord.Colour.red(),
+                ),
             )
 
     @app_commands.command(
@@ -738,13 +743,16 @@ class Gambling(commands.Cog):
                 )
 
     @blackjack.error
-    async def on_blackjack_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+    async def on_blackjack_error(
+        self, interaction: discord.Interaction, error: app_commands.AppCommandError
+    ):
         if isinstance(error, app_commands.CommandOnCooldown):
-            await interaction.response.send_message(ephemeral=True,
+            await interaction.response.send_message(
+                ephemeral=True,
                 embed=discord.Embed(
                     description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
-                    colour=discord.Colour.red()
-                )
+                    colour=discord.Colour.red(),
+                ),
             )
 
     @app_commands.command(
@@ -825,13 +833,16 @@ class Gambling(commands.Cog):
         )
 
     @coinflip.error
-    async def on_coinflip_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+    async def on_coinflip_error(
+        self, interaction: discord.Interaction, error: app_commands.AppCommandError
+    ):
         if isinstance(error, app_commands.CommandOnCooldown):
-            await interaction.response.send_message(ephemeral=True,
+            await interaction.response.send_message(
+                ephemeral=True,
                 embed=discord.Embed(
                     description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
-                    colour=discord.Colour.red()
-                )
+                    colour=discord.Colour.red(),
+                ),
             )
 
 
