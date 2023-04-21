@@ -68,7 +68,7 @@ class Moderation(commands.Cog):
                 )
             )
 
-        if interaction.user.top_role.position <= member.top_role.position:
+        if interaction.user.top_role <= member.top_role:
             return await interaction.response.send_message(
                 embed=discord.Embed(
                     description="<:white_cross:1096791282023669860> You can't mute your superiors",
@@ -77,7 +77,7 @@ class Moderation(commands.Cog):
             )
 
         bot = interaction.guild.get_member(self.bot.user.id)
-        if bot.top_role.position <= member.top_role.position:
+        if bot.top_role <= member.top_role:
             return await interaction.response.send_message(
                 embed=discord.Embed(
                     description="<:white_cross:1096791282023669860> That user is higher than me, I can't do that",
@@ -209,7 +209,7 @@ class Moderation(commands.Cog):
                 )
             )
 
-        if interaction.user.top_role.position <= member.top_role.position:
+        if interaction.user.top_role <= member.top_role:
             return await interaction.response.send_message(
                 embed=discord.Embed(
                     description="<:white_cross:1096791282023669860> You can't kick your superiors",
@@ -218,7 +218,7 @@ class Moderation(commands.Cog):
             )
 
         bot = interaction.guild.get_member(self.bot.user.id)
-        if bot.top_role.position <= member.top_role.position:
+        if bot.top_role <= member.top_role:
             return await interaction.response.send_message(
                 embed=discord.Embed(
                     description="<:white_cross:1096791282023669860> That user is higher than me, I can't do that",
@@ -277,6 +277,8 @@ class Moderation(commands.Cog):
         member: discord.Member,
         reason: str = "Unspecified",
     ):
+        guild_data = DataManager.get_guild_data(interaction.guild.id)
+        appeal_link = guild_data["appeal_link"]
         await self.bot.fetch_user(member)
 
         if member.id == interaction.user.id:
@@ -287,7 +289,7 @@ class Moderation(commands.Cog):
                 )
             )
 
-        if interaction.user.top_role.position <= member.top_role.position:
+        if interaction.user.top_role <= member.top_role:
             return await interaction.response.send_message(
                 embed=discord.Embed(
                     description="<:white_cross:1096791282023669860> You can't ban your superiors",
@@ -304,7 +306,7 @@ class Moderation(commands.Cog):
             )
 
         bot = interaction.guild.get_member(self.bot.user.id)
-        if bot.top_role.position <= member.top_role.position:
+        if bot.top_role <= member.top_role:
             return await interaction.response.send_message(
                 embed=discord.Embed(
                     description="<:white_cross:1096791282023669860> That user is higher than me, I can't do that",
@@ -314,6 +316,19 @@ class Moderation(commands.Cog):
 
         else:
             try:
+                if appeal_link != None:
+                    dm_channel = await member.create_dm()
+                    try:
+                        await dm_channel.send(
+                            embed=discord.Embed(
+                                title="You have been banned from the server",
+                                description=f"You have been banned from {interaction.guild.name}. Appeal for unban at {appeal_link}",
+                                timestamp=datetime.utcnow(),
+                                colour=discord.Colour.red(),
+                            )
+                        )
+                    except:
+                        pass
                 await member.ban(reason=reason)
                 await interaction.response.send_message(
                     embed=discord.Embed(
