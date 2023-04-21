@@ -28,7 +28,9 @@ class Moderation(commands.Cog):
         DataManager.edit_guild_data(interaction.guild.id, "muted_role_id", role.id)
 
     @set_muted_role.error
-    async def on_set_muted_role_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+    async def on_set_muted_role_error(
+        self, interaction: discord.Interaction, error: app_commands.AppCommandError
+    ):
         if isinstance(error, app_commands.CommandOnCooldown):
             await interaction.response.send_message(
                 embed=discord.Embed(
@@ -138,7 +140,9 @@ class Moderation(commands.Cog):
             DataManager.save("guilds")
 
     @mute.error
-    async def on_mute_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+    async def on_mute_error(
+        self, interaction: discord.Interaction, error: app_commands.AppCommandError
+    ):
         if isinstance(error, app_commands.CommandOnCooldown):
             await interaction.response.send_message(
                 embed=discord.Embed(
@@ -177,7 +181,9 @@ class Moderation(commands.Cog):
             )
 
     @unmute.error
-    async def on_unmute_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+    async def on_unmute_error(
+        self, interaction: discord.Interaction, error: app_commands.AppCommandError
+    ):
         if isinstance(error, app_commands.CommandOnCooldown):
             await interaction.response.send_message(
                 embed=discord.Embed(
@@ -195,7 +201,6 @@ class Moderation(commands.Cog):
         member: discord.Member,
         reason: str = "Unspecified",
     ):
-
         if member.id == interaction.user.id:
             return await interaction.response.send_message(
                 embed=discord.Embed(
@@ -250,9 +255,11 @@ class Moderation(commands.Cog):
                         colour=discord.Colour.orange(),
                     )
                 )
-    
+
     @kick.error
-    async def on_kick_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+    async def on_kick_error(
+        self, interaction: discord.Interaction, error: app_commands.AppCommandError
+    ):
         if isinstance(error, app_commands.CommandOnCooldown):
             await interaction.response.send_message(
                 embed=discord.Embed(
@@ -271,7 +278,7 @@ class Moderation(commands.Cog):
         reason: str = "Unspecified",
     ):
         await self.bot.fetch_user(member)
-        
+
         if member.id == interaction.user.id:
             return await interaction.response.send_message(
                 embed=discord.Embed(
@@ -335,7 +342,9 @@ class Moderation(commands.Cog):
                 )
 
     @ban.error
-    async def on_ban_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+    async def on_ban_error(
+        self, interaction: discord.Interaction, error: app_commands.AppCommandError
+    ):
         if isinstance(error, app_commands.CommandOnCooldown):
             await interaction.response.send_message(
                 embed=discord.Embed(
@@ -350,40 +359,39 @@ class Moderation(commands.Cog):
     )
     @app_commands.default_permissions(ban_members=True)
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id))
-    async def unban(self, interaction: discord.Interaction, member: int):
-        member = await self.bot.fetch_user(member)
+    async def unban(self, interaction: discord.Interaction, member: str):
+        try:
+            member = await self.bot.fetch_user(int(member))
+            entry = await interaction.guild.fetch_ban(member)
+            await interaction.guild.unban(entry.user)
+            dm_channel = await member.create_dm()
 
-        async for ban in interaction.guild.bans():
-            if ban.user.id == int(member):
-                await interaction.guild.unban(ban.user)
-
-                try:
-                    member.create_dm()
-                    await member.dm_channel.send(
-                        embed=discord.Embed(
-                            description=f"You have been unbanned from {interaction.guild.name} for ",
-                            colour=discord.Colour.red(),
-                        )
-                    )
-                except:
-                    pass
-
-                return await interaction.response.send_message(
-                    embed=discord.Embed(
-                        description=f"<:white_checkmark:1096793014287995061> unbanned {member.mention}",
-                        colour=discord.Colour.green(),
-                    )
+            await dm_channel.send(
+                embed=discord.Embed(
+                    description=f"<:white_checkmark:1096793014287995061> You have been unbanned from {interaction.guild.name}",
+                    colour=discord.Colour.green(),
                 )
-
-        await interaction.response.send_message(
-            embed=discord.Embed(
-                description=f"<:white_cross:1096791282023669860> Could not unban {member} because they are not banned",
-                colour=discord.Colour.orange(),
             )
-        )
-    
+
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    description=f"<:white_checkmark:1096793014287995061> unbanned {member.mention}",
+                    colour=discord.Colour.green(),
+                )
+            )
+
+        except:
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    description=f"<:white_cross:1096791282023669860> That user is not banned",
+                    colour=discord.Colour.red(),
+                )
+            )
+
     @unban.error
-    async def on_unban_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+    async def on_unban_error(
+        self, interaction: discord.Interaction, error: app_commands.AppCommandError
+    ):
         if isinstance(error, app_commands.CommandOnCooldown):
             await interaction.response.send_message(
                 embed=discord.Embed(
