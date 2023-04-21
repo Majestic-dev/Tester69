@@ -84,7 +84,6 @@ class Verification(commands.GroupCog):
                 embed=discord.Embed(
                     title="Verification Disabled",
                     description="Verification is already disabled or has not been interacted with for this server",
-                    timestamp=datetime.utcnow(),
                     colour=discord.Colour.orange(),
                 )
             )
@@ -93,7 +92,6 @@ class Verification(commands.GroupCog):
             embed=discord.Embed(
                 title="Verification Disabled",
                 description="Verification has been disabled for this server",
-                timestamp=datetime.utcnow(),
                 colour=discord.Colour.green(),
             )
         )
@@ -134,7 +132,6 @@ class Verification(commands.GroupCog):
         verification = discord.Embed(
             title="Verification Setup",
             description="Verification has been setup for this server",
-            timestamp=datetime.utcnow(),
             colour=discord.Colour.green(),
         )
         verification.add_field(
@@ -251,7 +248,6 @@ class Verification(commands.GroupCog):
                     embed=discord.Embed(
                         title="Timeout",
                         description=f"You took too long to enter the verification code. Please rejoin the server and try again: {invite}",
-                        timestamp=datetime.utcnow(),
                         colour=discord.Colour.orange(),
                     )
                 )
@@ -273,7 +269,6 @@ class Verification(commands.GroupCog):
                     embed=discord.Embed(
                         title="Verification Completed!",
                         description=f"{member.mention} has verified themselves!",
-                        timestamp=datetime.utcnow(),
                         colour=discord.Colour.green(),
                     )
                 )
@@ -290,7 +285,6 @@ class Verification(commands.GroupCog):
                     embed=discord.Embed(
                         title="Verification Cancelled",
                         description=f"Verification cancelled. Please rejoin the server if you'd like to verify yourself",
-                        timestamp=datetime.utcnow(),
                         colour=discord.Colour.orange(),
                     )
                 )
@@ -307,7 +301,6 @@ class Verification(commands.GroupCog):
                     embed=discord.Embed(
                         title="Code Reset",
                         description=f"{member.mention}'s code was reset",
-                        timestamp=datetime.utcnow(),
                         colour=discord.Colour.red(),
                     )
                 )
@@ -319,7 +312,6 @@ class Verification(commands.GroupCog):
                     embed=discord.Embed(
                         title="Invalid Code",
                         description=f"Invalid verification code! You have {fail_count} attempts remaining",
-                        timestamp=datetime.utcnow(),
                         colour=discord.Colour.orange(),
                     )
                 )
@@ -335,7 +327,6 @@ class Verification(commands.GroupCog):
                     embed=discord.Embed(
                         title="Code Reset",
                         description=f"{member.mention}'s code was reset",
-                        timestamp=datetime.utcnow(),
                         colour=discord.Colour.red(),
                     )
                 )
@@ -349,7 +340,6 @@ class Verification(commands.GroupCog):
             embed=discord.Embed(
                 title="Verification Failed",
                 description=f"You entered the verification code wrong too many times. Please rejoin the server and try again: {invite}",
-                timestamp=datetime.utcnow(),
                 colour=discord.Colour.orange(),
             )
         )

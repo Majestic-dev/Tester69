@@ -176,7 +176,6 @@ class Economy(commands.Cog):
                     description=(
                         f'Your balance is {DataManager.get_user_data(interaction.user.id)["balance"]} :coin:'
                     ),
-                    timestamp=datetime.utcnow(),
                     colour=discord.Colour.green(),
                 )
             )
@@ -187,7 +186,6 @@ class Economy(commands.Cog):
                     description=(
                         f'{user.name}\'s balance is {DataManager.get_user_data(user.id)["balance"]} :coin:'
                     ),
-                    timestamp=datetime.utcnow(),
                     colour=discord.Colour.green(),
                 )
             )
@@ -215,7 +213,6 @@ class Economy(commands.Cog):
             embed=discord.Embed(
                 title="Item Caught",
                 description=(f"You hunted down a {item_name}!"),
-                timestamp=datetime.utcnow(),
                 colour=discord.Colour.green(),
             )
         )
@@ -243,7 +240,6 @@ class Economy(commands.Cog):
             embed=discord.Embed(
                 title="Item Caught",
                 description=(f"You caught a {item_name}!"),
-                timestamp=datetime.utcnow(),
                 colour=discord.Colour.green(),
             )
         )
@@ -286,7 +282,6 @@ class Economy(commands.Cog):
                 embed=discord.Embed(
                     title="No Item",
                     description="You don't have any of that item",
-                    timestamp=datetime.utcnow(),
                     colour=discord.Colour.orange(),
                 )
             )
@@ -296,7 +291,6 @@ class Economy(commands.Cog):
                 embed=discord.Embed(
                     title="No Item",
                     description="You don't have any of that item",
-                    timestamp=datetime.utcnow(),
                     colour=discord.Colour.orange(),
                 )
             )
@@ -306,7 +300,6 @@ class Economy(commands.Cog):
                 embed=discord.Embed(
                     title="Can't Sell",
                     description="I can't sell that item, because it doesn't exist",
-                    timestamp=datetime.utcnow(),
                     colour=discord.Colour.red(),
                 )
             )
@@ -321,7 +314,6 @@ class Economy(commands.Cog):
             embed=discord.Embed(
                 title="Item Sold",
                 description=(f"You sold a {item} for {price} :coin:!"),
-                timestamp=datetime.utcnow(),
                 colour=discord.Colour.green(),
             )
         )
@@ -355,7 +347,6 @@ class Economy(commands.Cog):
                 embed=discord.Embed(
                     title="You Can Not Rob Yourself!",
                     description="You can't rob yourself, try mentioning another user",
-                    timestamp=datetime.utcnow(),
                     colour=discord.Colour.orange(),
                 )
             )
@@ -364,7 +355,6 @@ class Economy(commands.Cog):
                 embed=discord.Embed(
                     title="This User Does Not Have Any :coin:!",
                     description=f"You can't rob <@{victim_id}> since they do not have any :coin: to rob!",
-                    timestamp=datetime.utcnow(),
                     colour=discord.Colour.orange(),
                 )
             )
@@ -384,7 +374,6 @@ class Economy(commands.Cog):
                 embed=discord.Embed(
                     title=f"Rob Successful",
                     description=f"Successfully robbed <@{user.id}> {cash} :coin:",
-                    timestamp=datetime.utcnow(),
                     colour=discord.Colour.green(),
                 )
             )
@@ -396,7 +385,6 @@ class Economy(commands.Cog):
             embed=discord.Embed(
                 title="Rob Unsuccessful",
                 description=f"Failed to rob <@{user.id}>",
-                timestamp=datetime.utcnow(),
                 colour=discord.Colour.red(),
             )
         )
@@ -428,7 +416,6 @@ class Economy(commands.Cog):
             embed=discord.Embed(
                 title="Hourly Pay",
                 description="You received 100 :coin:!",
-                timestamp=datetime.utcnow(),
                 colour=discord.Colour.green(),
             )
         )
@@ -460,7 +447,6 @@ class Economy(commands.Cog):
             embed=discord.Embed(
                 title="Daily Pay",
                 description="You received 1000 :coin:!",
-                timestamp=datetime.utcnow(),
                 colour=discord.Colour.green(),
             )
         )
@@ -492,7 +478,6 @@ class Economy(commands.Cog):
             embed=discord.Embed(
                 title="Monthly Pay",
                 description="You received 20000 :coin:!",
-                timestamp=datetime.utcnow(),
                 colour=discord.Colour.green(),
             )
         )
@@ -522,7 +507,6 @@ class Economy(commands.Cog):
 
         inv_embed = discord.Embed(
             title="Inventory",
-            timestamp=datetime.utcnow(),
             colour=discord.Colour.green(),
         )
 
@@ -538,7 +522,6 @@ class Economy(commands.Cog):
                 embed=discord.Embed(
                     title="Empty Inventory",
                     description="You don't have any items in your inventory",
-                    timestamp=datetime.utcnow(),
                     colour=discord.Colour.orange(),
                 )
             )

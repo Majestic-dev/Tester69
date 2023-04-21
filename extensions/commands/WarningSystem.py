@@ -78,7 +78,6 @@ class WarningSystem(commands.Cog):
                     return await interaction.response.send_message(
                         embed=discord.Embed(
                             description=f"<:white_checkmark:1096793014287995061> Deleted warning ```{uuid}```",
-                            timestamp=datetime.utcnow(),
                             colour=discord.Colour.green(),
                         )
                     )

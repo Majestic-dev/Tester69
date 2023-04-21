@@ -455,7 +455,12 @@ class Logging(commands.GroupCog):
         if logs_channel == None:
             return
 
-        if message.author.bot and message.embeds == False or message.author.bot and message.channel != logs_channel:
+        if (
+            message.author.bot
+            and message.embeds == False
+            or message.author.bot
+            and message.channel != logs_channel
+        ):
             return
 
         if message.is_system() == True:

@@ -14,7 +14,6 @@ class MainStuff(commands.Cog):
         Ping = discord.Embed(
             title="Pong!",
             description=f"🏓 My ping is {round(self.bot.latency * 1000)}ms 🏓",
-            timestamp=datetime.utcnow(),
             colour=discord.Colour.green(),
         )
 
@@ -25,7 +24,6 @@ class MainStuff(commands.Cog):
         Prefix = discord.Embed(
             title="Prefix",
             description="Tester69 uses slash commands, enter `/` or `/help` and you will see all the available commands",
-            timestamp=datetime.utcnow(),
             colour=discord.Colour.light_gray(),
         )
 
@@ -35,7 +33,6 @@ class MainStuff(commands.Cog):
     async def help(self, interaction: discord.Interaction):
         help = discord.Embed(
             title="Tetser69's command list",
-            timestamp=datetime.utcnow(),
             colour=discord.Colour.darker_gray(),
         )
 
@@ -60,7 +57,6 @@ class MainStuff(commands.Cog):
     async def moderation(self, interaction: discord.Interaction):
         moderation = discord.Embed(
             title="Tester69's moderation commands",
-            timestamp=datetime.utcnow(),
             colour=discord.Colour.light_gray(),
         )
         moderation.add_field(name="Kick", value="`/kick`", inline=True)
@@ -80,7 +76,6 @@ class MainStuff(commands.Cog):
     async def economy(self, interaction: discord.Interaction):
         economy = discord.Embed(
             title="Tester69's economy commands",
-            timestamp=datetime.utcnow(),
             colour=discord.Colour.light_grey(),
         )
         economy.add_field(name="Balance", value="`/balance`", inline=True)
@@ -99,7 +94,6 @@ class MainStuff(commands.Cog):
     async def gambling(self, interaction: discord.Interaction):
         gambling = discord.Embed(
             title="Tester69's gambling commands",
-            timestamp=datetime.utcnow(),
             colour=discord.Colour.light_grey(),
         )
         gambling.add_field(name="Gamble", value="`/gamble`", inline=True)
@@ -113,7 +107,6 @@ class MainStuff(commands.Cog):
     async def misc(self, interaction: discord.Interaction):
         misc = discord.Embed(
             title="Tester69's misc commands",
-            timestamp=datetime.utcnow(),
             colour=discord.Colour.light_grey(),
         )
         misc.add_field(name="Ping", value="`/ping`", inline=True)
@@ -129,7 +122,6 @@ class MainStuff(commands.Cog):
     async def servermanagement(self, interaction: discord.Interaction):
         servermanagement = discord.Embed(
             title="Tester69's server management commands",
-            timestamp=datetime.utcnow(),
             colour=discord.Colour.light_grey(),
         )
 

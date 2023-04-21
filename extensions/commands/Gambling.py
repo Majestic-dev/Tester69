@@ -110,7 +110,6 @@ class Gambling(commands.Cog):
                 embed=discord.Embed(
                     title="Bet Failed",
                     description="You have to add a bet between 10 and 250000",
-                    timestamp=datetime.utcnow(),
                     colour=discord.Colour.orange(),
                 )
             )
@@ -123,7 +122,6 @@ class Gambling(commands.Cog):
                     description=(
                         f'You do not have enough funds to gamble. Your balance is {user_data["balance"]}'
                     ),
-                    timestamp=datetime.utcnow(),
                     colour=discord.Colour.orange(),
                 )
             )
@@ -146,7 +144,6 @@ class Gambling(commands.Cog):
                     description=(
                         f'Congratulations! You won {winnings} and your new balance is {user_data["balance"]}'
                     ),
-                    timestamp=datetime.utcnow(),
                     colour=discord.Colour.green(),
                 )
             )
@@ -157,7 +154,6 @@ class Gambling(commands.Cog):
                     description=(
                         f'Sorry, you lost {bet}. Your new balance is {user_data["balance"]}'
                     ),
-                    timestamp=datetime.utcnow(),
                     colour=discord.Colour.red(),
                 )
             )
@@ -188,7 +184,6 @@ class Gambling(commands.Cog):
                 embed=discord.Embed(
                     title="Bet Failed",
                     description="You have to add a bet between 10 and 250000",
-                    timestamp=datetime.utcnow(),
                     colour=discord.Colour.orange(),
                 )
             )
@@ -199,7 +194,6 @@ class Gambling(commands.Cog):
                 embed=discord.Embed(
                     title="Not Enough :coin:",
                     description="You do not have enough :coin: for that bet",
-                    timestamp=datetime.utcnow(),
                     colour=discord.Colour.orange(),
                 )
             )
@@ -216,7 +210,6 @@ class Gambling(commands.Cog):
                 embed=discord.Embed(
                     title="SNAKE EYES!",
                     description=(f"You rolled Snake Eyes! You won {30 * bet} :coin:!"),
-                    timestamp=datetime.utcnow(),
                     colour=discord.Colour.green(),
                 )
             )
@@ -229,8 +222,9 @@ class Gambling(commands.Cog):
             await interaction.response.send_message(
                 embed=discord.Embed(
                     title="Snake Eye!",
-                    description=(f"You rolled 1 snake eye! You won {1.5 * bet} :coin:!"),
-                    timestamp=datetime.utcnow(),
+                    description=(
+                        f"You rolled 1 snake eye! You won {1.5 * bet} :coin:!"
+                    ),
                     colour=discord.Colour.green(),
                 )
             )
@@ -245,7 +239,6 @@ class Gambling(commands.Cog):
                     description=(
                         f"You rolled a {roll1} and a {roll2}. You lost {bet} :coin:."
                     ),
-                    timestamp=datetime.utcnow(),
                     colour=discord.Colour.orange(),
                 )
             )
@@ -276,7 +269,6 @@ class Gambling(commands.Cog):
                 embed=discord.Embed(
                     title="Bet Failed",
                     description="You have to add a bet between 10 and 250000.",
-                    timestamp=datetime.utcnow(),
                     colour=discord.Colour.orange(),
                 )
             )
@@ -286,7 +278,6 @@ class Gambling(commands.Cog):
                 embed=discord.Embed(
                     title="Bet Failed",
                     description="You do not have enough :coin: for that bet",
-                    timestamp=datetime.utcnow(),
                     colour=discord.Colour.orange(),
                 )
             )
@@ -315,7 +306,6 @@ class Gambling(commands.Cog):
             e = discord.Embed(
                 title="Blackjack",
                 description=f"You got blackjack! You won {int(bet * 2.5)} :coin:.",
-                timestamp=datetime.utcnow(),
                 colour=discord.Colour.green(),
             )
 
@@ -344,7 +334,6 @@ class Gambling(commands.Cog):
         e = discord.Embed(
             title="Blackjack",
             description=f"Use the buttons below to play.\nBet: {bet}",
-            timestamp=datetime.utcnow(),
             colour=discord.Colour.blurple(),
         )
 
@@ -377,7 +366,6 @@ class Gambling(commands.Cog):
                     e = discord.Embed(
                         title="Blackjack",
                         description=f"You busted! You lost {bet} :coin:.",
-                        timestamp=datetime.utcnow(),
                         colour=discord.Colour.red(),
                     )
 
@@ -405,7 +393,6 @@ class Gambling(commands.Cog):
                     e = discord.Embed(
                         title="Blackjack",
                         description=f"The dealer busted! You won {bet} :coin:.",
-                        timestamp=datetime.utcnow(),
                         colour=discord.Colour.green(),
                     )
 
@@ -433,7 +420,6 @@ class Gambling(commands.Cog):
                     e = discord.Embed(
                         title="Blackjack",
                         description=f"You won! You won {bet} :coin:.",
-                        timestamp=datetime.utcnow(),
                         colour=discord.Colour.green(),
                     )
 
@@ -461,7 +447,6 @@ class Gambling(commands.Cog):
                     e = discord.Embed(
                         title="Blackjack",
                         description=f"You tied! You got your bet back.",
-                        timestamp=datetime.utcnow(),
                         colour=discord.Colour.orange(),
                     )
 
@@ -485,7 +470,6 @@ class Gambling(commands.Cog):
                     e = discord.Embed(
                         title="Blackjack",
                         description=f"You lost! You lost {bet} :coin:.",
-                        timestamp=datetime.utcnow(),
                         colour=discord.Colour.red(),
                     )
 
@@ -513,7 +497,6 @@ class Gambling(commands.Cog):
                 e = discord.Embed(
                     title="Blackjack",
                     description=f"You forfeited! You lost {bet / 2} :coin:. 50% of your bet was returned.",
-                    timestamp=datetime.utcnow(),
                     colour=discord.Colour.red(),
                 )
 
@@ -552,7 +535,6 @@ class Gambling(commands.Cog):
                     e = discord.Embed(
                         title="Blackjack",
                         description=f"You busted! You lost {bet} :coin:.",
-                        timestamp=datetime.utcnow(),
                         colour=discord.Colour.red(),
                     )
 
@@ -580,7 +562,6 @@ class Gambling(commands.Cog):
                     e = discord.Embed(
                         title="Blackjack",
                         description=f"The dealer busted! You won {bet} :coin:.",
-                        timestamp=datetime.utcnow(),
                         colour=discord.Colour.green(),
                     )
 
@@ -608,7 +589,6 @@ class Gambling(commands.Cog):
                     e = discord.Embed(
                         title="Blackjack",
                         description=f"You won! You won {bet} :coin:.",
-                        timestamp=datetime.utcnow(),
                         colour=discord.Colour.green(),
                     )
 
@@ -636,7 +616,6 @@ class Gambling(commands.Cog):
                     e = discord.Embed(
                         title="Blackjack",
                         description=f"You tied! You got your bet back.",
-                        timestamp=datetime.utcnow(),
                         colour=discord.Colour.orange(),
                     )
 
@@ -660,7 +639,6 @@ class Gambling(commands.Cog):
                     e = discord.Embed(
                         title="Blackjack",
                         description=f"You lost! You lost {bet} :coin:.",
-                        timestamp=datetime.utcnow(),
                         colour=discord.Colour.red(),
                     )
 
@@ -695,7 +673,6 @@ class Gambling(commands.Cog):
                     e = discord.Embed(
                         title="Blackjack",
                         description=f"You busted! You lost {bet} :coin:.",
-                        timestamp=datetime.utcnow(),
                         colour=discord.Colour.red(),
                     )
 
@@ -722,7 +699,6 @@ class Gambling(commands.Cog):
                 e = discord.Embed(
                     title="Blackjack",
                     description=f"Bet: {bet} :coin:",
-                    timestamp=datetime.utcnow(),
                     colour=discord.Colour.blue(),
                 )
 
@@ -778,7 +754,6 @@ class Gambling(commands.Cog):
                 embed=discord.Embed(
                     title="Bet Failed",
                     description="You have to add a bet between 10 and 250000",
-                    timestamp=datetime.utcnow(),
                     colour=discord.Colour.orange(),
                 )
             )
@@ -788,7 +763,6 @@ class Gambling(commands.Cog):
                 embed=discord.Embed(
                     title="Bet Failed",
                     description="You do not have enough :coin: for that bet",
-                    timestamp=datetime.utcnow(),
                     colour=discord.Colour.orange(),
                 )
             )
@@ -803,7 +777,6 @@ class Gambling(commands.Cog):
             embed=discord.Embed(
                 title="Flipping A Coin!",
                 description="Flipping a coin <a:coinflip:1088886954713694398>",
-                timestamp=datetime.utcnow(),
                 colour=discord.Colour.green(),
             )
         )
@@ -814,7 +787,6 @@ class Gambling(commands.Cog):
                 embed=discord.Embed(
                     title="You Lose!",
                     description=f"The coin landed on {result}, you lose {bet} :coin:!",
-                    timestamp=datetime.utcnow(),
                     colour=discord.Colour.red(),
                 )
             )
@@ -827,7 +799,6 @@ class Gambling(commands.Cog):
             embed=discord.Embed(
                 title="You Won!",
                 description=f"The coin landed on {result}, you win {bet} :coin:!",
-                timestamp=datetime.utcnow(),
                 colour=discord.Colour.green(),
             )
         )
