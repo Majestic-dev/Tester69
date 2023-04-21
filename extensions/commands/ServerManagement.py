@@ -46,39 +46,46 @@ class ServerManagement(commands.Cog):
         )
 
     @slowmode.error
-    async def on_slowmode_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+    async def on_slowmode_error(
+        self, interaction: discord.Interaction, error: app_commands.AppCommandError
+    ):
         if isinstance(error, app_commands.CommandOnCooldown):
-            await interaction.response.send_message(ephemeral=True,
+            await interaction.response.send_message(
+                ephemeral=True,
                 embed=discord.Embed(
                     description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
-                    colour=discord.Colour.red()
-                )
+                    colour=discord.Colour.red(),
+                ),
             )
 
     @app_commands.command(
-            name="set_appeal_link",
-            description="Set the appeal link that will be sent to users who get banned",
+        name="set_appeal_link",
+        description="Set the appeal link that will be sent to users who get banned",
     )
     @app_commands.default_permissions(manage_guild=True)
     @app_commands.checks.cooldown(1, 600, key=lambda i: (i.guild.id, i.user.id))
     async def set_appeal_link(self, interaction: discord.Interaction, appeal_link: str):
-        DataManager.edit_guild_data(interaction.guild.id, "appeal_link", f"{appeal_link}")
+        DataManager.edit_guild_data(
+            interaction.guild.id, "appeal_link", f"{appeal_link}"
+        )
         await interaction.response.send_message(
             embed=discord.Embed(
                 description=f"<:white_checkmark:1096793014287995061> Set the appeal link to {appeal_link}",
-                timestamp=datetime.utcnow(),
                 colour=discord.Colour.green(),
             )
         )
 
     @set_appeal_link.error
-    async def on_set_appeal_link_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+    async def on_set_appeal_link_error(
+        self, interaction: discord.Interaction, error: app_commands.AppCommandError
+    ):
         if isinstance(error, app_commands.CommandOnCooldown):
-            await interaction.response.send_message(ephemeral=True,
+            await interaction.response.send_message(
+                ephemeral=True,
                 embed=discord.Embed(
                     description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
-                    colour=discord.Colour.red()
-                )
+                    colour=discord.Colour.red(),
+                ),
             )
 
     @app_commands.command(
@@ -160,13 +167,16 @@ class ServerManagement(commands.Cog):
         await interaction.response.send_message(embed=TextChannel)
 
     @create_channel.error
-    async def on_create_channel_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+    async def on_create_channel_error(
+        self, interaction: discord.Interaction, error: app_commands.AppCommandError
+    ):
         if isinstance(error, app_commands.CommandOnCooldown):
-            await interaction.response.send_message(ephemeral=True,
+            await interaction.response.send_message(
+                ephemeral=True,
                 embed=discord.Embed(
                     description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
-                    colour=discord.Colour.red()
-                )
+                    colour=discord.Colour.red(),
+                ),
             )
 
     @app_commands.command(
@@ -205,17 +215,20 @@ class ServerManagement(commands.Cog):
         await interaction.response.send_message(embed=ChannelDelete)
 
     @delete_channel.error
-    async def on_delete_channel_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+    async def on_delete_channel_error(
+        self, interaction: discord.Interaction, error: app_commands.AppCommandError
+    ):
         if isinstance(error, app_commands.CommandOnCooldown):
-            await interaction.response.send_message(ephemeral=True,
+            await interaction.response.send_message(
+                ephemeral=True,
                 embed=discord.Embed(
                     description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
-                    colour=discord.Colour.red()
-                )
+                    colour=discord.Colour.red(),
+                ),
             )
 
     @app_commands.command(
-            name="add_role", description="Add a role to the mentioned user"
+        name="add_role", description="Add a role to the mentioned user"
     )
     @app_commands.default_permissions(manage_roles=True)
     @app_commands.checks.cooldown(1, 7, key=lambda i: (i.guild.id, i.user.id))
@@ -225,7 +238,6 @@ class ServerManagement(commands.Cog):
         user: discord.Member,
         role: discord.Role,
     ):
-        
         if role in user.roles:
             return await interaction.response.send_message(
                 embed=discord.Embed(
@@ -233,9 +245,12 @@ class ServerManagement(commands.Cog):
                     colour=discord.Colour.red(),
                 )
             )
-        
+
         bot = interaction.guild.get_member(self.bot.user.id)
-        if bot.top_role.position < role.position or bot.top_role.position == role.position:
+        if (
+            bot.top_role.position < role.position
+            or bot.top_role.position == role.position
+        ):
             return await interaction.response.send_message(
                 embed=discord.Embed(
                     description="<:white_cross:1096791282023669860> I cannot add a role higher than my highest role",
@@ -250,7 +265,7 @@ class ServerManagement(commands.Cog):
                     colour=discord.Colour.red(),
                 )
             )
-        
+
         await interaction.response.send_message(
             embed=discord.Embed(
                 description=f"<:white_checkmark:1096793014287995061> added {role.mention} to {user.mention}",
@@ -260,13 +275,16 @@ class ServerManagement(commands.Cog):
         await user.add_roles(role)
 
     @add_role.error
-    async def on_add_role_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+    async def on_add_role_error(
+        self, interaction: discord.Interaction, error: app_commands.AppCommandError
+    ):
         if isinstance(error, app_commands.CommandOnCooldown):
-            await interaction.response.send_message(ephemeral=True,
+            await interaction.response.send_message(
+                ephemeral=True,
                 embed=discord.Embed(
                     description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
-                    colour=discord.Colour.red()
-                )
+                    colour=discord.Colour.red(),
+                ),
             )
 
     @app_commands.command(
@@ -287,16 +305,19 @@ class ServerManagement(commands.Cog):
                     colour=discord.Colour.red(),
                 )
             )
-        
+
         bot = interaction.guild.get_member(self.bot.user.id)
-        if bot.top_role.position < role.position or bot.top_role.position == role.position:
+        if (
+            bot.top_role.position < role.position
+            or bot.top_role.position == role.position
+        ):
             return await interaction.response.send_message(
                 embed=discord.Embed(
                     description="<:white_cross:1096791282023669860> I cannot remove a role that is higher than my highest role.",
                     colour=discord.Colour.red(),
                 )
             )
-        
+
         if interaction.user.top_role.position < role.position:
             return await interaction.response.send_message(
                 embed=discord.Embed(
@@ -304,7 +325,7 @@ class ServerManagement(commands.Cog):
                     colour=discord.Colour.red(),
                 )
             )
-        
+
         await interaction.response.send_message(
             embed=discord.Embed(
                 description=f"<:white_checkmark:1096793014287995061> removed {role.mention} from {user.mention}",
@@ -312,15 +333,18 @@ class ServerManagement(commands.Cog):
             )
         )
         await user.remove_roles(role)
-    
+
     @remove_role.error
-    async def on_remove_role_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+    async def on_remove_role_error(
+        self, interaction: discord.Interaction, error: app_commands.AppCommandError
+    ):
         if isinstance(error, app_commands.CommandOnCooldown):
-            await interaction.response.send_message(ephemeral=True,
+            await interaction.response.send_message(
+                ephemeral=True,
                 embed=discord.Embed(
                     description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
-                    colour=discord.Colour.red()
-                )
+                    colour=discord.Colour.red(),
+                ),
             )
 
     @app_commands.command(
@@ -342,15 +366,18 @@ class ServerManagement(commands.Cog):
                 colour=discord.Colour.green(),
             )
         )
-    
+
     @purge.error
-    async def on_purge_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+    async def on_purge_error(
+        self, interaction: discord.Interaction, error: app_commands.AppCommandError
+    ):
         if isinstance(error, app_commands.CommandOnCooldown):
-            await interaction.response.send_message(ephemeral=True,
+            await interaction.response.send_message(
+                ephemeral=True,
                 embed=discord.Embed(
                     description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
-                    colour=discord.Colour.red()
-                )
+                    colour=discord.Colour.red(),
+                ),
             )
 
     @app_commands.command(
