@@ -164,7 +164,7 @@ class Economy(commands.Cog):
                 ),
             )
 
-    @app_commands.command(name="balance", description="Check your coin balance")
+    @app_commands.command(name="balance", description="Check your 🪙 balance")
     @app_commands.checks.cooldown(1, 60, key=lambda i: (i.guild_id, i.user.id))
     async def balance(
         self, interaction: discord.Interaction, user: Optional[discord.User] = None
@@ -271,7 +271,7 @@ class Economy(commands.Cog):
             and user_data["inventory"][item] > 0
         ]
 
-    @app_commands.command(name="sell", description="Sell your loot for :coin:")
+    @app_commands.command(name="sell", description="Sell your loot for 🪙")
     @app_commands.autocomplete(item=item_autocomplete)
     @app_commands.checks.cooldown(1, 60, key=lambda i: (i.guild_id, i.user.id))
     async def sell(self, interaction: discord.Interaction, item: str):
@@ -332,7 +332,7 @@ class Economy(commands.Cog):
             )
 
     @app_commands.command(
-        name="rob", description="Rob the mentioned user out of their :coin:"
+        name="rob", description="Rob the mentioned user out of their 🪙"
     )
     @app_commands.checks.cooldown(1, 3600, key=lambda i: (i.guild_id, i.user.id))
     async def rob(self, interaction: discord.Interaction, user: discord.User):
@@ -403,7 +403,7 @@ class Economy(commands.Cog):
             )
 
     @app_commands.command(
-        name="hourly", description="Gain 100 :coin: every time you use this command"
+        name="hourly", description="Gain 100 🪙 every time you use this command"
     )
     @app_commands.checks.cooldown(1, 3600, key=lambda i: (i.guild_id, i.user.id))
     async def hourly(self, interaction: discord.Interaction):
