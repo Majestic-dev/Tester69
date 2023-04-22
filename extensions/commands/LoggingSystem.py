@@ -482,7 +482,13 @@ class Logging(commands.GroupCog):
             and message.channel == logs_channel
         ):
             embed = message.embeds[0]
-            return await logs_channel.send(embed=embed)
+            return await logs_channel.send(content=f"{message.content}", embed=embed)
+        
+        if (
+            message.embeds
+        ):
+            embed = message.embeds[0]
+            return await logs_channel.send(content=f"Embed sent by {message.author} deleted in {message.channel.mention}",embed=embed)
 
         embed = discord.Embed(
             description=f"**Message sent by {message.author.mention} Deleted in {message.channel.mention}**",
