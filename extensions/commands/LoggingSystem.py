@@ -132,9 +132,12 @@ class Logging(commands.GroupCog):
         else:
             user_avatar = user.avatar
 
+        logs = [log async for log in guild.audit_logs(limit=1, action=discord.AuditLogAction.ban)]
+        logs = logs[0]
+
         ban = discord.Embed(
             title="Member Banned",
-            description=f"{user.mention} Has been banned from the server",
+            description=f"{user.mention} Has been banned by {logs.user.mention}",
             colour=discord.Colour.red(),
         )
         ban.set_author(icon_url=user_avatar, name=user)
@@ -176,6 +179,7 @@ class Logging(commands.GroupCog):
             return
 
         update = discord.Embed(
+            description=f"{after.mention} has been updated",
             colour=discord.Colour.gold(),
         )
 
@@ -312,6 +316,7 @@ class Logging(commands.GroupCog):
             member_avatar = member.avatar
 
         voice = discord.Embed(
+            description=f"{member.mention} Voice channel updated",
             colour=discord.Colour.gold(),
         )
 
@@ -471,26 +476,16 @@ class Logging(commands.GroupCog):
         else:
             author_avatar = message.author.avatar
 
-        async for entry in message.guild.audit_logs(
-            limit=1, action=discord.AuditLogAction.message_delete
-        ):
-            deleter = entry.user
-
         if (
             message.author.bot == True
             and message.embeds
             and message.channel == logs_channel
         ):
-            return await logs_channel.send(
-                embed=discord.Embed(
-                    title="Log Delted",
-                    description=f"Log sent by the bot was deleted by {deleter.mention}",
-                    colour=discord.Colour.red(),
-                )
-            )
+            embed = message.embeds[0]
+            return await logs_channel.send(embed=embed)
 
         embed = discord.Embed(
-            description=f"**Message sent by {message.author.mention} Deleted in {message.channel.mention} By {deleter.mention}**",
+            description=f"**Message sent by {message.author.mention} Deleted in {message.channel.mention}**",
             colour=discord.Colour.orange(),
         )
         if len(message.content) > 0:
@@ -551,7 +546,7 @@ class Logging(commands.GroupCog):
 
         embed = discord.Embed(
             title="Channel Deleted",
-            description=f"Deleted {channel.name} channel",
+            description=f"Deleted channel {channel.name}",
             timestamp=datetime.utcnow(),
             colour=discord.Colour.red(),
         )
