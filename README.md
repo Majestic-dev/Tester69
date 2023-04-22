@@ -100,7 +100,8 @@ This project is licensed under the Apache License - see the [LICENSE](LICENSE) f
 
 - [x] Add some customization to the moderation system (for example setting the muted role).
 - [ ] Migrate from json to a binary database.
-- [ ] Add a way to deposit money into the bank.
+- [ ] Add a way to deposit/withdraw money into the bank.
+- [ ] Add a way to disable/enable specific logging events.
 
 ## V1.3 Focused On Miscellaneous/Fun
 
