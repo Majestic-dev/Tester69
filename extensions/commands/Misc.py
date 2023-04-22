@@ -74,10 +74,10 @@ class Misc(commands.Cog):
             )
 
     @app_commands.command(
-        name="search_image", description="Search an image by keyword from Unsplash"
+        name="search_unsplash", description="Search an image by keyword from Unsplash"
     )
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id))
-    async def search_image(
+    async def search_unsplash(
         self, interaction: discord.Interaction, search: Optional[str]
     ):
         if search == None:
@@ -119,7 +119,7 @@ class Misc(commands.Cog):
         embed.timestamp = datetime.utcnow()
         await interaction.response.send_message(embed=embed)
 
-    @search_image.error
+    @search_unsplash.error
     async def on_search_image_error(
         self, interaction: discord.Interaction, error: app_commands.AppCommandError
     ):
