@@ -80,10 +80,13 @@ async def on_ready():
         activity=discord.Game(f"/help | https://discord.gg/VsDDf8YKBV"),
     )
 
-    for root, _, files in os.walk("extensions"):
-        for file in files:
-            if file.endswith(".py"):
-                await bot.load_extension(root.replace("\\", ".") + "." + file[:-3])
+    try:
+        for root, _, files in os.walk("extensions"):
+            for file in files:
+                if file.endswith(".py"):
+                    await bot.load_extension(root.replace("\\", ".") + "." + file[:-3])
+    except commands.ExtensionAlreadyLoaded:
+        pass
 
     await bot.tree.sync()
 
