@@ -86,11 +86,13 @@ This project is licensed under the Apache License - see the [LICENSE](LICENSE) f
             * Muted role will be set using a command (/set_muted_role)
             * Before a member gets muted, their roles get saved, when muted their roles will be replaced with the set muted role
             * When unmuted, their roles will be replaced with the roles they had before they got muted
+    - Logging System
+        * Made it so if a log was deleted the exact copy will be sent to the log channel, as long as it's in the message cache
     - Miscellaneous
         * Added a "search_gif" command that will search for a gif on GIPHY by the given keyword, if no keyword is given it will search for a random gif
-        * Added a "search_image" command that will search for an image on Unsplash by the given keyword, if no keyword is given it will search for a random image
+        * Added a "search_unsplash" command that will search for an image on Unsplash by the given keyword, if no keyword is given it will search for a random image
     - Commands
-        * Added a cooldown for all of the commands (except the ones located in MainStuff.py)
+        * Added a cooldown for most of the commands
 
 # TODO
 
