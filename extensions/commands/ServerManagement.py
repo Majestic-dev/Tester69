@@ -354,8 +354,7 @@ class ServerManagement(commands.Cog):
 
         return await interaction.edit_original_response(
             embed=discord.Embed(
-                title="Messages Purged!",
-                description=f"Successfully purged {count} messages!",
+                description=f"<:white_checkmark:1096793014287995061> Purged {count} messages!",
                 colour=discord.Colour.green(),
             )
         )
@@ -387,8 +386,7 @@ class ServerManagement(commands.Cog):
             return await interaction.response.send_message(
                 ephemeral=True,
                 embed=discord.Embed(
-                    title="Word Is Already In Blacklist",
-                    description=f'Could not add "{word.lower()}" to blacklisted words list, because it already exists there',
+                    description=f'<:white_cross:1096791282023669860> Could not add "{word.lower()}" to blacklisted words list, because it already exists there',
                     colour=discord.Colour.orange(),
                 ),
             )
@@ -396,8 +394,7 @@ class ServerManagement(commands.Cog):
         await interaction.response.send_message(
             ephemeral=True,
             embed=discord.Embed(
-                title="Added Word To Blacklist",
-                description=f'Successfully added "{word.lower()}" to blacklisted words list',
+                description=f'<:white_checkmark:1096793014287995061> Added "{word.lower()}" to blacklisted words list',
                 colour=discord.Colour.green(),
             ),
         )
@@ -434,8 +431,7 @@ class ServerManagement(commands.Cog):
             return await interaction.response.send_message(
                 ephemeral=True,
                 embed=discord.Embed(
-                    title="Could Not Remove Word From Blacklist",
-                    description=f'Could not remove "{word.lower()}" from blacklisted words list, because it does not exist there',
+                    description=f'<:white_cross:1096791282023669860> Could not remove "{word.lower()}" from blacklisted words list, because it does not exist there',
                     colour=discord.Colour.orange(),
                 ),
             )
@@ -444,7 +440,7 @@ class ServerManagement(commands.Cog):
             ephemeral=True,
             embed=discord.Embed(
                 title="Removed Word From Blacklist",
-                description=f'Successfully removed "{word.lower()}" from blacklisted words list',
+                description=f'<:white_checkmark:1096793014287995061> Removed "{word.lower()}" from blacklisted words list',
                 colour=discord.Colour.green(),
             ),
         )
@@ -467,8 +463,7 @@ class ServerManagement(commands.Cog):
             return await interaction.response.send_message(
                 ephemeral=True,
                 embed=discord.Embed(
-                    title="User Already In Whitelist",
-                    description=f"Could not add {whitelist.mention} to the whitelist because they already are in the whitelist",
+                    description=f"<:white_cross:1096791282023669860> Could not add {whitelist.mention} to the whitelist because they already are in the whitelist",
                     colour=discord.Colour.orange(),
                 ),
             )
@@ -477,7 +472,7 @@ class ServerManagement(commands.Cog):
             ephemeral=True,
             embed=discord.Embed(
                 title="Added Person To Whitelist",
-                description=f"Successfully added {whitelist.mention} to whitelist",
+                description=f"<:white_checkmark:1096793014287995061> Added {whitelist.mention} to whitelist",
                 colour=discord.Colour.green(),
             ),
         )
@@ -491,8 +486,7 @@ class ServerManagement(commands.Cog):
         dm_channel = await whitelist.create_dm()
         await dm_channel.send(
             embed=discord.Embed(
-                title="You Have Been Whitelisted!",
-                description=f"You have been whitelisted in {interaction.guild.name} by {interaction.user.mention}",
+                description=f"<:white_checkmark:1096793014287995061> You have been whitelisted in {interaction.guild.name} by {interaction.user.mention}",
                 colour=discord.Colour.green(),
             )
         )
@@ -510,8 +504,7 @@ class ServerManagement(commands.Cog):
             return await interaction.response.send_message(
                 ephemeral=True,
                 embed=discord.Embed(
-                    title="Could Not Remove User From Whitelist",
-                    description=f"Could not remove {whitelist.mention} from the whitelist because they are not in it",
+                    description=f"<:white_cross:1096791282023669860> Could not remove {whitelist.mention} from the whitelist because they are not in it",
                     colour=discord.Colour.orange(),
                 ),
             )
@@ -519,8 +512,7 @@ class ServerManagement(commands.Cog):
         await interaction.response.send_message(
             ephemeral=True,
             embed=discord.Embed(
-                title="Removed User From Whitelist",
-                description=f"Successfully removed {whitelist.mention} from whitelist",
+                description=f"<:white_checkmark:1096793014287995061> Removed {whitelist.mention} from whitelist",
                 colour=discord.Colour.green(),
             ),
         )
@@ -534,8 +526,7 @@ class ServerManagement(commands.Cog):
         dm_channel = await whitelist.create_dm()
         await dm_channel.send(
             embed=discord.Embed(
-                title="You Have Been Removed From The Whitelist!",
-                description=f"You have been removed from the whitelist in {interaction.guild.name} by {interaction.user.mention}",
+                description=f"<:white_cross:1096791282023669860> You have been removed from the whitelist in {interaction.guild.name} by {interaction.user.mention}",
                 colour=discord.Colour.red(),
             )
         )
@@ -548,8 +539,7 @@ class ServerManagement(commands.Cog):
     async def set_welcome_message(self, interaction: discord.Interaction, message: str):
         await interaction.response.send_message(
             embed=discord.Embed(
-                title="Welcome Message Set",
-                description=f"Welcome message set to: \n {message}",
+                description=f"<:white_checkmark:1096793014287995061> Set the welcome message to: \n {message}",
                 colour=discord.Colour.green(),
             )
         )
@@ -566,8 +556,7 @@ class ServerManagement(commands.Cog):
 
         await interaction.response.send_message(
             embed=discord.Embed(
-                title="Welcome Message Disabled",
-                description=f"Welcome message has been disabled",
+                description=f"<:white_checkmark:1096793014287995061> Disabled welcome message",
                 colour=discord.Colour.green(),
             )
         )
