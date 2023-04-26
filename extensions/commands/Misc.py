@@ -16,7 +16,7 @@ class Misc(commands.Cog):
         self.bot = bot
 
     @app_commands.command(
-        name="search_gif", description="Search a gif by keyword from Giphy"
+        name="search_giphy", description="Search a gif by keyword from Giphy"
     )
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id))
     async def search_gif(self, interaction: discord.Interaction, search: Optional[str]):
@@ -55,23 +55,10 @@ class Misc(commands.Cog):
 
         await session.close()
         embed.set_footer(
-            text=f"Requested by {interaction.user} | Powered by Giphy API ❤️"
+            icon_url=interaction.user.avatar,
+            text=f"Requested by - {interaction.user} | Powered by Giphy API ❤️",
         )
-        embed.timestamp = datetime.utcnow()
         await interaction.response.send_message(embed=embed)
-
-    @search_gif.error
-    async def on_search_gif_error(
-        self, interaction: discord.Interaction, error: app_commands.AppCommandError
-    ):
-        if isinstance(error, app_commands.CommandOnCooldown):
-            await interaction.response.send_message(
-                ephemeral=True,
-                embed=discord.Embed(
-                    description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
-                    colour=discord.Colour.red(),
-                ),
-            )
 
     @app_commands.command(
         name="search_unsplash", description="Search an image by keyword from Unsplash"
@@ -114,23 +101,10 @@ class Misc(commands.Cog):
 
         await session.close()
         embed.set_footer(
-            text=f"Requested by {interaction.user} | Powered by Unsplash API ❤️"
+            icon_url=interaction.user.avatar,
+            text=f"Requested by - {interaction.user} | Powered by Unsplash API ❤️",
         )
-        embed.timestamp = datetime.utcnow()
         await interaction.response.send_message(embed=embed)
-
-    @search_unsplash.error
-    async def on_search_image_error(
-        self, interaction: discord.Interaction, error: app_commands.AppCommandError
-    ):
-        if isinstance(error, app_commands.CommandOnCooldown):
-            await interaction.response.send_message(
-                ephemeral=True,
-                embed=discord.Embed(
-                    description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
-                    colour=discord.Colour.red(),
-                ),
-            )
 
 
 async def setup(bot):
