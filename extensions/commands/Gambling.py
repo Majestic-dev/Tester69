@@ -97,7 +97,7 @@ def prettify_cards(hand: list):
 
 
 class Gambling(commands.Cog):
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: commands.AutoShardedBot):
         self.bot = bot
 
     @app_commands.command(name="gamble", description="Gamble your set amount of 🪙")
@@ -763,5 +763,5 @@ class Gambling(commands.Cog):
         )
 
 
-async def setup(bot: commands.Bot):
+async def setup(bot: commands.AutoShardedBot):
     await bot.add_cog(Gambling(bot))

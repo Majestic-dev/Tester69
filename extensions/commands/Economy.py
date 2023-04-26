@@ -10,7 +10,7 @@ from utils import DataManager
 
 
 class DropDown(discord.ui.Select):
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: commands.AutoShardedBot):
         self.bot = bot
 
         options = [
@@ -80,7 +80,7 @@ class DropDown(discord.ui.Select):
 
 
 class DropDownView(discord.ui.View):
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: commands.AutoShardedBot):
         self.bot = bot
         super().__init__()
 
@@ -97,7 +97,7 @@ def random_choice_from_dict(d):
 
 
 class Economy(commands.Cog):
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: commands.AutoShardedBot):
         self.bot = bot
 
     @commands.command(name="add", description="Add set amount of 🪙 to your balance")
@@ -620,5 +620,5 @@ class Economy(commands.Cog):
             await interaction.response.send_message(embed=lb_embed, view=view)
 
 
-async def setup(bot: commands.Bot):
+async def setup(bot: commands.AutoShardedBot):
     await bot.add_cog(Economy(bot))

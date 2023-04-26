@@ -8,7 +8,7 @@ from utils import DataManager
 
 
 class WarningSystem(commands.Cog):
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: commands.AutoShardedBot):
         self.bot = bot
 
     @app_commands.command(
@@ -142,5 +142,5 @@ class WarningSystem(commands.Cog):
         await interaction.response.send_message(embed=e)
 
 
-async def setup(bot: commands.Bot):
+async def setup(bot: commands.AutoShardedBot):
     await bot.add_cog(WarningSystem(bot))

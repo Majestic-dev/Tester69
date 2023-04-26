@@ -6,7 +6,7 @@ from discord.ext import commands
 
 
 class MainStuff(commands.Cog):
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: commands.AutoShardedBot):
         self.bot = bot
 
     @app_commands.command(name="ping", description="Show my ping")
@@ -171,5 +171,5 @@ class MainStuff(commands.Cog):
         await interaction.response.send_message(embed=servermanagement, ephemeral=True)
 
 
-async def setup(bot: commands.Bot):
+async def setup(bot: commands.AutoShardedBot):
     await bot.add_cog(MainStuff(bot))

@@ -9,7 +9,7 @@ from utils import DataManager
 
 
 class Moderation(commands.Cog):
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: commands.AutoShardedBot):
         self.bot = bot
 
     @app_commands.command(name="set_muted_role", description="Set the muted role")
@@ -353,5 +353,5 @@ class Moderation(commands.Cog):
             )
 
 
-async def setup(bot: commands.Bot):
+async def setup(bot: commands.AutoShardedBot):
     await bot.add_cog(Moderation(bot))
