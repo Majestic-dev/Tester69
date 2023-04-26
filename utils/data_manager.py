@@ -104,7 +104,11 @@ class DataManager:
     @classmethod
     def add_user_data(cls, user_id: int) -> None:
         if str(user_id) not in cls.__data["users"]:
-            cls.__data["users"][str(user_id)] = {"inventory": {}, "balance": 0}
+            cls.__data["users"][str(user_id)] = {
+                "inventory": {},
+                "balance": 0,
+                "bank": 0,
+            }
 
         cls.save("users")
 
@@ -114,6 +118,10 @@ class DataManager:
             cls.add_user_data(user_id)
 
         return cls.__data["users"].get(str(user_id), None)
+
+    @classmethod
+    def get_all_users(cls) -> dict:
+        return cls.__data["users"]
 
     @classmethod
     def edit_user_data(cls, user_id: int, key: str, value: Any) -> None:
