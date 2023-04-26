@@ -1,7 +1,9 @@
 import os
+import traceback
 from typing import Literal, Optional
 
 import discord
+from discord import app_commands
 from discord.ext import commands
 
 from utils import DataManager
@@ -26,23 +28,23 @@ DataManager(
             "data/economy.json",
             {
                 "hunt_items": {
-                    "skunk": {"chance": 20, "price": 50},
-                    "pig": {"chance": 15, "price": 100},
-                    "cow": {"chance": 10, "price": 200},
+                    "skunk": {"chance": 20, "price": 500},
+                    "pig": {"chance": 15, "price": 1000},
+                    "cow": {"chance": 10, "price": 2000},
                     "deer": {"chance": 7, "price": 300},
-                    "bear": {"chance": 5, "price": 400},
-                    "junk": {"chance": 2, "price": 25},
-                    "treasure": {"chance": 0.5, "price": 10000},
+                    "bear": {"chance": 5, "price": 4000},
+                    "junk": {"chance": 2, "price": 250},
+                    "treasure": {"chance": 0.5, "price": 100000},
                 },
                 "fish_items": {
-                    "common fish": {"chance": 45, "price": 10},
-                    "uncommon fish": {"chance": 30, "price": 20},
-                    "rare fish": {"chance": 15, "price": 50},
-                    "epic fish": {"chance": 7, "price": 200},
-                    "legendary fish": {"chance": 1, "price": 1000},
-                    "junk": {"chance": 0.9, "price": 25},
-                    "treasure": {"chance": 0.1, "price": 10000},
-                    "seaweed": {"chance": 1, "price": 25},
+                    "common fish": {"chance": 45, "price": 100},
+                    "uncommon fish": {"chance": 30, "price": 200},
+                    "rare fish": {"chance": 15, "price": 500},
+                    "epic fish": {"chance": 7, "price": 2000},
+                    "legendary fish": {"chance": 1, "price": 10000},
+                    "junk": {"chance": 0.9, "price": 250},
+                    "treasure": {"chance": 0.1, "price": 100000},
+                    "seaweed": {"chance": 1, "price": 250},
                 },
                 "sell_prices": {
                     "common fish": 5,
@@ -87,8 +89,58 @@ async def on_ready():
                     await bot.load_extension(root.replace("\\", ".") + "." + file[:-3])
     except commands.ExtensionAlreadyLoaded:
         pass
-
     await bot.tree.sync()
+
+
+@bot.tree.error
+async def on_app_command_error(
+    interaction: discord.Interaction, error: app_commands.AppCommandError
+):
+    if isinstance(error, app_commands.CommandOnCooldown):
+        await interaction.response.send_message(
+            delete_after=error.retry_after,
+            embed=discord.Embed(
+                description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
+                colour=discord.Colour.red(),
+            ),
+        )
+    else:
+        await bot.get_user(bot.owner_id).send(
+            embed=discord.Embed(
+                title="Error",
+                description=f"If this error persists, DM <@705435835306213418> or mail them: `tester69.discord@gmail.com`\n```py\n{traceback.format_exc()}\n```",
+                colour=discord.Colour.red(),
+            )
+        )
+
+
+@bot.event
+async def on_error(event, *args, **kwargs):
+    await bot.get_user(bot.owner_id).send(
+        embed=discord.Embed(
+            title="Error",
+            description=f"```py\n{traceback.format_exc()}\n```",
+            colour=discord.Colour.red(),
+        )
+    )
+
+
+@bot.event
+async def on_command_error(ctx, error):
+    if isinstance(error, commands.CommandNotFound):
+        await ctx.reply(
+            embed=discord.Embed(
+                description=f"<:white_cross:1096791282023669860> Command not found.",
+                colour=discord.Colour.red(),
+            )
+        )
+    else:
+        await bot.get_user(bot.owner_id).send(
+            embed=discord.Embed(
+                description=f"If this error persists, DM <@705435835306213418> or mail them: `tester69.discord@gmail.com`\n```py\n{traceback.format_exc()}\n```",
+                colour=discord.Colour.red(),
+            )
+        )
 
 
 @commands.guild_only()
