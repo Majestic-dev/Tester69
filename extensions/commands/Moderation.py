@@ -27,18 +27,6 @@ class Moderation(commands.Cog):
         )
         DataManager.edit_guild_data(interaction.guild.id, "muted_role_id", role.id)
 
-    @set_muted_role.error
-    async def on_set_muted_role_error(
-        self, interaction: discord.Interaction, error: app_commands.AppCommandError
-    ):
-        if isinstance(error, app_commands.CommandOnCooldown):
-            await interaction.response.send_message(
-                embed=discord.Embed(
-                    description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
-                    colour=discord.Colour.red(),
-                )
-            )
-
     @app_commands.command(name="mute", description="Mutes the mentioned user")
     @app_commands.default_permissions(manage_roles=True)
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id))
@@ -110,6 +98,7 @@ class Moderation(commands.Cog):
                     colour=discord.Colour.orange(),
                 )
             )
+
         else:
             await member.edit(roles=[role])
             await interaction.edit_original_response(
@@ -139,18 +128,6 @@ class Moderation(commands.Cog):
             roles.pop(str(member.id))
             DataManager.save("guilds")
 
-    @mute.error
-    async def on_mute_error(
-        self, interaction: discord.Interaction, error: app_commands.AppCommandError
-    ):
-        if isinstance(error, app_commands.CommandOnCooldown):
-            await interaction.response.send_message(
-                embed=discord.Embed(
-                    description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
-                    colour=discord.Colour.red(),
-                )
-            )
-
     @app_commands.command(name="unmute", description="Unmutes the mentioned user")
     @app_commands.default_permissions(manage_roles=True)
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id))
@@ -159,6 +136,15 @@ class Moderation(commands.Cog):
         saved_roles = DataManager.get_guild_data(interaction.guild.id)[
             "muted_user_roles"
         ][str(member.id)]
+
+        if saved_roles == None or len(saved_roles) == 0:
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    description="<:white_cross:1096791282023669860> That user is not muted",
+                    colour=discord.Colour.orange(),
+                )
+            )
+
         role = interaction.guild.get_role(muted_role)
 
         if role in member.roles:
@@ -177,18 +163,6 @@ class Moderation(commands.Cog):
                 embed=discord.Embed(
                     description=f"<:white_cross:1096791282023669860> Could not unmute {member.mention} because they are not muted",
                     colour=discord.Colour.orange(),
-                )
-            )
-
-    @unmute.error
-    async def on_unmute_error(
-        self, interaction: discord.Interaction, error: app_commands.AppCommandError
-    ):
-        if isinstance(error, app_commands.CommandOnCooldown):
-            await interaction.response.send_message(
-                embed=discord.Embed(
-                    description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
-                    colour=discord.Colour.red(),
                 )
             )
 
@@ -256,18 +230,6 @@ class Moderation(commands.Cog):
                     )
                 )
 
-    @kick.error
-    async def on_kick_error(
-        self, interaction: discord.Interaction, error: app_commands.AppCommandError
-    ):
-        if isinstance(error, app_commands.CommandOnCooldown):
-            await interaction.response.send_message(
-                embed=discord.Embed(
-                    description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
-                    colour=discord.Colour.red(),
-                )
-            )
-
     @app_commands.command(name="ban", description="Bans the mentioned user")
     @app_commands.default_permissions(ban_members=True)
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id))
@@ -279,7 +241,6 @@ class Moderation(commands.Cog):
     ):
         guild_data = DataManager.get_guild_data(interaction.guild.id)
         appeal_link = guild_data["appeal_link"]
-        await self.bot.fetch_user(member)
 
         if member.id == interaction.user.id:
             return await interaction.response.send_message(
@@ -322,7 +283,7 @@ class Moderation(commands.Cog):
                         await dm_channel.send(
                             embed=discord.Embed(
                                 title="You have been banned from the server",
-                                description=f"You have been banned from {interaction.guild.name}. Appeal for unban at {appeal_link}",
+                                description=f"You have been banned from {interaction.guild.nam}. Appeal for unban at {appeal_link}",
                                 timestamp=datetime.utcnow(),
                                 colour=discord.Colour.red(),
                             )
@@ -338,7 +299,7 @@ class Moderation(commands.Cog):
                 )
 
                 try:
-                    member.create_dm()
+                    await member.create_dm()
                     await member.dm_channel.send(
                         embed=discord.Embed(
                             description=f'You have been banned from {interaction.guild.name} for "{reason}"',
@@ -355,18 +316,6 @@ class Moderation(commands.Cog):
                         colour=discord.Colour.orange(),
                     )
                 )
-
-    @ban.error
-    async def on_ban_error(
-        self, interaction: discord.Interaction, error: app_commands.AppCommandError
-    ):
-        if isinstance(error, app_commands.CommandOnCooldown):
-            await interaction.response.send_message(
-                embed=discord.Embed(
-                    description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
-                    colour=discord.Colour.red(),
-                )
-            )
 
     @app_commands.command(
         name="unban",
@@ -399,18 +348,6 @@ class Moderation(commands.Cog):
             return await interaction.response.send_message(
                 embed=discord.Embed(
                     description=f"<:white_cross:1096791282023669860> That user is not banned",
-                    colour=discord.Colour.red(),
-                )
-            )
-
-    @unban.error
-    async def on_unban_error(
-        self, interaction: discord.Interaction, error: app_commands.AppCommandError
-    ):
-        if isinstance(error, app_commands.CommandOnCooldown):
-            await interaction.response.send_message(
-                embed=discord.Embed(
-                    description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
                     colour=discord.Colour.red(),
                 )
             )
