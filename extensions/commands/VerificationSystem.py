@@ -161,21 +161,10 @@ class Verification(commands.GroupCog):
             interaction.guild.id, "unverified_role_id", unverified_role
         )
 
-    @verification_setup.error
-    async def verification_setup_error(
-        self, interaction: discord.Interaction, error: app_commands.AppCommandError
-    ):
-        if isinstance(error, app_commands.CommandOnCooldown):
-            await interaction.response.send_message(
-                ephemeral=True,
-                embed=discord.Embed(
-                    description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
-                    colour=discord.Colour.red(),
-                ),
-            )
-
     @commands.Cog.listener()
     async def on_member_join(self, member):
+        if member.bot:
+            return
         guild_data = DataManager.get_guild_data(member.guild.id)
         welcome_message = guild_data["welcome_message"]
         verification_channel = DataManager.get_guild_data(member.guild.id)[
