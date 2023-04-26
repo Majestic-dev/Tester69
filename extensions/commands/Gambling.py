@@ -118,7 +118,7 @@ class Gambling(commands.Cog):
         if bet > user_data["balance"]:
             return await interaction.response.send_message(
                 embed=discord.Embed(
-                    title="No :coin: To Gamble",
+                    title="No 🪙 To Gamble",
                     description=(
                         f'You do not have enough funds to gamble. Your balance is {user_data["balance"]}'
                     ),
@@ -158,19 +158,6 @@ class Gambling(commands.Cog):
                 )
             )
 
-    @gamble.error
-    async def on_gamble_error(
-        self, interaction: discord.Interaction, error: app_commands.AppCommandError
-    ):
-        if isinstance(error, app_commands.CommandOnCooldown):
-            await interaction.response.send_message(
-                ephemeral=True,
-                embed=discord.Embed(
-                    description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
-                    colour=discord.Colour.red(),
-                ),
-            )
-
     @app_commands.command(
         name="snakeeyes",
         description="Gamble your 🪙 in a snake eyes game for a chance to win big!",
@@ -192,8 +179,8 @@ class Gambling(commands.Cog):
         if bet > user_data["balance"]:
             return await interaction.response.send_message(
                 embed=discord.Embed(
-                    title="Not Enough :coin:",
-                    description="You do not have enough :coin: for that bet",
+                    title="Not Enough 🪙",
+                    description="You do not have enough 🪙 for that bet",
                     colour=discord.Colour.orange(),
                 )
             )
@@ -209,7 +196,7 @@ class Gambling(commands.Cog):
             await interaction.response.send_message(
                 embed=discord.Embed(
                     title="SNAKE EYES!",
-                    description=(f"You rolled Snake Eyes! You won {30 * bet} :coin:!"),
+                    description=(f"You rolled Snake Eyes! You won {30 * bet} 🪙!"),
                     colour=discord.Colour.green(),
                 )
             )
@@ -222,9 +209,7 @@ class Gambling(commands.Cog):
             await interaction.response.send_message(
                 embed=discord.Embed(
                     title="Snake Eye!",
-                    description=(
-                        f"You rolled 1 snake eye! You won {1.5 * bet} :coin:!"
-                    ),
+                    description=(f"You rolled 1 snake eye! You won {1.5 * bet} 🪙!"),
                     colour=discord.Colour.green(),
                 )
             )
@@ -237,23 +222,10 @@ class Gambling(commands.Cog):
                 embed=discord.Embed(
                     title="You lost",
                     description=(
-                        f"You rolled a {roll1} and a {roll2}. You lost {bet} :coin:."
+                        f"You rolled a {roll1} and a {roll2}. You lost {bet} 🪙."
                     ),
                     colour=discord.Colour.orange(),
                 )
-            )
-
-    @snakeeyes.error
-    async def on_snakeeyes_error(
-        self, interaction: discord.Interaction, error: app_commands.AppCommandError
-    ):
-        if isinstance(error, app_commands.CommandOnCooldown):
-            await interaction.response.send_message(
-                ephemeral=True,
-                embed=discord.Embed(
-                    description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
-                    colour=discord.Colour.red(),
-                ),
             )
 
     @app_commands.command(
@@ -277,7 +249,7 @@ class Gambling(commands.Cog):
             return await interaction.response.send_message(
                 embed=discord.Embed(
                     title="Bet Failed",
-                    description="You do not have enough :coin: for that bet",
+                    description="You do not have enough 🪙 for that bet",
                     colour=discord.Colour.orange(),
                 )
             )
@@ -305,7 +277,7 @@ class Gambling(commands.Cog):
         if sum_of_hand(player_hand) == 21:
             e = discord.Embed(
                 title="Blackjack",
-                description=f"You got blackjack! You won {int(bet * 2.5)} :coin:.",
+                description=f"You got blackjack! You won {int(bet * 2.5)} 🪙.",
                 colour=discord.Colour.green(),
             )
 
@@ -365,7 +337,7 @@ class Gambling(commands.Cog):
                 if player_hand_value > 21:
                     e = discord.Embed(
                         title="Blackjack",
-                        description=f"You busted! You lost {bet} :coin:.",
+                        description=f"You busted! You lost {bet} 🪙.",
                         colour=discord.Colour.red(),
                     )
 
@@ -392,7 +364,7 @@ class Gambling(commands.Cog):
                 if dealer_hand_value > 21:
                     e = discord.Embed(
                         title="Blackjack",
-                        description=f"The dealer busted! You won {bet} :coin:.",
+                        description=f"The dealer busted! You won {bet} 🪙.",
                         colour=discord.Colour.green(),
                     )
 
@@ -419,7 +391,7 @@ class Gambling(commands.Cog):
                 if player_hand_value > dealer_hand_value:
                     e = discord.Embed(
                         title="Blackjack",
-                        description=f"You won! You won {bet} :coin:.",
+                        description=f"You won! You won {bet} 🪙.",
                         colour=discord.Colour.green(),
                     )
 
@@ -469,7 +441,7 @@ class Gambling(commands.Cog):
                 if player_hand_value < dealer_hand_value:
                     e = discord.Embed(
                         title="Blackjack",
-                        description=f"You lost! You lost {bet} :coin:.",
+                        description=f"You lost! You lost {bet} 🪙.",
                         colour=discord.Colour.red(),
                     )
 
@@ -496,7 +468,7 @@ class Gambling(commands.Cog):
             elif view.choice == "forfeit":
                 e = discord.Embed(
                     title="Blackjack",
-                    description=f"You forfeited! You lost {bet / 2} :coin:. 50% of your bet was returned.",
+                    description=f"You forfeited! You lost {bet / 2} 🪙. 50% of your bet was returned.",
                     colour=discord.Colour.red(),
                 )
 
@@ -534,7 +506,7 @@ class Gambling(commands.Cog):
                 if player_hand_value > 21:
                     e = discord.Embed(
                         title="Blackjack",
-                        description=f"You busted! You lost {bet} :coin:.",
+                        description=f"You busted! You lost {bet} 🪙.",
                         colour=discord.Colour.red(),
                     )
 
@@ -561,7 +533,7 @@ class Gambling(commands.Cog):
                 if dealer_hand_value > 21:
                     e = discord.Embed(
                         title="Blackjack",
-                        description=f"The dealer busted! You won {bet} :coin:.",
+                        description=f"The dealer busted! You won {bet} 🪙.",
                         colour=discord.Colour.green(),
                     )
 
@@ -588,7 +560,7 @@ class Gambling(commands.Cog):
                 if player_hand_value > dealer_hand_value:
                     e = discord.Embed(
                         title="Blackjack",
-                        description=f"You won! You won {bet} :coin:.",
+                        description=f"You won! You won {bet} 🪙.",
                         colour=discord.Colour.green(),
                     )
 
@@ -638,7 +610,7 @@ class Gambling(commands.Cog):
                 if player_hand_value < dealer_hand_value:
                     e = discord.Embed(
                         title="Blackjack",
-                        description=f"You lost! You lost {bet} :coin:.",
+                        description=f"You lost! You lost {bet} 🪙.",
                         colour=discord.Colour.red(),
                     )
 
@@ -672,7 +644,7 @@ class Gambling(commands.Cog):
                 if player_hand_value > 21:
                     e = discord.Embed(
                         title="Blackjack",
-                        description=f"You busted! You lost {bet} :coin:.",
+                        description=f"You busted! You lost {bet} 🪙.",
                         colour=discord.Colour.red(),
                     )
 
@@ -698,7 +670,7 @@ class Gambling(commands.Cog):
 
                 e = discord.Embed(
                     title="Blackjack",
-                    description=f"Bet: {bet} :coin:",
+                    description=f"Bet: {bet} 🪙",
                     colour=discord.Colour.blue(),
                 )
 
@@ -717,19 +689,6 @@ class Gambling(commands.Cog):
                 await interaction.edit_original_response(
                     content=None, embed=e, view=view
                 )
-
-    @blackjack.error
-    async def on_blackjack_error(
-        self, interaction: discord.Interaction, error: app_commands.AppCommandError
-    ):
-        if isinstance(error, app_commands.CommandOnCooldown):
-            await interaction.response.send_message(
-                ephemeral=True,
-                embed=discord.Embed(
-                    description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
-                    colour=discord.Colour.red(),
-                ),
-            )
 
     @app_commands.command(
         name="coinflip", description="Bet your 🪙 in a game of coinflip"
@@ -762,7 +721,7 @@ class Gambling(commands.Cog):
             return await interaction.response.send_message(
                 embed=discord.Embed(
                     title="Bet Failed",
-                    description="You do not have enough :coin: for that bet",
+                    description="You do not have enough 🪙 for that bet",
                     colour=discord.Colour.orange(),
                 )
             )
@@ -786,7 +745,7 @@ class Gambling(commands.Cog):
             return await interaction.edit_original_response(
                 embed=discord.Embed(
                     title="You Lose!",
-                    description=f"The coin landed on {result}, you lose {bet} :coin:!",
+                    description=f"The coin landed on {result}, you lose {bet} 🪙!",
                     colour=discord.Colour.red(),
                 )
             )
@@ -798,23 +757,10 @@ class Gambling(commands.Cog):
         await interaction.edit_original_response(
             embed=discord.Embed(
                 title="You Won!",
-                description=f"The coin landed on {result}, you win {bet} :coin:!",
+                description=f"The coin landed on {result}, you win {bet} 🪙!",
                 colour=discord.Colour.green(),
             )
         )
-
-    @coinflip.error
-    async def on_coinflip_error(
-        self, interaction: discord.Interaction, error: app_commands.AppCommandError
-    ):
-        if isinstance(error, app_commands.CommandOnCooldown):
-            await interaction.response.send_message(
-                ephemeral=True,
-                embed=discord.Embed(
-                    description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
-                    colour=discord.Colour.red(),
-                ),
-            )
 
 
 async def setup(bot: commands.Bot):
