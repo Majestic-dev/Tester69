@@ -70,11 +70,6 @@ class Logging(commands.GroupCog):
         if logs_channel == None:
             return
 
-        if member.avatar == None:
-            member_avatar = member.default_avatar
-        else:
-            member_avatar = member.avatar
-
         join = discord.Embed(
             title="Member Joined",
             description=f"{member.mention} has joined the server",
@@ -84,7 +79,7 @@ class Logging(commands.GroupCog):
             name="Account Created",
             value=discord.utils.format_dt(member.created_at, style="F"),
         )
-        join.set_author(icon_url=member_avatar, name=member)
+        join.set_author(icon_url=member.display_avatar, name=member)
         join.set_footer(text=f"ID: {member.id}")
         join.timestamp = datetime.now()
         await logs_channel.send(embed=join)
@@ -98,11 +93,6 @@ class Logging(commands.GroupCog):
         if logs_channel == None:
             return
 
-        if member.avatar == None:
-            member_avatar = member.default_avatar
-        else:
-            member_avatar = member.avatar
-
         try:
             await member.guild.fetch_ban(member)
             return
@@ -113,7 +103,7 @@ class Logging(commands.GroupCog):
                 description=f"{member.mention} Has left the server",
                 colour=discord.Colour.red(),
             )
-            leave.set_author(icon_url=member_avatar, name=member)
+            leave.set_author(icon_url=member.display_avatar, name=member)
             leave.set_footer(text=f"ID: {member.id}")
             leave.timestamp = datetime.now()
             await logs_channel.send(embed=leave)
@@ -127,12 +117,12 @@ class Logging(commands.GroupCog):
         if logs_channel == None:
             return
 
-        if user.avatar == None:
-            user_avatar = user.default_avatar
-        else:
-            user_avatar = user.avatar
-
-        logs = [log async for log in guild.audit_logs(limit=1, action=discord.AuditLogAction.ban)]
+        logs = [
+            log
+            async for log in guild.audit_logs(
+                limit=1, action=discord.AuditLogAction.ban
+            )
+        ]
         logs = logs[0]
 
         ban = discord.Embed(
@@ -140,7 +130,7 @@ class Logging(commands.GroupCog):
             description=f"{user.mention} Has been banned by {logs.user.mention}",
             colour=discord.Colour.red(),
         )
-        ban.set_author(icon_url=user_avatar, name=user)
+        ban.set_author(icon_url=user.display_avatar, name=user)
         ban.set_footer(text=f"ID: {user.id}")
         ban.timestamp = datetime.now()
         await logs_channel.send(embed=ban)
@@ -154,17 +144,12 @@ class Logging(commands.GroupCog):
         if logs_channel == None:
             return
 
-        if user.avatar == None:
-            user_avatar = user.default_avatar
-        else:
-            user_avatar = user.avatar
-
         unban = discord.Embed(
             title="Member Unbanned",
             description=f"{user.mention} Has been unbanned from the server",
             colour=discord.Colour.green(),
         )
-        unban.set_author(icon_url=user_avatar, name=user)
+        unban.set_author(icon_url=user.display_avatar, name=user)
         unban.set_footer(text=f"ID: {user.id}")
         unban.timestamp = datetime.now()
         await logs_channel.send(embed=unban)
@@ -182,11 +167,6 @@ class Logging(commands.GroupCog):
             description=f"{after.mention} has been updated",
             colour=discord.Colour.gold(),
         )
-
-        if after.avatar == None:
-            user_avatar = after.default_avatar
-        else:
-            user_avatar = after.avatar
 
         nick = before.nick
         if nick == None:
@@ -212,7 +192,7 @@ class Logging(commands.GroupCog):
             )
         if len(update.fields) <= 0:
             return
-        update.set_author(icon_url=user_avatar, name=before)
+        update.set_author(icon_url=after.display_avatar, name=after)
         update.set_footer(text=f"ID: {before.id}")
         update.timestamp = datetime.now()
         return await logs_channel.send(embed=update)
@@ -310,11 +290,6 @@ class Logging(commands.GroupCog):
         if logs_channel == None:
             return
 
-        if member.avatar == None:
-            member_avatar = member.default_avatar
-        else:
-            member_avatar = member.avatar
-
         voice = discord.Embed(
             description=f"{member.mention} Voice channel updated",
             colour=discord.Colour.gold(),
@@ -361,7 +336,7 @@ class Logging(commands.GroupCog):
             )
         if len(voice.fields) <= 0:
             return
-        voice.set_author(icon_url=member_avatar, name=member)
+        voice.set_author(icon_url=member.display_avatar, name=member)
         voice.set_footer(text=f"ID: {member.id}")
         voice.timestamp = datetime.now()
         return await logs_channel.send(embed=voice)
@@ -407,19 +382,27 @@ class Logging(commands.GroupCog):
         if logs_channel == None:
             return
 
-        if after.author.avatar == None:
-            member_avatar = after.author.default_avatar
-        else:
-            member_avatar = after.author.avatar
-
         edit = discord.Embed(
             description=f"**Message Edited in {before.channel.mention}** [Jump to Message]({before.jump_url})",
             colour=discord.Colour.orange(),
         )
+        if len(before.content or after.content) >= 1024:
+            embed = discord.Embed(
+                title="Message Edit (Too Long)",
+                description=f"**Message Edited in {before.channel.mention}** [Jump to Message]({before.jump_url})",
+                colour=discord.Colour.orange(),
+            )
+            embed.set_author(icon_url=after.author.avatar, name=after.author)
+            return await logs_channel.send(embed=embed)
         if before.content != after.content:
             edit.add_field(
-                name="Content",
-                value=f"**Before:** {before.content}\n**After:** {after.content}",
+                name="**Before**",
+                value=f"{before.content}",
+                inline=True,
+            )
+            edit.add_field(
+                name="**After**",
+                value=f"{after.content}",
                 inline=True,
             )
         if len(after.attachments) >= 1:
@@ -442,7 +425,7 @@ class Logging(commands.GroupCog):
             )
         if len(edit.fields) <= 0:
             return
-        edit.set_author(icon_url=member_avatar, name=f"{before.author}")
+        edit.set_author(icon_url=after.author.avatar, name=f"{before.author}")
         edit.set_footer(text=f"Author ID: {before.author.id}")
         edit.timestamp = datetime.now()
         await logs_channel.send(embed=edit)
@@ -465,16 +448,9 @@ class Logging(commands.GroupCog):
             and message.embeds == False
             or message.author.bot
             and message.channel != logs_channel
+            or message.is_system() == True
         ):
             return
-
-        if message.is_system() == True:
-            return
-
-        if message.author.avatar == None:
-            author_avatar = message.author.default_avatar
-        else:
-            author_avatar = message.author.avatar
 
         if (
             message.author.bot == True
@@ -483,17 +459,28 @@ class Logging(commands.GroupCog):
         ):
             embed = message.embeds[0]
             return await logs_channel.send(content=f"{message.content}", embed=embed)
-        
-        if (
-            message.embeds
-        ):
+
+        if message.embeds:
             embed = message.embeds[0]
-            return await logs_channel.send(content=f"Embed sent by {message.author} deleted in {message.channel.mention}",embed=embed)
+            return await logs_channel.send(
+                content=f"Embed sent by {message.author} deleted in {message.channel.mention}",
+                embed=embed,
+            )
 
         embed = discord.Embed(
             description=f"**Message sent by {message.author.mention} Deleted in {message.channel.mention}**",
             colour=discord.Colour.orange(),
         )
+        if len(message.content) >= 1024:
+            embed = discord.Embed(
+                title="Message Deleted (Too Long)",
+                description=f"**Message sent by {message.author.mention} Deleted in {message.channel.mention}**",
+                colour=discord.Colour.orange(),
+            )
+            embed.set_author(
+                icon_url=message.author.display_avatar, name=message.author
+            )
+            return await logs_channel.send(embed=embed)
         if len(message.content) > 0:
             embed.add_field(name="**Content**", value=f"{message.content}")
         if any(word in words_in_blacklist for word in content.split(" ")):
@@ -513,7 +500,9 @@ class Logging(commands.GroupCog):
                 value=f"**{', '.join([sticker.url for sticker in message.stickers])}**",
                 inline=False,
             )
-        embed.set_author(icon_url=author_avatar, name=f"{message.author}")
+        embed.set_author(
+            icon_url=message.author.display_avatar, name=f"{message.author}"
+        )
         embed.set_footer(
             text=f"Author ID: {message.author.id} | Message ID: {message.id}"
         )
