@@ -1,5 +1,4 @@
-import random
-from datetime import datetime
+from typing import Optional
 
 import discord
 from discord import app_commands
@@ -20,7 +19,11 @@ class Server(commands.Cog):
 
         embed.set_thumbnail(url=guild.icon)
         embed.set_author(name=guild.name, icon_url=guild.icon)
-        embed.add_field(name="Owner", value=guild.owner.name, inline=True)
+        embed.add_field(
+            name="Owner",
+            value=f"{guild.owner.name}#{guild.owner.discriminator}",
+            inline=True,
+        )
         embed.add_field(
             name="Category Channels", value=len(guild.categories), inline=True
         )
@@ -42,18 +45,96 @@ class Server(commands.Cog):
         )
         await interaction.response.send_message(embed=embed)
 
-    @serverinfo.error
-    async def on_serverinfo_error(
-        self, interaction: discord.Interaction, error: app_commands.AppCommandError
+    @app_commands.command(name="userinfo", description="Get information about a user")
+    @app_commands.checks.cooldown(1, 20, key=lambda i: (i.guild.id, i.user.id))
+    async def userinfo(
+        self,
+        interaction: discord.Interaction,
+        user: Optional[discord.User] = None,
     ):
-        if isinstance(error, app_commands.CommandOnCooldown):
-            await interaction.response.send_message(
-                ephemeral=True,
-                embed=discord.Embed(
-                    description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
-                    colour=discord.Colour.red(),
-                ),
+        if user is None:
+            user = interaction.user
+        else:
+            await self.bot.fetch_user(user.id)
+        embed = discord.Embed(title=f"User Info", colour=discord.Colour.random())
+
+        embed.set_thumbnail(url=user.avatar)
+        embed.set_author(name=user.name, icon_url=user.avatar)
+        embed.add_field(
+            name="Name", value=f"{user.name}#{user.discriminator}", inline=True
+        )
+        embed.add_field(
+            name="Account Created",
+            value=discord.utils.format_dt(user.created_at, style="F"),
+            inline=True,
+        )
+        if interaction.guild.get_member(user.id):
+            embed.add_field(
+                name="Joined Server",
+                value=discord.utils.format_dt(user.joined_at, style="F"),
+                inline=True,
             )
+        embed.add_field(name="ID", value=user.id, inline=True)
+        embed.add_field(name="Bot", value=user.bot, inline=True)
+        embed.set_footer(
+            text=f"ID: {user.id} | Created at {user.created_at.strftime('%m/%d/%Y %H:%M')}"
+        )
+        await interaction.response.send_message(embed=embed)
+
+    @app_commands.command(name="roleinfo", description="Get information about a role")
+    @app_commands.checks.cooldown(1, 20, key=lambda i: (i.guild.id, i.user.id))
+    async def roleinfo(
+        self,
+        interaction: discord.Interaction,
+        role: Optional[discord.Role] = None,
+    ):
+        if role is None:
+            role = interaction.guild.default_role
+        embed = discord.Embed(colour=role.colour)
+
+        embed.set_thumbnail(url=role.icon)
+        embed.add_field(name="ID", value=role.id, inline=True)
+        embed.add_field(name="Name", value=role.name, inline=True)
+        embed.add_field(name="Color", value=role.colour, inline=True)
+        embed.add_field(name="Mention", value=f"`<@&{role.id}>`", inline=True)
+        embed.add_field(name="Hoisted", value=role.hoist, inline=True)
+        embed.add_field(name="Position", value=role, inline=True)
+        embed.add_field(name="Mentionable", value=role.mentionable, inline=True)
+        embed.add_field(name="Members", value=len(role.members), inline=True)
+
+        embed.set_footer(
+            text=f"Role Created • {role.created_at.strftime('%m/%d/%Y %H:%M')}"
+        )
+        await interaction.response.send_message(embed=embed)
+
+    @app_commands.command(
+        name="channelinfo", description="Get information about a channel"
+    )
+    @app_commands.checks.cooldown(1, 20, key=lambda i: (i.guild.id, i.user.id))
+    async def channelinfo(
+        self,
+        interaction: discord.Interaction,
+        channel: Optional[discord.TextChannel] = None,
+    ):
+        if channel is None:
+            channel = interaction.channel
+        embed = discord.Embed(colour=discord.Colour.random())
+
+        embed.set_thumbnail(url=channel.guild.icon)
+        embed.add_field(name="ID", value=channel.id, inline=True)
+        embed.add_field(name="Name", value=channel.name, inline=True)
+        embed.add_field(name="Type", value=channel.type, inline=True)
+        embed.add_field(name="Mention", value=f"`<#{channel.id}>`", inline=True)
+        embed.add_field(name="NSFW", value=channel.is_nsfw(), inline=True)
+        embed.add_field(name="Position", value=channel, inline=True)
+        embed.add_field(name="Slowmode", value=channel.slowmode_delay, inline=True)
+        embed.add_field(name="Topic", value=channel.topic, inline=True)
+        embed.add_field(name="Members", value=len(channel.members), inline=True)
+
+        embed.set_footer(
+            text=f"Channel Created • {channel.created_at.strftime('%m/%d/%Y %H:%M')}"
+        )
+        await interaction.response.send_message(embed=embed)
 
     @app_commands.command(
         name="membercount", description="Get the member count of the server"
@@ -66,6 +147,24 @@ class Server(commands.Cog):
             description=f"Total Members: {guild.member_count}",
             colour=discord.Colour.random(),
         )
+        await interaction.response.send_message(embed=embed)
+
+    @app_commands.command(
+        name="avatar", description="Get the avatar of a user or yourself"
+    )
+    @app_commands.checks.cooldown(1, 20, key=lambda i: (i.guild.id, i.user.id))
+    async def avatar(
+        self,
+        interaction: discord.Interaction,
+        user: Optional[discord.User] = None,
+    ):
+        if user is None:
+            user = interaction.user
+        embed = discord.Embed(
+            title=f"{user.name}'s Avatar", colour=discord.Colour.darker_gray()
+        )
+        embed.set_author(name=f"{user.name}#{user.discriminator}", icon_url=user.avatar)
+        embed.set_image(url=user.avatar)
         await interaction.response.send_message(embed=embed)
 
 
