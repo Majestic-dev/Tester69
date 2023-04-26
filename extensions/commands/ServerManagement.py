@@ -45,19 +45,6 @@ class ServerManagement(commands.Cog):
             )
         )
 
-    @slowmode.error
-    async def on_slowmode_error(
-        self, interaction: discord.Interaction, error: app_commands.AppCommandError
-    ):
-        if isinstance(error, app_commands.CommandOnCooldown):
-            await interaction.response.send_message(
-                ephemeral=True,
-                embed=discord.Embed(
-                    description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
-                    colour=discord.Colour.red(),
-                ),
-            )
-
     @app_commands.command(
         name="set_appeal_link",
         description="Set the appeal link that will be sent to users who get banned",
@@ -74,19 +61,6 @@ class ServerManagement(commands.Cog):
                 colour=discord.Colour.green(),
             )
         )
-
-    @set_appeal_link.error
-    async def on_set_appeal_link_error(
-        self, interaction: discord.Interaction, error: app_commands.AppCommandError
-    ):
-        if isinstance(error, app_commands.CommandOnCooldown):
-            await interaction.response.send_message(
-                ephemeral=True,
-                embed=discord.Embed(
-                    description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
-                    colour=discord.Colour.red(),
-                ),
-            )
 
     @app_commands.command(
         name="disable_appealing",
@@ -166,19 +140,6 @@ class ServerManagement(commands.Cog):
 
         await interaction.response.send_message(embed=TextChannel)
 
-    @create_channel.error
-    async def on_create_channel_error(
-        self, interaction: discord.Interaction, error: app_commands.AppCommandError
-    ):
-        if isinstance(error, app_commands.CommandOnCooldown):
-            await interaction.response.send_message(
-                ephemeral=True,
-                embed=discord.Embed(
-                    description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
-                    colour=discord.Colour.red(),
-                ),
-            )
-
     @app_commands.command(
         name="delete_channel", description="Delete the mentioned channel"
     )
@@ -213,19 +174,6 @@ class ServerManagement(commands.Cog):
             )
 
         await interaction.response.send_message(embed=ChannelDelete)
-
-    @delete_channel.error
-    async def on_delete_channel_error(
-        self, interaction: discord.Interaction, error: app_commands.AppCommandError
-    ):
-        if isinstance(error, app_commands.CommandOnCooldown):
-            await interaction.response.send_message(
-                ephemeral=True,
-                embed=discord.Embed(
-                    description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
-                    colour=discord.Colour.red(),
-                ),
-            )
 
     @app_commands.command(
         name="add_role", description="Add a role to the mentioned user"
@@ -271,19 +219,6 @@ class ServerManagement(commands.Cog):
         )
         await user.add_roles(role)
 
-    @add_role.error
-    async def on_add_role_error(
-        self, interaction: discord.Interaction, error: app_commands.AppCommandError
-    ):
-        if isinstance(error, app_commands.CommandOnCooldown):
-            await interaction.response.send_message(
-                ephemeral=True,
-                embed=discord.Embed(
-                    description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
-                    colour=discord.Colour.red(),
-                ),
-            )
-
     @app_commands.command(
         name="remove_role", description="Remove a role from the mentioned user"
     )
@@ -328,29 +263,27 @@ class ServerManagement(commands.Cog):
         )
         await user.remove_roles(role)
 
-    @remove_role.error
-    async def on_remove_role_error(
-        self, interaction: discord.Interaction, error: app_commands.AppCommandError
-    ):
-        if isinstance(error, app_commands.CommandOnCooldown):
-            await interaction.response.send_message(
-                ephemeral=True,
-                embed=discord.Embed(
-                    description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
-                    colour=discord.Colour.red(),
-                ),
-            )
-
     @app_commands.command(
         name="purge", description="Purge a custom amount of messages from this channel"
     )
     @app_commands.default_permissions(manage_channels=True)
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id))
     async def purge(self, interaction: discord.Interaction, count: int):
+        guild_data = DataManager.get_guild_data(interaction.guild.id)
+        logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
         await interaction.response.defer(ephemeral=True)
         await interaction.channel.purge(limit=count)
 
-        await asyncio.sleep(3)
+        await asyncio.sleep(2)
+
+        embed = discord.Embed(
+            description=f"{interaction.user.mention} purged {count} messages in {interaction.channel.mention}",
+            colour=discord.Colour.red(),
+        )
+        embed.set_author(url=interaction.user.display_avatar, name=interaction.user)
+        embed.set_footer(text=f"User ID: {interaction.user.id}")
+        embed.timestamp = datetime.utcnow()
+        await logs_channel.send(embed=embed)
 
         return await interaction.edit_original_response(
             embed=discord.Embed(
@@ -358,19 +291,6 @@ class ServerManagement(commands.Cog):
                 colour=discord.Colour.green(),
             )
         )
-
-    @purge.error
-    async def on_purge_error(
-        self, interaction: discord.Interaction, error: app_commands.AppCommandError
-    ):
-        if isinstance(error, app_commands.CommandOnCooldown):
-            await interaction.response.send_message(
-                ephemeral=True,
-                embed=discord.Embed(
-                    description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.1f} seconds before using this command again.",
-                    colour=discord.Colour.red(),
-                ),
-            )
 
     @app_commands.command(
         name="add_blacklisted_word",
@@ -439,7 +359,6 @@ class ServerManagement(commands.Cog):
         await interaction.response.send_message(
             ephemeral=True,
             embed=discord.Embed(
-                title="Removed Word From Blacklist",
                 description=f'<:white_checkmark:1096793014287995061> Removed "{word.lower()}" from blacklisted words list',
                 colour=discord.Colour.green(),
             ),
@@ -471,7 +390,6 @@ class ServerManagement(commands.Cog):
         await interaction.response.send_message(
             ephemeral=True,
             embed=discord.Embed(
-                title="Added Person To Whitelist",
                 description=f"<:white_checkmark:1096793014287995061> Added {whitelist.mention} to whitelist",
                 colour=discord.Colour.green(),
             ),
