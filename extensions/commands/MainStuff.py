@@ -76,7 +76,7 @@ class MainStuff(commands.Cog):
     async def economy(self, interaction: discord.Interaction):
         economy = discord.Embed(
             title="Tester69's economy commands",
-            colour=discord.Colour.light_grey(),
+            colour=discord.Colour.light_gray(),
         )
         economy.add_field(name="Balance", value="`/balance`", inline=True)
         economy.add_field(name="Inventory", value="`/inventory`", inline=True)
@@ -94,7 +94,7 @@ class MainStuff(commands.Cog):
     async def gambling(self, interaction: discord.Interaction):
         gambling = discord.Embed(
             title="Tester69's gambling commands",
-            colour=discord.Colour.light_grey(),
+            colour=discord.Colour.light_gray(),
         )
         gambling.add_field(name="Gamble", value="`/gamble`", inline=True)
         gambling.add_field(name="Blackjack", value="`/blackjack`", inline=True)
@@ -107,7 +107,7 @@ class MainStuff(commands.Cog):
     async def misc(self, interaction: discord.Interaction):
         misc = discord.Embed(
             title="Tester69's misc commands",
-            colour=discord.Colour.light_grey(),
+            colour=discord.Colour.light_gray(),
         )
         misc.add_field(name="Ping", value="`/ping`", inline=True)
         misc.add_field(name="Prefix", value="`/prefix`", inline=True)
@@ -122,7 +122,7 @@ class MainStuff(commands.Cog):
     async def servermanagement(self, interaction: discord.Interaction):
         servermanagement = discord.Embed(
             title="Tester69's server management commands",
-            colour=discord.Colour.light_grey(),
+            colour=discord.Colour.light_gray(),
         )
 
         servermanagement.add_field(
