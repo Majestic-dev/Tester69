@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 
 import discord
@@ -20,8 +21,7 @@ class Logging(commands.GroupCog):
     ):
         await interaction.response.send_message(
             embed=discord.Embed(
-                title="Logging Channel Set!",
-                description=f"Logging channel set to {channel.mention}",
+                description=f"<:white_checkmark:1096793014287995061> Set the logging channel to {channel.mention}",
                 timestamp=datetime.utcnow(),
                 colour=discord.Colour.green(),
             )
@@ -39,8 +39,7 @@ class Logging(commands.GroupCog):
             return await interaction.response.send_message(
                 ephemeral=True,
                 embed=discord.Embed(
-                    title="Logging Already Disabled",
-                    description="Logging is already disabled",
+                    description="<:white_cross:1096791282023669860> Logging is already disabled",
                     timestamp=datetime.utcnow(),
                     colour=discord.Colour.red(),
                 ),
@@ -387,13 +386,19 @@ class Logging(commands.GroupCog):
             colour=discord.Colour.orange(),
         )
         if len(before.content or after.content) >= 1024:
+            with open(f"{after.author.id}_edit.txt", "a") as n:
+                n.write(f"Before: {before.content}\nAfter: {after.content}")
             embed = discord.Embed(
                 title="Message Edit (Too Long)",
                 description=f"**Message Edited in {before.channel.mention}** [Jump to Message]({before.jump_url})",
                 colour=discord.Colour.orange(),
             )
             embed.set_author(icon_url=after.author.avatar, name=after.author)
-            return await logs_channel.send(embed=embed)
+            await logs_channel.send(
+                embed=embed, file=discord.File(f"{after.author.id}_edit.txt")
+            )
+            return os.remove(f"{after.author.id}_edit.txt")
+
         if before.content != after.content:
             edit.add_field(
                 name="**Before**",
@@ -433,24 +438,27 @@ class Logging(commands.GroupCog):
     # Delete Logs
     @commands.Cog.listener()
     async def on_message_delete(self, message: discord.Message):
+        if (
+            message.author.bot
+            and message.embeds == False
+            or message.is_system() == True
+            or message.guild is False
+        ):
+            return
+
         guild_data = DataManager.get_guild_data(message.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
-        words_in_blacklist = guild_data["blacklisted_words"]
-        content = message.content.lower()
-        content2 = message.content.split(" ")
-        bad_words_said = "\n".join(list(set(content2) & set(words_in_blacklist)))
+
+        if message.author.bot and message.channel != logs_channel:
+            return
 
         if logs_channel == None:
             return
 
-        if (
-            message.author.bot
-            and message.embeds == False
-            or message.author.bot
-            and message.channel != logs_channel
-            or message.is_system() == True
-        ):
-            return
+        words_in_blacklist = guild_data["blacklisted_words"]
+        content = message.content.lower()
+        content2 = message.content.split(" ")
+        bad_words_said = "\n".join(list(set(content2) & set(words_in_blacklist)))
 
         if (
             message.author.bot == True
@@ -472,6 +480,9 @@ class Logging(commands.GroupCog):
             colour=discord.Colour.orange(),
         )
         if len(message.content) >= 1024:
+            with open(f"{message.author.id}_delete.txt", "a") as n:
+                n.write(message.content)
+
             embed = discord.Embed(
                 title="Message Deleted (Too Long)",
                 description=f"**Message sent by {message.author.mention} Deleted in {message.channel.mention}**",
@@ -480,7 +491,11 @@ class Logging(commands.GroupCog):
             embed.set_author(
                 icon_url=message.author.display_avatar, name=message.author
             )
-            return await logs_channel.send(embed=embed)
+            await logs_channel.send(
+                embed=embed, file=discord.File(f"{message.author.id}_delete.txt")
+            )
+            return os.remove(f"{message.author.id}_delete.txt")
+
         if len(message.content) > 0:
             embed.add_field(name="**Content**", value=f"{message.content}")
         if any(word in words_in_blacklist for word in content.split(" ")):
