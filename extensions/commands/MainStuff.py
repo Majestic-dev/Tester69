@@ -78,13 +78,20 @@ class MainStuff(commands.Cog):
             title="Tester69's economy commands",
             colour=discord.Colour.light_gray(),
         )
+        economy.add_field(name="Pay", value="`/pay`", inline=True)
+        economy.add_field(name="Deposit", value="`/deposit`", inline=True)
+        economy.add_field(name="Withdraw", value="`/withdraw`", inline=True)
         economy.add_field(name="Balance", value="`/balance`", inline=True)
         economy.add_field(name="Inventory", value="`/inventory`", inline=True)
         economy.add_field(name="Fish", value="`/fish`", inline=True)
         economy.add_field(name="Hourly", value="`/hourly`", inline=True)
+        economy.add_field(name="Daily", value="`/daily`", inline=True)
+        economy.add_field(name="Weekly", value="`/weekly`", inline=True)
         economy.add_field(name="Monthly", value="`/monthly`", inline=True)
-        economy.add_field(name="Yearly", value="`/yearly`", inline=True)
+        economy.add_field(name="Shop", value="`/shop`", inline=True)
         economy.add_field(name="Sell", value="`/sell`", inline=True)
+        economy.add_field(name="Buy", value="`/buy_item`", inline=True)
+        economy.add_field(name="Leaderboard", value="`/leaderboard`", inline=True)
 
         await interaction.response.send_message(embed=economy, ephemeral=True)
 
@@ -105,15 +112,41 @@ class MainStuff(commands.Cog):
 
     @app_commands.command(name="main", description="Get all current main commands")
     async def misc(self, interaction: discord.Interaction):
+        main = discord.Embed(
+            title="Tester69's main commands",
+            colour=discord.Colour.light_gray(),
+        )
+        main.add_field(name="Ping", value="`/ping`", inline=True)
+        main.add_field(name="Prefix", value="`/prefix`", inline=True)
+        main.add_field(name="Help", value="`/help`", inline=True)
+
+        await interaction.response.send_message(embed=main, ephemeral=True)
+
+    @app_commands.command(name="misc", description="Get all current misc commands")
+    async def misc(self, interaction: discord.Interaction):
         misc = discord.Embed(
             title="Tester69's misc commands",
             colour=discord.Colour.light_gray(),
         )
-        misc.add_field(name="Ping", value="`/ping`", inline=True)
-        misc.add_field(name="Prefix", value="`/prefix`", inline=True)
-        misc.add_field(name="Help", value="`/help`", inline=True)
-
-        await interaction.response.send_message(embed=misc, ephemeral=True)
+        misc.add_field(name="Server info", value="`/serverinfo`", inline=True)
+        misc.add_field(name="User info", value="`/userinfo`", inline=True)
+        misc.add_field(name="Role info", value="`/roleinfo`", inline=True)
+        misc.add_field(name="Channel info", value="`/channelinfo`", inline=True)
+        misc.add_field(name="Member count", value="`/membercount`", inline=True)
+        misc.add_field(name="Avatar", value="`/avatar`", inline=True)
+        misc.add_field(name="Server icon", value="`/servericon`", inline=True)
+        misc.add_field(name="Server banner", value="`/serverbanner`", inline=True)
+        misc.add_field(name="Search a Gif", value="`/search_giphy`", inline=True)
+        misc.add_field(name="Search an Image", value="`/search_unsplash`", inline=True)
+        misc.add_field(name="Get a Cat Image", value="`/cat`", inline=True)
+        misc.add_field(name="Get a Dog Image", value="`/dog`", inline=True)
+        misc.add_field(name="Get a Dad Joke", value="`/dadjoke`", inline=True)
+        misc.add_field(name="Search Wikipedia", value="`/wikipedia`", inline=True)
+        misc.add_field(name="Search Urban Dictionary", value="`/urban`", inline=True)
+        misc.add_field(name="Get a Github Profile", value="`/github`", inline=True)
+        misc.add_field(name="Get Covid Stats", value="`/covid`", inline=True)
+        misc.add_field(name="Weather", value="`/weather`", inline=True)
+        misc.add_field(name="Weather Forecast", value="`/forecast`", inline=True)
 
     @app_commands.command(
         name="servermanagement",
