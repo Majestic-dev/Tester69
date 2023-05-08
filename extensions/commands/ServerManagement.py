@@ -18,6 +18,7 @@ class ServerManagement(commands.Cog):
     @app_commands.command(
         name="slowmode", description="Set the slowmode in the channel of your choice"
     )
+    @app_commands.guild_only()
     @app_commands.default_permissions(manage_channels=True)
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id))
     async def slowmode(
@@ -49,6 +50,7 @@ class ServerManagement(commands.Cog):
         name="set_appeal_link",
         description="Set the appeal link that will be sent to users who get banned",
     )
+    @app_commands.guild_only()
     @app_commands.default_permissions(manage_guild=True)
     @app_commands.checks.cooldown(1, 600, key=lambda i: (i.guild.id, i.user.id))
     async def set_appeal_link(self, interaction: discord.Interaction, appeal_link: str):
@@ -66,6 +68,7 @@ class ServerManagement(commands.Cog):
         name="disable_appealing",
         description="Disable the appeal link that will be sent to users who get banned",
     )
+    @app_commands.guild_only()
     @app_commands.default_permissions(manage_guild=True)
     @app_commands.checks.cooldown(1, 600, key=lambda i: (i.guild.id, i.user.id))
     async def disable_appealing(self, interaction: discord.Interaction):
@@ -82,6 +85,7 @@ class ServerManagement(commands.Cog):
         name="create_channel",
         description="Create a channel with the name of your choice",
     )
+    @app_commands.guild_only()
     @app_commands.choices(
         channeltype=[
             app_commands.Choice(name="text", value=0),
@@ -143,6 +147,7 @@ class ServerManagement(commands.Cog):
     @app_commands.command(
         name="delete_channel", description="Delete the mentioned channel"
     )
+    @app_commands.guild_only()
     @app_commands.default_permissions(manage_channels=True)
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id))
     async def delete_channel(
@@ -178,6 +183,7 @@ class ServerManagement(commands.Cog):
     @app_commands.command(
         name="add_role", description="Add a role to the mentioned user"
     )
+    @app_commands.guild_only()
     @app_commands.default_permissions(manage_roles=True)
     @app_commands.checks.cooldown(1, 7, key=lambda i: (i.guild.id, i.user.id))
     async def add_role(
@@ -222,6 +228,7 @@ class ServerManagement(commands.Cog):
     @app_commands.command(
         name="remove_role", description="Remove a role from the mentioned user"
     )
+    @app_commands.guild_only()
     @app_commands.default_permissions(manage_roles=True)
     @app_commands.checks.cooldown(1, 7, key=lambda i: (i.guild.id, i.user.id))
     async def remove_role(
@@ -266,6 +273,7 @@ class ServerManagement(commands.Cog):
     @app_commands.command(
         name="purge", description="Purge a custom amount of messages from this channel"
     )
+    @app_commands.guild_only()
     @app_commands.default_permissions(manage_channels=True)
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id))
     async def purge(self, interaction: discord.Interaction, count: int):
@@ -296,6 +304,7 @@ class ServerManagement(commands.Cog):
         name="add_blacklisted_word",
         description="Add a word to the blacklisted words list.",
     )
+    @app_commands.guild_only()
     @app_commands.default_permissions(administrator=True)
     async def add_blacklisted_word(self, interaction: discord.Interaction, word: str):
         blacklisted_words = DataManager.get_guild_data(interaction.guild.id)[
@@ -338,6 +347,7 @@ class ServerManagement(commands.Cog):
         name="remove_blacklisted_word",
         description="Remove a blacklisted word from the blacklisted words list.",
     )
+    @app_commands.guild_only()
     @app_commands.default_permissions(administrator=True)
     @app_commands.autocomplete(word=word_autocomplete)
     async def remove_blacklisted_word(
@@ -372,6 +382,7 @@ class ServerManagement(commands.Cog):
     @app_commands.command(
         name="whitelist_add", description="Add a user in the whitelist"
     )
+    @app_commands.guild_only()
     @app_commands.default_permissions(administrator=True)
     async def whitelist_add(
         self, interaction: discord.Interaction, whitelist: discord.User | discord.Role
@@ -412,6 +423,7 @@ class ServerManagement(commands.Cog):
     @app_commands.command(
         name="whitelist_remove", description="Remove a user from the whitelist"
     )
+    @app_commands.guild_only()
     @app_commands.default_permissions(administrator=True)
     async def whitelist_remove(
         self, interaction: discord.Interaction, whitelist: discord.User | discord.Role
@@ -453,6 +465,7 @@ class ServerManagement(commands.Cog):
         name="set_welcome_message",
         description="Add a welcome message that will be sent to users DMs when they join the server",
     )
+    @app_commands.guild_only()
     @app_commands.default_permissions(administrator=True)
     async def set_welcome_message(self, interaction: discord.Interaction, message: str):
         await interaction.response.send_message(
@@ -468,6 +481,7 @@ class ServerManagement(commands.Cog):
         name="disable_welcome_message",
         description="Disable the welcome message that is sent to users DMs when they join the server",
     )
+    @app_commands.guild_only()
     @app_commands.default_permissions(administrator=True)
     async def disable_welcome_message(self, interaction: discord.Interaction):
         DataManager.edit_guild_data(interaction.guild.id, "welcome_message", None)
