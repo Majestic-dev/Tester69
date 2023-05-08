@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import Optional
 
 import discord
+import Paginator
 from discord import app_commands
 from discord.ext import commands
 
@@ -10,8 +11,9 @@ from utils import DataManager
 
 
 class DropDown(discord.ui.Select):
-    def __init__(self, bot: commands.AutoShardedBot):
+    def __init__(self, bot: commands.AutoShardedBot, interaction: discord.Interaction):
         self.bot = bot
+        self.executer = interaction.user.id
 
         options = [
             discord.SelectOption(
@@ -35,6 +37,15 @@ class DropDown(discord.ui.Select):
         )
 
     async def callback(self, interaction: discord.Interaction):
+        if interaction.user.id != self.executer:
+            return await interaction.response.send_message(
+                ephemeral=True,
+                embed=discord.Embed(
+                    description="<:white_cross:1096791282023669860> This isn't yours",
+                    colour=discord.Colour.red(),
+                ),
+            )
+
         if self.values[0] == "cash":
             users = DataManager.get_all_users()
 
@@ -54,7 +65,9 @@ class DropDown(discord.ui.Select):
             lb_embed.set_author(name="Cash Leaderboard", icon_url=self.bot.user.avatar)
             lb_embed.timestamp = datetime.utcnow()
             await interaction.response.edit_message(
-                content=None, embed=lb_embed, view=DropDownView(bot=self.bot)
+                content=None,
+                embed=lb_embed,
+                view=DropDownView(bot=self.bot, interaction=interaction),
             )
 
         elif self.values[0] == "bank":
@@ -75,16 +88,16 @@ class DropDown(discord.ui.Select):
             lb_embed.set_author(name="Bank Leaderboard", icon_url=self.bot.user.avatar)
             lb_embed.timestamp = datetime.utcnow()
             await interaction.response.edit_message(
-                embed=lb_embed, view=DropDownView(bot=self.bot)
+                embed=lb_embed, view=DropDownView(bot=self.bot, interaction=interaction)
             )
 
 
 class DropDownView(discord.ui.View):
-    def __init__(self, bot: commands.AutoShardedBot):
+    def __init__(self, bot: commands.AutoShardedBot, interaction: discord.Interaction):
         self.bot = bot
         super().__init__()
 
-        self.add_item(DropDown(bot=self.bot))
+        self.add_item(DropDown(bot=self.bot, interaction=interaction))
 
 
 def random_choice_from_dict(d):
@@ -100,93 +113,8 @@ class Economy(commands.Cog):
     def __init__(self, bot: commands.AutoShardedBot):
         self.bot = bot
 
-    @commands.command(name="add", description="Add set amount of 🪙 to your balance")
-    async def add(
-        self,
-        ctx,
-        amount: int,
-        member: Optional[discord.Member] = None,
-    ):
-        if self.bot.owner_id != ctx.author.id:
-            return await ctx.reply(
-                embed=discord.Embed(
-                    description="<:white_cross:1096791282023669860> You are not the owner of this bot.",
-                    colour=discord.Colour.red(),
-                )
-            )
-
-        if member == None:
-            user_data = DataManager.get_user_data(ctx.author.id)
-            DataManager.edit_user_data(
-                ctx.author.id, "balance", user_data["balance"] + amount
-            )
-            return await ctx.reply(
-                embed=discord.Embed(
-                    description=(
-                        f'<:white_checkmark:1096793014287995061> Added {amount} 🪙 to your balance. Your new balance is {user_data["balance"]} 🪙'
-                    ),
-                    colour=discord.Colour.green(),
-                )
-            )
-
-        else:
-            user_data = DataManager.get_user_data(member.id)
-        DataManager.edit_user_data(member.id, "balance", user_data["balance"] + amount)
-        return await ctx.reply(
-            embed=discord.Embed(
-                description=(
-                    f'<:white_checkmark:1096793014287995061> Added {amount} 🪙 to {member.name}\'s balance. Their new balance is {user_data["balance"]} 🪙'
-                ),
-                colour=discord.Colour.green(),
-            )
-        )
-
-    @commands.command(
-        name="subtract", description="Subtract set amount of 🪙 from your balance"
-    )
-    async def subtract(
-        self,
-        ctx,
-        amount: int,
-        member: Optional[discord.Member] = None,
-    ):
-        if self.bot.owner_id != ctx.author.id:
-            return await ctx.reply(
-                embed=discord.Embed(
-                    description="<:white_cross:1096791282023669860> You are not the owner of this bot.",
-                    colour=discord.Colour.red(),
-                )
-            )
-
-        user_data = DataManager.get_user_data(ctx.author.id)
-
-        if member == None:
-            DataManager.edit_user_data(
-                ctx.author.id, "balance", user_data["balance"] - amount
-            )
-            return await ctx.reply(
-                embed=discord.Embed(
-                    description=(
-                        f'<:white_checkmark:1096793014287995061> Removed {amount} 🪙 from your balance. Your new balance is {user_data["balance"]} 🪙'
-                    ),
-                    colour=discord.Colour.green(),
-                )
-            )
-
-        else:
-            user_data = DataManager.get_user_data(member.id)
-        DataManager.edit_user_data(member.id, "balance", user_data["balance"] - amount)
-        return await ctx.reply(
-            embed=discord.Embed(
-                description=(
-                    f'<:white_checkmark:1096793014287995061> Removed {amount} 🪙 from {member.name}\'s balance. Their new balance is {user_data["balance"]} 🪙'
-                ),
-                colour=discord.Colour.green(),
-            )
-        )
-
     @app_commands.command(name="pay", description="Pay someone some 🪙")
-    @app_commands.checks.cooldown(1, 600, key=lambda i: (i.guild_id, i.user.id))
+    @app_commands.checks.cooldown(1, 600, key=lambda i: (i.user.id))
     async def pay(
         self, interaction: discord.Interaction, user: discord.User, amount: int
     ):
@@ -230,7 +158,7 @@ class Economy(commands.Cog):
         )
 
     @app_commands.command(name="balance", description="Check your 🪙 balance")
-    @app_commands.checks.cooldown(1, 20, key=lambda i: (i.guild_id, i.user.id))
+    @app_commands.checks.cooldown(1, 20, key=lambda i: (i.user.id))
     async def balance(
         self, interaction: discord.Interaction, user: Optional[discord.User] = None
     ):
@@ -239,7 +167,7 @@ class Economy(commands.Cog):
                 embed=discord.Embed(
                     title=f"{interaction.user}'s Balance",
                     description=(
-                        f'**:moneybag: Wallet:** {DataManager.get_user_data(interaction.user.id)["balance"]} 🪙\n**🏦 Bank:** {DataManager.get_user_data(interaction.user.id)["bank"]} 🪙'
+                        f'**💸 Wallet:** {DataManager.get_user_data(interaction.user.id)["balance"]} 🪙\n**🏦 Bank:** {DataManager.get_user_data(interaction.user.id)["bank"]} 🪙'
                     ),
                     colour=discord.Colour.green(),
                 )
@@ -247,38 +175,72 @@ class Economy(commands.Cog):
         else:
             await interaction.response.send_message(
                 embed=discord.Embed(
-                    title="Balance",
+                    title=f"{user}'s Balance",
                     description=(
-                        f'{user.name}\'s balance is {DataManager.get_user_data(user.id)["balance"]} 🪙'
+                        f'**💸 Wallet:** {DataManager.get_user_data(user.id)["balance"]} 🪙\n**🏦 Bank:** {DataManager.get_user_data(user.id)["bank"]} 🪙'
                     ),
                     colour=discord.Colour.green(),
                 )
             )
 
-    @app_commands.command(name="hunt", description="Hunt for some loot")
-    @app_commands.checks.cooldown(1, 600, key=lambda i: (i.guild_id, i.user.id))
+    @app_commands.command(
+        name="hunt",
+        description="Grab a rifle from the shop and go hunting for some animals",
+    )
+    @app_commands.checks.cooldown(1, 600, key=lambda i: (i.user.id))
     async def hunt(self, interaction: discord.Interaction):
-        item_name, _ = random_choice_from_dict(DataManager.get("economy", "hunt_items"))
-        DataManager.edit_user_inventory(interaction.user.id, item_name, 1)
+        chances = []
+        for item, count in DataManager.get("economy", "hunting items").items():
+            chances.append(count["chance"])
+        items = list(DataManager.get("economy", "hunting items").keys())
+        item_name = random.choices(items, weights=chances, k=1)
+        item_emoji = DataManager.get("economy", "items")[item_name[0]]["emoji"]
+        user_data = DataManager.get_user_data(interaction.user.id)
+
+        if "hunting rifle" not in user_data["inventory"]:
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    description="<:white_cross:1096791282023669860> You need a **<:hunting_rifle:1101060264713003028> Hunting Rifle** to hunt some animals `/buy_item`",
+                    colour=discord.Colour.red(),
+                )
+            )
+
+        DataManager.edit_user_inventory(interaction.user.id, item_name[0], 1)
 
         await interaction.response.send_message(
             embed=discord.Embed(
-                title="Item Caught",
-                description=(f"You hunted down a {item_name}!"),
+                description=f"You hunted down a **{item_emoji} {item_name[0]}**",
                 colour=discord.Colour.green(),
             )
         )
 
-    @app_commands.command(name="fish", description="Fish for some loot")
-    @app_commands.checks.cooldown(1, 600, key=lambda i: (i.guild_id, i.user.id))
+    @app_commands.command(
+        name="fish",
+        description="Grab a fishing pole from the shop and go fishing for some fish",
+    )
+    @app_commands.checks.cooldown(1, 600, key=lambda i: (i.user.id))
     async def fish(self, interaction: discord.Interaction):
-        item_name, _ = random_choice_from_dict(DataManager.get("economy", "fish_items"))
-        DataManager.edit_user_inventory(interaction.user.id, item_name, 1)
+        chances = []
+        for item, count in DataManager.get("economy", "fishing items").items():
+            chances.append(count["chance"])
+        items = list(DataManager.get("economy", "fishing items").keys())
+        item_name = random.choices(items, weights=chances, k=1)
+        item_emoji = DataManager.get("economy", "items")[item_name[0]]["emoji"]
+        user_data = DataManager.get_user_data(interaction.user.id)
+
+        if "fishing pole" not in user_data["inventory"]:
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    description="<:white_cross:1096791282023669860> You need a **<:fishing_pole:1101061913938509855> Fishing Pole** to fish `/buy_item`",
+                    colour=discord.Colour.red(),
+                )
+            )
+
+        DataManager.edit_user_inventory(interaction.user.id, item_name[0], 1)
 
         await interaction.response.send_message(
             embed=discord.Embed(
-                title="Item Caught",
-                description=(f"You caught a {item_name}!"),
+                description=f"You caught a **{item_emoji} {item_name[0]}**",
                 colour=discord.Colour.green(),
             )
         )
@@ -299,47 +261,37 @@ class Economy(commands.Cog):
 
     @app_commands.command(name="sell", description="Sell your loot for 🪙")
     @app_commands.autocomplete(item=item_autocomplete)
-    @app_commands.checks.cooldown(1, 60, key=lambda i: (i.guild_id, i.user.id))
-    async def sell(self, interaction: discord.Interaction, item: str):
+    @app_commands.checks.cooldown(1, 15, key=lambda i: (i.user.id))
+    async def sell(self, interaction: discord.Interaction, item: str, amount: int = 1):
         user_data = DataManager.get_user_data(interaction.user.id)
+
+        item1 = DataManager.get("economy", "items")[item.lower()]
 
         if item.lower() not in user_data["inventory"]:
             return await interaction.response.send_message(
                 embed=discord.Embed(
-                    title="No Item",
-                    description="You don't have any of that item",
+                    description="<:white_cross:1096791282023669860> You don't have any of that item",
                     colour=discord.Colour.orange(),
                 )
             )
 
-        if user_data["inventory"][item.lower()] <= 0:
+        if user_data["inventory"][item] <= amount:
             return await interaction.response.send_message(
                 embed=discord.Embed(
-                    title="No Item",
-                    description="You don't have any of that item",
+                    description="<:white_cross:1096791282023669860> You don't have enough of that item",
                     colour=discord.Colour.orange(),
                 )
             )
 
-        if item.lower() not in DataManager.get("economy", "sell_prices"):
-            return await interaction.response.send_message(
-                embed=discord.Embed(
-                    title="Can't Sell",
-                    description="I can't sell that item, because it doesn't exist",
-                    colour=discord.Colour.red(),
-                )
-            )
-
-        price = DataManager.get("economy", "sell_prices")[item.lower()]
+        price = item1["sell price"]
         DataManager.edit_user_data(
-            interaction.user.id, "balance", user_data["balance"] + price
+            interaction.user.id, "balance", user_data["balance"] + (int(amount) * price)
         )
-        DataManager.edit_user_inventory(interaction.user.id, item.lower(), -1)
+        DataManager.edit_user_inventory(interaction.user.id, item, -int(amount))
 
         await interaction.response.send_message(
             embed=discord.Embed(
-                title="Item Sold",
-                description=(f"You sold a {item} for {price} 🪙!"),
+                description=f"<:white_checkmark:1096793014287995061> Sold {amount} **{item1['emoji']} {item1['name']}** for **{(int(amount) * price)} 🪙**",
                 colour=discord.Colour.green(),
             )
         )
@@ -347,32 +299,33 @@ class Economy(commands.Cog):
     @app_commands.command(
         name="rob", description="Rob the mentioned user out of their 🪙"
     )
-    @app_commands.checks.cooldown(1, 3600, key=lambda i: (i.guild_id, i.user.id))
+    @app_commands.checks.cooldown(1, 3600, key=lambda i: (i.user.id))
     async def rob(self, interaction: discord.Interaction, user: discord.User):
         robber_data = DataManager.get_user_data(interaction.user.id)
         robber_id = interaction.user.id
         robber_balance = DataManager.get_user_data(interaction.user.id)["balance"]
+        robber_bank = DataManager.get_user_data(interaction.user.id)["bank"]
         victim_id = user.id
         victim_balance = DataManager.get_user_data(user.id)["balance"]
 
         if interaction.user.id == user.id:
             return await interaction.response.send_message(
                 embed=discord.Embed(
-                    title="You Can Not Rob Yourself!",
-                    description="You can't rob yourself, try mentioning another user",
+                    description="<:white_cross:1096791282023669860> Can't rob yourself, try mentioning another user",
                     colour=discord.Colour.orange(),
                 )
             )
+
         elif victim_balance == 0:
             return await interaction.response.send_message(
                 embed=discord.Embed(
-                    title="This User Does Not Have Any 🪙!",
-                    description=f"You can't rob <@{victim_id}> since they do not have any 🪙 to rob!",
+                    description=f"<:white_cross:1096791282023669860> Can't rob <@{victim_id}> since they do not have any 🪙 to rob!",
                     colour=discord.Colour.orange(),
                 )
             )
+
         successfulrob = random.choices([True, False])[0]
-        if successfulrob:
+        if successfulrob == True:
             percentage = random.randint(10, 75) / 100
             cash = int(victim_balance * percentage)
             victim_data = DataManager.get_user_data(victim_id)
@@ -385,46 +338,41 @@ class Economy(commands.Cog):
 
             return await interaction.response.send_message(
                 embed=discord.Embed(
-                    title=f"Rob Successful",
-                    description=f"Successfully robbed <@{user.id}> {cash} 🪙",
+                    description=f"<:white_checkmark:1096793014287995061> You flee from the cops as you robbed <@{user.id}> out of {cash} 🪙",
                     colour=discord.Colour.green(),
                 )
             )
 
-        percentage = random.randint(10, 33) / 100
-        cash = int(robber_balance * percentage)
-        DataManager.edit_user_data(robber_id, "balance", robber_data["balance"] - cash)
-        await interaction.response.send_message(
-            embed=discord.Embed(
-                title="Rob Unsuccessful",
-                description=f"Failed to rob <@{user.id}>",
-                colour=discord.Colour.red(),
-            )
-        )
+        elif successfulrob == False:
+            percentage = random.randint(20, 50) / 100
+            if robber_balance != 0:
+                cash = int(robber_balance * percentage)
+                DataManager.edit_user_data(
+                    robber_id, "balance", robber_data["balance"] - cash
+                )
+                await interaction.response.send_message(
+                    embed=discord.Embed(
+                        description=f"<:white_cross:1096791282023669860> You got caught trying to rob <@{user.id}> and had to pay the police {cash}",
+                        colour=discord.Colour.red(),
+                    )
+                )
+            else:
+                cash2 = int(robber_bank * percentage)
+                DataManager.edit_user_data(
+                    robber_id, "balance", robber_data["bank"] - cash2
+                )
+                await interaction.response.send_message(
+                    embed=discord.Embed(
+                        description=f"<:white_cross:1096791282023669860> You got caught trying to rob <@{user.id}> and had to pay the police {cash2}",
+                        colour=discord.Colour.red(),
+                    )
+                )
 
     @app_commands.command(
-        name="hourly", description="Gain 100 🪙 every time you use this command"
+        name="hourly", description="Gain 1000 🪙 every time you use this command"
     )
-    @app_commands.checks.cooldown(1, 3600, key=lambda i: (i.guild_id, i.user.id))
+    @app_commands.checks.cooldown(1, 3600, key=lambda i: (i.user.id))
     async def hourly(self, interaction: discord.Interaction):
-        user_data = DataManager.get_user_data(interaction.user.id)
-        DataManager.edit_user_data(
-            interaction.user.id, "balance", user_data["balance"] + 100
-        )
-
-        await interaction.response.send_message(
-            embed=discord.Embed(
-                title="Hourly Pay",
-                description="You received 100 🪙!",
-                colour=discord.Colour.green(),
-            )
-        )
-
-    @app_commands.command(
-        name="daily", description="Gain 1000 🪙 every time you use this command"
-    )
-    @app_commands.checks.cooldown(1, 86400, key=lambda i: (i.guild_id, i.user.id))
-    async def daily(self, interaction: discord.Interaction):
         user_data = DataManager.get_user_data(interaction.user.id)
         DataManager.edit_user_data(
             interaction.user.id, "balance", user_data["balance"] + 1000
@@ -432,70 +380,83 @@ class Economy(commands.Cog):
 
         await interaction.response.send_message(
             embed=discord.Embed(
-                title="Daily Pay",
-                description="You received 1000 🪙!",
+                description="<:white_checkmark:1096793014287995061> You received 1000 🪙",
                 colour=discord.Colour.green(),
             )
         )
 
     @app_commands.command(
-        name="weekly", description="Gain 5000 🪙 every time you use the command"
+        name="daily", description="Gain 10000 🪙 every time you use this command"
     )
-    @app_commands.checks.cooldown(1, 604800, key=lambda i: (i.guild_id, i.user.id))
+    @app_commands.checks.cooldown(1, 86400, key=lambda i: (i.user.id))
+    async def daily(self, interaction: discord.Interaction):
+        user_data = DataManager.get_user_data(interaction.user.id)
+        DataManager.edit_user_data(
+            interaction.user.id, "balance", user_data["balance"] + 10000
+        )
+
+        await interaction.response.send_message(
+            embed=discord.Embed(
+                description="<:white_checkmark:1096793014287995061> You received 10000 🪙",
+                colour=discord.Colour.green(),
+            )
+        )
+
+    @app_commands.command(
+        name="weekly", description="Gain 25000 🪙 every time you use the command"
+    )
+    @app_commands.checks.cooldown(1, 604800, key=lambda i: (i.user.id))
     async def weekly(self, interaction: discord.Interaction):
         user_data = DataManager.get_user_data(interaction.user.id)
         DataManager.edit_user_data(
-            interaction.user.id, "balance", user_data["balance"] + 5000
+            interaction.user.id, "balance", user_data["balance"] + 25000
         )
 
         await interaction.response.send_message(
             embed=discord.Embed(
-                title="Weekly Pay",
-                description="You received 5000 🪙!",
+                description="<:white_checkmark:1096793014287995061> You received 25000 🪙",
                 colour=discord.Colour.green(),
             )
         )
 
     @app_commands.command(
-        name="monthly", description="Gain 20000 🪙 every time you use the command"
+        name="monthly", description="Gain 50000 🪙 every time you use the command"
     )
-    @app_commands.checks.cooldown(1, 2592000, key=lambda i: (i.guild_id, i.user.id))
+    @app_commands.checks.cooldown(1, 2592000, key=lambda i: (i.user.id))
     async def monthly(self, interaction: discord.Interaction):
         user_data = DataManager.get_user_data(interaction.user.id)
         DataManager.edit_user_data(
-            interaction.user.id, "balance", user_data["balance"] + 20000
+            interaction.user.id, "balance", user_data["balance"] + 50000
         )
 
         await interaction.response.send_message(
             embed=discord.Embed(
-                title="Monthly Pay",
-                description="You received 20000 🪙!",
+                description="<:white_checkmark:1096793014287995061> You received 50000 🪙",
                 colour=discord.Colour.green(),
             )
         )
 
     @app_commands.command(name="inventory", description="See your inventory")
-    @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild_id, i.user.id))
+    @app_commands.checks.cooldown(1, 10, key=lambda i: (i.user.id))
     async def inventory(self, interaction: discord.Interaction):
         user_data = DataManager.get_user_data(interaction.user.id)
 
         inv_embed = discord.Embed(
-            title="Inventory",
             colour=discord.Colour.green(),
         )
 
         for item, count in user_data["inventory"].items():
+            name = f"{DataManager.get('economy', 'items')[item.lower()]['emoji']} {item} - {count}"
             inv_embed.add_field(
-                name=f"{item} - {count}",
-                value="smth goes here (Coming Soon:tm:)",
+                name=f"{name}",
+                value=f"{DataManager.get('economy', 'items')[item.lower()]['type']}",
                 inline=False,
             )
 
         if len(inv_embed.fields) == 0:
             return await interaction.response.send_message(
                 embed=discord.Embed(
-                    title="Empty Inventory",
-                    description="You don't have any items in your inventory",
+                    description="<:white_cross:1096791282023669860> You don't have any items in your inventory",
                     colour=discord.Colour.orange(),
                 )
             )
@@ -507,59 +468,101 @@ class Economy(commands.Cog):
         await interaction.response.send_message(embed=inv_embed)
 
     @app_commands.command(name="deposit", description="Deposit money into your bank")
-    @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild_id, i.user.id))
-    async def deposit(self, interaction: discord.Interaction, amount: int):
+    @app_commands.checks.cooldown(1, 10, key=lambda i: (i.user.id))
+    async def deposit(self, interaction: discord.Interaction, amount: str):
         user_data = DataManager.get_user_data(interaction.user.id)
 
-        if amount > user_data["balance"]:
+        if amount == "all":
+            DataManager.edit_user_data(
+                interaction.user.id, "bank", user_data["bank"] + user_data["balance"]
+            )
+            DataManager.edit_user_data(
+                interaction.user.id,
+                "balance",
+                user_data["balance"] - user_data["balance"],
+            )
             return await interaction.response.send_message(
                 embed=discord.Embed(
-                    title="Not Enough Money",
-                    description="You do not have enough money to deposit",
+                    description="<:white_checkmark:1096793014287995061> Deposited all your coins in the bank",
+                    colour=discord.Colour.green(),
+                )
+            )
+
+        if amount.isnumeric() == False:
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    description="<:white_cross:1096791282023669860> Enter a valid number as an input",
+                    colour=discord.Colour.red(),
+                )
+            )
+
+        if int(amount) > user_data["balance"]:
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    description="<:white_cross:1096791282023669860> You do not have enough money to deposit",
                     colour=discord.Colour.orange(),
                 )
             )
 
         DataManager.edit_user_data(
-            interaction.user.id, "balance", user_data["balance"] - amount
+            interaction.user.id, "balance", user_data["balance"] - int(amount)
         )
         DataManager.edit_user_data(
-            interaction.user.id, "bank", user_data["bank"] + amount
+            interaction.user.id, "bank", user_data["bank"] + int(amount)
         )
 
         await interaction.response.send_message(
             embed=discord.Embed(
-                title="Deposit Successful",
-                description=f"Successfully deposited {amount} 🪙 into your bank",
+                description=f"<:white_checkmark:1096793014287995061> Deposited {amount} 🪙 into your bank",
                 colour=discord.Colour.green(),
             )
         )
 
     @app_commands.command(name="withdraw", description="Withdraw money from your bank")
-    @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild_id, i.user.id))
-    async def withdraw(self, interaction: discord.Interaction, amount: int):
+    @app_commands.checks.cooldown(1, 10, key=lambda i: (i.user.id))
+    async def withdraw(self, interaction: discord.Interaction, amount: str):
         user_data = DataManager.get_user_data(interaction.user.id)
 
-        if amount > user_data["bank"]:
+        if amount == "all":
+            DataManager.edit_user_data(
+                interaction.user.id, "balance", user_data["balance"] + user_data["bank"]
+            )
+            DataManager.edit_user_data(
+                interaction.user.id, "bank", user_data["bank"] - user_data["bank"]
+            )
             return await interaction.response.send_message(
                 embed=discord.Embed(
-                    title="Not Enough Money",
-                    description="You do not have enough money to withdraw",
+                    description="<:white_checkmark:1096793014287995061> Withdrew all your coins from the bank",
+                    colour=discord.Colour.green(),
+                )
+            )
+
+        if amount.isnumeric() == False:
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    description="<:white_cross:1096791282023669860> Enter a valid number as an input",
+                    colour=discord.Colour.red(),
+                )
+            )
+
+        if int(amount) > user_data["bank"]:
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    description="<:white_cross:1096791282023669860> You do not have enough money to withdraw",
                     colour=discord.Colour.orange(),
                 )
             )
 
         DataManager.edit_user_data(
-            interaction.user.id, "balance", user_data["balance"] + amount
+            interaction.user.id, "bank", user_data["bank"] - int(amount)
         )
         DataManager.edit_user_data(
-            interaction.user.id, "bank", user_data["bank"] - amount
+            interaction.user.id, "balance", user_data["balance"] + int(amount)
         )
 
         await interaction.response.send_message(
             embed=discord.Embed(
-                title="Withdraw Successful",
-                description=f"Successfully withdrew {amount} 🪙 from your bank",
+                description=f"<:white_checkmark:1096793014287995061> Withdrew {int(amount)} 🪙 from your bank",
                 colour=discord.Colour.green(),
             )
         )
@@ -567,7 +570,7 @@ class Economy(commands.Cog):
     @app_commands.command(
         name="leaderboard", description="See the top 10 richest people"
     )
-    @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild_id, i.user.id))
+    @app_commands.checks.cooldown(1, 10, key=lambda i: (i.user.id))
     @app_commands.choices(
         choices=[
             app_commands.Choice(name="💸 Cash", value="cash"),
@@ -577,7 +580,7 @@ class Economy(commands.Cog):
     async def leaderboard(
         self, interaction: discord.Interaction, choices: app_commands.Choice[str]
     ):
-        view = DropDownView(bot=self.bot)
+        view = DropDownView(bot=self.bot, interaction=interaction)
 
         if choices.value == "cash":
             users = DataManager.get_all_users()
@@ -589,6 +592,8 @@ class Economy(commands.Cog):
             )
 
             for i, user in enumerate(top_10):
+                if any(user) == 705435835306213418:
+                    pass
                 lb_embed.add_field(
                     name=f"{i + 1}. {self.bot.get_user(int(user))}",
                     value=f"**Wallet:** `{users[user]['balance']}` 🪙",
@@ -618,6 +623,158 @@ class Economy(commands.Cog):
             lb_embed.set_author(name="Bank Leaderboard", icon_url=self.bot.user.avatar)
             lb_embed.timestamp = datetime.utcnow()
             await interaction.response.send_message(embed=lb_embed, view=view)
+
+    @app_commands.command(name="shop", description="View the shop to buy various items")
+    async def shop(self, interaction: discord.Interaction):
+        user_data = DataManager.get_user_data(interaction.user.id)
+
+        embeds = []
+
+        cur_embed = discord.Embed(
+            title="Shop", colour=discord.Colour.from_rgb(43, 45, 49)
+        )
+
+        for item in DataManager.get("economy", "items"):
+            if len(cur_embed.fields) >= 8:
+                embeds.append(cur_embed)
+
+                cur_embed = discord.Embed(
+                    title="Shop",
+                    colour=discord.Colour.green(),
+                )
+
+            price = DataManager.get("economy", "items")[item]["buy price"]
+            description = DataManager.get("economy", "items")[item]["description"]
+            emoji = DataManager.get("economy", "items")[item]["emoji"]
+
+            if price != 0:
+                if item.lower() in user_data["inventory"]:
+                    cur_embed.add_field(
+                        name=f"{emoji} **{item.title()}**"
+                        + f" ({user_data['inventory'][item.lower()]}) - {price} 🪙",
+                        value=f"{description}",
+                        inline=False,
+                    )
+                else:
+                    cur_embed.add_field(
+                        name=f"{emoji} **{item.title()}**" + f" - {price} 🪙",
+                        value=f"{description}",
+                        inline=False,
+                    )
+
+        embeds.append(cur_embed)
+
+        await Paginator.Simple().start(interaction, pages=embeds)
+
+    async def item_autocomplete(
+        self, interaction: discord.Interaction, current: str
+    ) -> list[app_commands.Choice[str]]:
+        shop_items = DataManager.get("economy", "shop items").keys()
+
+        return [app_commands.Choice(name=item, value=item) for item in shop_items]
+
+    @app_commands.command(name="buy_item", description="Buy an item")
+    @app_commands.autocomplete(item=item_autocomplete)
+    @app_commands.checks.cooldown(1, 15, key=lambda i: (i.user.id))
+    async def buy_item(
+        self, interaction: discord.Interaction, item: str, amount: int = 1
+    ):
+        price = DataManager.get("economy", "shop items")[item.lower()]["price"]
+        user_data = DataManager.get_user_data(interaction.user.id)
+
+        if item == "fishing pole":
+            item1 = "**<:fishing_pole:1101061913938509855> Fishing Pole**"
+        if item == "hunting rifle":
+            item1 = "**<:hunting_rifle:1101060264713003028> Hunting Rifle**"
+
+        if (int(amount) * price) > user_data["balance"]:
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    description="<:white_cross:1096791282023669860> You dont have enough 🪙 to buy that item",
+                    colour=discord.Colour.red(),
+                )
+            )
+
+        if item.lower() not in DataManager.get("economy", "shop items"):
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    description="<:white_cross:1096791282023669860> Can't buy that item, because it doesn't exist",
+                    colour=discord.Colour.red(),
+                )
+            )
+
+        DataManager.edit_user_data(
+            interaction.user.id, "balance", user_data["balance"] - (int(amount) * price)
+        )
+        DataManager.edit_user_inventory(interaction.user.id, item.lower(), +int(amount))
+        await interaction.response.send_message(
+            embed=discord.Embed(
+                description=f"{interaction.user.mention} Bought {amount} {item1} and paid **{(int(amount) * price)}** 🪙",
+                colour=discord.Colour.from_rgb(43, 45, 49),
+            )
+            .set_author(
+                name=f"Successful {item} Purchase",
+                icon_url=interaction.user.display_avatar,
+            )
+            .set_footer(text="Thank you for your purchase!")
+        )
+
+    async def items_autocomplete(
+        self, interaction: discord.Interaction, current: str
+    ) -> list[app_commands.Choice[str]]:
+        items = DataManager.get("economy", "items").keys()
+
+        return [
+            app_commands.Choice(name=item, value=item)
+            for item in items
+            if item.lower().startswith(current.lower()) or len(current) < 2
+        ]
+
+    @app_commands.command(name="item", description="View the description of an item")
+    @app_commands.autocomplete(item=items_autocomplete)
+    @app_commands.checks.cooldown(1, 15, key=lambda i: (i.user.id))
+    async def item(self, interaction: discord.Interaction, item: str):
+        if item not in DataManager.get("economy", "items"):
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    description="<:white_cross:1096791282023669860> Can't find that item, because it doesn't exist",
+                    colour=discord.Colour.red(),
+                )
+            )
+
+        user_data = DataManager.get_user_data(interaction.user.id)
+        item1 = DataManager.get("economy", "items")[item.lower()]
+        emoji = self.bot.get_emoji(item1["id"])
+
+        try:
+            itemsowned = user_data["inventory"][item.lower()]
+        except KeyError:
+            itemsowned = 0
+
+        embed = discord.Embed(
+            title=f"{item1['name']}",
+            description=f"> {item1['description']}\n\nYou own **{itemsowned}** of this item",
+            colour=discord.Colour.from_rgb(15, 255, 255),
+            url="https://github.com/Majestic-dev/Tester69",
+        )
+
+        embed.add_field(
+            name="Sell Value", value=f"{item1['sell price']} 🪙", inline=True
+        )
+
+        if item1["buy price"] == 0:
+            embed.add_field(
+                name="Shop Value", value="Can not be bought from the shop", inline=True
+            )
+        else:
+            embed.add_field(
+                name="Shop Value", value=f"{item1['buy price']} 🪙", inline=True
+            )
+
+        embed.add_field(name="Type", value=f"{item1['type']}", inline=False)
+        embed.set_thumbnail(url=emoji.url)
+
+        await interaction.response.send_message(embed=embed)
 
 
 async def setup(bot: commands.AutoShardedBot):
