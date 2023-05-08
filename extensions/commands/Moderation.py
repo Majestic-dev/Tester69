@@ -13,6 +13,7 @@ class Moderation(commands.Cog):
         self.bot = bot
 
     @app_commands.command(name="set_muted_role", description="Set the muted role")
+    @app_commands.guild_only()
     @app_commands.default_permissions(manage_roles=True)
     @app_commands.checks.cooldown(1, 30, key=lambda i: (i.guild.id, i.user.id))
     async def set_muted_role(
@@ -20,14 +21,14 @@ class Moderation(commands.Cog):
     ):
         await interaction.response.send_message(
             embed=discord.Embed(
-                title="Muted Role Set",
-                description=f"Set muted role to {role.mention}",
+                description=f"<:white_checkmark:1096793014287995061> Set the muted role to {role.mention}",
                 colour=discord.Colour.green(),
             )
         )
         DataManager.edit_guild_data(interaction.guild.id, "muted_role_id", role.id)
 
     @app_commands.command(name="mute", description="Mutes the mentioned user")
+    @app_commands.guild_only()
     @app_commands.default_permissions(manage_roles=True)
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id))
     async def mute(
@@ -37,11 +38,11 @@ class Moderation(commands.Cog):
         duration: int,
         reason: str = "Unspecified",
     ):
-        await interaction.response.defer(ephemeral=True)
+        await interaction.response.defer()
         muted_role = DataManager.get_guild_data(interaction.guild.id)["muted_role_id"]
 
         if muted_role == None:
-            return await interaction.response.send_message(
+            return await interaction.edit_original_response(
                 embed=discord.Embed(
                     description="<:white_cross:1096791282023669860> Please set a muted role first",
                     colour=discord.Colour.orange(),
@@ -49,7 +50,7 @@ class Moderation(commands.Cog):
             )
 
         if member.id == interaction.user.id:
-            return await interaction.response.send_message(
+            return await interaction.edit_original_response(
                 embed=discord.Embed(
                     description="<:white_cross:1096791282023669860> You can't mute yourself",
                     colour=discord.Colour.orange(),
@@ -57,7 +58,7 @@ class Moderation(commands.Cog):
             )
 
         if interaction.user.top_role <= member.top_role:
-            return await interaction.response.send_message(
+            return await interaction.edit_original_response(
                 embed=discord.Embed(
                     description="<:white_cross:1096791282023669860> You can't mute your superiors",
                     colour=discord.Colour.orange(),
@@ -66,7 +67,7 @@ class Moderation(commands.Cog):
 
         bot = interaction.guild.get_member(self.bot.user.id)
         if bot.top_role <= member.top_role:
-            return await interaction.response.send_message(
+            return await interaction.edit_original_response(
                 embed=discord.Embed(
                     description="<:white_cross:1096791282023669860> That user is higher than me, I can't do that",
                     colour=discord.Colour.orange(),
@@ -129,6 +130,7 @@ class Moderation(commands.Cog):
             DataManager.save("guilds")
 
     @app_commands.command(name="unmute", description="Unmutes the mentioned user")
+    @app_commands.guild_only()
     @app_commands.default_permissions(manage_roles=True)
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id))
     async def unmute(self, interaction: discord.Interaction, member: discord.Member):
@@ -167,6 +169,7 @@ class Moderation(commands.Cog):
             )
 
     @app_commands.command(name="kick", description="Kicks the mentioned user")
+    @app_commands.guild_only()
     @app_commands.default_permissions(kick_members=True)
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id))
     async def kick(
@@ -231,6 +234,7 @@ class Moderation(commands.Cog):
                 )
 
     @app_commands.command(name="ban", description="Bans the mentioned user")
+    @app_commands.guild_only()
     @app_commands.default_permissions(ban_members=True)
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id))
     async def ban(
@@ -321,6 +325,7 @@ class Moderation(commands.Cog):
         name="unban",
         description="Unbans the user by their discord ID",
     )
+    @app_commands.guild_only()
     @app_commands.default_permissions(ban_members=True)
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id))
     async def unban(self, interaction: discord.Interaction, member: str):
