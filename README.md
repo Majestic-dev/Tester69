@@ -51,56 +51,49 @@ This project is licensed under the Apache License - see the [LICENSE](LICENSE) f
 ## v1.1
 
     - Verification System
-        * Optimised verification system setup (now only requires 1 command)
-        * Made the verification system more secure (code will be on images that are noisy and blurred)
-        * After the first startup you can add more fonts to the fonts folder (has to be a .ttf file)
-        * You can now disable verification if you wish to
+        * Optimized and improved the verification system
     
     - Warning System
         * Warnings are now per server, not global
     
     - Server Management
-        * Added a word blacklist (blacklist the words you don't want being sent)
-        * Added a user/role whitelist (whitelist the users/roles you want to be able to bypass the word blacklist)
-        * Added a welcome message that will be sent to users when they join the server (if a server has enabled verification, it will be sent after they verify)
+        * Improved the server management system (adding/removing blacklisted words and whitelisted users/roles)
     
     - Main Commands
         * Updated the help command to list all the commands
 
     - Economy
-        * Changed the add and subtract commands to text commands, because a way to abuse it was found (change the guild permissions of that command)
+        * Improve the security of some commands
     
     - Logging System
-        * More things are now logged (message deletion, message editing). This will be improved and updated
-
-    - Main
-        * On first startup, a new folder (fonts) will be created
-
-    - Listeners
-        * Moved some listeners to another file to make other files smaller in size
+        * A logging system to log server actions
 
 ## v1.2
 
     - Moderation System
-        * Made muting and unmuting more efficient
-            * Muted role will be set using a command (/set_muted_role)
-            * Before a member gets muted, their roles get saved, when muted their roles will be replaced with the set muted role
-            * When unmuted, their roles will be replaced with the roles they had before they got muted
+        * Improved muting and unmuting
+
     - Logging System
-        * Made it so if a log was deleted the exact copy will be sent to the log channel, as long as it's in the message cache
+        * Log deletion protection
+
     - Miscellaneous
-        * Added a "search_gif" command that will search for a gif on GIPHY by the given keyword, if no keyword is given it will search for a random gif
-        * Added a "search_unsplash" command that will search for an image on Unsplash by the given keyword, if no keyword is given it will search for a random image
+        * Many miscellaneous commands to search random stuff, get random images, gifs, etc.
+
     - Commands
-        * Added a cooldown for most of the commands
+        * Cooldowns for most commands using discord's built in cooldown system
+
+    - Economy
+        * Updated all the economy items and a command to view the descriptions of items
+        * Banking system and a global leaderboard
 
 # TODO
 
-## v1.2 Focused On Economy And Some Fixes/Reworking To Moderation
+## v1.2 Focused On Economy And Miscallaneous Systems
 
 - [x] Add some customization to the moderation system (for example setting the muted role).
-- [ ] Migrate from json to a binary database.
-- [ ] Add a way to deposit/withdraw money into the bank.
+- [x] Add a way to deposit/withdraw money into the bank.
+- [ ] Migrate from json to a more reliable database.
+- [ ] Make a custom cooldown handler for a few commands (hourly, daily, weekly and monthly).
 
 ## V1.3 Focused On Miscellaneous/Fun
 
