@@ -63,6 +63,7 @@ class Verification(commands.GroupCog):
         name="disable",
         description="Disable the verification system",
     )
+    @app_commands.guild_only()
     @app_commands.default_permissions(administrator=True)
     async def disable_verification(self, interaction: discord.Interaction):
         verification_channel = DataManager.get_guild_data(interaction.guild.id)[
@@ -82,16 +83,14 @@ class Verification(commands.GroupCog):
         ):
             return await interaction.response.send_message(
                 embed=discord.Embed(
-                    title="Verification Disabled",
-                    description="Verification is already disabled or has not been interacted with for this server",
+                    description="<:white_cross:1096791282023669860> Verification is already disabled or has not been interacted with for this server",
                     colour=discord.Colour.orange(),
                 )
             )
 
         await interaction.response.send_message(
             embed=discord.Embed(
-                title="Verification Disabled",
-                description="Verification has been disabled for this server",
+                description="<:white_checkmark:1096793014287995061> Verification has been disabled for this server",
                 colour=discord.Colour.green(),
             )
         )
@@ -108,6 +107,7 @@ class Verification(commands.GroupCog):
         name="setup",
         description="Setup the verification system",
     )
+    @app_commands.guild_only()
     @app_commands.checks.cooldown(1, 60, key=lambda i: (i.guild.id, i.user.id))
     @app_commands.default_permissions(administrator=True)
     async def verification_setup(
@@ -130,8 +130,7 @@ class Verification(commands.GroupCog):
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
 
         verification = discord.Embed(
-            title="Verification Setup",
-            description="Verification has been setup for this server",
+            description="<:white_checkmark:1096793014287995061> Verification has been setup for this server",
             colour=discord.Colour.green(),
         )
         verification.add_field(
@@ -327,8 +326,7 @@ class Verification(commands.GroupCog):
 
         await dm_channel.send(
             embed=discord.Embed(
-                title="Verification Failed",
-                description=f"You entered the verification code wrong too many times. Please rejoin the server and try again: {invite}",
+                description=f"<:white_cross:1096791282023669860> You entered the verification code wrong too many times. Please rejoin the server and try again: {invite}",
                 colour=discord.Colour.orange(),
             )
         )

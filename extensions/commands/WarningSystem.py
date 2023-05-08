@@ -14,6 +14,7 @@ class WarningSystem(commands.Cog):
     @app_commands.command(
         name="warn", description="Warns the mentioned user with a custom warning reason"
     )
+    @app_commands.guild_only()
     @app_commands.default_permissions(manage_messages=True)
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id))
     async def warn(
@@ -79,6 +80,7 @@ class WarningSystem(commands.Cog):
         )
 
     @app_commands.command(name="delwarn", description="Deletes the warning by UUID")
+    @app_commands.guild_only()
     @app_commands.default_permissions(manage_messages=True)
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id))
     async def delwarn(self, interaction: discord.Interaction, uuid: str):
@@ -108,6 +110,7 @@ class WarningSystem(commands.Cog):
     @app_commands.command(
         name="warnings", description="get the warning list of the user"
     )
+    @app_commands.guild_only()
     @app_commands.default_permissions(manage_messages=True)
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id))
     async def warnings(self, interaction: discord.Interaction, member: discord.Member):
