@@ -12,6 +12,7 @@ class Server(commands.Cog):
     @app_commands.command(
         name="serverinfo", description="Get information about the server"
     )
+    @app_commands.guild_only()
     @app_commands.checks.cooldown(1, 20, key=lambda i: (i.guild.id, i.user.id))
     async def serverinfo(self, interaction: discord.Interaction):
         guild = interaction.guild
@@ -46,6 +47,7 @@ class Server(commands.Cog):
         await interaction.response.send_message(embed=embed)
 
     @app_commands.command(name="userinfo", description="Get information about a user")
+    @app_commands.guild_only()
     @app_commands.checks.cooldown(1, 20, key=lambda i: (i.guild.id, i.user.id))
     async def userinfo(
         self,
@@ -82,6 +84,7 @@ class Server(commands.Cog):
         await interaction.response.send_message(embed=embed)
 
     @app_commands.command(name="roleinfo", description="Get information about a role")
+    @app_commands.guild_only()
     @app_commands.checks.cooldown(1, 20, key=lambda i: (i.guild.id, i.user.id))
     async def roleinfo(
         self,
@@ -110,6 +113,7 @@ class Server(commands.Cog):
     @app_commands.command(
         name="channelinfo", description="Get information about a channel"
     )
+    @app_commands.guild_only()
     @app_commands.checks.cooldown(1, 20, key=lambda i: (i.guild.id, i.user.id))
     async def channelinfo(
         self,
@@ -139,6 +143,7 @@ class Server(commands.Cog):
     @app_commands.command(
         name="membercount", description="Get the member count of the server"
     )
+    @app_commands.guild_only()
     @app_commands.checks.cooldown(1, 20, key=lambda i: (i.guild.id, i.user.id))
     async def membercount(self, interaction: discord.Interaction):
         guild = interaction.guild
@@ -165,6 +170,38 @@ class Server(commands.Cog):
         )
         embed.set_author(name=f"{user.name}#{user.discriminator}", icon_url=user.avatar)
         embed.set_image(url=user.avatar)
+        await interaction.response.send_message(embed=embed)
+
+    @app_commands.command(
+        name="servericon", description="Get the icon of the server you are in"
+    )
+    @app_commands.guild_only()
+    @app_commands.checks.cooldown(1, 20, key=lambda i: (i.guild.id, i.user.id))
+    async def servericon(self, interaction: discord.Interaction):
+        embed = discord.Embed(
+            title=f"{interaction.guild.name}'s Icon",
+            colour=discord.Colour.darker_gray(),
+        )
+        embed.set_author(
+            name=f"{interaction.guild.name}", icon_url=interaction.guild.icon
+        )
+        embed.set_image(url=interaction.guild.icon)
+        await interaction.response.send_message(embed=embed)
+
+    @app_commands.command(
+        name="serverbanner", description="Get the banner of the server you are in"
+    )
+    @app_commands.guild_only()
+    @app_commands.checks.cooldown(1, 20, key=lambda i: (i.guild.id, i.user.id))
+    async def serverbanner(self, interaction: discord.Interaction):
+        embed = discord.Embed(
+            title=f"{interaction.guild.name}'s Banner",
+            colour=discord.Colour.darker_gray(),
+        )
+        embed.set_author(
+            name=f"{interaction.guild.name}", icon_url=interaction.guild.icon
+        )
+        embed.set_image(url=interaction.guild.banner)
         await interaction.response.send_message(embed=embed)
 
 
