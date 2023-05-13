@@ -6,6 +6,8 @@ A general-use discord bot coded in discord.py
 
 # Big shoutout to kaJob-dev on github (Jakob#2222 on discord) for guiding me on this project!
 
+# PROJECT ON HOLD UNTIL SEPTEMBER DUE TO SUMMER COMING UP, I WILL MAKE SMALL CHANGES IF POSSIBLE
+
 # Installation
 ### Requirements
 - [Python 3.8 or higher](https://www.python.org/downloads/)
