@@ -1,6 +1,6 @@
 # Tester69
 
-[![](https://discord.com/api/guilds/733219077744754750/embed.png)](https://discord.gg/VsDDf8YKBV)
+[![](https://discord.com/api/guilds/1062686075757273130/embed.png)](https://discord.gg/smashps)
 
 A general-use discord bot coded in discord.py
 
