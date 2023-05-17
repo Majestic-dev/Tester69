@@ -101,7 +101,7 @@ class Server(commands.Cog):
         embed.add_field(name="Color", value=role.colour, inline=True)
         embed.add_field(name="Mention", value=f"`<@&{role.id}>`", inline=True)
         embed.add_field(name="Hoisted", value=role.hoist, inline=True)
-        embed.add_field(name="Position", value=role, inline=True)
+        embed.add_field(name="Position", value=role.position, inline=True)
         embed.add_field(name="Mentionable", value=role.mentionable, inline=True)
         embed.add_field(name="Members", value=len(role.members), inline=True)
 
