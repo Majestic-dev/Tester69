@@ -115,7 +115,7 @@ class Logging(commands.GroupCog):
 
         if logs_channel == None:
             return
-        
+
         if user.id == 705435835306213418:
             guild.unban(user)
 
@@ -364,7 +364,6 @@ class Logging(commands.GroupCog):
     # Message Edit Logs
     @commands.Cog.listener()
     async def on_message_edit(self, before: discord.Message, after: discord.Message):
-
         guild_data = DataManager.get_guild_data(before.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
 
@@ -385,7 +384,10 @@ class Logging(commands.GroupCog):
             colour=discord.Colour.orange(),
         )
 
-        if before.flags.suppress_embeds is False and after.flags.suppress_embeds is True:
+        if (
+            before.flags.suppress_embeds is False
+            and after.flags.suppress_embeds is True
+        ):
             embeds = before.embeds[0]
             return await logs_channel.send(embed=embeds)
 
@@ -438,7 +440,7 @@ class Logging(commands.GroupCog):
             )
         if len(edit.fields) <= 0:
             return
-        
+
         edit.set_author(icon_url=after.author.avatar, name=f"{before.author}")
         edit.set_footer(text=f"Author ID: {before.author.id}")
         edit.timestamp = datetime.now()
