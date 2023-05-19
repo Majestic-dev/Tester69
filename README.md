@@ -6,7 +6,10 @@ A general-use discord bot coded in discord.py
 
 # Big shoutout to kaJob-dev on github (Jakob#2222 on discord) for guiding me on this project!
 
-# PROJECT ON HOLD UNTIL SEPTEMBER DUE TO SUMMER COMING UP, I WILL MAKE SMALL CHANGES IF POSSIBLE
+# ENJOY YOUR SUMMER ❤️, THIS HAS BEEN THE BEST 5 MONTHS OF MY CODING JOURNEY! SEE YOU IN SEPTEMBER!
+
+
+## Project on hold until September ❤️, see you soon!
 
 # Installation
 ### Requirements
