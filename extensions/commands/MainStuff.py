@@ -111,7 +111,7 @@ class MainStuff(commands.Cog):
         await interaction.response.send_message(embed=gambling, ephemeral=True)
 
     @app_commands.command(name="main", description="Get all current main commands")
-    async def misc(self, interaction: discord.Interaction):
+    async def main(self, interaction: discord.Interaction):
         main = discord.Embed(
             title="Tester69's main commands",
             colour=discord.Colour.light_gray(),
