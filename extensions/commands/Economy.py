@@ -115,7 +115,10 @@ class Economy(commands.Cog):
 
     @app_commands.command(name="pay", description="Pay someone some 🪙")
     @app_commands.checks.cooldown(1, 600, key=lambda i: (i.user.id))
-    @app_commands.describe(user = "The user you want to pay the money to", amount = "The amount of money you want to pay")
+    @app_commands.describe(
+        user="The user you want to pay the money to",
+        amount="The amount of money you want to pay",
+    )
     async def pay(
         self, interaction: discord.Interaction, user: discord.User, amount: int
     ):
@@ -160,7 +163,9 @@ class Economy(commands.Cog):
 
     @app_commands.command(name="balance", description="Check your 🪙 balance")
     @app_commands.checks.cooldown(1, 20, key=lambda i: (i.user.id))
-    @app_commands.describe(user = "The user you want to check the balance of (yours if no user is provided)")
+    @app_commands.describe(
+        user="The user you want to check the balance of (yours if no user is provided)"
+    )
     async def balance(
         self, interaction: discord.Interaction, user: Optional[discord.User] = None
     ):
@@ -264,7 +269,10 @@ class Economy(commands.Cog):
     @app_commands.command(name="sell", description="Sell your loot for 🪙")
     @app_commands.autocomplete(item=item_autocomplete)
     @app_commands.checks.cooldown(1, 15, key=lambda i: (i.user.id))
-    @app_commands.describe(item = "The item you want to sell", amount = "The amount of the item you want to sell (default 1)")
+    @app_commands.describe(
+        item="The item you want to sell",
+        amount="The amount of the item you want to sell (default 1)",
+    )
     async def sell(self, interaction: discord.Interaction, item: str, amount: int = 1):
         user_data = DataManager.get_user_data(interaction.user.id)
 
@@ -440,7 +448,9 @@ class Economy(commands.Cog):
             )
         )
 
-    @app_commands.command(name="inventory", description="Check the contents of your inventory")
+    @app_commands.command(
+        name="inventory", description="Check the contents of your inventory"
+    )
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.user.id))
     async def inventory(self, interaction: discord.Interaction):
         user_data = DataManager.get_user_data(interaction.user.id)
@@ -473,7 +483,7 @@ class Economy(commands.Cog):
 
     @app_commands.command(name="deposit", description="Deposit money into your bank")
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.user.id))
-    @app_commands.describe(amount = "The amount of 🪙 you want to deposit")
+    @app_commands.describe(amount="The amount of 🪙 you want to deposit")
     async def deposit(self, interaction: discord.Interaction, amount: str):
         user_data = DataManager.get_user_data(interaction.user.id)
 
@@ -525,7 +535,7 @@ class Economy(commands.Cog):
 
     @app_commands.command(name="withdraw", description="Withdraw money from your bank")
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.user.id))
-    @app_commands.describe(amount = "The amount of 🪙 you want to withdraw")
+    @app_commands.describe(amount="The amount of 🪙 you want to withdraw")
     async def withdraw(self, interaction: discord.Interaction, amount: str):
         user_data = DataManager.get_user_data(interaction.user.id)
 
@@ -683,7 +693,10 @@ class Economy(commands.Cog):
     @app_commands.command(name="buy_item", description="Buy an item")
     @app_commands.autocomplete(item=item_autocomplete)
     @app_commands.checks.cooldown(1, 15, key=lambda i: (i.user.id))
-    @app_commands.describe(item="The item you want to buy", amount="The amount of the item you want to buy (default 1)")
+    @app_commands.describe(
+        item="The item you want to buy",
+        amount="The amount of the item you want to buy (default 1)",
+    )
     async def buy_item(
         self, interaction: discord.Interaction, item: str, amount: int = 1
     ):

@@ -21,7 +21,10 @@ class ServerManagement(commands.Cog):
     @app_commands.guild_only()
     @app_commands.default_permissions(manage_channels=True)
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id))
-    @app_commands.describe(channel = "The channel to set the slowmode in (defaults to the channel where the command was ran in)", slowmode = "The slowmode in seconds to set in the channel (0 to disable)")
+    @app_commands.describe(
+        channel="The channel to set the slowmode in (defaults to the channel where the command was ran in)",
+        slowmode="The slowmode in seconds to set in the channel (0 to disable)",
+    )
     async def slowmode(
         self,
         interaction: discord.Interaction,
@@ -54,7 +57,9 @@ class ServerManagement(commands.Cog):
     @app_commands.guild_only()
     @app_commands.default_permissions(manage_guild=True)
     @app_commands.checks.cooldown(1, 600, key=lambda i: (i.guild.id, i.user.id))
-    @app_commands.describe(appeal_link = "The appeal link to set (sent to users who get banned)")
+    @app_commands.describe(
+        appeal_link="The appeal link to set (sent to users who get banned)"
+    )
     async def set_appeal_link(self, interaction: discord.Interaction, appeal_link: str):
         DataManager.edit_guild_data(
             interaction.guild.id, "appeal_link", f"{appeal_link}"

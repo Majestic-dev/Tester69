@@ -20,7 +20,7 @@ class Misc(commands.Cog):
         name="search_giphy", description="Search a gif by keyword from Giphy"
     )
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.user.id))
-    @app_commands.describe(search = "The keyword you want to search the Gif by")
+    @app_commands.describe(search="The keyword you want to search the Gif by")
     async def search_gif(self, interaction: discord.Interaction, search: Optional[str]):
         if search == None:
             search1 = "Random Gif"
@@ -66,7 +66,7 @@ class Misc(commands.Cog):
         name="search_unsplash", description="Search an image by keyword from Unsplash"
     )
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.user.id))
-    @app_commands.describe(search = "The keyword you want to search the image by")
+    @app_commands.describe(search="The keyword you want to search the image by")
     async def search_unsplash(
         self, interaction: discord.Interaction, search: Optional[str]
     ):
@@ -158,7 +158,9 @@ class Misc(commands.Cog):
         name="wikipedia", description="Get a definition from Wikipedia"
     )
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.user.id))
-    @app_commands.describe(search = "The keyword you want to search the definition from Wikipedia by")
+    @app_commands.describe(
+        search="The keyword you want to search the definition from Wikipedia by"
+    )
     async def wikipedia(self, interaction: discord.Interaction, *, search: str):
         try:
             session = aiohttp.ClientSession()
@@ -188,7 +190,9 @@ class Misc(commands.Cog):
     @app_commands.command(
         name="urban", description="Get a definition from Urban Dictionary"
     )
-    @app_commands.describe(search = "The keyword you want to search the definition from The Urban Dictionary by")
+    @app_commands.describe(
+        search="The keyword you want to search the definition from The Urban Dictionary by"
+    )
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.user.id))
     async def urban(self, interaction: discord.Interaction, *, search: str = None):
         embeds = []
@@ -224,7 +228,9 @@ class Misc(commands.Cog):
 
     @app_commands.command(name="github", description="Get a user's GitHub profile")
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.user.id))
-    @app_commands.describe(search = "The GitHub username you want to search the profile of")
+    @app_commands.describe(
+        search="The GitHub username you want to search the profile of"
+    )
     async def github(self, interaction: discord.Interaction, *, search: str):
         session = aiohttp.ClientSession()
         try:
@@ -254,7 +260,9 @@ class Misc(commands.Cog):
         name="covid", description="Get the COVID-19 stats for a country"
     )
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.user.id))
-    @app_commands.describe(search = "The country you want to search the COVID-19 stats for")
+    @app_commands.describe(
+        search="The country you want to search the COVID-19 stats for"
+    )
     async def covid(self, interaction: discord.Interaction, *, search: str):
         session = aiohttp.ClientSession()
         try:
@@ -288,7 +296,7 @@ class Misc(commands.Cog):
 
     @app_commands.command(name="weather", description="Get the weather for a location")
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.user.id))
-    @app_commands.describe(search = "The location you want to search the weather for")
+    @app_commands.describe(search="The location you want to search the weather for")
     async def weather(self, interaction: discord.Interaction, *, search: str):
         session = aiohttp.ClientSession()
         try:
@@ -348,7 +356,9 @@ class Misc(commands.Cog):
         description="Get the weather forecast for a location (3 hour intervals)",
     )
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.user.id))
-    @app_commands.describe(search = "The location you want to search the weather forecast for")
+    @app_commands.describe(
+        search="The location you want to search the weather forecast for"
+    )
     async def forecast(self, interaction: discord.Interaction, *, search: str):
         session = aiohttp.ClientSession()
         try:

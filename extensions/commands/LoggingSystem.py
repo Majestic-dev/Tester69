@@ -15,7 +15,9 @@ class Logging(commands.GroupCog):
     @app_commands.command(
         name="set_channel", description="Set where all server logs will be sent"
     )
-    @app_commands.describe(channel = "Choose the channel where all server logs will be sent")
+    @app_commands.describe(
+        channel="Choose the channel where all server logs will be sent"
+    )
     @app_commands.default_permissions(administrator=True)
     async def set_logs_channel(
         self, interaction: discord.Interaction, channel: discord.TextChannel

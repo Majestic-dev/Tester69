@@ -16,7 +16,9 @@ class Moderation(commands.Cog):
     @app_commands.guild_only()
     @app_commands.default_permissions(manage_roles=True)
     @app_commands.checks.cooldown(1, 30, key=lambda i: (i.guild.id, i.user.id))
-    @app_commands.describe(role = "The role that will be assigned to users when muting them")
+    @app_commands.describe(
+        role="The role that will be assigned to users when muting them"
+    )
     async def set_muted_role(
         self, interaction: discord.Interaction, role: discord.Role
     ):
@@ -32,7 +34,11 @@ class Moderation(commands.Cog):
     @app_commands.guild_only()
     @app_commands.default_permissions(manage_roles=True)
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id))
-    @app_commands.describe(member = "The user to mute", duration = "The duration to mute the user for (in seconds)", reason = 'The reason for muting the user ("Unspecified" by default)')
+    @app_commands.describe(
+        member="The user to mute",
+        duration="The duration to mute the user for (in seconds)",
+        reason='The reason for muting the user ("Unspecified" by default)',
+    )
     async def mute(
         self,
         interaction: discord.Interaction,
@@ -135,7 +141,7 @@ class Moderation(commands.Cog):
     @app_commands.guild_only()
     @app_commands.default_permissions(manage_roles=True)
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id))
-    @app_commands.describe(member = "The user to unmute")
+    @app_commands.describe(member="The user to unmute")
     async def unmute(self, interaction: discord.Interaction, member: discord.Member):
         muted_role = DataManager.get_guild_data(interaction.guild.id)["muted_role_id"]
         saved_roles = DataManager.get_guild_data(interaction.guild.id)[
@@ -175,7 +181,10 @@ class Moderation(commands.Cog):
     @app_commands.guild_only()
     @app_commands.default_permissions(kick_members=True)
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id))
-    @app_commands.describe(member = "The user to kick", reason = 'The reason for kicking the user ("Unspecified" by default))')
+    @app_commands.describe(
+        member="The user to kick",
+        reason='The reason for kicking the user ("Unspecified" by default))',
+    )
     async def kick(
         self,
         interaction: discord.Interaction,
@@ -241,7 +250,10 @@ class Moderation(commands.Cog):
     @app_commands.guild_only()
     @app_commands.default_permissions(ban_members=True)
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id))
-    @app_commands.describe(member = "The user to ban", reason = 'The reason for banning the user ("Unspecified" by default)')
+    @app_commands.describe(
+        member="The user to ban",
+        reason='The reason for banning the user ("Unspecified" by default)',
+    )
     async def ban(
         self,
         interaction: discord.Interaction,
@@ -333,7 +345,7 @@ class Moderation(commands.Cog):
     @app_commands.guild_only()
     @app_commands.default_permissions(ban_members=True)
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id))
-    @app_commands.describe(member = "The user to unban")
+    @app_commands.describe(member="The user to unban")
     async def unban(self, interaction: discord.Interaction, member: str):
         try:
             member = await self.bot.fetch_user(int(member))
