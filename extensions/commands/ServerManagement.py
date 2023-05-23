@@ -21,6 +21,7 @@ class ServerManagement(commands.Cog):
     @app_commands.guild_only()
     @app_commands.default_permissions(manage_channels=True)
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id))
+    @app_commands.describe(channel = "The channel to set the slowmode in (defaults to the channel where the command was ran in)", slowmode = "The slowmode in seconds to set in the channel (0 to disable)")
     async def slowmode(
         self,
         interaction: discord.Interaction,
@@ -53,6 +54,7 @@ class ServerManagement(commands.Cog):
     @app_commands.guild_only()
     @app_commands.default_permissions(manage_guild=True)
     @app_commands.checks.cooldown(1, 600, key=lambda i: (i.guild.id, i.user.id))
+    @app_commands.describe(appeal_link = "The appeal link to set (sent to users who get banned)")
     async def set_appeal_link(self, interaction: discord.Interaction, appeal_link: str):
         DataManager.edit_guild_data(
             interaction.guild.id, "appeal_link", f"{appeal_link}"
@@ -98,6 +100,12 @@ class ServerManagement(commands.Cog):
     )
     @app_commands.default_permissions(manage_channels=True)
     @app_commands.checks.cooldown(1, 20, key=lambda i: (i.guild.id, i.user.id))
+    @app_commands.describe(
+        channeltype="The type of channel to create",
+        name="The name of the channel to create",
+        category="The category to create the channel in (defaults no category)",
+        slowmode="The slowmode in seconds to set in the channel (0 to disable)",
+    )
     async def create_channel(
         self,
         interaction: discord.Interaction,
@@ -150,6 +158,9 @@ class ServerManagement(commands.Cog):
     @app_commands.guild_only()
     @app_commands.default_permissions(manage_channels=True)
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id))
+    @app_commands.describe(
+        channel="The channel to delete", reason="The reason for deleting the channel"
+    )
     async def delete_channel(
         self,
         interaction: discord.Interaction,
@@ -186,6 +197,9 @@ class ServerManagement(commands.Cog):
     @app_commands.guild_only()
     @app_commands.default_permissions(manage_roles=True)
     @app_commands.checks.cooldown(1, 7, key=lambda i: (i.guild.id, i.user.id))
+    @app_commands.describe(
+        user="The user to add the role to", role="The role to add to the user"
+    )
     async def add_role(
         self,
         interaction: discord.Interaction,
@@ -231,6 +245,9 @@ class ServerManagement(commands.Cog):
     @app_commands.guild_only()
     @app_commands.default_permissions(manage_roles=True)
     @app_commands.checks.cooldown(1, 7, key=lambda i: (i.guild.id, i.user.id))
+    @app_commands.describe(
+        user="The user to remove the role from", role="The role to remove from the user"
+    )
     async def remove_role(
         self,
         interaction: discord.Interaction,
@@ -276,6 +293,7 @@ class ServerManagement(commands.Cog):
     @app_commands.guild_only()
     @app_commands.default_permissions(manage_channels=True)
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id))
+    @app_commands.describe(count="The amount of messages to purge")
     async def purge(self, interaction: discord.Interaction, count: int):
         guild_data = DataManager.get_guild_data(interaction.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
@@ -306,6 +324,7 @@ class ServerManagement(commands.Cog):
     )
     @app_commands.guild_only()
     @app_commands.default_permissions(administrator=True)
+    @app_commands.describe(word="The word to add to the blacklisted words list")
     async def add_blacklisted_word(self, interaction: discord.Interaction, word: str):
         blacklisted_words = DataManager.get_guild_data(interaction.guild.id)[
             "blacklisted_words"
@@ -350,6 +369,7 @@ class ServerManagement(commands.Cog):
     @app_commands.guild_only()
     @app_commands.default_permissions(administrator=True)
     @app_commands.autocomplete(word=word_autocomplete)
+    @app_commands.describe(word="The word to remove from the blacklisted words list")
     async def remove_blacklisted_word(
         self, interaction: discord.Interaction, word: str
     ):
@@ -384,6 +404,7 @@ class ServerManagement(commands.Cog):
     )
     @app_commands.guild_only()
     @app_commands.default_permissions(administrator=True)
+    @app_commands.describe(whitelist="The user or role to add to the whitelist")
     async def whitelist_add(
         self, interaction: discord.Interaction, whitelist: discord.User | discord.Role
     ):
@@ -425,6 +446,7 @@ class ServerManagement(commands.Cog):
     )
     @app_commands.guild_only()
     @app_commands.default_permissions(administrator=True)
+    @app_commands.describe(whitelist="The user or role to remove from the whitelist")
     async def whitelist_remove(
         self, interaction: discord.Interaction, whitelist: discord.User | discord.Role
     ):
@@ -467,6 +489,7 @@ class ServerManagement(commands.Cog):
     )
     @app_commands.guild_only()
     @app_commands.default_permissions(administrator=True)
+    @app_commands.describe(message="The message to send to users DMs when they join")
     async def set_welcome_message(self, interaction: discord.Interaction, message: str):
         await interaction.response.send_message(
             embed=discord.Embed(

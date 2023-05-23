@@ -49,6 +49,7 @@ class Server(commands.Cog):
     @app_commands.command(name="userinfo", description="Get information about a user")
     @app_commands.guild_only()
     @app_commands.checks.cooldown(1, 20, key=lambda i: (i.guild.id, i.user.id))
+    @app_commands.describe(user = "The user to get information about")
     async def userinfo(
         self,
         interaction: discord.Interaction,
@@ -86,6 +87,7 @@ class Server(commands.Cog):
     @app_commands.command(name="roleinfo", description="Get information about a role")
     @app_commands.guild_only()
     @app_commands.checks.cooldown(1, 20, key=lambda i: (i.guild.id, i.user.id))
+    @app_commands.describe(role = "The role to get information about")
     async def roleinfo(
         self,
         interaction: discord.Interaction,
@@ -115,6 +117,7 @@ class Server(commands.Cog):
     )
     @app_commands.guild_only()
     @app_commands.checks.cooldown(1, 20, key=lambda i: (i.guild.id, i.user.id))
+    @app_commands.describe(channel = "The channel to get information about")
     async def channelinfo(
         self,
         interaction: discord.Interaction,
@@ -158,6 +161,7 @@ class Server(commands.Cog):
         name="avatar", description="Get the avatar of a user or yourself"
     )
     @app_commands.checks.cooldown(1, 20, key=lambda i: (i.guild.id, i.user.id))
+    @app_commands.describe(user = "The user to get the avatar of, defaults to yourself")
     async def avatar(
         self,
         interaction: discord.Interaction,

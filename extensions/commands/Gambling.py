@@ -121,6 +121,7 @@ class Gambling(commands.Cog):
         description="Gamble your 🪙 in a game of blackjack",
     )
     @app_commands.checks.cooldown(1, 25, key=lambda i: (i.user.id))
+    @app_commands.describe(bet = "The amount of 🪙 you want to bet")
     async def blackjack(self, interaction: discord.Interaction, bet: int):
         user_data = DataManager.get_user_data(interaction.user.id)
 
@@ -587,6 +588,7 @@ class Gambling(commands.Cog):
             app_commands.Choice(name="Tails", value="tails"),
         ]
     )
+    @app_commands.describe(bet = "The amount of 🪙 you want to bet", choices="Choose heads or tails")
     async def coinflip(
         self,
         interaction: discord.Interaction,
@@ -649,6 +651,7 @@ class Gambling(commands.Cog):
 
     @app_commands.command(name="gamble", description="Gamble your set amount of 🪙")
     @app_commands.checks.cooldown(1, 25, key=lambda i: (i.user.id))
+    @app_commands.describe(bet = "The amount of 🪙 you want to bet")
     async def gamble(self, interaction: discord.Interaction, bet: int):
         user_data = DataManager.get_user_data(interaction.user.id)
 
@@ -708,6 +711,7 @@ class Gambling(commands.Cog):
         description="Gamble your 🪙 in a snake eyes game for a chance to win big!",
     )
     @app_commands.checks.cooldown(1, 25, key=lambda i: (i.user.id))
+    @app_commands.describe(bet = "The amount of 🪙 you want to bet")
     async def snakeeyes(self, interaction: discord.Interaction, bet: int):
         user_data = DataManager.get_user_data(interaction.user.id)
 
@@ -778,6 +782,7 @@ class Gambling(commands.Cog):
         description="Gamble your 🪙 in a slots game for a chance to win big!",
     )
     @app_commands.checks.cooldown(1, 25, key=lambda i: (i.user.id))
+    @app_commands.describe(bet = "The amount of 🪙 you want to bet")
     async def slots(self, interaction: discord.Interaction, bet: int):
         user_data = DataManager.get_user_data(interaction.user.id)
 

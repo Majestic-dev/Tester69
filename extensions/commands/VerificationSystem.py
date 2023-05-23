@@ -110,6 +110,11 @@ class Verification(commands.GroupCog):
     @app_commands.guild_only()
     @app_commands.checks.cooldown(1, 60, key=lambda i: (i.guild.id, i.user.id))
     @app_commands.default_permissions(administrator=True)
+    @app_commands.describe(
+        verification_channel = "The channel where users will send the verification code",
+        verification_logs_channel = "The channel where the bot will send the verification logs",
+        unverified_role = "The role that will be given to the user when they join the server",
+    )
     async def verification_setup(
         self,
         interaction: discord.Interaction,
