@@ -45,7 +45,7 @@ git clone https://github.com/Majestic-dev/Tester69.git
 ```
 
 ### Install requirements.txt
-``bash
+```bash
 pip install -r requirements.txt
 ```
 or
