@@ -1,5 +1,8 @@
-data
+\venv
+\.venv
+\data
 __pycache__
 fonts
-Smash.py
-Test.py
+test.py
+WorldRender.py
+FindItem.py
