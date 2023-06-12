@@ -37,11 +37,37 @@ A general-use discord bot coded in discord.py
     pip3 install pillow
     ```
 
-### Guide
-1. Clone the repository
-2. Run the main.py file
+## Guide
 
-    Running the main.py file for the first time will create a new directory named "data" and 3 new files in it. It should then ask you to enter your bot token. You can see how to get a bot token [here](https://www.youtube.com/watch?v=aI4OmIbkJH8). There will also be a new directory named "fonts", there you can place any fonts you'd like that have the .ttf extension. This will be used for [Pillow](https://pillow.readthedocs.io/en/stable/index.html#) image generation for the verification system. Enter your bot token in the data/config.json file and save the file. Then run the main.py file again. It should now work. If you don't want to run the main file in a code editor you can run it using the [start.bat](start.bat) file.
+### Clone the repository
+```bash
+git clone https://github.com/Majestic-dev/Tester69.git
+```
+
+### Install requirements.txt
+``bash
+pip install -r requirements.txt
+```
+or
+```bash
+python -m pip install -r requirements.txt
+```
+
+### Running the bot through VSCode
+
+Install Pylance and Python extensions on github, after you've done that you should be able to run the main.py file by clicking the "Run Python File" button in the top right corner of the screen
+
+### Running the bot through terminal
+
+change your current directory to the cloned repository
+```bash
+cd Tester69
+```
+
+run the file
+```bash
+python main.py
+```
 
 # Contributing 
 All contributions are welcome! If you'd like to contribute, please make a pull request.
