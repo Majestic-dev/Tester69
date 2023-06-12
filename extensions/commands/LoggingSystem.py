@@ -367,14 +367,14 @@ class Logging(commands.GroupCog):
     # Message Edit Logs
     @commands.Cog.listener()
     async def on_message_edit(self, before: discord.Message, after: discord.Message):
+        if before.channel.type == discord.channel.ChannelType.private:
+            return
+
         guild_data = DataManager.get_guild_data(before.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
 
         if before.author.bot and before.channel != logs_channel:
             return
-
-        guild_data = DataManager.get_guild_data(before.guild.id)
-        logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
 
         if before.is_system() == True:
             return
@@ -456,7 +456,7 @@ class Logging(commands.GroupCog):
             message.author.bot
             and message.embeds == False
             or message.is_system() == True
-            or isinstance(message.channel, discord.channel.DMChannel)
+            or message.channel.type == discord.channel.ChannelType.private
         ):
             return
 

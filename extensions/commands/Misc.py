@@ -1,4 +1,5 @@
 import json
+import os
 import random
 from datetime import datetime
 from typing import Optional
@@ -396,6 +397,29 @@ class Misc(commands.Cog):
             embed.description = "<:white_cross:1096791282023669860> Couldn't find a location with that name"
         await session.close()
         await interaction.response.send_message(embed=embed)
+
+    @app_commands.command(
+        name="count", description="Count from one number to another number"
+    )
+    @app_commands.checks.cooldown(1, 10, key=lambda i: (i.user.id))
+    @app_commands.describe(
+        start="The number you want to start counting from",
+        end="The number you want to stop counting at",
+    )
+    async def count(
+        self,
+        interaction: discord.Interaction,
+        start: int,
+        end: int,
+    ):
+        await interaction.response.defer()
+        i = start
+        while i <= end:
+            with open(f"{interaction.user.id}.txt", "a") as f:
+                f.write(f"{i}\n")
+                i += 1
+        await interaction.followup.send(file=discord.File(f"{interaction.user.id}.txt"))
+        os.remove(f"{interaction.user.id}.txt")
 
 
 async def setup(bot):
