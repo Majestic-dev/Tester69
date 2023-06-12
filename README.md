@@ -12,31 +12,6 @@ A general-use discord bot coded in discord.py
 ## Project on hold until September ❤️, see you soon!
 
 # Installation
-### Requirements
-- [Python 3.8 or higher](https://www.python.org/downloads/)
-- discord.py, version 2.1.0 or higher 
-    ```bash
-    # WINDOWS 
-    python -m pip install -U discord.py
-
-    # LINUX
-    python3 -m pip install -U discord.py
-
-    # MACOS
-    python3 -m pip install -U discord.py
-    ```
-- Python Pillow (Install with pip)
-    ```bash
-    # WINDOWS 
-    pip install pillow
-
-    # LINUX
-    pip3 install pillow
-
-    # MACOS
-    pip3 install pillow
-    ```
-
 ## Guide
 
 ### Clone the repository
@@ -44,7 +19,7 @@ A general-use discord bot coded in discord.py
 git clone https://github.com/Majestic-dev/Tester69.git
 ```
 
-### Install requirements.txt
+### Install [requirements.txt](requirements.txt)
 ```bash
 pip install -r requirements.txt
 ```
