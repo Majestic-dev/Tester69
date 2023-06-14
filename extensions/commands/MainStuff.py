@@ -32,7 +32,7 @@ class MainStuff(commands.Cog):
     @app_commands.command(name="help", description="Get the basic help for commands")
     async def help(self, interaction: discord.Interaction):
         help = discord.Embed(
-            title="Tetser69's command list",
+            title="Tester69's command list",
             colour=discord.Colour.darker_gray(),
         )
 
@@ -200,7 +200,6 @@ class MainStuff(commands.Cog):
             value="`/disable_welcome_message`",
             inline=True,
         )
-
         await interaction.response.send_message(embed=servermanagement, ephemeral=True)
 
 
