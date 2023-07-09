@@ -6,20 +6,16 @@ A general-use discord bot coded in discord.py
 
 # Big shoutout to kaJob-dev on github (Jakob#2222 on discord) for guiding me on this project!
 
-# ENJOY YOUR SUMMER ❤️, THIS HAS BEEN THE BEST 5 MONTHS OF MY CODING JOURNEY! SEE YOU IN SEPTEMBER!
-
-
-## Project on hold until September ❤️, see you soon!
+# Project on hold until September ❤️, see you soon!
 
 # Installation
-## Guide
 
-### Clone the repository
+## Clone the repository
 ```bash
 git clone https://github.com/Majestic-dev/Tester69.git
 ```
 
-### Install [requirements.txt](requirements.txt)
+## Install [requirements.txt](requirements.txt)
 ```bash
 pip install -r requirements.txt
 ```
@@ -28,18 +24,27 @@ or
 python -m pip install -r requirements.txt
 ```
 
-### Running the bot through VSCode
+## Running the bot through VS Code
 
-Install Pylance and Python extensions on github, after you've done that you should be able to run the main.py file by clicking the "Run Python File" button in the top right corner of the screen
+### Launch VS Code Quick Open (Ctrl + P), paste the following command, and press enter.
+```bash
+ext install formulahendry.code-runner
+```
 
-### Running the bot through terminal
+or
 
-change your current directory to the cloned repository
+### Use the [Extension Marketplace](https://code.visualstudio.com/docs/editor/extension-marketplace) and search for 'code-runner'.
+
+### After you've installed the extension, run the [main.py](main.py) file by pressing the play button on the top right corner of VS Code.
+
+## Running the bot through terminal
+
+### change your current directory to the cloned repository
 ```bash
 cd Tester69
 ```
 
-run the file
+### run the file
 ```bash
 python main.py
 ```
@@ -98,8 +103,8 @@ This project is licensed under the Apache License - see the [LICENSE](LICENSE) f
 
 - [x] Add some customization to the moderation system (for example setting the muted role).
 - [x] Add a way to deposit/withdraw money into the bank.
+- [x] Make a custom cooldown handler for a few commands (hourly, daily, weekly and monthly).
 - [ ] Migrate from json to a more reliable database.
-- [ ] Make a custom cooldown handler for a few commands (hourly, daily, weekly and monthly).
 
 ## V1.3 Focused On Miscellaneous/Fun
 
