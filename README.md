@@ -24,20 +24,7 @@ or
 python -m pip install -r requirements.txt
 ```
 
-## Running the bot through VS Code
-
-### Launch VS Code Quick Open (Ctrl + P), paste the following command, and press enter.
-```bash
-ext install formulahendry.code-runner
-```
-
-or
-
-### Use the [Extension Marketplace](https://code.visualstudio.com/docs/editor/extension-marketplace) and search for 'code-runner'.
-
-### After you've installed the extension, run the [main.py](main.py) file by pressing the play button on the top right corner of VS Code.
-
-## Running the bot through terminal
+## Running the bot
 
 ### change your current directory to the cloned repository
 ```bash
