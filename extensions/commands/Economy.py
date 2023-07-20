@@ -1,4 +1,5 @@
 import random
+import time
 from datetime import datetime
 from typing import Optional
 
@@ -271,7 +272,7 @@ class Economy(commands.Cog):
     @app_commands.checks.cooldown(1, 15, key=lambda i: (i.user.id))
     @app_commands.describe(
         item="The item you want to sell",
-        amount="The amount of the item you want to sell (default 1)",
+        amount="The amount of the item you want to sell (defaults to 1)",
     )
     async def sell(self, interaction: discord.Interaction, item: str, amount: int = 1):
         user_data = DataManager.get_user_data(interaction.user.id)
@@ -383,11 +384,33 @@ class Economy(commands.Cog):
     @app_commands.command(
         name="hourly", description="Gain 1000 🪙 every time you use this command"
     )
-    @app_commands.checks.cooldown(1, 3600, key=lambda i: (i.user.id))
     async def hourly(self, interaction: discord.Interaction):
         user_data = DataManager.get_user_data(interaction.user.id)
+        cooldowns = DataManager.get_user_data(interaction.user.id)["cooldowns"]
+
+        if "hourly" not in cooldowns:
+            DataManager.add_cooldown(interaction.user.id, "hourly", 3600)
+
+        elif "hourly" in cooldowns:
+            startTime = datetime.strptime(cooldowns["hourly"], "%Y-%m-%dT%H:%M:%S.%f")
+            endTime = datetime.strptime(
+                datetime.utcnow().isoformat(), "%Y-%m-%dT%H:%M:%S.%f"
+            )
+            timeLeft = (startTime - endTime).total_seconds()
+
+            if str(cooldowns["hourly"]) > datetime.utcnow().isoformat():
+                return await interaction.response.send_message(
+                    embed=discord.Embed(
+                        description=f"<:white_cross:1096791282023669860> You already claimed your hourly coins, try again <t:{int(time.time() + timeLeft)}:R>",
+                        colour=discord.Colour.red(),
+                    )
+                )
+
+        if str(cooldowns["hourly"]) < datetime.utcnow().isoformat():
+            DataManager.remove_cooldown(interaction.user.id, "hourly")
+
         DataManager.edit_user_data(
-            interaction.user.id, "balance", user_data["balance"] + 1000
+            interaction.user.id, "balance", user_data["balance"] + 25000
         )
 
         await interaction.response.send_message(
@@ -400,11 +423,33 @@ class Economy(commands.Cog):
     @app_commands.command(
         name="daily", description="Gain 10000 🪙 every time you use this command"
     )
-    @app_commands.checks.cooldown(1, 86400, key=lambda i: (i.user.id))
     async def daily(self, interaction: discord.Interaction):
         user_data = DataManager.get_user_data(interaction.user.id)
+        cooldowns = DataManager.get_user_data(interaction.user.id)["cooldowns"]
+
+        if "daily" not in cooldowns:
+            DataManager.add_cooldown(interaction.user.id, "daily", 86400)
+
+        elif "daily" in cooldowns:
+            startTime = datetime.strptime(cooldowns["daily"], "%Y-%m-%dT%H:%M:%S.%f")
+            endTime = datetime.strptime(
+                datetime.utcnow().isoformat(), "%Y-%m-%dT%H:%M:%S.%f"
+            )
+            timeLeft = (startTime - endTime).total_seconds()
+
+            if str(cooldowns["daily"]) > datetime.utcnow().isoformat():
+                return await interaction.response.send_message(
+                    embed=discord.Embed(
+                        description=f"<:white_cross:1096791282023669860> You already claimed your daily coins, try again <t:{int(time.time() + timeLeft)}:R>",
+                        colour=discord.Colour.red(),
+                    )
+                )
+
+        if str(cooldowns["daily"]) < datetime.utcnow().isoformat():
+            DataManager.remove_cooldown(interaction.user.id, "daily")
+
         DataManager.edit_user_data(
-            interaction.user.id, "balance", user_data["balance"] + 10000
+            interaction.user.id, "balance", user_data["balance"] + 25000
         )
 
         await interaction.response.send_message(
@@ -417,9 +462,31 @@ class Economy(commands.Cog):
     @app_commands.command(
         name="weekly", description="Gain 25000 🪙 every time you use the command"
     )
-    @app_commands.checks.cooldown(1, 604800, key=lambda i: (i.user.id))
     async def weekly(self, interaction: discord.Interaction):
         user_data = DataManager.get_user_data(interaction.user.id)
+        cooldowns = DataManager.get_user_data(interaction.user.id)["cooldowns"]
+
+        if "weekly" not in cooldowns:
+            DataManager.add_cooldown(interaction.user.id, "weekly", 604800)
+
+        elif "weekly" in cooldowns:
+            startTime = datetime.strptime(cooldowns["weekly"], "%Y-%m-%dT%H:%M:%S.%f")
+            endTime = datetime.strptime(
+                datetime.utcnow().isoformat(), "%Y-%m-%dT%H:%M:%S.%f"
+            )
+            timeLeft = (startTime - endTime).total_seconds()
+
+            if str(cooldowns["weekly"]) > datetime.utcnow().isoformat():
+                return await interaction.response.send_message(
+                    embed=discord.Embed(
+                        description=f"<:white_cross:1096791282023669860> You already claimed your weekly coins, try again <t:{int(time.time() + timeLeft)}:R>",
+                        colour=discord.Colour.red(),
+                    )
+                )
+
+        if str(cooldowns["weekly"]) < datetime.utcnow().isoformat():
+            DataManager.remove_cooldown(interaction.user.id, "weekly")
+
         DataManager.edit_user_data(
             interaction.user.id, "balance", user_data["balance"] + 25000
         )
@@ -434,9 +501,32 @@ class Economy(commands.Cog):
     @app_commands.command(
         name="monthly", description="Gain 50000 🪙 every time you use the command"
     )
-    @app_commands.checks.cooldown(1, 2592000, key=lambda i: (i.user.id))
     async def monthly(self, interaction: discord.Interaction):
         user_data = DataManager.get_user_data(interaction.user.id)
+        cooldowns = DataManager.get_user_data(interaction.user.id)["cooldowns"]
+
+        if "monthly" not in cooldowns:
+            DataManager.add_cooldown(interaction.user.id, "monthly", 2592000)
+
+        elif "monthly" in cooldowns:
+            startTime = datetime.strptime(cooldowns["monthly"], "%Y-%m-%dT%H:%M:%S.%f")
+            endTime = datetime.strptime(
+                datetime.utcnow().isoformat(), "%Y-%m-%dT%H:%M:%S.%f"
+            )
+            print()
+            timeLeft = (startTime - endTime).total_seconds()
+
+            if str(cooldowns["monthly"]) > datetime.utcnow().isoformat():
+                return await interaction.response.send_message(
+                    embed=discord.Embed(
+                        description=f"<:white_cross:1096791282023669860> You already claimed your monthly coins, try again <t:{int(time.time() + timeLeft)}:R>",
+                        colour=discord.Colour.red(),
+                    )
+                )
+
+        if str(cooldowns["monthly"]) < datetime.utcnow().isoformat():
+            DataManager.remove_cooldown(interaction.user.id, "monthly")
+
         DataManager.edit_user_data(
             interaction.user.id, "balance", user_data["balance"] + 50000
         )
@@ -695,7 +785,7 @@ class Economy(commands.Cog):
     @app_commands.checks.cooldown(1, 15, key=lambda i: (i.user.id))
     @app_commands.describe(
         item="The item you want to buy",
-        amount="The amount of the item you want to buy (default 1)",
+        amount="The amount of the item you want to buy (defaults to 1)",
     )
     async def buy_item(
         self, interaction: discord.Interaction, item: str, amount: int = 1
