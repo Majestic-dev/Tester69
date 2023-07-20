@@ -167,6 +167,79 @@ class OwnerOnly(commands.Cog):
         )
         return await self.bot.tree.sync()
 
+    @commands.command(name="skipcooldown", description="Skip the cooldown of a command")
+    @commands.is_owner()
+    async def skipcooldown(
+        self, ctx, command: str, member: Optional[discord.Member] = None
+    ):
+        if member == None:
+            if command == "all":
+                DataManager.remove_all_cooldowns(ctx.author.id)
+                return await ctx.reply(
+                    embed=discord.Embed(
+                        description=(
+                            f"<:white_checkmark:1096793014287995061> Skipped all cooldowns for {ctx.author.name}"
+                        ),
+                        colour=discord.Colour.green(),
+                    )
+                )
+
+            cooldowns = DataManager.get_user_data(ctx.author.id)["cooldowns"]
+            if command not in cooldowns:
+                return await ctx.reply(
+                    embed=discord.Embed(
+                        description=(
+                            f"<:error:109679301358805760> {command} command is not on cooldown or does not exist"
+                        ),
+                        colour=discord.Colour.red(),
+                    )
+                )
+
+            DataManager.remove_cooldown(ctx.author.id, command)
+
+            return await ctx.reply(
+                embed=discord.Embed(
+                    description=(
+                        f"<:white_checkmark:1096793014287995061> Skipped cooldown for {command} command"
+                    ),
+                    colour=discord.Colour.green(),
+                )
+            )
+
+        else:
+            if command == "all":
+                DataManager.remove_all_cooldowns(member.id)
+                return await ctx.reply(
+                    embed=discord.Embed(
+                        description=(
+                            f"<:white_checkmark:1096793014287995061> Skipped all cooldowns for {member.name}"
+                        ),
+                        colour=discord.Colour.green(),
+                    )
+                )
+
+            cooldowns = DataManager.get_user_data(member.id)["cooldowns"]
+            if command not in cooldowns:
+                return await ctx.reply(
+                    embed=discord.Embed(
+                        description=(
+                            f"<:error:109679301358805760> {command} command is not on cooldown or does not exist"
+                        ),
+                        colour=discord.Colour.red(),
+                    )
+                )
+
+            DataManager.remove_cooldown(member.id, command)
+
+            return await ctx.reply(
+                embed=discord.Embed(
+                    description=(
+                        f"<:white_checkmark:1096793014287995061> Skipped cooldown for {command} command for {member.name}"
+                    ),
+                    colour=discord.Colour.green(),
+                )
+            )
+
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(OwnerOnly(bot))
