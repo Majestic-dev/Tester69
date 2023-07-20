@@ -116,6 +116,15 @@ class Moderation(commands.Cog):
                     colour=discord.Colour.green(),
                 )
             )
+
+            self.bot.dispatch(
+                "mute",
+                muter=interaction.user,
+                muted=member,
+                duration=duration,
+                reason=reason,
+            )
+
             try:
                 await member.create_dm()
                 await member.dm_channel.send(
@@ -163,12 +172,20 @@ class Moderation(commands.Cog):
             for role in saved_roles:
                 saved_roles1.append(interaction.guild.get_role(role))
             await member.edit(roles=saved_roles1)
+
+            self.bot.dispatch(
+                "unmute",
+                unmuter=interaction.user,
+                unmuted=member,
+            )
+
             await interaction.response.send_message(
                 embed=discord.Embed(
                     description=f"Successfully unmuted {member.mention}",
                     colour=discord.Colour.green(),
                 )
             )
+
         else:
             await interaction.response.send_message(
                 embed=discord.Embed(
@@ -224,6 +241,13 @@ class Moderation(commands.Cog):
                         description=f"<:white_checkmark:1096793014287995061> Kicked {member.mention}",
                         colour=discord.Colour.green(),
                     )
+                )
+
+                self.bot.dispatch(
+                    "kick",
+                    kicker=interaction.user,
+                    kicked=member,
+                    reason=reason,
                 )
 
                 try:
@@ -319,6 +343,13 @@ class Moderation(commands.Cog):
                     )
                 )
 
+                self.bot.dispatch(
+                    "ban",
+                    banner=interaction.user,
+                    banned=member,
+                    reason=reason,
+                )
+
                 try:
                     await member.create_dm()
                     await member.dm_channel.send(
@@ -359,7 +390,6 @@ class Moderation(commands.Cog):
                     colour=discord.Colour.green(),
                 )
             )
-
             return await interaction.response.send_message(
                 embed=discord.Embed(
                     description=f"<:white_checkmark:1096793014287995061> unbanned {member.mention}",

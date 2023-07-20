@@ -110,21 +110,119 @@ class Logging(commands.GroupCog):
             leave.timestamp = datetime.now()
             await logs_channel.send(embed=leave)
 
-    # Member Ban Listener
+    # Warning Listener
     @commands.Cog.listener()
-    async def on_member_ban(self, guild, user):
+    async def on_warning(
+        self,
+        guild: discord.Guild,
+        warned: discord.Member,
+        warner: discord.Member,
+        reason: str,
+    ):
         guild_data = DataManager.get_guild_data(guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
 
         if logs_channel == None:
             return
 
-        if user.id == 705435835306213418:
-            guild.unban(user)
+        warning = discord.Embed(
+            title="Member Warned",
+            description=f"{warned.mention} Has been warned by {warner.mention}",
+            colour=discord.Colour.red(),
+        )
+        warning.add_field(name="Reason", value=f"```{reason}```")
+        warning.set_author(icon_url=warned.display_avatar, name=warned)
+        warning.set_footer(text=f"ID: {warned.id}")
+        warning.timestamp = datetime.now()
+        await logs_channel.send(embed=warning)
+
+    # Member Mute Listener
+    @commands.Cog.listener()
+    async def on_mute(
+        self,
+        guild: discord.Guild,
+        muted: discord.Member,
+        muter: discord.Member,
+        reason: str,
+    ):
+        guild_data = DataManager.get_guild_data(guild.id)
+        logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
+
+        if logs_channel == None:
+            return
+
+        mute = discord.Embed(
+            title="Member Muted",
+            description=f"{muted.mention} Has been muted by {muter.mention}",
+            colour=discord.Colour.red(),
+        )
+        mute.add_field(name="Reason", value=f"```{reason}```")
+        mute.set_author(icon_url=muted.display_avatar, name=muted)
+        mute.set_footer(text=f"ID: {muted.id}")
+        mute.timestamp = datetime.now()
+        await logs_channel.send(embed=mute)
+
+    # Member Unmute Listener
+    @commands.Cog.listener()
+    async def on_unmute(
+        self,
+        guild: discord.Guild,
+        unmuted: discord.Member,
+        unmuter: discord.Member,
+        reason: str,
+    ):
+        guild_data = DataManager.get_guild_data(guild.id)
+        logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
+
+        if logs_channel == None:
+            return
+
+        unmute = discord.Embed(
+            title="Member Unmuted",
+            description=f"{unmuted.mention} Has been unmuted by {unmuter.mention}",
+            colour=discord.Colour.green(),
+        )
+        unmute.add_field(name="Reason", value=f"```{reason}```")
+        unmute.set_author(icon_url=unmuted.display_avatar, name=unmuted)
+        unmute.set_footer(text=f"ID: {unmuted.id}")
+        unmute.timestamp = datetime.now()
+        await logs_channel.send(embed=unmute)
+
+    # Member Kick Listener
+    @commands.Cog.listener()
+    async def on_kick(
+        self, kicker: discord.User, guild: discord.Guild, user: discord.User
+    ):
+        guild_data = DataManager.get_guild_data(guild.id)
+        logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
+
+        if logs_channel == None:
+            return
+
+        kick = discord.Embed(
+            title="Member Kicked",
+            description=f"{user.mention} Has been kicked from the server",
+            colour=discord.Colour.red(),
+        )
+        kick.set_author(icon_url=user.display_avatar, name=user)
+        kick.set_footer(text=f"ID: {user.id}")
+        kick.timestamp = datetime.now()
+        await logs_channel.send(embed=kick)
+
+    # Member Ban Listener
+    @commands.Cog.listener()
+    async def on_ban(
+        self, banner: discord.User, guild: discord.Guild, user: discord.User
+    ):
+        guild_data = DataManager.get_guild_data(guild.id)
+        logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
+
+        if logs_channel == None:
+            return
 
         ban = discord.Embed(
             title="Member Banned",
-            description=f"{user.mention} Has been banned",
+            description=f"{user.mention} Has been banned from the server",
             colour=discord.Colour.red(),
         )
         ban.set_author(icon_url=user.display_avatar, name=user)
@@ -348,18 +446,13 @@ class Logging(commands.GroupCog):
             return
 
         guild_data = DataManager.get_guild_data(message.guild.id)
-        logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
         words_in_blacklist = guild_data["blacklisted_words"]
-
-        if logs_channel == None:
-            return
+        content = message.content.lower()
 
         if message.author.id in guild_data["whitelist"] or any(
             role.id in guild_data["whitelist"] for role in message.author.roles
         ):
             return
-
-        content = message.content.lower()
 
         if any(word in words_in_blacklist for word in content.split(" ")):
             await message.delete()
@@ -372,6 +465,8 @@ class Logging(commands.GroupCog):
 
         guild_data = DataManager.get_guild_data(before.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
+        words_in_blacklist = guild_data["blacklisted_words"]
+        content = after.content.lower()
 
         if before.author.bot and before.channel != logs_channel:
             return
@@ -381,6 +476,14 @@ class Logging(commands.GroupCog):
 
         if logs_channel == None:
             return
+
+        if before.author.id in guild_data["whitelist"] or any(
+            role.id in guild_data["whitelist"] for role in before.author.roles
+        ):
+            return
+
+        if any(word in words_in_blacklist for word in content.split(" ")):
+            return await after.delete()
 
         edit = discord.Embed(
             description=f"**Message Edited in {before.channel.mention}** [Jump to Message]({before.jump_url})",
