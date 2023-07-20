@@ -1,6 +1,7 @@
 \venv
 \.venv
 \data
+\test
 __pycache__
 fonts
 test.py
