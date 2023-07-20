@@ -1,3 +1,4 @@
+import datetime
 import json
 import os
 import uuid
@@ -69,6 +70,7 @@ class DataManager:
                 "whitelist": [],
                 "welcome_message": None,
                 "warned_users": {},
+                "giveaways": {},
             }
 
         cls.save("guilds")
@@ -89,23 +91,11 @@ class DataManager:
         cls.save("guilds")
 
     @classmethod
-    def edit_guild_user_data(
-        cls, guild_id: int, user_id: int, key: str, value: Any
-    ) -> None:
-        if str(guild_id) not in cls.__data["guilds"]:
-            cls.add_guild_data(guild_id)
-
-        if str(user_id) not in cls.__data["guilds"][str(guild_id)]["users"]:
-            cls.__data["guilds"][str(guild_id)]["users"].append(str(user_id))
-
-        cls.__data["guilds"][str(guild_id)][key] = value
-        cls.save("guilds")
-
-    @classmethod
     def add_user_data(cls, user_id: int) -> None:
         if str(user_id) not in cls.__data["users"]:
             cls.__data["users"][str(user_id)] = {
                 "inventory": {},
+                "cooldowns": {},
                 "balance": 0,
                 "bank": 0,
             }
@@ -144,6 +134,47 @@ class DataManager:
         if cls.__data["users"][str(user_id)]["inventory"][item] <= 0:
             del cls.__data["users"][str(user_id)]["inventory"][item]
 
+        cls.save("users")
+
+    @classmethod
+    def add_cooldown(
+        cls, user_id: str, command_name: str, cooldown_seconds: int
+    ) -> None:
+        if str(user_id) not in cls.__data["users"]:
+            cls.add_user_data(user_id)
+
+        if "cooldowns" not in cls.__data["users"][str(user_id)]:
+            cls.__data["users"][str(user_id)]["cooldowns"] = {}
+
+        end_date = datetime.datetime.utcnow() + datetime.timedelta(
+            seconds=cooldown_seconds
+        )
+        cls.__data["users"][str(user_id)]["cooldowns"][
+            command_name
+        ] = end_date.isoformat()
+        cls.save("users")
+
+    @classmethod
+    def remove_cooldown(cls, user_id: str, command_name: str) -> None:
+        if str(user_id) not in cls.__data["users"]:
+            cls.add_user_data(user_id)
+
+        if "cooldowns" not in cls.__data["users"][str(user_id)]:
+            cls.__data["users"][str(user_id)]["cooldowns"] = {}
+
+        if command_name in cls.__data["users"][str(user_id)]["cooldowns"]:
+            del cls.__data["users"][str(user_id)]["cooldowns"][command_name]
+            cls.save("users")
+
+    @classmethod
+    def remove_all_cooldowns(cls, user_id: str) -> None:
+        if str(user_id) not in cls.__data["users"]:
+            cls.add_user_data(user_id)
+
+        if "cooldowns" not in cls.__data["users"][str(user_id)]:
+            cls.__data["users"][str(user_id)]["cooldowns"] = {}
+
+        cls.__data["users"][str(user_id)]["cooldowns"] = {}
         cls.save("users")
 
     @classmethod
