@@ -61,21 +61,13 @@ class WarningSystem(commands.Cog):
             f"{reason} - Warned by {interaction.user.name}#{interaction.user.discriminator}",
         )
 
-        if logs_channel != None:
-            embed = discord.Embed(
-                description=f"{user.mention} has been warned for: ```{reason}```",
-                colour=discord.Colour.red(),
-            )
-            embed.add_field(
-                name="Warned by", value=f"{interaction.user.mention}", inline=False
-            )
-            if user.avatar == None:
-                embed.set_author(name=user.name, icon_url=user.default.display_avatar)
-            else:
-                embed.set_author(name=user.name, icon_url=user.avatar)
-            embed.timestamp = datetime.utcnow()
+        self.bot.dispatch(
+            "warning",
+            warned=user,
+            warner=interaction.user,
+            reason=reason,
+        )
 
-            await logs_channel.send(embed=embed)
         return await interaction.response.send_message(
             embed=discord.Embed(
                 description=f"<:white_checkmark:1096793014287995061> {user.name} has been warned for: ```{reason}```",
