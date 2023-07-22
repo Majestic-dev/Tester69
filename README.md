@@ -4,7 +4,7 @@
 
 A general-use discord bot coded in discord.py
 
-# Big shoutout to kaJob-dev on github (Jakob#2222 on discord) for guiding me on this project!
+# Big shoutout to kaJob-dev on github (kajob. on discord) for guiding me on this project!
 
 # Project on hold until September ❤️, see you soon!
 
@@ -70,15 +70,18 @@ This project is licensed under the Apache License - see the [LICENSE](LICENSE) f
 
     - Moderation System
         * Improved muting and unmuting
+        * Use the dispatch event for certain actions
 
     - Logging System
         * Log deletion protection
+        * Log moderation actions inside Loggingsystem.py using dispatch events instead of inside the moderation commands
 
     - Miscellaneous
         * Many miscellaneous commands to search random stuff, get random images, gifs, etc.
 
     - Commands
         * Cooldowns for most commands using discord's built in cooldown system
+        * Cooldowns using the new cooldown handler for longer duration commands (hourly, daily, weekly, monthly)
 
     - Economy
         * Updated all the economy items and a command to view the descriptions of items
