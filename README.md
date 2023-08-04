@@ -6,8 +6,6 @@ A general-use discord bot coded in discord.py
 
 # Big shoutout to kaJob-dev on github (kajob. on discord) for guiding me on this project!
 
-# Project on hold until September ❤️, see you soon!
-
 # Installation
 
 ## Clone the repository
@@ -86,6 +84,7 @@ This project is licensed under the Apache License - see the [LICENSE](LICENSE) f
     - Economy
         * Updated all the economy items and a command to view the descriptions of items
         * Banking system and a global leaderboard
+        * Archived all gambling commands to ensure a safe future for Tester69 on discord, and blackjack being broken anyways
 
 # TODO
 
