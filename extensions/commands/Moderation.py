@@ -345,6 +345,7 @@ class Moderation(commands.Cog):
 
                 self.bot.dispatch(
                     "ban",
+                    guild=interaction.guild,
                     banner=interaction.user,
                     banned=member,
                     reason=reason,
