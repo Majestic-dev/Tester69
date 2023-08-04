@@ -25,7 +25,7 @@ class WarningSystem(commands.Cog):
         self, interaction: discord.Interaction, user: discord.User, *, reason: str
     ):
         guild_data = DataManager.get_guild_data(interaction.guild.id)
-        logs_channel = logs_channel = self.bot.get_channel(
+        logs_channel = self.bot.get_channel(
             guild_data["logs_channel_id"]
         )
 
@@ -141,7 +141,7 @@ class WarningSystem(commands.Cog):
                     inline=False,
                 )
         if member.avatar is None:
-            e.set_author(name=member.name, icon_url=member.default.display_avatar.url)
+            e.set_author(name=member.name, icon_url=member.display_avatar.url)
         else:
             e.set_author(name=member.name, icon_url=member.avatar.url)
         await interaction.response.send_message(embed=e)
