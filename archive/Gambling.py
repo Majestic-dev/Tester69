@@ -183,16 +183,14 @@ class Gambling(commands.Cog):
                 embed=e,
                 view=None,
             )
-
             DataManager.edit_user_data(
                 interaction.user.id, "balance", user_data["balance"] + int(bet * 1.5)
             )
-
             return
 
         e = discord.Embed(
             title="Blackjack",
-            description=f"Use the buttons below to play.\nBet: {bet}",
+            description=f"Use the buttons below to play.\nBet: {bet} 🪙",
             colour=discord.Colour.blurple(),
         )
 
@@ -241,11 +239,9 @@ class Gambling(commands.Cog):
                     await interaction.edit_original_response(
                         content=None, embed=e, view=None
                     )
-
                     DataManager.edit_user_data(
                         interaction.user.id, "balance", user_data["balance"] - bet
                     )
-
                     return
 
                 if dealer_hand_value > 21:
@@ -268,11 +264,9 @@ class Gambling(commands.Cog):
                     await interaction.edit_original_response(
                         content=None, embed=e, view=None
                     )
-
                     DataManager.edit_user_data(
                         interaction.user.id, "balance", user_data["balance"] + bet
                     )
-
                     return
 
                 if player_hand_value > dealer_hand_value:
@@ -295,11 +289,9 @@ class Gambling(commands.Cog):
                     await interaction.edit_original_response(
                         content=None, embed=e, view=None
                     )
-
                     DataManager.edit_user_data(
                         interaction.user.id, "balance", user_data["balance"] + bet
                     )
-
                     return
 
                 if player_hand_value == dealer_hand_value:
@@ -322,7 +314,6 @@ class Gambling(commands.Cog):
                     await interaction.edit_original_response(
                         content=None, embed=e, view=None
                     )
-
                     return
 
                 if player_hand_value < dealer_hand_value:
@@ -345,11 +336,9 @@ class Gambling(commands.Cog):
                     await interaction.edit_original_response(
                         content=None, embed=e, view=None
                     )
-
                     DataManager.edit_user_data(
                         interaction.user.id, "balance", user_data["balance"] - bet
                     )
-
                     return
 
             elif view.choice == "forfeit":
@@ -372,11 +361,9 @@ class Gambling(commands.Cog):
                 await interaction.edit_original_response(
                     content=None, embed=e, view=None
                 )
-
                 DataManager.edit_user_data(
                     interaction.user.id, "balance", int(user_data["balance"] - bet / 2)
                 )
-
                 return
 
             elif view.choice == "ddown":
@@ -411,11 +398,9 @@ class Gambling(commands.Cog):
                     await interaction.edit_original_response(
                         content=None, embed=e, view=None
                     )
-
                     DataManager.edit_user_data(
                         interaction.user.id, "balance", user_data["balance"] - bet
                     )
-
                     return
 
                 if dealer_hand_value > 21:
@@ -438,11 +423,9 @@ class Gambling(commands.Cog):
                     await interaction.edit_original_response(
                         content=None, embed=e, view=None
                     )
-
                     DataManager.edit_user_data(
                         interaction.user.id, "balance", user_data["balance"] + bet
                     )
-
                     return
 
                 if player_hand_value > dealer_hand_value:
@@ -465,11 +448,9 @@ class Gambling(commands.Cog):
                     await interaction.edit_original_response(
                         content=None, embed=e, view=None
                     )
-
                     DataManager.edit_user_data(
                         interaction.user.id, "balance", user_data["balance"] + bet
                     )
-
                     return
 
                 if player_hand_value == dealer_hand_value:
@@ -492,7 +473,6 @@ class Gambling(commands.Cog):
                     await interaction.edit_original_response(
                         content=None, embed=e, view=None
                     )
-
                     return
 
                 if player_hand_value < dealer_hand_value:
@@ -515,11 +495,9 @@ class Gambling(commands.Cog):
                     await interaction.edit_original_response(
                         content=None, embed=e, view=None
                     )
-
                     DataManager.edit_user_data(
                         interaction.user.id, "balance", user_data["balance"] - bet
                     )
-
                     return
 
             elif view.choice == "hit":
@@ -549,11 +527,9 @@ class Gambling(commands.Cog):
                     await interaction.edit_original_response(
                         content=None, embed=e, view=None
                     )
-
                     DataManager.edit_user_data(
                         interaction.user.id, "balance", user_data["balance"] - bet
                     )
-
                     return
 
                 e = discord.Embed(
@@ -577,6 +553,8 @@ class Gambling(commands.Cog):
                 await interaction.edit_original_response(
                     content=None, embed=e, view=view
                 )
+            else:
+                print("xd")
 
     @app_commands.command(
         name="coinflip", description="Bet your 🪙 in a game of coinflip"
@@ -692,7 +670,7 @@ class Gambling(commands.Cog):
                 embed=discord.Embed(
                     title="Bet Results",
                     description=(
-                        f'Congratulations! You won {int(winnings)} and your new balance is {user_data["balance"]} 🪙'
+                        f'Congratulations! You won {int(winnings)} 🪙 and your new balance is {user_data["balance"]} 🪙'
                     ),
                     colour=discord.Colour.green(),
                 )
