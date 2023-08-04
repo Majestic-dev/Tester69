@@ -1,6 +1,7 @@
 import json
 import os
 import random
+import time
 from datetime import datetime
 from typing import Optional
 
@@ -160,7 +161,7 @@ class Misc(commands.Cog):
     )
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.user.id))
     @app_commands.describe(
-        search="The keyword you want to search the definition from Wikipedia by"
+        search="The keyword you want to search the definition from Wikipedia"
     )
     async def wikipedia(self, interaction: discord.Interaction, *, search: str):
         try:
@@ -192,7 +193,7 @@ class Misc(commands.Cog):
         name="urban", description="Get a definition from Urban Dictionary"
     )
     @app_commands.describe(
-        search="The keyword you want to search the definition from The Urban Dictionary by"
+        search="The keyword you want to search the definition from The Urban Dictionary"
     )
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.user.id))
     async def urban(self, interaction: discord.Interaction, *, search: str = None):
@@ -273,17 +274,19 @@ class Misc(commands.Cog):
             data = json.loads(await response.text())
             embed = discord.Embed(
                 title=f"COVID-19 Statistics for {search}",
-                colour=discord.Colour.from_rgb(29, 29, 29),
+                description=f"* **Last Updated:** {discord.utils.format_dt(datetime.fromtimestamp(data['updated'] / 1000), style='F')}\n"
+                f"* **Cases:** {data['cases']}\n"
+                f"* **Deaths:** {data['deaths']}\n"
+                f"* **Recovered:** {data['recovered']}\n"
+                f"* **Active:** {data['active']}\n"
+                f"* **Critical:** {data['critical']}\n"
+                f"* **Cases Today:** {data['todayCases']}\n"
+                f"* **Deaths Today:** {data['todayDeaths']}\n"
+                f"* **Tests:** {data['tests']}\n"
+                f"* **Population:** {data['population']}",
+                colour=discord.Colour.dark_red(),
             )
-            embed.add_field(name="Cases", value=data["cases"], inline=True)
-            embed.add_field(name="Deaths", value=data["deaths"], inline=True)
-            embed.add_field(name="Recovered", value=data["recovered"], inline=True)
-            embed.add_field(name="Active", value=data["active"], inline=True)
-            embed.add_field(name="Critical", value=data["critical"], inline=True)
-            embed.add_field(name="Cases Today", value=data["todayCases"], inline=True)
-            embed.add_field(name="Deaths Today", value=data["todayDeaths"], inline=True)
-            embed.add_field(name="Tests", value=data["tests"], inline=True)
-            embed.add_field(name="Population", value=data["population"], inline=True)
+
             embed.set_footer(
                 icon_url=interaction.user.avatar,
                 text=f"Requested by - {interaction.user} | Powered by NovelCOVID API ❤️",
@@ -315,30 +318,18 @@ class Misc(commands.Cog):
             data = json.loads(await response.text())
             embed = discord.Embed(
                 title=f"Weather for {search}",
-                colour=discord.Colour.from_rgb(29, 29, 29),
+                description=f"* **Last Updated:** {discord.utils.format_dt(datetime.fromtimestamp(data['dt']), style='F')}\n"
+                f"* **Sunrise:** {discord.utils.format_dt(datetime.fromtimestamp(data['sys']['sunrise']), style='T')}\n"
+                f"* **Sunset:** {discord.utils.format_dt(datetime.fromtimestamp(data['sys']['sunset']), style='T')}\n"
+                f"* **Description:** {data['weather'][0]['description']}\n"
+                f"* **Temperature:** {round(data['main']['temp'] - 273.15)}°C\n"
+                f"* **Feels Like:** {round(data['main']['feels_like'] - 273.15)}°C\n"
+                f"* **Humidity:** {data['main']['humidity']}%\n"
+                f"* **Wind Speed:** {int(data['wind']['speed'] * 1.60934)} km/h ({data['wind']['speed']} mph)\n"
+                f"* **Cloudiness:** {data['clouds']['all']}%",
+                colour=discord.Colour.blurple(),
             )
-            embed.add_field(
-                name="Description", value=data["weather"][0]["description"], inline=True
-            )
-            embed.add_field(
-                name="Temperature",
-                value=f"{round(data['main']['temp'] - 273.15)}°C",
-                inline=True,
-            )
-            embed.add_field(
-                name="Feels Like",
-                value=f"{round(data['main']['feels_like'] - 273.15)}°C",
-                inline=True,
-            )
-            embed.add_field(
-                name="Humidity", value=f"{data['main']['humidity']}%", inline=True
-            )
-            embed.add_field(
-                name="Wind Speed", value=f"{data['wind']['speed']}mph", inline=True
-            )
-            embed.add_field(
-                name="Cloudiness", value=f"{data['clouds']['all']}%", inline=True
-            )
+
             embed.set_footer(
                 icon_url=interaction.user.avatar,
                 text=f"Requested by - {interaction.user} | Powered by OpenWeatherMap API ❤️",
@@ -377,8 +368,9 @@ class Misc(commands.Cog):
             data = json.loads(await response.text())
             embed = discord.Embed(
                 title=f"Weather Forecast for {search}",
-                colour=discord.Colour.from_rgb(29, 29, 29),
+                colour=discord.Colour.from_rgb(173, 216, 230),
             )
+
             embed.set_footer(
                 icon_url=interaction.user.avatar,
                 text=f"Requested by - {interaction.user} | Powered by OpenWeatherMap API ❤️",
@@ -413,13 +405,134 @@ class Misc(commands.Cog):
         end: int,
     ):
         await interaction.response.defer()
-        i = start
-        while i <= end:
+        while start <= end:
             with open(f"{interaction.user.id}.txt", "a") as f:
-                f.write(f"{i}\n")
-                i += 1
+                f.write(f"{start}\n")
+                start += 1
         await interaction.followup.send(file=discord.File(f"{interaction.user.id}.txt"))
         os.remove(f"{interaction.user.id}.txt")
+
+    @app_commands.command(
+        name="transcript", description="Get a transcript of a channel"
+    )
+    @app_commands.guild_only()
+    @app_commands.default_permissions(administrator=True)
+    @app_commands.checks.cooldown(1, 10, key=lambda i: (i.user.id))
+    @app_commands.describe(channel="The channel you want to get the transcript of")
+    async def transcript(self, interaction: discord.Interaction, channel: discord.TextChannel):
+        await interaction.response.defer()
+        messagelist = []
+
+        async for message in channel.history(limit=None):
+            messagelist.append(message)
+
+        for message in reversed(messagelist):
+            with open(f"{channel.id}.txt", "a", encoding="utf-8") as f:
+                if message.embeds:
+                    f.write(f"\n{message.author} EMBED\n")
+                    if message.embeds[0].title:
+                        f.write(f"TITLE - {message.embeds[0].title}\n")
+                    if message.embeds[0].description:
+                        f.write(f"DESCRIPTION - {message.embeds[0].description}\n")
+                    if len(message.embeds[0].fields) > 0:
+                        for field in message.embeds[0].fields:
+                            f.write(f"FIELD - {field.name} - {field.value}\n")
+                    if message.embeds[0].footer:
+                        f.write(f"FOOTER - {message.embeds[0].footer.text}\n")
+                    if message.embeds[0].image:
+                        f.write(f"IMAGE - {message.embeds[0].image.url}\n")
+                    if message.embeds[0].thumbnail:
+                        f.write(f"THUMBNAIL - {message.embeds[0].thumbnail.url}\n")
+                    if message.embeds[0].author:
+                        f.write(f"AUTHOR - {message.embeds[0].author.name}\n")
+                    if message.embeds[0].url:
+                        f.write(f"EMBED URL LINK - {message.embeds[0].url}\n")
+                    f.write(f"MESSAGE LINK - {message.jump_url}\n\n")
+                    continue
+                if message.attachments:
+                    f.write(f"\n{message.author} ATTACHMENT\n")
+                    f.write(f"ATTACHMENT URL - {message.attachments[0].url}\n")
+                    f.write(f"MESSAGE LINK - {message.jump_url}\n\n")
+                    continue
+                f.write(f"{message.author} - {message.content} - {message.jump_url}\n")
+        await interaction.followup.send(file=discord.File(f"{channel.id}.txt"))
+        os.remove(f"{channel.id}.txt")
+
+    @app_commands.command(
+        name="report", description="Report a bug or issue with the bot"
+    )
+    @app_commands.choices(
+        choices=[
+            app_commands.Choice(name="Report a bug", value="bug"),
+            app_commands.Choice(name="Report a suggestion", value="suggestion"),
+            app_commands.Choice(name="Report a spelling error", value="typo"),
+            app_commands.Choice(name="Report abuse", value="abuse"),
+            app_commands.Choice(name="Report something else", value="other"),
+        ]
+    )
+    async def report(
+        self,
+        interaction: discord.Interaction,
+        choices: app_commands.Choice[str],
+        description: str,
+    ):
+        user_data = DataManager.get_user_data(interaction.user.id)
+        cooldowns = DataManager.get_user_data(interaction.user.id)["cooldowns"]
+
+        if len(description) < 100:
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    description="<:white_cross:1096791282023669860> Your report description can't be shorter than 100 characters, please try to be more descriptive",
+                    colour=discord.Colour.red(),
+                )
+            )
+
+        if choices.value == "bug":
+            choices = "Bug Report"
+        elif choices.value == "suggestion":
+            choices = "Suggestion"
+        elif choices.value == "typo":
+            choices = "Typo Report"
+        elif choices.value == "abuse":
+            choices = "Abuse Report"
+        elif choices.value == "other":
+            choices = "Other Report"
+
+        if "report" not in cooldowns:
+            DataManager.add_cooldown(interaction.user.id, "report", 86400)
+
+        elif "report" in cooldowns:
+            startTime = datetime.strptime(cooldowns["report"], "%Y-%m-%dT%H:%M:%S.%f")
+            endTime = datetime.strptime(
+                datetime.utcnow().isoformat(), "%Y-%m-%dT%H:%M:%S.%f"
+            )
+            timeLeft = (startTime - endTime).total_seconds()
+
+            if str(cooldowns["report"]) > datetime.utcnow().isoformat():
+                return await interaction.response.send_message(
+                    embed=discord.Embed(
+                        description=f"<:white_cross:1096791282023669860> You already sent a report in the last 24 hours, try again <t:{int(time.time() + timeLeft)}:R>",
+                        colour=discord.Colour.red(),
+                    )
+                )
+
+        if str(cooldowns["report"]) < datetime.utcnow().isoformat():
+            DataManager.remove_cooldown(interaction.user.id, "report")
+
+        await self.bot.get_user(self.bot.owner_id).send(
+            embed=discord.Embed(
+                title=f"New {choices} report from {interaction.user}",
+                description=description,
+                colour=discord.Colour.green(),
+            )
+        )
+
+        return await interaction.response.send_message(
+            embed=discord.Embed(
+                description=f"<:white_checkmark:1096793014287995061> Your {choices} report has been sent to the bot owner, thank you for your feedback!",
+                colour=discord.Colour.green(),
+            )
+        )
 
 
 async def setup(bot):
