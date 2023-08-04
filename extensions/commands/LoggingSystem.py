@@ -212,7 +212,7 @@ class Logging(commands.GroupCog):
     # Member Ban Listener
     @commands.Cog.listener()
     async def on_ban(
-        self, banner: discord.User, guild: discord.Guild, user: discord.User
+        self, guild: discord.Guild,  banner: discord.User, banned: discord.User, reason: str
     ):
         guild_data = DataManager.get_guild_data(guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
@@ -222,11 +222,11 @@ class Logging(commands.GroupCog):
 
         ban = discord.Embed(
             title="Member Banned",
-            description=f"{user.mention} Has been banned from the server",
+            description=f"{banned.mention} Has been banned by {banner} from the server\nReason: {reason}",
             colour=discord.Colour.red(),
         )
-        ban.set_author(icon_url=user.display_avatar, name=user)
-        ban.set_footer(text=f"ID: {user.id}")
+        ban.set_author(icon_url=banned.display_avatar, name=banned)
+        ban.set_footer(text=f"ID: {banned.id}")
         ban.timestamp = datetime.now()
         await logs_channel.send(embed=ban)
 
