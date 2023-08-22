@@ -419,7 +419,9 @@ class Misc(commands.Cog):
     @app_commands.default_permissions(administrator=True)
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.user.id))
     @app_commands.describe(channel="The channel you want to get the transcript of")
-    async def transcript(self, interaction: discord.Interaction, channel: discord.TextChannel):
+    async def transcript(
+        self, interaction: discord.Interaction, channel: discord.TextChannel
+    ):
         await interaction.response.defer()
         messagelist = []
 
