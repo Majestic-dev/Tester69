@@ -122,65 +122,46 @@ class Verification(commands.GroupCog):
         verification_logs_channel: discord.TextChannel,
         unverified_role: discord.Role,
     ):
-        verification_channel = DataManager.get_guild_data(interaction.guild.id)[
-            "verification_channel_id"
-        ]
-        verification_logs_channel = DataManager.get_guild_data(interaction.guild.id)[
-            "verification_logs_channel_id"
-        ]
-        unverified_role = DataManager.get_guild_data(interaction.guild.id)[
-            "unverified_role_id"
-        ]
-        guild_data = DataManager.get_guild_data(interaction.guild.id)
-        logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
-
         verification = discord.Embed(
             description="<:white_checkmark:1096793014287995061> Verification has been setup for this server",
             colour=discord.Colour.green(),
         )
         verification.add_field(
             name="Verification Channel",
-            value=f"<#{verification_channel}>",
+            value=f"<#{verification_channel.id}>",
             inline=False,
         )
         verification.add_field(
             name="Verification Logs Channel",
-            value=f"<#{verification_logs_channel}>",
+            value=f"<#{verification_logs_channel.id}>",
             inline=False,
         )
         verification.add_field(
-            name="Unverified Role", value=f"<@&{unverified_role}>", inline=False
+            name="Unverified Role", value=f"<@&{unverified_role.id}>", inline=False
         )
         await interaction.response.send_message(embed=verification)
 
         DataManager.edit_guild_data(
-            interaction.guild.id, "verification_channel_id", verification_channel
+            interaction.guild.id, "verification_channel_id", verification_channel.id
         )
         DataManager.edit_guild_data(
             interaction.guild.id,
             "verification_logs_channel_id",
-            verification_logs_channel,
+            verification_logs_channel.id,
         )
         DataManager.edit_guild_data(
-            interaction.guild.id, "unverified_role_id", unverified_role
+            interaction.guild.id, "unverified_role_id", unverified_role.id
         )
 
     @commands.Cog.listener()
-    async def on_member_join(self, member):
+    async def on_member_join(self, member: discord.Member):
         if member.bot:
             return
         guild_data = DataManager.get_guild_data(member.guild.id)
         welcome_message = guild_data["welcome_message"]
-        verification_channel = DataManager.get_guild_data(member.guild.id)[
-            "verification_channel_id"
-        ]
-        verification_logs_channel = DataManager.get_guild_data(member.guild.id)[
-            "verification_logs_channel_id"
-        ]
-        unverified_role = discord.utils.get(
-            member.guild.roles,
-            id=guild_data["unverified_role_id"],
-        )
+        verification_channel = guild_data["verification_channel_id"]
+        verification_logs_channel = guild_data["verification_logs_channel_id"]
+        unverified_role = member.guild.get_role(guild_data["unverified_role_id"])
 
         if (
             verification_channel == None
