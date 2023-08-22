@@ -173,7 +173,6 @@ class ServerManagement(commands.Cog):
         reason: str = None,
     ):
         guild_data = DataManager.get_guild_data(interaction.guild.id)
-        logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
         channeltype = discord.ChannelType
 
         await channel.delete(reason=reason)
