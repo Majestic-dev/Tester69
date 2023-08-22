@@ -24,11 +24,6 @@ class WarningSystem(commands.Cog):
     async def warn(
         self, interaction: discord.Interaction, user: discord.User, *, reason: str
     ):
-        guild_data = DataManager.get_guild_data(interaction.guild.id)
-        logs_channel = self.bot.get_channel(
-            guild_data["logs_channel_id"]
-        )
-
         if user.id == interaction.user.id:
             return await interaction.response.send_message(
                 embed=discord.Embed(
@@ -58,11 +53,12 @@ class WarningSystem(commands.Cog):
         DataManager.register_warning(
             interaction.guild.id,
             user_id,
-            f"{reason} - Warned by {interaction.user.name}#{interaction.user.discriminator}",
+            f"{reason} - Warned by {interaction.user.name}",
         )
 
         self.bot.dispatch(
             "warning",
+            guild=interaction.guild,
             warned=user,
             warner=interaction.user,
             reason=reason,
