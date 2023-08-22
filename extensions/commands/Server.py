@@ -37,8 +37,7 @@ class Server(commands.Cog):
             f"* **Roles:** {len(guild.roles)}\n"
             f"* **Role List:** {', '.join([role.mention for role in guild.roles if role.name != '@everyone'])}\n"
             f"* **Emojis:** {len(guild.emojis)}\n"
-            f"* **Normal Emoji List:** {', '.join([f'<:{emoji.name}:{emoji.id}>' for emoji in guild.emojis if not emoji.animated])}\n"
-            f"* **Animated Emoji List:** {', '.join([f'<a:{emoji.name}:{emoji.id}>' for emoji in guild.emojis if emoji.animated])}\n",
+            f"* **Emoji List:** {', '.join([f'<:{emoji.name}:{emoji.id}>' for emoji in guild.emojis if not emoji.animated])}\n {', '.join([f'<a:{emoji.name}:{emoji.id}>' for emoji in guild.emojis if emoji.animated])}\n",
             colour=discord.Colour.random(),
         )
 
@@ -81,7 +80,7 @@ class Server(commands.Cog):
                 )
 
             return any([user.display_avatar.is_animated(), user.banner])
-        
+
         def boosting_server(user: discord.Member):
             for member in interaction.guild.premium_subscribers:
                 if member.id == user.id:
@@ -117,7 +116,6 @@ class Server(commands.Cog):
             badges.append("<:nitro:1132663522162122812>")
         if boosting_server(user):
             badges.append("<:boosting:1134076723508559893>")
-        
 
         embed = discord.Embed(
             description=f"* **Username**: {user.name}\n"
