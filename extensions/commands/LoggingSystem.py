@@ -212,7 +212,11 @@ class Logging(commands.GroupCog):
     # Member Ban Listener
     @commands.Cog.listener()
     async def on_ban(
-        self, guild: discord.Guild,  banner: discord.User, banned: discord.User, reason: str
+        self,
+        guild: discord.Guild,
+        banner: discord.User,
+        banned: discord.User,
+        reason: str,
     ):
         guild_data = DataManager.get_guild_data(guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
