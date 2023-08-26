@@ -1,5 +1,5 @@
 import os
-from datetime import datetime
+import datetime
 
 import discord
 from discord import app_commands
@@ -135,6 +135,36 @@ class Logging(commands.GroupCog):
         warning.set_footer(text=f"ID: {warned.id}")
         warning.timestamp = datetime.now()
         await logs_channel.send(embed=warning)
+
+    # Member Timeout Listener
+    @commands.Cog.listener()
+    async def on_timeout(
+        self,
+        guild: discord.Guild,
+        timeouter: discord.Member,
+        timeouted: discord.Member,
+        timedout_until: int,
+        reason: str,
+    ):
+        guild_data = DataManager.get_guild_data(guild.id)
+        logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
+
+        if logs_channel == None:
+            return
+
+        timeout = discord.Embed(
+            title="Member Timed Out",
+            description=f"{timeouted.mention} Has been timed out by {timeouter.mention}",
+            colour=discord.Colour.red(),
+        )
+        timeout.add_field(name="Reason", value=f"```{reason}```")
+        timeout.add_field(
+            name="Timed Out Until",
+            value=discord.utils.format_dt(datetime.datetime.now() + datetime.timedelta(seconds=timedout_until), "F"),
+        )
+        timeout.set_author(icon_url=timeouted.display_avatar, name=timeouted)
+        timeout.set_footer(text=f"ID: {timeouted.id}")
+        await logs_channel.send(embed=timeout)
 
     # Member Mute Listener
     @commands.Cog.listener()
