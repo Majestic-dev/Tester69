@@ -4,11 +4,11 @@
 
 A general-use discord bot coded in discord.py
 
-# Big shoutout to kaJob-dev on github (kajob. on discord) for guiding me on this project!
+# Big shoutout to [kaJob-dev](https://github.com/kaJob-dev) (kajob. on discord) for guiding me on this project!
 
 # Installation
 
-## Clone the repository
+## Clone the [repository](https://github.com/Majestic-dev/Tester69/)
 ```bash
 git clone https://github.com/Majestic-dev/Tester69.git
 ```
@@ -85,16 +85,12 @@ This project is licensed under the Apache License - see the [LICENSE](LICENSE) f
         * Updated all the economy items and a command to view the descriptions of items
         * Banking system and a global leaderboard
         * Archived all gambling commands to ensure a safe future for Tester69 on discord, and blackjack being broken anyways
+    
+    - Database
+        * Migrated from a JSON database (if you call it a one) to PostgreSQL (asyncpg)
 
 # TODO
 
-## v1.2 Focused On Economy And Miscallaneous Systems
+## V1.3 Focused On Reworking Some Systems
 
-- [x] Add some customization to the moderation system (for example setting the muted role).
-- [x] Add a way to deposit/withdraw money into the bank.
-- [x] Make a custom cooldown handler for a few commands (hourly, daily, weekly and monthly).
-- [ ] Migrate from json to a more reliable database.
-
-## V1.3 Focused On Miscellaneous/Fun
-
-- [ ] Think of the update notes for this version.
+- [ ] Rework the Economy system to be more fun and interactive
