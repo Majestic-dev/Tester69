@@ -70,11 +70,6 @@ v1.2
         * Improved muting and unmuting
         * Use the dispatch event for certain actions
 
-v1.2
-    - Logging System
-        * Log deletion protection
-        * Log moderation actions inside Loggingsystem.py using dispatch events instead of inside the moderation commands
-
     - Miscellaneous
         * Many miscellaneous commands to search random stuff, get random images, gifs, etc.
 
