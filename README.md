@@ -29,7 +29,6 @@ python -m pip install -r requirements.txt
 cd Tester69
 ```
 
-v1.2
 ### run the file
 ```bash
 python main.py
@@ -43,7 +42,6 @@ Please make sure that your code is formatted correctly before making a new pull 
 # License 
 This project is licensed under the Apache License - see the [LICENSE](LICENSE) file for details
 
-v1.2
 # Version Changelogs
 
     - Verification System
