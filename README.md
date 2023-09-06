@@ -90,3 +90,4 @@ v1.2
 ## V1.3 Focused On Reworking Some Systems
 
 - [ ] Rework the Economy system to be more fun and interactive
+- [ ] Add a Ticket system
