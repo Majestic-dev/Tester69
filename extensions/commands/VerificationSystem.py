@@ -66,13 +66,13 @@ class Verification(commands.GroupCog):
     @app_commands.guild_only()
     @app_commands.default_permissions(administrator=True)
     async def disable_verification(self, interaction: discord.Interaction):
-        verification_channel = DataManager.get_guild_data(interaction.guild.id)[
+        verification_channel = await DataManager.get_guild_data(interaction.guild.id)[
             "verification_channel_id"
         ]
-        verification_logs_channel = DataManager.get_guild_data(interaction.guild.id)[
-            "verification_logs_channel_id"
-        ]
-        unverified_role = DataManager.get_guild_data(interaction.guild.id)[
+        verification_logs_channel = await DataManager.get_guild_data(
+            interaction.guild.id
+        )["verification_logs_channel_id"]
+        unverified_role = await DataManager.get_guild_data(interaction.guild.id)[
             "unverified_role_id"
         ]
 
@@ -95,13 +95,15 @@ class Verification(commands.GroupCog):
             )
         )
 
-        DataManager.edit_guild_data(
+        await DataManager.edit_guild_data(
             interaction.guild.id, "verification_channel_id", None
         )
-        DataManager.edit_guild_data(
+        await DataManager.edit_guild_data(
             interaction.guild.id, "verification_logs_channel_id", None
         )
-        DataManager.edit_guild_data(interaction.guild.id, "unverified_role_id", None)
+        await DataManager.edit_guild_data(
+            interaction.guild.id, "unverified_role_id", None
+        )
 
     @app_commands.command(
         name="setup",
@@ -141,15 +143,15 @@ class Verification(commands.GroupCog):
         )
         await interaction.response.send_message(embed=verification)
 
-        DataManager.edit_guild_data(
+        await DataManager.edit_guild_data(
             interaction.guild.id, "verification_channel_id", verification_channel.id
         )
-        DataManager.edit_guild_data(
+        await DataManager.edit_guild_data(
             interaction.guild.id,
             "verification_logs_channel_id",
             verification_logs_channel.id,
         )
-        DataManager.edit_guild_data(
+        await DataManager.edit_guild_data(
             interaction.guild.id, "unverified_role_id", unverified_role.id
         )
 
@@ -157,7 +159,7 @@ class Verification(commands.GroupCog):
     async def on_member_join(self, member: discord.Member):
         if member.bot:
             return
-        guild_data = DataManager.get_guild_data(member.guild.id)
+        guild_data = await DataManager.get_guild_data(member.guild.id)
         welcome_message = guild_data["welcome_message"]
         verification_channel = guild_data["verification_channel_id"]
         verification_logs_channel = guild_data["verification_logs_channel_id"]
@@ -202,7 +204,7 @@ class Verification(commands.GroupCog):
 
         check = (
             lambda m: m.channel == dm_channel
-            or verification_channel
+            or m.channel == verification_channel
             and m.author == member
         )
         fail_count = 3
@@ -228,7 +230,7 @@ class Verification(commands.GroupCog):
 
                 return await member.kick()
 
-            if code in message.content:
+            if message.content == code:
                 try:
                     await message.delete()
                     await member.remove_roles(unverified_role)
@@ -243,6 +245,14 @@ class Verification(commands.GroupCog):
                     embed=discord.Embed(
                         title="Verification Completed!",
                         description=f"{member.mention} has verified themselves!",
+                        colour=discord.Colour.green(),
+                    )
+                )
+
+                await dm_channel.send(
+                    embed=discord.Embed(
+                        title="Verification Completed!",
+                        description=f"You have verified yourself in {member.guild.name}",
                         colour=discord.Colour.green(),
                     )
                 )
