@@ -62,7 +62,7 @@ class Misc(commands.Cog):
             icon_url=interaction.user.avatar,
             text=f"Requested by - {interaction.user} | Powered by Giphy API ❤️",
         )
-        await interaction.response.send_message(embed=embed)
+        await interaction.response.send_message(embed=embed, ephemeral=True)
 
     @app_commands.command(
         name="search_unsplash", description="Search an image by keyword from Unsplash"
@@ -109,7 +109,7 @@ class Misc(commands.Cog):
             icon_url=interaction.user.avatar,
             text=f"Requested by - {interaction.user} | Powered by Unsplash API ❤️",
         )
-        await interaction.response.send_message(embed=embed)
+        await interaction.response.send_message(embed=embed, ephemeral=True)
 
     @app_commands.command(name="cat", description="Get a random cat image")
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.user.id))
@@ -125,7 +125,7 @@ class Misc(commands.Cog):
             icon_url=interaction.user.avatar,
             text=f"Requested by - {interaction.user} | Powered by The Cat API ❤️",
         )
-        await interaction.response.send_message(embed=embed)
+        await interaction.response.send_message(embed=embed, ephemeral=True)
 
     @app_commands.command(name="dog", description="Get a random dog image")
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.user.id))
@@ -141,7 +141,7 @@ class Misc(commands.Cog):
             icon_url=interaction.user.avatar,
             text=f"Requested by - {interaction.user} | Powered by The Dog API ❤️",
         )
-        await interaction.response.send_message(embed=embed)
+        await interaction.response.send_message(embed=embed, ephemeral=True)
 
     @app_commands.command(name="dadjoke", description="Get a random dad joke")
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.user.id))
@@ -153,7 +153,8 @@ class Misc(commands.Cog):
         data = await response.text()
         await session.close()
         await interaction.response.send_message(
-            embed=discord.Embed(description=f"🤣 {data}", colour=discord.Colour.green())
+            embed=discord.Embed(description=f"🤣 {data}", colour=discord.Colour.green()),
+            ephemeral=True,
         )
 
     @app_commands.command(
@@ -187,7 +188,7 @@ class Misc(commands.Cog):
                 colour=discord.Colour.red(),
             )
         await session.close()
-        await interaction.response.send_message(embed=embed)
+        await interaction.response.send_message(embed=embed, ephemeral=True)
 
     @app_commands.command(
         name="urban", description="Get a definition from Urban Dictionary"
@@ -226,7 +227,7 @@ class Misc(commands.Cog):
                     colour=discord.Colour.red(),
                 )
         await session.close()
-        await Paginator.Simple().start(interaction, pages=embeds)
+        await Paginator.Simple(ephemeral=True).start(interaction, pages=embeds)
 
     @app_commands.command(name="github", description="Get a user's GitHub profile")
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.user.id))
@@ -256,7 +257,7 @@ class Misc(commands.Cog):
             embed = discord.Embed(colour=discord.Colour.red())
             embed.description = "<:white_cross:1096791282023669860> Couldn't find a GitHub user with that name"
         await session.close()
-        await interaction.response.send_message(embed=embed)
+        await interaction.response.send_message(embed=embed, ephemeral=True)
 
     @app_commands.command(
         name="covid", description="Get the COVID-19 stats for a country"
@@ -296,7 +297,7 @@ class Misc(commands.Cog):
             embed = discord.Embed(colour=discord.Colour.red())
             embed.description = "<:white_cross:1096791282023669860> Couldn't find a country with that name"
         await session.close()
-        await interaction.response.send_message(embed=embed)
+        await interaction.response.send_message(embed=embed, ephemeral=True)
 
     @app_commands.command(name="weather", description="Get the weather for a location")
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.user.id))
@@ -341,7 +342,7 @@ class Misc(commands.Cog):
             embed = discord.Embed(colour=discord.Colour.red())
             embed.description = "<:white_cross:1096791282023669860> Couldn't find a location with that name"
         await session.close()
-        await interaction.response.send_message(embed=embed)
+        await interaction.response.send_message(embed=embed, ephemeral=True)
 
     @app_commands.command(
         name="forecast",
@@ -388,7 +389,7 @@ class Misc(commands.Cog):
             embed = discord.Embed(colour=discord.Colour.red())
             embed.description = "<:white_cross:1096791282023669860> Couldn't find a location with that name"
         await session.close()
-        await interaction.response.send_message(embed=embed)
+        await interaction.response.send_message(embed=embed, ephemeral=True)
 
     @app_commands.command(
         name="count", description="Count from one number to another number"
@@ -404,12 +405,14 @@ class Misc(commands.Cog):
         start: int,
         end: int,
     ):
-        await interaction.response.defer()
+        await interaction.response.defer(ephemeral=True)
         while start <= end:
             with open(f"{interaction.user.id}.txt", "a") as f:
                 f.write(f"{start}\n")
                 start += 1
-        await interaction.followup.send(file=discord.File(f"{interaction.user.id}.txt"))
+        await interaction.followup.send(
+            ephemeral=True, file=discord.File(f"{interaction.user.id}.txt")
+        )
         os.remove(f"{interaction.user.id}.txt")
 
     @app_commands.command(
@@ -422,7 +425,7 @@ class Misc(commands.Cog):
     async def transcript(
         self, interaction: discord.Interaction, channel: discord.TextChannel
     ):
-        await interaction.response.defer()
+        await interaction.response.defer(ephemeral=True)
         messagelist = []
 
         async for message in channel.history(limit=None):
@@ -457,7 +460,9 @@ class Misc(commands.Cog):
                     f.write(f"MESSAGE LINK - {message.jump_url}\n\n")
                     continue
                 f.write(f"{message.author} - {message.content} - {message.jump_url}\n")
-        await interaction.followup.send(file=discord.File(f"{channel.id}.txt"))
+        await interaction.followup.send(
+            file=discord.File(f"{channel.id}.txt"), ephemeral=True
+        )
         os.remove(f"{channel.id}.txt")
 
     @app_commands.command(
@@ -478,15 +483,16 @@ class Misc(commands.Cog):
         choices: app_commands.Choice[str],
         description: str,
     ):
-        user_data = DataManager.get_user_data(interaction.user.id)
-        cooldowns = DataManager.get_user_data(interaction.user.id)["cooldowns"]
+        user_data = await DataManager.get_user_data(interaction.user.id)
+        cooldowns = user_data["cooldowns"]
 
         if len(description) < 100:
             return await interaction.response.send_message(
                 embed=discord.Embed(
                     description="<:white_cross:1096791282023669860> Your report description can't be shorter than 100 characters, please try to be more descriptive",
                     colour=discord.Colour.red(),
-                )
+                ),
+                ephemeral=True,
             )
 
         if choices.value == "bug":
@@ -494,14 +500,14 @@ class Misc(commands.Cog):
         elif choices.value == "suggestion":
             choices = "Suggestion"
         elif choices.value == "typo":
-            choices = "Typo Report"
+            choices = "Spelling Error Report"
         elif choices.value == "abuse":
             choices = "Abuse Report"
         elif choices.value == "other":
             choices = "Other Report"
 
-        if "report" not in cooldowns:
-            DataManager.add_cooldown(interaction.user.id, "report", 86400)
+        if cooldowns is None or "report" not in cooldowns:
+            await DataManager.add_cooldown(interaction.user.id, "report", 86400)
 
         elif "report" in cooldowns:
             startTime = datetime.strptime(cooldowns["report"], "%Y-%m-%dT%H:%M:%S.%f")
@@ -510,16 +516,18 @@ class Misc(commands.Cog):
             )
             timeLeft = (startTime - endTime).total_seconds()
 
-            if str(cooldowns["report"]) > datetime.utcnow().isoformat():
+            if json.loads(cooldowns)["report"] < datetime.utcnow().isoformat():
+                await DataManager.remove_cooldown(interaction.user.id, "report")
+                await DataManager.add_cooldown(interaction.user.id, "report", 86400)
+
+            if json.loads(cooldowns)["report"] > datetime.utcnow().isoformat():
                 return await interaction.response.send_message(
                     embed=discord.Embed(
                         description=f"<:white_cross:1096791282023669860> You already sent a report in the last 24 hours, try again <t:{int(time.time() + timeLeft)}:R>",
                         colour=discord.Colour.red(),
-                    )
+                    ),
+                    ephemeral=True,
                 )
-
-        if str(cooldowns["report"]) < datetime.utcnow().isoformat():
-            DataManager.remove_cooldown(interaction.user.id, "report")
 
         await self.bot.get_user(self.bot.owner_id).send(
             embed=discord.Embed(
@@ -533,7 +541,8 @@ class Misc(commands.Cog):
             embed=discord.Embed(
                 description=f"<:white_checkmark:1096793014287995061> Your {choices} report has been sent to the bot owner, thank you for your feedback!",
                 colour=discord.Colour.green(),
-            )
+            ),
+            ephemeral=True,
         )
 
 
