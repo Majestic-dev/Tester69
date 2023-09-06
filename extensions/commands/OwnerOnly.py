@@ -1,5 +1,5 @@
 import os
-from typing import Optional
+from typing import Literal, Optional
 
 import discord
 from discord.ext import commands
@@ -20,32 +20,36 @@ class OwnerOnly(commands.Cog):
         member: Optional[discord.Member] = None,
     ):
         if member == None:
-            user_data = DataManager.get_user_data(ctx.author.id)
-            DataManager.edit_user_data(
+            user_data = await DataManager.get_user_data(ctx.author.id)
+            await DataManager.edit_user_data(
                 ctx.author.id, "balance", user_data["balance"] + amount
             )
             return await ctx.reply(
                 embed=discord.Embed(
                     description=(
-                        f'<:white_checkmark:1096793014287995061> Added {amount} 🪙 to your balance. Your new balance is {user_data["balance"]} 🪙'
+                        f'<:white_checkmark:1096793014287995061> Added {amount} 🪙 to your balance. Your new balance is {user_data["balance"] + amount} 🪙'
                     ),
                     colour=discord.Colour.green(),
                 )
             )
 
         else:
-            user_data = DataManager.get_user_data(member.id)
-        DataManager.edit_user_data(member.id, "balance", user_data["balance"] + amount)
-        return await ctx.reply(
-            embed=discord.Embed(
-                description=(
-                    f'<:white_checkmark:1096793014287995061> Added {amount} 🪙 to {member.name}\'s balance. Their new balance is {user_data["balance"]} 🪙'
-                ),
-                colour=discord.Colour.green(),
+            user_data = await DataManager.get_user_data(member.id)
+            await DataManager.edit_user_data(
+                member.id, "balance", user_data["balance"] + amount
             )
-        )
+            return await ctx.reply(
+                embed=discord.Embed(
+                    description=(
+                        f'<:white_checkmark:1096793014287995061> Added {amount} 🪙 to {member.name}\'s balance. Their new balance is {user_data["balance"] + amount} 🪙'
+                    ),
+                    colour=discord.Colour.green(),
+                )
+            )
 
-    @commands.command(name="addbank", description="Add set amount of 🪙 to your balance")
+    @commands.command(
+        name="addbank", description="Add set amount of 🪙 to your bank balance"
+    )
     @commands.is_owner()
     async def addbank(
         self,
@@ -54,100 +58,32 @@ class OwnerOnly(commands.Cog):
         member: Optional[discord.Member] = None,
     ):
         if member == None:
-            user_data = DataManager.get_user_data(ctx.author.id)
-            DataManager.edit_user_data(
+            user_data = await DataManager.get_user_data(ctx.author.id)
+            await DataManager.edit_user_data(
                 ctx.author.id, "bank", user_data["bank"] + amount
             )
             return await ctx.reply(
                 embed=discord.Embed(
                     description=(
-                        f'<:white_checkmark:1096793014287995061> Added {amount} 🪙 to your bank. Your new bank balance is {user_data["bank"]} 🪙'
+                        f'<:white_checkmark:1096793014287995061> Added {amount} 🪙 to your bank. Your new bank balance is {user_data["bank"] + amount} 🪙'
                     ),
                     colour=discord.Colour.green(),
                 )
             )
 
         else:
-            user_data = DataManager.get_user_data(member.id)
-        DataManager.edit_user_data(member.id, "bank", user_data["bank"] + amount)
-        return await ctx.reply(
-            embed=discord.Embed(
-                description=(
-                    f'<:white_checkmark:1096793014287995061> Added {amount} 🪙 to {member.name}\'s bank. Their new bank balance is {user_data["bank"]} 🪙'
-                ),
-                colour=discord.Colour.green(),
+            user_data = await DataManager.get_user_data(member.id)
+            await DataManager.edit_user_data(
+                member.id, "bank", user_data["bank"] + amount
             )
-        )
-
-    @commands.command(
-        name="subtract", description="Subtract set amount of 🪙 from your balance"
-    )
-    @commands.is_owner()
-    async def subtract(
-        self,
-        ctx,
-        amount: int,
-        member: Optional[discord.Member] = None,
-    ):
-        if member == None:
-            user_data = DataManager.get_user_data(ctx.author.id)
-            DataManager.edit_user_data(
-                ctx.author.id, "balance", user_data["balance"] - amount
-            )
-            await ctx.reply(
+            return await ctx.reply(
                 embed=discord.Embed(
                     description=(
-                        f'<:white_checkmark:1096793014287995061> Removed {amount} 🪙 from your balance. Your new balance is {user_data["balance"]} 🪙'
+                        f'<:white_checkmark:1096793014287995061> Added {amount} 🪙 to {member.name}\'s bank. Their new bank balance is {user_data["bank"] + amount} 🪙'
                     ),
                     colour=discord.Colour.green(),
                 )
             )
-
-        else:
-            user_data = DataManager.get_user_data(member.id)
-        DataManager.edit_user_data(member.id, "balance", user_data["balance"] - amount)
-        await ctx.reply(
-            embed=discord.Embed(
-                description=(
-                    f'<:white_checkmark:1096793014287995061> Removed {amount} 🪙 from {member.name}\'s balance. Their new balance is {user_data["balance"]} 🪙'
-                ),
-                colour=discord.Colour.green(),
-            )
-        )
-
-    @commands.command(
-        name="subtractbank", description="Subtract set amount of 🪙 from your balance"
-    )
-    @commands.is_owner()
-    async def subtractbank(
-        self, ctx, amount: int, member: Optional[discord.Member] = None
-    ):
-        user_data = DataManager.get_user_data(ctx.author.id)
-
-        if member == None:
-            DataManager.edit_user_data(
-                ctx.author.id, "bank", user_data["bank"] - amount
-            )
-            await ctx.reply(
-                embed=discord.Embed(
-                    description=(
-                        f'<:white_checkmark:1096793014287995061> Removed {amount} 🪙 from your bank. Your new bank balance is {user_data["bank"]} 🪙'
-                    ),
-                    colour=discord.Colour.green(),
-                )
-            )
-
-        else:
-            user_data = DataManager.get_user_data(member.id)
-        DataManager.edit_user_data(member.id, "bank", user_data["bank"] - amount)
-        await ctx.reply(
-            embed=discord.Embed(
-                description=(
-                    f'<:white_checkmark:1096793014287995061> Removed {amount} 🪙 from {member.name}\'s bank. Their new bank balance is {user_data["bank"]} 🪙'
-                ),
-                colour=discord.Colour.green(),
-            )
-        )
 
     @commands.command(name="reload", description="Reload the cogs in the bot")
     @commands.is_owner()
@@ -174,7 +110,7 @@ class OwnerOnly(commands.Cog):
     ):
         if member == None:
             if command == "all":
-                DataManager.remove_all_cooldowns(ctx.author.id)
+                await DataManager.remove_all_cooldowns(ctx.author.id)
                 return await ctx.reply(
                     embed=discord.Embed(
                         description=(
@@ -184,7 +120,7 @@ class OwnerOnly(commands.Cog):
                     )
                 )
 
-            cooldowns = DataManager.get_user_data(ctx.author.id)["cooldowns"]
+            cooldowns = await DataManager.get_user_data(ctx.author.id)["cooldowns"]
             if command not in cooldowns:
                 return await ctx.reply(
                     embed=discord.Embed(
@@ -195,7 +131,7 @@ class OwnerOnly(commands.Cog):
                     )
                 )
 
-            DataManager.remove_cooldown(ctx.author.id, command)
+            await DataManager.remove_cooldown(ctx.author.id, command)
 
             return await ctx.reply(
                 embed=discord.Embed(
@@ -208,7 +144,7 @@ class OwnerOnly(commands.Cog):
 
         else:
             if command == "all":
-                DataManager.remove_all_cooldowns(member.id)
+                await DataManager.remove_all_cooldowns(member.id)
                 return await ctx.reply(
                     embed=discord.Embed(
                         description=(
@@ -218,7 +154,7 @@ class OwnerOnly(commands.Cog):
                     )
                 )
 
-            cooldowns = DataManager.get_user_data(member.id)["cooldowns"]
+            cooldowns = await DataManager.get_user_data(member.id)["cooldowns"]
             if command not in cooldowns:
                 return await ctx.reply(
                     embed=discord.Embed(
@@ -229,7 +165,7 @@ class OwnerOnly(commands.Cog):
                     )
                 )
 
-            DataManager.remove_cooldown(member.id, command)
+            await DataManager.remove_cooldown(member.id, command)
 
             return await ctx.reply(
                 embed=discord.Embed(
