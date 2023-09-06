@@ -131,6 +131,7 @@ async def on_command_error(ctx, error):
             )
         )
 
+
 async def main():
     await DataManager.initialise()
     if None in [
@@ -148,6 +149,7 @@ async def main():
         print(f"Please fill out the config.json file before running {__file__}")
     else:
         await bot.start(DataManager.get("config", "token"))
+
 
 if __name__ == "__main__":
     asyncio.run(main())
