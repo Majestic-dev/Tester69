@@ -27,7 +27,6 @@ class Moderation(commands.Cog):
         duration: int,
         reason: str = "Unspecified",
     ):
-
         if member.id == interaction.user.id:
             return await interaction.response.send_message(
                 embed=discord.Embed(
@@ -35,7 +34,7 @@ class Moderation(commands.Cog):
                     colour=discord.Colour.orange(),
                 )
             )
-        
+
         if interaction.user.top_role <= member.top_role:
             return await interaction.response.send_message(
                 embed=discord.Embed(
@@ -52,7 +51,7 @@ class Moderation(commands.Cog):
                     colour=discord.Colour.orange(),
                 )
             )
-        
+
         if member.is_timed_out():
             return await interaction.response.send_message(
                 embed=discord.Embed(
@@ -60,7 +59,7 @@ class Moderation(commands.Cog):
                     colour=discord.Colour.orange(),
                 )
             )
-        
+
         else:
             await member.timeout(datetime.timedelta(seconds=duration), reason=reason)
             await interaction.response.send_message(
@@ -79,13 +78,14 @@ class Moderation(commands.Cog):
                 reason=reason,
             )
 
-    @app_commands.command(name="untimeout", description="Removes the timeout from the mentioned user")
+    @app_commands.command(
+        name="untimeout", description="Removes the timeout from the mentioned user"
+    )
     @app_commands.guild_only()
     @app_commands.default_permissions(manage_roles=True)
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id))
     @app_commands.describe(member="The user to remove the timeout from")
     async def untimeout(self, interaction: discord.Interaction, member: discord.Member):
-
         if member.id == interaction.user.id:
             return await interaction.response.send_message(
                 embed=discord.Embed(
@@ -93,7 +93,7 @@ class Moderation(commands.Cog):
                     colour=discord.Colour.orange(),
                 )
             )
-        
+
         if interaction.user.top_role <= member.top_role:
             return await interaction.response.send_message(
                 embed=discord.Embed(
@@ -110,7 +110,7 @@ class Moderation(commands.Cog):
                     colour=discord.Colour.orange(),
                 )
             )
-        
+
         if member.is_timed_out():
             await member.timeout(None, reason="Untimeout")
             await interaction.response.send_message(
@@ -196,7 +196,6 @@ class Moderation(commands.Cog):
                     pass
 
             except Exception as exc:
-                print(exc)
                 await interaction.response.send_message(
                     embed=discord.Embed(
                         description=f"<:white_cross:1096791282023669860> Could not kick {member.mention}",
@@ -218,7 +217,7 @@ class Moderation(commands.Cog):
         member: discord.Member,
         reason: str = "Unspecified",
     ):
-        guild_data = DataManager.get_guild_data(interaction.guild.id)
+        guild_data = await DataManager.get_guild_data(interaction.guild.id)
         appeal_link = guild_data["appeal_link"]
 
         if member.id == interaction.user.id:
@@ -312,9 +311,9 @@ class Moderation(commands.Cog):
     @app_commands.default_permissions(ban_members=True)
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id))
     @app_commands.describe(member="The user to unban")
-    async def unban(self, interaction: discord.Interaction, member: str):
+    async def unban(self, interaction: discord.Interaction, member: int):
         try:
-            member = await self.bot.fetch_user(int(member))
+            member = await self.bot.fetch_user(member)
             entry = await interaction.guild.fetch_ban(member)
             await interaction.guild.unban(entry.user)
             dm_channel = await member.create_dm()
