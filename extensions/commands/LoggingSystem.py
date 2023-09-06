@@ -1,5 +1,5 @@
-import os
 import datetime
+import os
 
 import discord
 from discord import app_commands
@@ -18,24 +18,27 @@ class Logging(commands.GroupCog):
     @app_commands.describe(
         channel="Choose the channel where all server logs will be sent"
     )
+    @app_commands.guild_only()
     @app_commands.default_permissions(administrator=True)
+    @app_commands.checks.cooldown(1, 10, key=lambda i: (i.user.id))
     async def set_logs_channel(
         self, interaction: discord.Interaction, channel: discord.TextChannel
     ):
         await interaction.response.send_message(
             embed=discord.Embed(
                 description=f"<:white_checkmark:1096793014287995061> Set the logging channel to {channel.mention}",
-                timestamp=datetime.utcnow(),
                 colour=discord.Colour.green(),
             )
         )
 
-        DataManager.edit_guild_data(interaction.guild.id, "logs_channel_id", channel.id)
+        await DataManager.edit_guild_data(
+            interaction.guild.id, "logs_channel_id", channel.id
+        )
 
     @app_commands.command(name="disable", description="Disable logging for this server")
     @app_commands.default_permissions(administrator=True)
     async def disable_logs(self, interaction: discord.Interaction):
-        guild_data = DataManager.get_guild_data(interaction.guild.id)
+        guild_data = await DataManager.get_guild_data(interaction.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
 
         if logs_channel == None:
@@ -43,19 +46,19 @@ class Logging(commands.GroupCog):
                 ephemeral=True,
                 embed=discord.Embed(
                     description="<:white_cross:1096791282023669860> Logging is already disabled",
-                    timestamp=datetime.utcnow(),
                     colour=discord.Colour.red(),
                 ),
             )
 
         else:
-            DataManager.edit_guild_data(interaction.guild.id, "logs_channel_id", None)
+            await DataManager.edit_guild_data(
+                interaction.guild.id, "logs_channel_id", None
+            )
             return await interaction.response.send_message(
                 ephemeral=True,
                 embed=discord.Embed(
                     title="Logging Disabled",
                     description="Logging has been disabled for this server",
-                    timestamp=datetime.utcnow(),
                     colour=discord.Colour.red(),
                 ),
             )
@@ -63,7 +66,7 @@ class Logging(commands.GroupCog):
     # Member Join Listener
     @commands.Cog.listener()
     async def on_member_join(self, member):
-        guild_data = DataManager.get_guild_data(member.guild.id)
+        guild_data = await DataManager.get_guild_data(member.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
 
         if member.guild.get_member(member.id) == None:
@@ -83,13 +86,13 @@ class Logging(commands.GroupCog):
         )
         join.set_author(icon_url=member.display_avatar, name=member)
         join.set_footer(text=f"ID: {member.id}")
-        join.timestamp = datetime.now()
+        join.timestamp = datetime.datetime.now()
         await logs_channel.send(embed=join)
 
     # Member Leave Listener
     @commands.Cog.listener()
     async def on_member_remove(self, member):
-        guild_data = DataManager.get_guild_data(member.guild.id)
+        guild_data = await DataManager.get_guild_data(member.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
 
         if logs_channel == None:
@@ -107,7 +110,7 @@ class Logging(commands.GroupCog):
             )
             leave.set_author(icon_url=member.display_avatar, name=member)
             leave.set_footer(text=f"ID: {member.id}")
-            leave.timestamp = datetime.now()
+            leave.timestamp = datetime.datetime.now()
             await logs_channel.send(embed=leave)
 
     # Warning Listener
@@ -119,7 +122,7 @@ class Logging(commands.GroupCog):
         warner: discord.Member,
         reason: str,
     ):
-        guild_data = DataManager.get_guild_data(guild.id)
+        guild_data = await DataManager.get_guild_data(guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
 
         if logs_channel == None:
@@ -133,7 +136,7 @@ class Logging(commands.GroupCog):
         warning.add_field(name="Reason", value=f"```{reason}```")
         warning.set_author(icon_url=warned.display_avatar, name=warned)
         warning.set_footer(text=f"ID: {warned.id}")
-        warning.timestamp = datetime.now()
+        warning.timestamp = datetime.datetime.now()
         await logs_channel.send(embed=warning)
 
     # Member Timeout Listener
@@ -146,7 +149,7 @@ class Logging(commands.GroupCog):
         timedout_until: int,
         reason: str,
     ):
-        guild_data = DataManager.get_guild_data(guild.id)
+        guild_data = await DataManager.get_guild_data(guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
 
         if logs_channel == None:
@@ -160,70 +163,21 @@ class Logging(commands.GroupCog):
         timeout.add_field(name="Reason", value=f"```{reason}```")
         timeout.add_field(
             name="Timed Out Until",
-            value=discord.utils.format_dt(datetime.datetime.now() + datetime.timedelta(seconds=timedout_until), "F"),
+            value=discord.utils.format_dt(
+                datetime.datetime.now() + datetime.timedelta(seconds=timedout_until),
+                "F",
+            ),
         )
         timeout.set_author(icon_url=timeouted.display_avatar, name=timeouted)
         timeout.set_footer(text=f"ID: {timeouted.id}")
         await logs_channel.send(embed=timeout)
-
-    # Member Mute Listener
-    @commands.Cog.listener()
-    async def on_mute(
-        self,
-        guild: discord.Guild,
-        muted: discord.Member,
-        muter: discord.Member,
-        reason: str,
-    ):
-        guild_data = DataManager.get_guild_data(guild.id)
-        logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
-
-        if logs_channel == None:
-            return
-
-        mute = discord.Embed(
-            title="Member Muted",
-            description=f"{muted.mention} Has been muted by {muter.mention}",
-            colour=discord.Colour.red(),
-        )
-        mute.add_field(name="Reason", value=f"```{reason}```")
-        mute.set_author(icon_url=muted.display_avatar, name=muted)
-        mute.set_footer(text=f"ID: {muted.id}")
-        mute.timestamp = datetime.now()
-        await logs_channel.send(embed=mute)
-
-    # Member Unmute Listener
-    @commands.Cog.listener()
-    async def on_unmute(
-        self,
-        guild: discord.Guild,
-        unmuted: discord.Member,
-        unmuter: discord.Member,
-        reason: str,
-    ):
-        guild_data = DataManager.get_guild_data(guild.id)
-        logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
-
-        if logs_channel == None:
-            return
-
-        unmute = discord.Embed(
-            title="Member Unmuted",
-            description=f"{unmuted.mention} Has been unmuted by {unmuter.mention}",
-            colour=discord.Colour.green(),
-        )
-        unmute.add_field(name="Reason", value=f"```{reason}```")
-        unmute.set_author(icon_url=unmuted.display_avatar, name=unmuted)
-        unmute.set_footer(text=f"ID: {unmuted.id}")
-        unmute.timestamp = datetime.now()
-        await logs_channel.send(embed=unmute)
 
     # Member Kick Listener
     @commands.Cog.listener()
     async def on_kick(
         self, kicker: discord.User, guild: discord.Guild, user: discord.User
     ):
-        guild_data = DataManager.get_guild_data(guild.id)
+        guild_data = await DataManager.get_guild_data(guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
 
         if logs_channel == None:
@@ -236,7 +190,7 @@ class Logging(commands.GroupCog):
         )
         kick.set_author(icon_url=user.display_avatar, name=user)
         kick.set_footer(text=f"ID: {user.id}")
-        kick.timestamp = datetime.now()
+        kick.timestamp = datetime.datetime.now()
         await logs_channel.send(embed=kick)
 
     # Member Ban Listener
@@ -248,7 +202,7 @@ class Logging(commands.GroupCog):
         banned: discord.User,
         reason: str,
     ):
-        guild_data = DataManager.get_guild_data(guild.id)
+        guild_data = await DataManager.get_guild_data(guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
 
         if logs_channel == None:
@@ -261,13 +215,13 @@ class Logging(commands.GroupCog):
         )
         ban.set_author(icon_url=banned.display_avatar, name=banned)
         ban.set_footer(text=f"ID: {banned.id}")
-        ban.timestamp = datetime.now()
+        ban.timestamp = datetime.datetime.now()
         await logs_channel.send(embed=ban)
 
     # Member Unban Listener
     @commands.Cog.listener()
     async def on_member_unban(self, guild, user):
-        guild_data = DataManager.get_guild_data(guild.id)
+        guild_data = await DataManager.get_guild_data(guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
 
         if logs_channel == None:
@@ -280,13 +234,13 @@ class Logging(commands.GroupCog):
         )
         unban.set_author(icon_url=user.display_avatar, name=user)
         unban.set_footer(text=f"ID: {user.id}")
-        unban.timestamp = datetime.now()
+        unban.timestamp = datetime.datetime.now()
         await logs_channel.send(embed=unban)
 
     # Member Update Listener
     @commands.Cog.listener()
     async def on_member_update(self, before, after):
-        guild_data = DataManager.get_guild_data(before.guild.id)
+        guild_data = await DataManager.get_guild_data(before.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
 
         if logs_channel == None:
@@ -323,13 +277,13 @@ class Logging(commands.GroupCog):
             return
         update.set_author(icon_url=after.display_avatar, name=after)
         update.set_footer(text=f"ID: {before.id}")
-        update.timestamp = datetime.now()
+        update.timestamp = datetime.datetime.now()
         return await logs_channel.send(embed=update)
 
     # Role Create Listener
     @commands.Cog.listener()
     async def on_guild_role_create(self, role):
-        guild_data = DataManager.get_guild_data(role.guild.id)
+        guild_data = await DataManager.get_guild_data(role.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
 
         if logs_channel == None:
@@ -342,13 +296,13 @@ class Logging(commands.GroupCog):
         )
         create.set_author(icon_url=role.guild.icon, name=role.guild)
         create.set_footer(text=f"Role ID: {role.id}")
-        create.timestamp = datetime.now()
+        create.timestamp = datetime.datetime.now()
         await logs_channel.send(embed=create)
 
     # Role Delete Listener
     @commands.Cog.listener()
     async def on_guild_role_delete(self, role):
-        guild_data = DataManager.get_guild_data(role.guild.id)
+        guild_data = await DataManager.get_guild_data(role.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
 
         if logs_channel == None:
@@ -361,13 +315,13 @@ class Logging(commands.GroupCog):
         )
         delete.set_author(icon_url=role.guild.icon, name=role.guild)
         delete.set_footer(text=f"Role ID: {role.id}")
-        delete.timestamp = datetime.now()
+        delete.timestamp = datetime.datetime.now()
         await logs_channel.send(embed=delete)
 
     # Role Update Listener
     @commands.Cog.listener()
     async def on_guild_role_update(self, before, after):
-        guild_data = DataManager.get_guild_data(before.guild.id)
+        guild_data = await DataManager.get_guild_data(before.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
 
         if logs_channel == None:
@@ -407,13 +361,13 @@ class Logging(commands.GroupCog):
             return
         update.set_author(icon_url=before.guild.icon, name=before.guild)
         update.set_footer(text=f"Role ID: {before.id}")
-        update.timestamp = datetime.now()
+        update.timestamp = datetime.datetime.now()
         return await logs_channel.send(embed=update)
 
     # Voice Channel Listener
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
-        guild_data = DataManager.get_guild_data(member.guild.id)
+        guild_data = await DataManager.get_guild_data(member.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
 
         if logs_channel == None:
@@ -467,7 +421,7 @@ class Logging(commands.GroupCog):
             return
         voice.set_author(icon_url=member.display_avatar, name=member)
         voice.set_footer(text=f"ID: {member.id}")
-        voice.timestamp = datetime.now()
+        voice.timestamp = datetime.datetime.now()
         return await logs_channel.send(embed=voice)
 
     # Blacklisted Word Listener
@@ -479,12 +433,14 @@ class Logging(commands.GroupCog):
         if message.channel.type == discord.channel.ChannelType.private:
             return
 
-        guild_data = DataManager.get_guild_data(message.guild.id)
+        guild_data = await DataManager.get_guild_data(message.guild.id)
         words_in_blacklist = guild_data["blacklisted_words"]
         content = message.content.lower()
 
-        if message.author.id in guild_data["whitelist"] or any(
-            role.id in guild_data["whitelist"] for role in message.author.roles
+        if (
+            guild_data["whitelist"] is None
+            or message.author.id in guild_data["whitelist"]
+            or any(role.id in guild_data["whitelist"] for role in message.author.roles)
         ):
             return
 
@@ -497,7 +453,7 @@ class Logging(commands.GroupCog):
         if before.channel.type == discord.channel.ChannelType.private:
             return
 
-        guild_data = DataManager.get_guild_data(before.guild.id)
+        guild_data = await DataManager.get_guild_data(before.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
         words_in_blacklist = guild_data["blacklisted_words"]
         content = after.content.lower()
@@ -583,7 +539,7 @@ class Logging(commands.GroupCog):
 
         edit.set_author(icon_url=after.author.avatar, name=f"{before.author}")
         edit.set_footer(text=f"Author ID: {before.author.id}")
-        edit.timestamp = datetime.now()
+        edit.timestamp = datetime.datetime.now()
         await logs_channel.send(embed=edit)
 
     # Delete Logs
@@ -597,7 +553,7 @@ class Logging(commands.GroupCog):
         ):
             return
 
-        guild_data = DataManager.get_guild_data(message.guild.id)
+        guild_data = await DataManager.get_guild_data(message.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
 
         if message.author.bot and message.channel != logs_channel:
@@ -672,13 +628,13 @@ class Logging(commands.GroupCog):
         embed.set_footer(
             text=f"Author ID: {message.author.id} | Message ID: {message.id}"
         )
-        embed.timestamp = datetime.now()
+        embed.timestamp = datetime.datetime.now()
         await logs_channel.send(embed=embed)
 
     # Channel Create Listener
     @commands.Cog.listener()
     async def on_guild_channel_create(self, channel):
-        guild_data = DataManager.get_guild_data(channel.guild.id)
+        guild_data = await DataManager.get_guild_data(channel.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
 
         if logs_channel == None:
@@ -699,7 +655,7 @@ class Logging(commands.GroupCog):
     # Channel Delete Listener
     @commands.Cog.listener()
     async def on_guild_channel_delete(self, channel):
-        guild_data = DataManager.get_guild_data(channel.guild.id)
+        guild_data = await DataManager.get_guild_data(channel.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
 
         if logs_channel == None:
