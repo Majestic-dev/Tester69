@@ -61,7 +61,7 @@ class ServerManagement(commands.Cog):
         appeal_link="The appeal link to set (sent to users who get banned)"
     )
     async def set_appeal_link(self, interaction: discord.Interaction, appeal_link: str):
-        DataManager.edit_guild_data(
+        await DataManager.edit_guild_data(
             interaction.guild.id, "appeal_link", f"{appeal_link}"
         )
         await interaction.response.send_message(
@@ -79,8 +79,8 @@ class ServerManagement(commands.Cog):
     @app_commands.default_permissions(manage_guild=True)
     @app_commands.checks.cooldown(1, 600, key=lambda i: (i.guild.id, i.user.id))
     async def disable_appealing(self, interaction: discord.Interaction):
-        guild_data = DataManager.get_guild_data(interaction.guild.id)
-        DataManager.edit_guild_data(interaction.guild.id, "appeal_link", None)
+        guild_data = await DataManager.get_guild_data(interaction.guild.id)
+        await DataManager.edit_guild_data(interaction.guild.id, "appeal_link", None)
         await interaction.response.send_message(
             embed=discord.Embed(
                 description=f"<:white_checkmark:1096793014287995061> Disabled appealing",
@@ -119,7 +119,7 @@ class ServerManagement(commands.Cog):
         category: Optional[discord.CategoryChannel],
         slowmode: Optional[int],
     ):
-        guild_data = DataManager.get_guild_data(interaction.guild.id)
+        guild_data = await DataManager.get_guild_data(interaction.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
         channeltype = ChannelType(interaction.namespace.channeltype)
 
@@ -172,7 +172,7 @@ class ServerManagement(commands.Cog):
         channel: GuildChannel,
         reason: str = None,
     ):
-        guild_data = DataManager.get_guild_data(interaction.guild.id)
+        guild_data = await DataManager.get_guild_data(interaction.guild.id)
         channeltype = discord.ChannelType
 
         await channel.delete(reason=reason)
@@ -299,7 +299,7 @@ class ServerManagement(commands.Cog):
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id))
     @app_commands.describe(count="The amount of messages to purge")
     async def purge(self, interaction: discord.Interaction, count: int):
-        guild_data = DataManager.get_guild_data(interaction.guild.id)
+        guild_data = await DataManager.get_guild_data(interaction.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
         await interaction.response.defer(ephemeral=True)
         await interaction.channel.purge(limit=count)
@@ -328,38 +328,44 @@ class ServerManagement(commands.Cog):
     )
     @app_commands.guild_only()
     @app_commands.default_permissions(administrator=True)
-    @app_commands.describe(word="The word to add to the blacklisted words list")
-    async def add_blacklisted_word(self, interaction: discord.Interaction, word: str):
-        blacklisted_words = DataManager.get_guild_data(interaction.guild.id)[
-            "blacklisted_words"
-        ]
+    @app_commands.describe(
+        blacklisted_word="The word to add to the blacklisted words list"
+    )
+    async def add_blacklisted_word(
+        self, interaction: discord.Interaction, blacklisted_word: str
+    ):
+        guild_data = await DataManager.get_guild_data(interaction.guild.id)
+        blacklisted_words = guild_data["blacklisted_words"]
 
-        if word.lower() in blacklisted_words:
+        if (
+            blacklisted_words is None
+            or blacklisted_word.lower() not in blacklisted_words
+        ):
+            blacklisted_words.append(blacklisted_word.lower())
+            await DataManager.edit_blacklisted_words(
+                interaction.guild.id, blacklisted_words
+            )
             return await interaction.response.send_message(
                 ephemeral=True,
                 embed=discord.Embed(
-                    description=f'<:white_cross:1096791282023669860> Could not add "{word.lower()}" to blacklisted words list, because it already exists there',
+                    description=f'<:white_checkmark:1096793014287995061> Added "{blacklisted_word.lower()}" to blacklisted words list',
+                    colour=discord.Colour.green(),
+                ),
+            )
+
+        elif blacklisted_word.lower() in blacklisted_words:
+            return await interaction.response.send_message(
+                ephemeral=True,
+                embed=discord.Embed(
+                    description=f'<:white_cross:1096791282023669860> Could not add "{blacklisted_word.lower()}" to blacklisted words list, because it already exists there',
                     colour=discord.Colour.orange(),
                 ),
             )
 
-        await interaction.response.send_message(
-            ephemeral=True,
-            embed=discord.Embed(
-                description=f'<:white_checkmark:1096793014287995061> Added "{word.lower()}" to blacklisted words list',
-                colour=discord.Colour.green(),
-            ),
-        )
-
-        blacklisted_words.append(word.lower())
-        DataManager.edit_guild_data(
-            interaction.guild.id, "blacklisted_words", blacklisted_words
-        )
-
     async def word_autocomplete(
         self, interaction: discord.Interaction, current: str
     ) -> list[app_commands.Choice[str]]:
-        guild_data = DataManager.get_guild_data(interaction.guild.id)
+        guild_data = await DataManager.get_guild_data(interaction.guild.id)
         words_in_blacklist = guild_data["blacklisted_words"]
 
         return [
@@ -372,36 +378,40 @@ class ServerManagement(commands.Cog):
     )
     @app_commands.guild_only()
     @app_commands.default_permissions(administrator=True)
-    @app_commands.autocomplete(word=word_autocomplete)
-    @app_commands.describe(word="The word to remove from the blacklisted words list")
+    @app_commands.autocomplete(blacklisted_word=word_autocomplete)
+    @app_commands.describe(
+        blacklisted_word="The word to remove from the blacklisted words list"
+    )
     async def remove_blacklisted_word(
-        self, interaction: discord.Interaction, word: str
+        self, interaction: discord.Interaction, blacklisted_word: str
     ):
-        blacklisted_words = DataManager.get_guild_data(interaction.guild.id)[
-            "blacklisted_words"
-        ]
+        guild_data = await DataManager.get_guild_data(interaction.guild.id)
+        blacklisted_words = guild_data["blacklisted_words"]
 
-        if word not in blacklisted_words:
+        if (
+            blacklisted_words is None
+            or blacklisted_word.lower() not in blacklisted_words
+        ):
             return await interaction.response.send_message(
                 ephemeral=True,
                 embed=discord.Embed(
-                    description=f'<:white_cross:1096791282023669860> Could not remove "{word.lower()}" from blacklisted words list, because it does not exist there',
+                    description=f'<:white_cross:1096791282023669860> Could not remove "{blacklisted_word.lower()}" from blacklisted words list, because it does not exist there',
                     colour=discord.Colour.orange(),
                 ),
             )
 
-        await interaction.response.send_message(
-            ephemeral=True,
-            embed=discord.Embed(
-                description=f'<:white_checkmark:1096793014287995061> Removed "{word.lower()}" from blacklisted words list',
-                colour=discord.Colour.green(),
-            ),
-        )
-
-        blacklisted_words.remove(word.lower())
-        DataManager.edit_guild_data(
-            interaction.guild.id, "blacklisted_words", blacklisted_words
-        )
+        elif blacklisted_word.lower() in blacklisted_words:
+            blacklisted_words.remove(blacklisted_word.lower())
+            await DataManager.edit_blacklisted_words(
+                interaction.guild.id, blacklisted_words
+            )
+            return await interaction.response.send_message(
+                ephemeral=True,
+                embed=discord.Embed(
+                    description=f'<:white_checkmark:1096793014287995061> Removed "{blacklisted_word.lower()}" from blacklisted words list',
+                    colour=discord.Colour.green(),
+                ),
+            )
 
     @app_commands.command(
         name="whitelist_add", description="Add a user in the whitelist"
@@ -412,9 +422,21 @@ class ServerManagement(commands.Cog):
     async def whitelist_add(
         self, interaction: discord.Interaction, whitelist: discord.User | discord.Role
     ):
-        wlist = DataManager.get_guild_data(interaction.guild.id)["whitelist"]
+        guild_data = await DataManager.get_guild_data(interaction.guild.id)
+        wlist = guild_data["whitelist"]
 
-        if whitelist.id in wlist:
+        if wlist is None or whitelist.id not in wlist:
+            wlist.append(whitelist.id)
+            await DataManager.edit_whitelist(interaction.guild.id, wlist)
+            await interaction.response.send_message(
+                ephemeral=True,
+                embed=discord.Embed(
+                    description=f"<:white_checkmark:1096793014287995061> Added {whitelist.mention} to whitelist",
+                    colour=discord.Colour.green(),
+                ),
+            )
+
+        elif whitelist.id in wlist:
             return await interaction.response.send_message(
                 ephemeral=True,
                 embed=discord.Embed(
@@ -422,17 +444,6 @@ class ServerManagement(commands.Cog):
                     colour=discord.Colour.orange(),
                 ),
             )
-
-        await interaction.response.send_message(
-            ephemeral=True,
-            embed=discord.Embed(
-                description=f"<:white_checkmark:1096793014287995061> Added {whitelist.mention} to whitelist",
-                colour=discord.Colour.green(),
-            ),
-        )
-
-        wlist.append(whitelist.id)
-        DataManager.edit_guild_data(interaction.guild.id, "whitelist", wlist)
 
         if isinstance(whitelist, discord.Role):
             return
@@ -454,9 +465,10 @@ class ServerManagement(commands.Cog):
     async def whitelist_remove(
         self, interaction: discord.Interaction, whitelist: discord.User | discord.Role
     ):
-        wlist = DataManager.get_guild_data(interaction.guild.id)["whitelist"]
+        guild_data = await DataManager.get_guild_data(interaction.guild.id)
+        wlist = guild_data["whitelist"]
 
-        if whitelist.id not in wlist:
+        if wlist is None or whitelist.id not in wlist:
             return await interaction.response.send_message(
                 ephemeral=True,
                 embed=discord.Embed(
@@ -465,16 +477,16 @@ class ServerManagement(commands.Cog):
                 ),
             )
 
-        await interaction.response.send_message(
-            ephemeral=True,
-            embed=discord.Embed(
-                description=f"<:white_checkmark:1096793014287995061> Removed {whitelist.mention} from whitelist",
-                colour=discord.Colour.green(),
-            ),
-        )
-
-        wlist.remove(whitelist.id)
-        DataManager.edit_guild_data(interaction.guild.id, "whitelist", wlist)
+        elif whitelist.id in wlist:
+            wlist.remove(whitelist.id)
+            await DataManager.edit_whitelist(interaction.guild.id, wlist)
+            await interaction.response.send_message(
+                ephemeral=True,
+                embed=discord.Embed(
+                    description=f"<:white_checkmark:1096793014287995061> Removed {whitelist.mention} from whitelist",
+                    colour=discord.Colour.green(),
+                ),
+            )
 
         if isinstance(whitelist, discord.Role):
             return
@@ -497,12 +509,14 @@ class ServerManagement(commands.Cog):
     async def set_welcome_message(self, interaction: discord.Interaction, message: str):
         await interaction.response.send_message(
             embed=discord.Embed(
-                description=f"<:white_checkmark:1096793014287995061> Set the welcome message to: \n {message}",
+                description=f"<:white_checkmark:1096793014287995061> Set the welcome message to: \n ```{message}```",
                 colour=discord.Colour.green(),
             )
         )
 
-        DataManager.edit_guild_data(interaction.guild.id, "welcome_message", message)
+        await DataManager.edit_guild_data(
+            interaction.guild.id, "welcome_message", message
+        )
 
     @app_commands.command(
         name="disable_welcome_message",
@@ -511,7 +525,7 @@ class ServerManagement(commands.Cog):
     @app_commands.guild_only()
     @app_commands.default_permissions(administrator=True)
     async def disable_welcome_message(self, interaction: discord.Interaction):
-        DataManager.edit_guild_data(interaction.guild.id, "welcome_message", None)
+        await DataManager.edit_guild_data(interaction.guild.id, "welcome_message", None)
 
         await interaction.response.send_message(
             embed=discord.Embed(
