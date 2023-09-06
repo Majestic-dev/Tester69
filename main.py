@@ -1,57 +1,49 @@
+import asyncio
 import os
-from typing import Literal, Optional
+import traceback
 
 import discord
+from discord import app_commands
 from discord.ext import commands
 
 from utils import DataManager
 
-DataManager(
+DataManager.setup(
     [
-        ("guilds", "data/guilds.json", {}),
-        ("users", "data/users.json", {}),
         (
-            "config",
             "data/config.json",
-            {"token": None, "global_whitelist": [], "owners": []},
+            {
+                "token": None,
+                "postgres_user": None,
+                "postgres_password": None,
+                "postgres_database": None,
+                "giphy_key": None,
+                "unsplash_key": None,
+                "weather_api_key": None,
+            },
         ),
         (
-            "economy",
             "data/economy.json",
             {
-                "hunt_items": {
-                    "skunk": {"chance": 20, "price": 50},
-                    "pig": {"chance": 15, "price": 100},
-                    "cow": {"chance": 10, "price": 200},
-                    "deer": {"chance": 7, "price": 300},
-                    "bear": {"chance": 5, "price": 400},
-                    "junk": {"chance": 2, "price": 25},
-                    "treasure": {"chance": 0.5, "price": 10000},
+                "items": {
+                    "Example Item": {
+                        "name": "Example Item",
+                        "description": "> This is an example item, not meant to be used",
+                        "type": "Example",
+                        "sell price": 0,
+                        "buy price": 0,
+                        "emoji": "Use a discord emoji here",
+                        "emoji_id": 0,
+                    },
                 },
-                "fish_items": {
-                    "common fish": {"chance": 45, "price": 10},
-                    "uncommon fish": {"chance": 30, "price": 20},
-                    "rare fish": {"chance": 15, "price": 50},
-                    "epic fish": {"chance": 7, "price": 200},
-                    "legendary fish": {"chance": 1, "price": 1000},
-                    "junk": {"chance": 0.9, "price": 25},
-                    "treasure": {"chance": 0.1, "price": 10000},
-                    "seaweed": {"chance": 1, "price": 25},
+                "hunting items": {
+                    "Example Item": {"chance": 0},
                 },
-                "sell_prices": {
-                    "common fish": 5,
-                    "uncommon fish": 10,
-                    "rare fish": 25,
-                    "epic fish": 100,
-                    "legendary fish": 500,
-                    "junk": 15,
-                    "treasure": 10000,
-                    "seaweed": 15,
-                    "skunk": 5,
-                    "pig": 10,
-                    "cow": 25,
-                    "deer": 150,
-                    "bear": 200,
+                "fishing items": {
+                    "Example Item": {"chance": 0},
+                },
+                "shop items": {
+                    "Example Item": {"price": 0},
                 },
             },
         ),
@@ -61,7 +53,9 @@ DataManager(
 if "fonts" not in os.listdir("."):
     os.mkdir("fonts")
 
-bot = commands.Bot(command_prefix="'", intents=discord.Intents.all())
+bot = commands.AutoShardedBot(
+    command_prefix="'", owner_id=705435835306213418, intents=discord.Intents.all()
+)
 bot.remove_command("help")
 
 
@@ -69,55 +63,93 @@ bot.remove_command("help")
 async def on_ready():
     await bot.change_presence(
         status=discord.Status.online,
-        activity=discord.Game(f"/help - https://discord.gg/VsDDf8YKBV"),
+        activity=discord.Game(f"/help | https://discord.gg/VsDDf8YKBV"),
     )
 
-    for root, _, files in os.walk("extensions"):
-        for file in files:
-            if file.endswith(".py"):
-                await bot.load_extension(root.replace("\\", ".") + "." + file[:-3])
-
+    try:
+        for root, _, files in os.walk("extensions", "test"):
+            for file in files:
+                if file.endswith(".py"):
+                    await bot.load_extension(root.replace("\\", ".") + "." + file[:-3])
+    except commands.ExtensionAlreadyLoaded:
+        pass
     await bot.tree.sync()
 
 
-@commands.guild_only()
-@commands.is_owner()
-async def sync(
-    ctx: commands.Context,
-    guilds: commands.Greedy[discord.Object],
-    spec: Optional[Literal["~", "*", "^"]] = None,
-) -> None:
-    if not guilds:
-        if spec == "~":
-            synced = await ctx.bot.tree.sync(guild=ctx.guild)
-        elif spec == "*":
-            ctx.bot.tree.copy_global_to(guild=ctx.guild)
-            synced = await ctx.bot.tree.sync(guild=ctx.guild)
-        elif spec == "^":
-            ctx.bot.tree.clear_commands(guild=ctx.guild)
-            await ctx.bot.tree.sync(guild=ctx.guild)
-            synced = []
-        else:
-            synced = await ctx.bot.tree.sync()
-
-        await ctx.send(
-            f"Synced {len(synced)} commands {'globally' if spec is None else 'to the current guild.'}"
+@bot.tree.error
+async def on_app_command_error(
+    interaction: discord.Interaction, error: app_commands.AppCommandError
+):
+    if isinstance(error, app_commands.CommandOnCooldown):
+        return await interaction.response.send_message(
+            delete_after=error.retry_after,
+            ephemeral=True,
+            embed=discord.Embed(
+                description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.0f} seconds before using this command again.",
+                colour=discord.Colour.red(),
+            ),
         )
+    else:
+        return await bot.get_user(bot.owner_id).send(
+            embed=discord.Embed(
+                title="Error",
+                description=f"```py\n{traceback.format_exc()}\n```",
+                colour=discord.Colour.red(),
+            )
+        )
+
+
+@bot.event
+async def on_error(event, *args, **kwargs):
+    return await bot.get_user(bot.owner_id).send(
+        embed=discord.Embed(
+            title="Error",
+            description=f"```py\n{traceback.format_exc()}\n```",
+            colour=discord.Colour.red(),
+        )
+    )
+
+
+@bot.event
+async def on_command_error(ctx, error):
+    if isinstance(error, commands.CommandNotFound):
         return
 
-    ret = 0
-    for guild in guilds:
-        try:
-            await ctx.bot.tree.sync(guild=guild)
-        except discord.HTTPException:
-            pass
-        else:
-            ret += 1
+    if isinstance(error, commands.NotOwner):
+        return await ctx.reply(
+            embed=discord.Embed(
+                description="<:white_cross:1096791282023669860> You are not the owner of this bot",
+                colour=discord.Colour.red(),
+            )
+        )
 
-    await ctx.send(f"Synced the tree to {ret}/{len(guilds)}.")
+    else:
+        return await bot.get_user(bot.owner_id).send(
+            embed=discord.Embed(
+                description=f"```py\n{traceback.format_exc()}\n```",
+                colour=discord.Colour.red(),
+            )
+        )
 
 
-if DataManager.get("config", "token") is None:
-    print("Please set your bot's token in data/config.json.")
-else:
-    bot.run(DataManager.get("config", "token"))
+async def main():
+    await DataManager.initialise()
+    if None in [
+        DataManager.get("config", key)
+        for key in [
+            "token",
+            "postgres_user",
+            "postgres_password",
+            "postgres_database",
+            "giphy_key",
+            "unsplash_key",
+            "weather_api_key",
+        ]
+    ]:
+        print(f"Please fill out the config.json file before running {__file__}")
+    else:
+        await bot.start(DataManager.get("config", "token"))
+
+
+if __name__ == "__main__":
+    asyncio.run(main())

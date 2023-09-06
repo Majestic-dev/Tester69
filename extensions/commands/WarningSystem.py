@@ -8,97 +8,132 @@ from utils import DataManager
 
 
 class WarningSystem(commands.Cog):
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: commands.AutoShardedBot):
         self.bot = bot
-        
 
     @app_commands.command(
         name="warn", description="Warns the mentioned user with a custom warning reason"
     )
+    @app_commands.guild_only()
     @app_commands.default_permissions(manage_messages=True)
+    @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id))
+    @app_commands.describe(
+        user="The user to warn",
+        reason="The reason for the warning",
+    )
     async def warn(
-        self, interaction: discord.Interaction, user: discord.User, *, reason: str
+        self, interaction: discord.Interaction, user: discord.User, reason: str
     ):
-        user_id = str(user.id)
-        DataManager.register_warning(
+        if user.id == interaction.user.id:
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    description="<:white_cross:1096791282023669860> You can't warn yourself",
+                    colour=discord.Colour.red(),
+                )
+            )
+
+        if interaction.user.top_role <= user.top_role:
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    description="<:white_cross:1096791282023669860> You can't warn your superiors",
+                    colour=discord.Colour.red(),
+                )
+            )
+
+        bot = interaction.guild.get_member(self.bot.user.id)
+        if bot.top_role <= user.top_role:
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    description="<:white_cross:1096791282023669860> I can't warn my superiors",
+                    colour=discord.Colour.red(),
+                )
+            )
+
+        await DataManager.register_warning(
             interaction.guild.id,
-            user_id,
-            f"{reason} - Warned by {interaction.user.name}#{interaction.user.discriminator}",
+            user.id,
+            f"{reason} - Warned by {interaction.user.name}",
+        )
+
+        self.bot.dispatch(
+            "warning",
+            guild=interaction.guild,
+            warned=user,
+            warner=interaction.user,
+            reason=reason,
         )
 
         return await interaction.response.send_message(
             embed=discord.Embed(
-                title="Warning",
-                description=(f"{user.name} has been warned for: ```{reason}```"),
-                timestamp=datetime.utcnow(),
-                colour=discord.Colour.red(),
+                description=f"<:white_checkmark:1096793014287995061> {user.name} has been warned",
+                colour=discord.Colour.green(),
             )
         )
 
     @app_commands.command(name="delwarn", description="Deletes the warning by UUID")
+    @app_commands.guild_only()
     @app_commands.default_permissions(manage_messages=True)
+    @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id))
+    @app_commands.describe(
+        uuid="The UUID of the warning to delete, use the `/warnings <user>` command to get the UUID",
+    )
     async def delwarn(self, interaction: discord.Interaction, uuid: str):
-        warnings = DataManager.get_guild_data(interaction.guild.id)["warned_users"]
+        delwarn = await DataManager.delete_warning(interaction.guild.id, uuid)
 
-        for user in warnings:
-            for index, warn in enumerate(warnings[user]):
-                if uuid in warn:
-                    warnings[user].pop(index)
-                    if len(warnings[user]) <= 0:
-                        warnings.pop(user)
-                    DataManager.save("guilds")
-                    return await interaction.response.send_message(
-                        embed=discord.Embed(
-                            title="Warning Deleted",
-                            description=(f"Deleted warning ```{uuid}```"),
-                            timestamp=datetime.utcnow(),
-                            colour=discord.Colour.green(),
-                        )
-                    )
-
-        return await interaction.response.send_message(
-            embed=discord.Embed(
-                title="Warning Not Found",
-                description=(f"Couldn't find warning with the UUID ```{uuid}```"),
-                timestamp=datetime.utcnow(),
-                colour=discord.Colour.orange(),
+        if delwarn == True:
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    description=f"<:white_checkmark:1096793014287995061> Deleted warning ```{uuid}```",
+                    colour=discord.Colour.green(),
+                )
             )
-        )
+        elif delwarn == False:
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    description=f"<:white_cross:1096791282023669860> Couldn't find warning with the UUID ```{uuid}```",
+                    colour=discord.Colour.orange(),
+                )
+            )
 
     @app_commands.command(
         name="warnings", description="get the warning list of the user"
     )
+    @app_commands.guild_only()
     @app_commands.default_permissions(manage_messages=True)
+    @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id))
+    @app_commands.describe(
+        member="The member to get the warnings of",
+    )
     async def warnings(self, interaction: discord.Interaction, member: discord.Member):
+        guild_data = await DataManager.get_guild_data(interaction.guild.id)
+        warnings = await DataManager.get_user_warnings(interaction.guild.id, member.id)
 
-        warnings = DataManager.get_guild_data(interaction.guild.id)["warned_users"]
-
-        if len(warnings) == 0:
+        if warnings is None or len(warnings) == 0:
             return await interaction.response.send_message(
                 embed=discord.Embed(
-                    title="Warnings",
-                    description=f"{member.mention} has no warnings",
-                    timestamp=datetime.utcnow(),
+                    description=f"<:white_checkmark:1096793014287995061> {member.mention} has no warnings",
                     colour=discord.Colour.green(),
                 )
             )
-        
+
         e = discord.Embed(
             title="Warnings",
             timestamp=datetime.utcnow(),
             colour=discord.Colour.orange(),
         )
-
-        for user in warnings:
-            for warn in warnings[user]:
-                for warn_uuid in warn:
-                    e.add_field(
-                        name=f"UUID: `{warn_uuid}`",
-                        value=f"\n{warn[warn_uuid]}",
-                        inline=False
-                    )
-        e.set_author(name=member.name, icon_url=member.avatar.url)
+        for warn in warnings:
+            for warn_uuid in warn:
+                e.add_field(
+                    name=f"UUID: `{warn_uuid}`",
+                    value=f"\n{warn[warn_uuid]}",
+                    inline=False,
+                )
+        if member.avatar is None:
+            e.set_author(name=member.name, icon_url=member.display_avatar.url)
+        else:
+            e.set_author(name=member.name, icon_url=member.avatar.url)
         await interaction.response.send_message(embed=e)
 
-async def setup(bot: commands.Bot):
+
+async def setup(bot: commands.AutoShardedBot):
     await bot.add_cog(WarningSystem(bot))

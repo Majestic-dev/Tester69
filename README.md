@@ -4,39 +4,36 @@
 
 A general-use discord bot coded in discord.py
 
-# Big shoutout to kaJob-dev on github (Jakob#2222 on discord) for guiding me on this project!
+# Big shoutout to [kaJob-dev](https://github.com/kaJob-dev) (kajob. on discord) for guiding me on this project!
 
 # Installation
-### Requirements
-- [Python 3.8 or higher](https://www.python.org/downloads/)
-- discord.py, version 2.1.0 or higher 
-    ```bash
-    # WINDOWS 
-    python -m pip install -U discord.py
 
-    # LINUX
-    python3 -m pip install -U discord.py
+## Clone the [repository](https://github.com/Majestic-dev/Tester69/)
+```bash
+git clone https://github.com/Majestic-dev/Tester69.git
+```
 
-    # MACOS
-    python3 -m pip install -U discord.py
-    ```
-- Python Pillow (Install with pip)
-    ```bash
-    # WINDOWS 
-    pip install pillow
+## Install [requirements.txt](requirements.txt)
+```bash
+pip install -r requirements.txt
+```
+or
+```bash
+python -m pip install -r requirements.txt
+```
 
-    # LINUX
-    pip3 install pillow
+## Running the bot
 
-    # MACOS
-    pip3 install pillow
-    ```
+### change your current directory to the cloned repository
+```bash
+cd Tester69
+```
 
-### Guide
-1. Clone the repository
-2. Run the main.py file
-
-    Running the main.py file for the first time will create a new directory named "data" and 3 new files in it. It should then ask you to enter your bot token. You can see how to get a bot token [here](https://www.youtube.com/watch?v=aI4OmIbkJH8). There will also be a new directory named "fonts", there you can place any fonts you'd like that have the .ttf extension. This will be used for [Pillow](https://pillow.readthedocs.io/en/stable/index.html#) image generation for the verification system. Enter your bot token in the data/config.json file and save the file. Then run the main.py file again. It should now work. If you don't want to run the main file in a code editor you can run it using the [start.bat](start.bat) file.
+v1.2
+### run the file
+```bash
+python main.py
+```
 
 # Contributing 
 All contributions are welcome! If you'd like to contribute, please make a pull request.
@@ -46,48 +43,55 @@ Please make sure that your code is formatted correctly before making a new pull 
 # License 
 This project is licensed under the Apache License - see the [LICENSE](LICENSE) file for details
 
-# Current Version Changelogs
+v1.2
+# Version Changelogs
 
     - Verification System
-        * Optimised verification system setup (now only requires 1 command)
-        * Made the verification system more secure (code will be on images that are noisy and blurred)
-        * After the first startup you can add more fonts to the fonts folder (has to be a .ttf file)
-        * You can now disable verification if you wish to
+        * Optimized and improved the verification system
     
     - Warning System
         * Warnings are now per server, not global
     
     - Server Management
-        * Added a word blacklist (blacklist the words you don't want being sent)
-        * Added a user/role whitelist (whitelist the users/roles you want to be able to bypass the word blacklist)
-        * Added a welcome message that will be sent to users when they join the server (if a server has enabled verification, it will be sent after they verify)
+        * Improved the server management system (adding/removing blacklisted words and whitelisted users/roles)
     
     - Main Commands
         * Updated the help command to list all the commands
 
     - Economy
-        * Changed the add and subtract commands to text commands, because a way to abuse it was found (change the guild permissions of that command)
+        * Improve the security of some commands
     
     - Logging System
-        * More things are now logged (message deletion, message editing). This will be improved and updated
+        * A logging system to log server actions
 
-    - Main
-        * On first startup, a new folder (fonts) will be created
+## v1.2
 
-    - Listeners
-        * Moved some listeners to another file to make other files smaller in size
+    - Moderation System
+        * Improved muting and unmuting
+        * Use the dispatch event for certain actions
+
+v1.2
+    - Logging System
+        * Log deletion protection
+        * Log moderation actions inside Loggingsystem.py using dispatch events instead of inside the moderation commands
+
+    - Miscellaneous
+        * Many miscellaneous commands to search random stuff, get random images, gifs, etc.
+
+    - Commands
+        * Cooldowns for most commands using discord's built in cooldown system
+        * Cooldowns using the new cooldown handler for longer duration commands (hourly, daily, weekly, monthly)
+
+    - Economy
+        * Updated all the economy items and a command to view the descriptions of items
+        * Banking system and a global leaderboard
+        * Archived all gambling commands to ensure a safe future for Tester69 on discord, and blackjack being broken anyways
+    
+    - Database
+        * Migrated from a JSON database (if you call it a one) to PostgreSQL (asyncpg)
 
 # TODO
 
-## v1.2 Focused On Economy And Some Fixes/Reworking To Moderation
+## V1.3 Focused On Reworking Some Systems
 
-- [ ] Migrate from json to a binary database.
-- [ ] Add a shop for economy.
-- [ ] Redo fishing and hunting.
-- [ ] Add a way to auction things (basically like Dank Memer).
-- [ ] More gambling games.
-- [ ] Add some customization to the moderation system (for example setting the muted role).
-
-## V1.3 Focused On Miscellaneous/Fun
-
-- [ ] Think of the update notes for this version.
+- [ ] Rework the Economy system to be more fun and interactive

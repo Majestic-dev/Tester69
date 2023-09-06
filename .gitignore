@@ -1,4 +1,9 @@
-data
+\venv
+\.venv
+\data
+\test
 __pycache__
-Misc.py
 fonts
+test.py
+WorldRender.py
+data_manager_new.py

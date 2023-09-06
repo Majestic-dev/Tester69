@@ -63,15 +63,16 @@ class Verification(commands.GroupCog):
         name="disable",
         description="Disable the verification system",
     )
+    @app_commands.guild_only()
     @app_commands.default_permissions(administrator=True)
     async def disable_verification(self, interaction: discord.Interaction):
-        verification_channel = DataManager.get_guild_data(interaction.guild.id)[
+        verification_channel = await DataManager.get_guild_data(interaction.guild.id)[
             "verification_channel_id"
         ]
-        verification_logs_channel = DataManager.get_guild_data(interaction.guild.id)[
-            "verification_logs_channel_id"
-        ]
-        unverified_role = DataManager.get_guild_data(interaction.guild.id)[
+        verification_logs_channel = await DataManager.get_guild_data(
+            interaction.guild.id
+        )["verification_logs_channel_id"]
+        unverified_role = await DataManager.get_guild_data(interaction.guild.id)[
             "unverified_role_id"
         ]
 
@@ -82,35 +83,40 @@ class Verification(commands.GroupCog):
         ):
             return await interaction.response.send_message(
                 embed=discord.Embed(
-                    title="Verification Disabled",
-                    description="Verification is already disabled or has not been interacted with for this server",
-                    timestamp=datetime.utcnow(),
+                    description="<:white_cross:1096791282023669860> Verification is already disabled or has not been interacted with for this server",
                     colour=discord.Colour.orange(),
                 )
             )
 
         await interaction.response.send_message(
             embed=discord.Embed(
-                title="Verification Disabled",
-                description="Verification has been disabled for this server",
-                timestamp=datetime.utcnow(),
+                description="<:white_checkmark:1096793014287995061> Verification has been disabled for this server",
                 colour=discord.Colour.green(),
             )
         )
 
-        DataManager.edit_guild_data(
+        await DataManager.edit_guild_data(
             interaction.guild.id, "verification_channel_id", None
         )
-        DataManager.edit_guild_data(
+        await DataManager.edit_guild_data(
             interaction.guild.id, "verification_logs_channel_id", None
         )
-        DataManager.edit_guild_data(interaction.guild.id, "unverified_role_id", None)
+        await DataManager.edit_guild_data(
+            interaction.guild.id, "unverified_role_id", None
+        )
 
     @app_commands.command(
         name="setup",
         description="Setup the verification system",
     )
+    @app_commands.guild_only()
+    @app_commands.checks.cooldown(1, 60, key=lambda i: (i.guild.id, i.user.id))
     @app_commands.default_permissions(administrator=True)
+    @app_commands.describe(
+        verification_channel="The channel where users will send the verification code",
+        verification_logs_channel="The channel where the bot will send the verification logs",
+        unverified_role="The role that will be given to the user when they join the server",
+    )
     async def verification_setup(
         self,
         interaction: discord.Interaction,
@@ -118,75 +124,46 @@ class Verification(commands.GroupCog):
         verification_logs_channel: discord.TextChannel,
         unverified_role: discord.Role,
     ):
-        verification_channel = DataManager.get_guild_data(interaction.guild.id)[
-            "verification_channel_id"
-        ]
-        verification_logs_channel = DataManager.get_guild_data(interaction.guild.id)[
-            "verification_logs_channel_id"
-        ]
-        unverified_role = DataManager.get_guild_data(interaction.guild.id)[
-            "unverified_role_id"
-        ]
-        guild_data = DataManager.get_guild_data(interaction.guild.id)
-        logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
-
-        if logs_channel == None:
-            await interaction.channel.send_message(
-                embed=discord.Embed(
-                    title="No Logs Channel",
-                    description="If you wish to log your actions please set a logging channel `/set_logs_channel`",
-                    timestamp=datetime.utcnow(),
-                    colour=discord.Colour.orange(),
-                )
-            )
-
         verification = discord.Embed(
-            title="Verification Setup",
-            description="Verification has been setup for this server",
-            timestamp=datetime.utcnow(),
+            description="<:white_checkmark:1096793014287995061> Verification has been setup for this server",
             colour=discord.Colour.green(),
         )
         verification.add_field(
             name="Verification Channel",
-            value=f"<#{verification_channel}>",
+            value=f"<#{verification_channel.id}>",
             inline=False,
         )
         verification.add_field(
             name="Verification Logs Channel",
-            value=f"<#{verification_logs_channel}>",
+            value=f"<#{verification_logs_channel.id}>",
             inline=False,
         )
         verification.add_field(
-            name="Unverified Role", value=f"<@&{unverified_role}>", inline=False
+            name="Unverified Role", value=f"<@&{unverified_role.id}>", inline=False
         )
         await interaction.response.send_message(embed=verification)
 
-        DataManager.edit_guild_data(
-            interaction.guild.id, "verification_channel_id", verification_channel
+        await DataManager.edit_guild_data(
+            interaction.guild.id, "verification_channel_id", verification_channel.id
         )
-        DataManager.edit_guild_data(
+        await DataManager.edit_guild_data(
             interaction.guild.id,
             "verification_logs_channel_id",
-            verification_logs_channel,
+            verification_logs_channel.id,
         )
-        DataManager.edit_guild_data(
-            interaction.guild.id, "unverified_role_id", unverified_role
+        await DataManager.edit_guild_data(
+            interaction.guild.id, "unverified_role_id", unverified_role.id
         )
 
     @commands.Cog.listener()
-    async def on_member_join(self, member):
-        guild_data = DataManager.get_guild_data(member.guild.id)
+    async def on_member_join(self, member: discord.Member):
+        if member.bot:
+            return
+        guild_data = await DataManager.get_guild_data(member.guild.id)
         welcome_message = guild_data["welcome_message"]
-        verification_channel = DataManager.get_guild_data(member.guild.id)[
-            "verification_channel_id"
-        ]
-        verification_logs_channel = DataManager.get_guild_data(member.guild.id)[
-            "verification_logs_channel_id"
-        ]
-        unverified_role = discord.utils.get(
-            member.guild.roles,
-            id=guild_data["unverified_role_id"],
-        )
+        verification_channel = guild_data["verification_channel_id"]
+        verification_logs_channel = guild_data["verification_logs_channel_id"]
+        unverified_role = member.guild.get_role(guild_data["unverified_role_id"])
 
         if (
             verification_channel == None
@@ -210,20 +187,26 @@ class Verification(commands.GroupCog):
             self.generate_img(code := str(random.randint(11111, 99999)), member.id)
 
             await member.add_roles(unverified_role)
-            await member.create_dm()
+            dm_channel = await member.create_dm()
 
             try:
                 await dm_channel.send(
-                    f'Please enter the code seen in the image. If the code is too blurry and you can not see it type "reset"',
+                    f'Please enter the code seen in the image. If the code is too blurry and you can not see it type "reset".\n By verifying yourself you accept the rules of the server you are trying to verify in',
                     file=discord.File(f"{member.id}.png"),
                 )
                 os.remove(f"{member.id}.png")
             except:
-                return verification_channel.send(
+                await verification_channel.send(
                     f"{member.mention} Please enable your direct messages to verify yourself, rejoin once done. Thanks!"
                 )
+                await asyncio.sleep(30)
+                return await message.delete()
 
-        check = lambda m: m.channel == dm_channel and m.author == member
+        check = (
+            lambda m: m.channel == dm_channel
+            or m.channel == verification_channel
+            and m.author == member
+        )
         fail_count = 3
 
         while fail_count > 0:
@@ -241,15 +224,18 @@ class Verification(commands.GroupCog):
                     embed=discord.Embed(
                         title="Timeout",
                         description=f"You took too long to enter the verification code. Please rejoin the server and try again: {invite}",
-                        timestamp=datetime.utcnow(),
                         colour=discord.Colour.orange(),
                     )
                 )
 
                 return await member.kick()
 
-            if code in message.content:
-                await member.remove_roles(unverified_role)
+            if message.content == code:
+                try:
+                    await message.delete()
+                    await member.remove_roles(unverified_role)
+                except:
+                    await member.remove_roles(unverified_role)
 
                 verification_logs_channel = self.bot.get_channel(
                     guild_data["verification_logs_channel_id"]
@@ -259,7 +245,14 @@ class Verification(commands.GroupCog):
                     embed=discord.Embed(
                         title="Verification Completed!",
                         description=f"{member.mention} has verified themselves!",
-                        timestamp=datetime.utcnow(),
+                        colour=discord.Colour.green(),
+                    )
+                )
+
+                await dm_channel.send(
+                    embed=discord.Embed(
+                        title="Verification Completed!",
+                        description=f"You have verified yourself in {member.guild.name}",
                         colour=discord.Colour.green(),
                     )
                 )
@@ -276,7 +269,6 @@ class Verification(commands.GroupCog):
                     embed=discord.Embed(
                         title="Verification Cancelled",
                         description=f"Verification cancelled. Please rejoin the server if you'd like to verify yourself",
-                        timestamp=datetime.utcnow(),
                         colour=discord.Colour.orange(),
                     )
                 )
@@ -285,7 +277,7 @@ class Verification(commands.GroupCog):
                 self.generate_img(code := str(random.randint(11111, 99999)), member.id)
 
                 await dm_channel.send(
-                    f'Please enter the code seen in the image. If the code is too blurry and you can not see it type "reset"',
+                    f'Please enter the code seen in the image. If the code is too blurry and you can not see it type "reset".\n By verifying yourself you accept the rules of the server you are trying to verify in',
                     file=discord.File(f"{member.id}.png"),
                 )
 
@@ -293,7 +285,6 @@ class Verification(commands.GroupCog):
                     embed=discord.Embed(
                         title="Code Reset",
                         description=f"{member.mention}'s code was reset",
-                        timestamp=datetime.utcnow(),
                         colour=discord.Colour.red(),
                     )
                 )
@@ -305,7 +296,6 @@ class Verification(commands.GroupCog):
                     embed=discord.Embed(
                         title="Invalid Code",
                         description=f"Invalid verification code! You have {fail_count} attempts remaining",
-                        timestamp=datetime.utcnow(),
                         colour=discord.Colour.orange(),
                     )
                 )
@@ -313,7 +303,7 @@ class Verification(commands.GroupCog):
                 self.generate_img(code := str(random.randint(11111, 99999)), member.id)
 
                 await dm_channel.send(
-                    f'Please enter the code seen in the image. If the code is too blurry and you can not see it type "reset"',
+                    f'Please enter the code seen in the image. If the code is too blurry and you can not see it type "reset".\n By verifying yourself you accept the rules of the server you are trying to verify in',
                     file=discord.File(f"{member.id}.png"),
                 )
 
@@ -321,7 +311,6 @@ class Verification(commands.GroupCog):
                     embed=discord.Embed(
                         title="Code Reset",
                         description=f"{member.mention}'s code was reset",
-                        timestamp=datetime.utcnow(),
                         colour=discord.Colour.red(),
                     )
                 )
@@ -333,9 +322,7 @@ class Verification(commands.GroupCog):
 
         await dm_channel.send(
             embed=discord.Embed(
-                title="Verification Failed",
-                description=f"You entered the verification code wrong too many times. Please rejoin the server and try again: {invite}",
-                timestamp=datetime.utcnow(),
+                description=f"<:white_cross:1096791282023669860> You entered the verification code wrong too many times. Please rejoin the server and try again: {invite}",
                 colour=discord.Colour.orange(),
             )
         )

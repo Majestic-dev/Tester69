@@ -3,18 +3,66 @@ from datetime import datetime
 import discord
 from discord import app_commands
 from discord.ext import commands
+from discord.ui import Select, View
+
+
+class HelpSelect(Select):
+    def __init__(self, bot: commands.Bot):
+        super().__init__(
+            placeholder="Choose a command category",
+            options=[
+                discord.SelectOption(label=cog_name, description=cog.__doc__)
+                for cog_name, cog in bot.cogs.items()
+                if cog.__cog_app_commands__
+                and cog_name not in ["HelpSelect", "Gambling"]
+            ],
+        )
+
+        self.bot = bot
+
+    async def callback(self, interaction: discord.Interaction):
+        cog = self.bot.get_cog(self.values[0])
+        assert cog
+
+        commands_mixer = []
+        for i in cog.walk_app_commands():
+            commands_mixer.append(i)
+
+        embed = discord.Embed(
+            title=f"{cog.__cog_name__} Commands",
+            description="\n".join(
+                f"**/{command.name}:** `{command.description}`"
+                for command in commands_mixer
+            ),
+            colour=discord.Colour.light_gray(),
+        ).set_footer(
+            text=f"{len(commands_mixer)} {cog.__cog_name__} Commands | Credits to: CodeWithPranoy on Youtube"
+        )
+
+        view = View().add_item(HelpSelect(self.bot))
+        await interaction.response.edit_message(embed=embed, view=view)
 
 
 class MainStuff(commands.Cog):
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: commands.AutoShardedBot):
         self.bot = bot
+
+    @app_commands.command(name="help", description="Get the basic help for commands")
+    async def help(self, interaction: discord.Interaction):
+        embed = discord.Embed(
+            title="Help Command",
+            description="Choose a slash command category you need help for",
+            colour=discord.Colour.light_gray(),
+        )
+
+        view = View().add_item(HelpSelect(self.bot))
+        await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
 
     @app_commands.command(name="ping", description="Show my ping")
     async def ping(self, interaction: discord.Interaction):
         Ping = discord.Embed(
             title="Pong!",
             description=f"🏓 My ping is {round(self.bot.latency * 1000)}ms 🏓",
-            timestamp=datetime.utcnow(),
             colour=discord.Colour.green(),
         )
 
@@ -25,163 +73,11 @@ class MainStuff(commands.Cog):
         Prefix = discord.Embed(
             title="Prefix",
             description="Tester69 uses slash commands, enter `/` or `/help` and you will see all the available commands",
-            timestamp=datetime.utcnow(),
             colour=discord.Colour.light_gray(),
         )
 
         await interaction.response.send_message(embed=Prefix, ephemeral=True)
 
-    @app_commands.command(name="help", description="Get the basic help for commands")
-    async def help(self, interaction: discord.Interaction):
-        invite = await interaction.channel.create_invite(
-            max_age=0, max_uses=1, unique=True
-        )
 
-        help = discord.Embed(
-            title="Tetser69's command list",
-            timestamp=datetime.utcnow(),
-            colour=discord.Colour.darker_gray(),
-        )
-
-        help.add_field(name="Moderation", value="`/moderation`", inline=True)
-        help.add_field(name="Economy", value="`/economy`", inline=True)
-        help.add_field(name="Gambling", value="`/gambling`", inline=True)
-        help.add_field(
-            name="Server Management", value="`/servermanagement`", inline=True
-        )
-        help.add_field(name="Main", value="`/main`", inline=True)
-        help.add_field(
-            name="Support",
-            value=f"Need more help? Join our community [server]({invite}) to get more help",
-            inline=False,
-        )
-
-        await interaction.response.send_message(embed=help, ephemeral=True)
-
-    @app_commands.command(
-        name="moderation", description="Get all current moderation commands"
-    )
-    async def moderation(self, interaction: discord.Interaction):
-        moderation = discord.Embed(
-            title="Tester69's moderation commands",
-            timestamp=datetime.utcnow(),
-            colour=discord.Colour.light_gray(),
-        )
-        moderation.add_field(name="Kick", value="`/kick`", inline=True)
-        moderation.add_field(name="Mute", value="`/mute`", inline=True)
-        moderation.add_field(name="Unmute", value="`/unmute`", inline=True)
-        moderation.add_field(name="Ban", value="`/ban`", inline=True)
-        moderation.add_field(name="Unban", value="`/unban`", inline=True)
-        moderation.add_field(name="Warnings", value="`/warnings`", inline=True)
-        moderation.add_field(name="Warn", value="`/warn`", inline=True)
-        moderation.add_field(name="Delwarn", value="`/delwarn`", inline=True)
-
-        await interaction.response.send_message(embed=moderation, ephemeral=True)
-
-    @app_commands.command(
-        name="economy", description="Get all current economy commands"
-    )
-    async def economy(self, interaction: discord.Interaction):
-        economy = discord.Embed(
-            title="Tester69's economy commands",
-            timestamp=datetime.utcnow(),
-            colour=discord.Colour.light_grey(),
-        )
-        economy.add_field(name="Balance", value="`/balance`", inline=True)
-        economy.add_field(name="Inventory", value="`/inventory`", inline=True)
-        economy.add_field(name="Fish", value="`/fish`", inline=True)
-        economy.add_field(name="Hourly", value="`/hourly`", inline=True)
-        economy.add_field(name="Monthly", value="`/monthly`", inline=True)
-        economy.add_field(name="Yearly", value="`/yearly`", inline=True)
-        economy.add_field(name="Sell", value="`/sell`", inline=True)
-
-        await interaction.response.send_message(embed=economy, ephemeral=True)
-
-    @app_commands.command(
-        name="gambling", description="Get all current gambling commands"
-    )
-    async def gambling(self, interaction: discord.Interaction):
-        gambling = discord.Embed(
-            title="Tester69's gambling commands",
-            timestamp=datetime.utcnow(),
-            colour=discord.Colour.light_grey(),
-        )
-        gambling.add_field(name="Gamble", value="`/gamble`", inline=True)
-        gambling.add_field(name="Blackjack", value="`/blackjack`", inline=True)
-        gambling.add_field(name="Snakeeyes", value="`/snakeeyes`", inline=True)
-        gambling.add_field(name="Coinflip", value="`/coinflip`", inline=True)
-
-        await interaction.response.send_message(embed=gambling, ephemeral=True)
-
-    @app_commands.command(name="main", description="Get all current main commands")
-    async def misc(self, interaction: discord.Interaction):
-        misc = discord.Embed(
-            title="Tester69's misc commands",
-            timestamp=datetime.utcnow(),
-            colour=discord.Colour.light_grey(),
-        )
-        misc.add_field(name="Ping", value="`/ping`", inline=True)
-        misc.add_field(name="Prefix", value="`/prefix`", inline=True)
-        misc.add_field(name="Help", value="`/help`", inline=True)
-
-        await interaction.response.send_message(embed=misc, ephemeral=True)
-
-    @app_commands.command(
-        name="servermanagement",
-        description="Get all current server management commands",
-    )
-    async def servermanagement(self, interaction: discord.Interaction):
-        servermanagement = discord.Embed(
-            title="Tester69's server management commands",
-            timestamp=datetime.utcnow(),
-            colour=discord.Colour.light_grey(),
-        )
-
-        servermanagement.add_field(
-            name="Set Logging Channel", value="`/set_logging_channel`", inline=True
-        )
-        servermanagement.add_field(
-            name="Disable Logging System", value="`/logging disable`", inline=True
-        )
-        servermanagement.add_field(
-            name="Setup Verification", value="`/verification setup`", inline=True
-        )
-        servermanagement.add_field(
-            name="Disable Verification", value="`/verification disable`", inline=True
-        )
-        servermanagement.add_field(name="Slowmode", value="`/slowmode`", inline=True)
-        servermanagement.add_field(
-            name="Create A Channel", value="`/create_channel`", inline=True
-        )
-        servermanagement.add_field(
-            name="Delete A Channel", value="`/delete_channel`", inline=True
-        )
-        servermanagement.add_field(name="Purge", value="`/purge`", inline=True)
-        servermanagement.add_field(
-            name="Add A Blacklisted Word", value="`/add_blacklisted_word`", inline=True
-        )
-        servermanagement.add_field(
-            name="Remove A Blacklisted Word",
-            value="`/remove_blacklisted_word`",
-            inline=True,
-        )
-        servermanagement.add_field(
-            name="Add A Whitelisted User", value="`/whitelist_add`", inline=True
-        )
-        servermanagement.add_field(
-            name="Remove A Whitelisted User", value="`/whitelist_remove`", inline=True
-        )
-        servermanagement.add_field(
-            name="Set A Welcome Message", value="`/set_welcome_message`", inline=True
-        )
-        servermanagement.add_field(
-            name="Disable Welcome Message",
-            value="`/disable_welcome_message`",
-            inline=True,
-        )
-
-        await interaction.response.send_message(embed=servermanagement, ephemeral=True)
-
-
-async def setup(bot: commands.Bot):
+async def setup(bot: commands.AutoShardedBot):
     await bot.add_cog(MainStuff(bot))
