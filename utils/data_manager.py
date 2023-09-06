@@ -2,182 +2,382 @@ import datetime
 import json
 import os
 import uuid
-from typing import Any, Optional
+from dataclasses import dataclass
+from typing import Any
+
+import asyncpg
+
+
+@dataclass
+class Inventory:
+    id: int
+    items: dict[str, Any] = None
+
+
+@dataclass
+class User:
+    id: int
+    inventory: dict[str, Any] = None
+    cooldowns: dict[str, Any] = None
+    balance: int = None
+    bank: int = None
+
+
+@dataclass
+class Guild:
+    id: int
+    muted_role_id: int = None
+    muted_user_roles: dict[str, Any] = None
+    unverified_role_id: int = None
+    verification_channel_id: int = None
+    verification_logs_channel_id: int = None
+    logs_channel_id: int = None
+    appeal_link: str = None
+    blacklisted_words: list[str] = None
+    whitelist: list[int] = None
+    welcome_message: str = None
+    warned_users: dict[str, Any] = None
 
 
 class DataManager:
-    __data = {}
+    guilds: dict[str, Guild] = {}
+    users: dict[str, User] = {}
+    __data: dict[str, str] = {}
+    initialised = False
 
-    def __init__(self, paths: list[tuple[str, str]]) -> None:
-        for name, path, default in paths:
-            if not os.path.exists(os.path.dirname(path)):
-                os.mkdir(os.path.dirname(path))
+    @classmethod
+    def setup(cls, paths: list[tuple[str, str, str]]) -> None:
+        for path in paths:
+            path, default = path
 
-            if not os.path.isfile(path):
-                with open(path, "w") as f:
-                    json.dump(default, f, indent=4)
+            if not os.path.exists(path):
+                if not os.path.exists(os.path.dirname(path)):
+                    os.makedirs(os.path.dirname(path))
 
-            with open(path, "r") as f:
-                self.__data[name] = json.load(f)
+                with open(path, "w") as file:
+                    file.write(json.dumps(default, indent=4))
+
+    @classmethod
+    async def initialise(cls) -> None:
+        for root, _, files in os.walk(os.curdir):
+            for file in files:
+                if not file.endswith(".json"):
+                    continue
+
+                with open(os.path.join(root, file), "r") as f:
+                    cls.__data[file[:-5]] = json.load(f)
+
+        DataManager.initialised = True
+
+        cls.db_connection = await asyncpg.create_pool(
+            user=DataManager.get("config", "postgres_user"),
+            host="127.0.0.1",
+            password=DataManager.get("config", "postgres_password"),
+            database=DataManager.get("config", "postgres_database"),
+        )
+
+        await cls.db_connection.execute(
+            """CREATE TABLE IF NOT EXISTS guilds (
+                id bigint PRIMARY KEY,
+                unverified_role_id bigint,
+                verification_channel_id bigint,
+                verification_logs_channel_id bigint,
+                logs_channel_id bigint,
+                appeal_link TEXT,
+                blacklisted_words TEXT ARRAY DEFAULT '{}'::text[],
+                whitelist bigint ARRAY DEFAULT '{}'::bigint[],
+                welcome_message TEXT,
+                warned_users JSONB
+            );"""
+        )
+
+        await cls.db_connection.execute(
+            """CREATE TABLE IF NOT EXISTS users (
+                id bigint PRIMARY KEY,
+                inventory JSONB,
+                cooldowns JSONB,
+                balance bigint DEFAULT 0,
+                bank bigint DEFAULT 0
+            );"""
+        )
 
     @classmethod
     def get(cls, path: str, key: str) -> Any:
-        return cls.__data[path].get(key, None)
+        return cls.__data.get(path, {}).get(key, None)
 
     @classmethod
-    def set(cls, path: str, key: str, value: Any) -> None:
-        cls.__data[path][key] = value
-        cls.save(path)
+    async def get_all_guilds(cls) -> None:
+        async with cls.db_connection.acquire():
+            rows = await cls.db_connection.fetch("SELECT id FROM guilds")
+            return [row["id"] for row in rows]
 
     @classmethod
-    def register_warning(cls, guild_id, user_id, warning) -> None:
-        guild_data = cls.get_guild_data(guild_id)
+    async def get_guild_data(cls, guild_id: int) -> None:
+        async with cls.db_connection.acquire():
+            if guild_id not in await cls.get_all_guilds():
+                await cls.add_guild_data(guild_id)
 
-        if str(user_id) in guild_data["warned_users"]:
-            guild_data["warned_users"][str(user_id)].append(
-                {f"{uuid.uuid4()}": f"{warning}"}
+            row = await cls.db_connection.fetchrow(
+                "SELECT * FROM guilds WHERE id = $1", guild_id
             )
-        else:
-            guild_data["warned_users"][str(user_id)] = [
-                {f"{uuid.uuid4()}": f"{warning}"}
-            ]
-
-        cls.save("guilds")
+            return row
 
     @classmethod
-    def save_roles(cls, guild_id, user_id, roles) -> None:
-        guild_data = cls.get_guild_data(guild_id)
-
-        if str(user_id) in guild_data["muted_user_roles"]:
-            guild_data["muted_user_roles"][str(user_id)].append(roles)
-        else:
-            guild_data["muted_user_roles"][str(user_id)] = [roles]
-
-        cls.save("guilds")
+    async def add_guild_data(cls, guild_id: int) -> None:
+        async with cls.db_connection.acquire():
+            await cls.db_connection.execute(
+                "INSERT INTO guilds (id) VALUES ($1)", guild_id
+            )
 
     @classmethod
-    def add_guild_data(cls, guild_id: int) -> None:
-        if str(guild_id) not in cls.__data["guilds"]:
-            cls.__data["guilds"][str(guild_id)] = {
-                "muted_role_id": None,
-                "muted_user_roles": {},
-                "unverified_role_id": None,
-                "verification_channel_id": None,
-                "verification_logs_channel_id": None,
-                "logs_channel_id": None,
-                "appeal_link": None,
-                "blacklisted_words": [],
-                "whitelist": [],
-                "welcome_message": None,
-                "warned_users": {},
-                "giveaways": {},
-            }
+    async def edit_guild_data(cls, guild_id: int, key: str, value: Any) -> None:
+        async with cls.db_connection.acquire():
+            if guild_id not in await cls.get_all_guilds():
+                await cls.add_guild_data(guild_id)
 
-        cls.save("guilds")
+            await cls.db_connection.execute(
+                f"UPDATE guilds SET {key} = $1 WHERE id = $2", value, guild_id
+            )
 
     @classmethod
-    def get_guild_data(cls, guild_id: int) -> Optional[dict]:
-        if str(guild_id) not in cls.__data["guilds"]:
-            cls.add_guild_data(guild_id)
+    async def edit_blacklisted_words(cls, guild_id: int, words: list[str]) -> None:
+        async with cls.db_connection.acquire():
+            if guild_id not in await cls.get_all_guilds():
+                await cls.add_guild_data(guild_id)
 
-        return cls.__data["guilds"].get(str(guild_id), None)
-
-    @classmethod
-    def edit_guild_data(cls, guild_id: int, key: str, value: Any) -> None:
-        if str(guild_id) not in cls.__data["guilds"]:
-            cls.add_guild_data(guild_id)
-
-        cls.__data["guilds"][str(guild_id)][key] = value
-        cls.save("guilds")
+            await cls.db_connection.execute(
+                "UPDATE guilds SET blacklisted_words = $1 WHERE id = $2",
+                words,
+                guild_id,
+            )
 
     @classmethod
-    def add_user_data(cls, user_id: int) -> None:
-        if str(user_id) not in cls.__data["users"]:
-            cls.__data["users"][str(user_id)] = {
-                "inventory": {},
-                "cooldowns": {},
-                "balance": 0,
-                "bank": 0,
-            }
+    async def edit_whitelist(cls, guild_id: int, whitelist: list[int]) -> None:
+        async with cls.db_connection.acquire():
+            if guild_id not in await cls.get_all_guilds():
+                await cls.add_guild_data(guild_id)
 
-        cls.save("users")
+            await cls.db_connection.execute(
+                "UPDATE guilds SET whitelist = $1 WHERE id = $2", whitelist, guild_id
+            )
 
     @classmethod
-    def get_user_data(cls, user_id: int) -> Optional[dict]:
-        if str(user_id) not in cls.__data["users"]:
-            cls.add_user_data(user_id)
+    async def register_warning(cls, guild_id: int, user_id: int, reason: str) -> None:
+        async with cls.db_connection.acquire():
+            if guild_id not in await cls.get_all_guilds():
+                await cls.add_guild_data(guild_id)
 
-        return cls.__data["users"].get(str(user_id), None)
+            existing_warnings = await cls.db_connection.fetchval(
+                "SELECT warned_users FROM guilds WHERE id = $1", guild_id
+            )
 
-    @classmethod
-    def get_all_users(cls) -> dict:
-        return cls.__data["users"]
+            if existing_warnings is None:
+                new_warning = {str(user_id): [{str(uuid.uuid4()): reason}]}
+                await cls.db_connection.execute(
+                    "UPDATE guilds SET warned_users = $1::jsonb WHERE id = $2",
+                    json.dumps(new_warning),
+                    guild_id,
+                )
 
-    @classmethod
-    def edit_user_data(cls, user_id: int, key: str, value: Any) -> None:
-        if str(user_id) not in cls.__data["users"]:
-            cls.add_user_data(user_id)
+            else:
+                warned_user_dict = json.loads(existing_warnings)
+                if str(user_id) in warned_user_dict:
+                    warned_user_dict[str(user_id)].append({str(uuid.uuid4()): reason})
+                else:
+                    warned_user_dict[str(user_id)] = [{str(uuid.uuid4()): reason}]
 
-        cls.__data["users"][str(user_id)][key] = value
-        cls.save("users")
-
-    @classmethod
-    def edit_user_inventory(cls, user_id: int, item: str, amount: int) -> None:
-        if str(user_id) not in cls.__data["users"]:
-            cls.add_user_data(user_id)
-
-        if item not in cls.__data["users"][str(user_id)]["inventory"]:
-            cls.__data["users"][str(user_id)]["inventory"][item] = 0
-
-        cls.__data["users"][str(user_id)]["inventory"][item] += amount
-
-        if cls.__data["users"][str(user_id)]["inventory"][item] <= 0:
-            del cls.__data["users"][str(user_id)]["inventory"][item]
-
-        cls.save("users")
+                await cls.db_connection.execute(
+                    "UPDATE guilds SET warned_users = $1::jsonb WHERE id = $2",
+                    json.dumps(warned_user_dict),
+                    guild_id,
+                )
 
     @classmethod
-    def add_cooldown(
-        cls, user_id: str, command_name: str, cooldown_seconds: int
+    async def delete_warning(cls, guild_id: int, warning_uuid: uuid.uuid4) -> None:
+        async with cls.db_connection.acquire():
+            if guild_id not in await cls.get_all_guilds():
+                await cls.add_guild_data(guild_id)
+
+            warned_users_json = await cls.db_connection.fetchval(
+                "SELECT warned_users FROM guilds WHERE id  = $1 FOR UPDATE", guild_id
+            )
+
+            if warned_users_json:
+                warned_users_dict = json.loads(warned_users_json)
+                found = False
+                for user_warnings in warned_users_dict.values():
+                    for warning in user_warnings:
+                        if warning.get(warning_uuid):
+                            user_warnings.remove(warning)
+                            found = True
+                            break
+
+                if found:
+                    await cls.db_connection.execute(
+                        "UPDATE guilds SET warned_users = $1::jsonb WHERE id = $2",
+                        json.dumps(warned_users_dict),
+                        guild_id,
+                    )
+                    return True
+                else:
+                    return False
+
+    @classmethod
+    async def get_user_warnings(cls, guild_id: int, user_id: int) -> None:
+        async with cls.db_connection.acquire():
+            if guild_id not in await cls.get_all_guilds():
+                await cls.add_guild_data(guild_id)
+
+            warned_users_json = await cls.db_connection.fetchval(
+                "SELECT warned_users FROM guilds where id = $1", guild_id
+            )
+
+            if warned_users_json:
+                warned_users_dict = json.loads(warned_users_json)
+                return warned_users_dict.get(str(user_id), [])
+
+    @classmethod
+    async def get_all_users(cls) -> None:
+        async with cls.db_connection.acquire():
+            rows = await cls.db_connection.fetch("SELECT id FROM users")
+            return [row["id"] for row in rows]
+
+    @classmethod
+    async def get_user_data(cls, user_id: int) -> None:
+        async with cls.db_connection.acquire():
+            if user_id not in await cls.get_all_users():
+                await cls.add_user_data(user_id)
+
+            row = await cls.db_connection.fetchrow(
+                "SELECT * FROM users WHERE id = $1", user_id
+            )
+            return row
+
+    @classmethod
+    async def add_user_data(cls, user_id: int) -> None:
+        async with cls.db_connection.acquire():
+            await cls.db_connection.execute(
+                "INSERT INTO users (id) VALUES ($1)", user_id
+            )
+
+    @classmethod
+    async def edit_user_data(cls, user_id: int, key: str, value: Any) -> None:
+        async with cls.db_connection.acquire():
+            if user_id not in await cls.get_all_users():
+                await cls.add_user_data(user_id)
+
+            await cls.db_connection.execute(
+                f"UPDATE users SET {key} = $1 WHERE id = $2", value, user_id
+            )
+
+    @classmethod
+    async def edit_user_inventory(cls, user_id: int, item: str, amount: int) -> None:
+        async with cls.db_connection.acquire():
+            if user_id not in await cls.get_all_users():
+                await cls.add_user_data(user_id)
+
+            inventory = await cls.db_connection.fetchval(
+                "SELECT inventory FROM users WHERE id = $1", user_id
+            )
+
+            if inventory is None:
+                await cls.db_connection.execute(
+                    "UPDATE users SET inventory = $1::jsonb WHERE id = $2",
+                    json.dumps({item: amount}),
+                    user_id,
+                )
+            else:
+                inventory_dict = json.loads(inventory)
+                if item not in inventory_dict:
+                    inventory_dict[item] = amount
+                    await cls.db_connection.execute(
+                        "UPDATE users SET inventory = $1::jsonb WHERE id = $2",
+                        json.dumps(inventory_dict),
+                        user_id,
+                    )
+                else:
+                    inventory_dict[item] += amount
+
+                    await cls.db_connection.execute(
+                        "UPDATE users SET inventory = $1::jsonb WHERE id = $2",
+                        json.dumps(inventory_dict),
+                        user_id,
+                    )
+
+    @classmethod
+    async def add_cooldown(
+        cls, user_id: int, command_name: str, cooldown_seconds: int
     ) -> None:
-        if str(user_id) not in cls.__data["users"]:
-            cls.add_user_data(user_id)
+        async with cls.db_connection.acquire():
+            if user_id not in await cls.get_all_users():
+                await cls.add_user_data(user_id)
 
-        if "cooldowns" not in cls.__data["users"][str(user_id)]:
-            cls.__data["users"][str(user_id)]["cooldowns"] = {}
+            cooldowns = await cls.db_connection.fetchval(
+                "SELECT cooldowns FROM users WHERE id = $1", user_id
+            )
 
-        end_date = datetime.datetime.utcnow() + datetime.timedelta(
-            seconds=cooldown_seconds
-        )
-        cls.__data["users"][str(user_id)]["cooldowns"][
-            command_name
-        ] = end_date.isoformat()
-        cls.save("users")
+            end_time = datetime.datetime.utcnow() + datetime.timedelta(
+                seconds=cooldown_seconds
+            )
+            new_cooldown = {command_name: end_time.isoformat()}
 
-    @classmethod
-    def remove_cooldown(cls, user_id: str, command_name: str) -> None:
-        if str(user_id) not in cls.__data["users"]:
-            cls.add_user_data(user_id)
+            if cooldowns is None:
+                await cls.db_connection.execute(
+                    "UPDATE users set cooldowns = $1::jsonb WHERE id = $2",
+                    json.dumps(new_cooldown),
+                    user_id,
+                )
+            else:
+                cooldown_dict = json.loads(cooldowns)
+                cooldown_dict.update(new_cooldown)
 
-        if "cooldowns" not in cls.__data["users"][str(user_id)]:
-            cls.__data["users"][str(user_id)]["cooldowns"] = {}
-
-        if command_name in cls.__data["users"][str(user_id)]["cooldowns"]:
-            del cls.__data["users"][str(user_id)]["cooldowns"][command_name]
-            cls.save("users")
-
-    @classmethod
-    def remove_all_cooldowns(cls, user_id: str) -> None:
-        if str(user_id) not in cls.__data["users"]:
-            cls.add_user_data(user_id)
-
-        if "cooldowns" not in cls.__data["users"][str(user_id)]:
-            cls.__data["users"][str(user_id)]["cooldowns"] = {}
-
-        cls.__data["users"][str(user_id)]["cooldowns"] = {}
-        cls.save("users")
+                await cls.db_connection.execute(
+                    "UPDATE users SET cooldowns = $1::jsonb WHERE id = $2",
+                    json.dumps(cooldown_dict),
+                    user_id,
+                )
 
     @classmethod
-    def save(cls, path: str) -> None:
-        with open(f"data/{path}.json", "w") as f:
-            json.dump(cls.__data[path], f, indent=4)
+    async def get_cooldown_end(cls, user_id: int, command_name: str) -> None:
+        async with cls.db_connection.acquire():
+            if user_id not in await cls.get_all_users():
+                await cls.add_user_data(user_id)
+
+            cooldowns = await cls.db_connection.fetchval(
+                "SELECT cooldowns FROM users WHERE id = $1", user_id
+            )
+
+            if cooldowns:
+                cooldown_dict = json.loads(cooldowns)
+                return cooldown_dict.get(command_name, None)
+
+    @classmethod
+    async def remove_cooldown(cls, user_id: int, command_name: str) -> None:
+        async with cls.db_connection.acquire():
+            if user_id not in await cls.get_all_users():
+                await cls.add_user_data(user_id)
+
+            cooldowns = await cls.db_connection.fetchval(
+                "SELECT cooldowns FROM users WHERE id = $1", user_id
+            )
+
+            if cooldowns:
+                cooldown_dict = json.loads(cooldowns)
+                if command_name in cooldown_dict:
+                    del cooldown_dict[command_name]
+
+                    await cls.db_connection.execute(
+                        "UPDATE users SET cooldowns = $1::jsonb WHERE id = $2",
+                        json.dumps(cooldown_dict),
+                        user_id,
+                    )
+
+    @classmethod
+    async def remove_all_cooldowns(cls, user_id: int) -> None:
+        async with cls.db_connection.acquire():
+            if user_id not in await cls.get_all_users():
+                await cls.add_user_data(user_id)
+
+            await cls.db_connection.execute(
+                "UPDATE users SET cooldowns = null WHERE id = $1", user_id
+            )
