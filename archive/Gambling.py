@@ -123,7 +123,7 @@ class Gambling(commands.Cog):
     @app_commands.checks.cooldown(1, 25, key=lambda i: (i.user.id))
     @app_commands.describe(bet="The amount of 🪙 you want to bet")
     async def blackjack(self, interaction: discord.Interaction, bet: int):
-        user_data = DataManager.get_user_data(interaction.user.id)
+        user_data = await DataManager.get_user_data(interaction.user.id)
 
         if bet < 10 or bet > 250000:
             return await interaction.response.send_message(
@@ -183,7 +183,7 @@ class Gambling(commands.Cog):
                 embed=e,
                 view=None,
             )
-            DataManager.edit_user_data(
+            await DataManager.edit_user_data(
                 interaction.user.id, "balance", user_data["balance"] + int(bet * 1.5)
             )
             return
@@ -239,7 +239,7 @@ class Gambling(commands.Cog):
                     await interaction.edit_original_response(
                         content=None, embed=e, view=None
                     )
-                    DataManager.edit_user_data(
+                    await DataManager.edit_user_data(
                         interaction.user.id, "balance", user_data["balance"] - bet
                     )
                     return
@@ -264,7 +264,7 @@ class Gambling(commands.Cog):
                     await interaction.edit_original_response(
                         content=None, embed=e, view=None
                     )
-                    DataManager.edit_user_data(
+                    await DataManager.edit_user_data(
                         interaction.user.id, "balance", user_data["balance"] + bet
                     )
                     return
@@ -289,7 +289,7 @@ class Gambling(commands.Cog):
                     await interaction.edit_original_response(
                         content=None, embed=e, view=None
                     )
-                    DataManager.edit_user_data(
+                    await DataManager.edit_user_data(
                         interaction.user.id, "balance", user_data["balance"] + bet
                     )
                     return
@@ -336,7 +336,7 @@ class Gambling(commands.Cog):
                     await interaction.edit_original_response(
                         content=None, embed=e, view=None
                     )
-                    DataManager.edit_user_data(
+                    await DataManager.edit_user_data(
                         interaction.user.id, "balance", user_data["balance"] - bet
                     )
                     return
@@ -361,7 +361,7 @@ class Gambling(commands.Cog):
                 await interaction.edit_original_response(
                     content=None, embed=e, view=None
                 )
-                DataManager.edit_user_data(
+                await DataManager.edit_user_data(
                     interaction.user.id, "balance", int(user_data["balance"] - bet / 2)
                 )
                 return
@@ -398,7 +398,7 @@ class Gambling(commands.Cog):
                     await interaction.edit_original_response(
                         content=None, embed=e, view=None
                     )
-                    DataManager.edit_user_data(
+                    await DataManager.edit_user_data(
                         interaction.user.id, "balance", user_data["balance"] - bet
                     )
                     return
@@ -423,7 +423,7 @@ class Gambling(commands.Cog):
                     await interaction.edit_original_response(
                         content=None, embed=e, view=None
                     )
-                    DataManager.edit_user_data(
+                    await DataManager.edit_user_data(
                         interaction.user.id, "balance", user_data["balance"] + bet
                     )
                     return
@@ -448,7 +448,7 @@ class Gambling(commands.Cog):
                     await interaction.edit_original_response(
                         content=None, embed=e, view=None
                     )
-                    DataManager.edit_user_data(
+                    await DataManager.edit_user_data(
                         interaction.user.id, "balance", user_data["balance"] + bet
                     )
                     return
@@ -495,7 +495,7 @@ class Gambling(commands.Cog):
                     await interaction.edit_original_response(
                         content=None, embed=e, view=None
                     )
-                    DataManager.edit_user_data(
+                    await DataManager.edit_user_data(
                         interaction.user.id, "balance", user_data["balance"] - bet
                     )
                     return
@@ -527,7 +527,7 @@ class Gambling(commands.Cog):
                     await interaction.edit_original_response(
                         content=None, embed=e, view=None
                     )
-                    DataManager.edit_user_data(
+                    await DataManager.edit_user_data(
                         interaction.user.id, "balance", user_data["balance"] - bet
                     )
                     return
@@ -575,7 +575,7 @@ class Gambling(commands.Cog):
         bet: int,
         choices: app_commands.Choice[str],
     ):
-        user_data = DataManager.get_user_data(interaction.user.id)
+        user_data = await DataManager.get_user_data(interaction.user.id)
 
         if bet < 10 or bet > 250000:
             return await interaction.response.send_message(
@@ -593,7 +593,7 @@ class Gambling(commands.Cog):
                 )
             )
 
-        DataManager.edit_user_data(
+        await DataManager.edit_user_data(
             interaction.user.id, "balance", user_data["balance"] - bet
         )
 
@@ -617,7 +617,7 @@ class Gambling(commands.Cog):
                 )
             )
 
-        DataManager.edit_user_data(
+        await DataManager.edit_user_data(
             interaction.user.id, "balance", user_data["balance"] + bet * 2
         )
 
@@ -633,7 +633,7 @@ class Gambling(commands.Cog):
     @app_commands.checks.cooldown(1, 25, key=lambda i: (i.user.id))
     @app_commands.describe(bet="The amount of 🪙 you want to bet")
     async def gamble(self, interaction: discord.Interaction, bet: int):
-        user_data = DataManager.get_user_data(interaction.user.id)
+        user_data = await DataManager.get_user_data(interaction.user.id)
 
         if bet < 10 or bet > 250000:
             await interaction.response.send_message(
@@ -654,7 +654,7 @@ class Gambling(commands.Cog):
                 )
             )
 
-        DataManager.edit_user_data(
+        await DataManager.edit_user_data(
             interaction.user.id, "balance", user_data["balance"] - bet
         )
 
@@ -662,7 +662,7 @@ class Gambling(commands.Cog):
         random1 = round(random.uniform(1.0, 3.0), 1)
         winnings = round(bet * random1, 0)
         if win == True:
-            DataManager.edit_user_data(
+            await DataManager.edit_user_data(
                 interaction.user.id, "balance", user_data["balance"] + int(winnings)
             )
 
@@ -693,7 +693,7 @@ class Gambling(commands.Cog):
     @app_commands.checks.cooldown(1, 25, key=lambda i: (i.user.id))
     @app_commands.describe(bet="The amount of 🪙 you want to bet")
     async def snakeeyes(self, interaction: discord.Interaction, bet: int):
-        user_data = DataManager.get_user_data(interaction.user.id)
+        user_data = await DataManager.get_user_data(interaction.user.id)
 
         if bet < 10 or bet > 250000:
             await interaction.response.send_message(
@@ -716,7 +716,7 @@ class Gambling(commands.Cog):
         roll2 = random.randint(1, 6)
 
         if roll1 == 1 and roll2 == 1:
-            DataManager.edit_user_data(
+            await DataManager.edit_user_data(
                 interaction.user.id, "balance", user_data["balance"] + 30 * bet
             )
 
@@ -729,7 +729,7 @@ class Gambling(commands.Cog):
             )
 
         elif roll1 == 1 or roll2 == 1:
-            DataManager.edit_user_data(
+            await DataManager.edit_user_data(
                 interaction.user.id, "balance", int(user_data["balance"] + 1.5 * bet)
             )
 
@@ -743,7 +743,7 @@ class Gambling(commands.Cog):
                 )
             )
         else:
-            DataManager.edit_user_data(
+            await DataManager.edit_user_data(
                 interaction.user.id, "balance", user_data["balance"] - bet
             )
 
@@ -764,7 +764,7 @@ class Gambling(commands.Cog):
     @app_commands.checks.cooldown(1, 25, key=lambda i: (i.user.id))
     @app_commands.describe(bet="The amount of 🪙 you want to bet")
     async def slots(self, interaction: discord.Interaction, bet: int):
-        user_data = DataManager.get_user_data(interaction.user.id)
+        user_data = await DataManager.get_user_data(interaction.user.id)
 
         if bet < 10 or bet > 250000:
             await interaction.response.send_message(
@@ -789,7 +789,7 @@ class Gambling(commands.Cog):
         slot3 = random.choice(emojis)
 
         if slot1 == slot2 == slot3:
-            DataManager.edit_user_data(
+            await DataManager.edit_user_data(
                 interaction.user.id, "balance", user_data["balance"] + 30 * bet
             )
 
@@ -804,7 +804,7 @@ class Gambling(commands.Cog):
             )
 
         elif slot1 == slot2 or slot1 == slot3 or slot2 == slot3:
-            DataManager.edit_user_data(
+            await DataManager.edit_user_data(
                 interaction.user.id, "balance", int(user_data["balance"] + 1.5 * bet)
             )
 
@@ -819,7 +819,7 @@ class Gambling(commands.Cog):
             )
 
         else:
-            DataManager.edit_user_data(
+            await DataManager.edit_user_data(
                 interaction.user.id, "balance", user_data["balance"] - bet
             )
 
