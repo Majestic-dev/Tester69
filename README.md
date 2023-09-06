@@ -29,6 +29,7 @@ python -m pip install -r requirements.txt
 cd Tester69
 ```
 
+v1.2
 ### run the file
 ```bash
 python main.py
@@ -42,9 +43,8 @@ Please make sure that your code is formatted correctly before making a new pull 
 # License 
 This project is licensed under the Apache License - see the [LICENSE](LICENSE) file for details
 
+v1.2
 # Version Changelogs
-
-## v1.1
 
     - Verification System
         * Optimized and improved the verification system
@@ -70,6 +70,7 @@ This project is licensed under the Apache License - see the [LICENSE](LICENSE) f
         * Improved muting and unmuting
         * Use the dispatch event for certain actions
 
+v1.2
     - Logging System
         * Log deletion protection
         * Log moderation actions inside Loggingsystem.py using dispatch events instead of inside the moderation commands
