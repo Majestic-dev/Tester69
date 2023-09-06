@@ -1,1 +1,1 @@
-from .data_manager_postgresql import DataManager
+from .data_manager import DataManager
