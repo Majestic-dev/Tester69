@@ -44,6 +44,8 @@ This project is licensed under the Apache License - see the [LICENSE](LICENSE) f
 
 # Version Changelogs
 
+## v1.1
+
     - Verification System
         * Optimized and improved the verification system
     
