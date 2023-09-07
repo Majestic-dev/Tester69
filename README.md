@@ -44,7 +44,7 @@ python main.py
 
 [Contributing Guidelines](.github/CONTRIBUTING.md)
 
-[License](.github/LICENSE)
+[License](LICENSE)
 
 [Code Security](.github/SECURITY.md)
 
