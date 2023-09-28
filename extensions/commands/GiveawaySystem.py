@@ -28,38 +28,49 @@ class GiveawayLooper(commands.Cog):
                     giveaway["id"], giveaway["guild_id"]
                 )
                 if winners is False:
+                    try:
+                        await message.edit(
+                            view=None,
+                        )
+                        return await message.reply(
+                            f"Unfortunately, nobody entered the giveaway for the **{giveaway['prize']}**"
+                        )
+                    except:
+                        return
+
+                try:
                     await message.edit(
                         view=None,
+                        embed=discord.Embed(
+                            title=f"{giveaway['prize']}",
+                            description=(
+                                giveaway["extra_notes"]
+                                if giveaway["extra_notes"] is not None
+                                else ""
+                            )
+                            + f"Ended: {discord.utils.format_dt(datetime.datetime.strptime(giveaway['end_date'], '%Y-%m-%dT%H:%M:%S.%f'), style='R')} ({discord.utils.format_dt(datetime.datetime.strptime(giveaway['end_date'], '%Y-%m-%dT%H:%M:%S.%f'), style='F')})\n"
+                            f"Hosted by: <@{giveaway['host_id']}>\n"
+                            f"Entries: {len(giveaway['participants'])}\n"
+                            +
+                            (
+                                f"Winners: {','.join([f'<@{winner}>' for winner in winners])}"
+                                if len(winners) > 0
+                                else "Winners: No Winners"
+                            )
+                        ).set_footer(
+                            text=f"`/giveaway reroll {giveaway['id']}` to reroll the giveaway winners",
+                        ),
                     )
-                    return await message.reply(
-                        f"Unfortunately, nobody entered the giveaway for the **{giveaway['prize']}**"
-                    )
-
-                await message.edit(
-                    view=None,
-                    embed=discord.Embed(
-                        title=f"{giveaway['prize']}",
-                        description=(
-                            giveaway["extra_notes"]
-                            if giveaway["extra_notes"] is not None
-                            else ""
+                    if len(winners) > 0:
+                        return await message.reply(
+                            f"Congratulations {', '.join([f'<@{winner}>' for winner in winners])}! You have won the **{giveaway['prize']}**"
                         )
-                        + f"Ended: {discord.utils.format_dt(datetime.datetime.strptime(giveaway['end_date'], '%Y-%m-%dT%H:%M:%S.%f'), style='R')}\n"
-                        f"Hosted by: <@{giveaway['host_id']}>\n"
-                        f"Entries: {len(giveaway['participants'])}\n"
-                        +
-                        (
-                            f"Winners: {','.join([f'<@{winner}>' for winner in winners])}"
-                            if len(winners) > 0
-                            else "Winners: No Winners"
+                    else:
+                        return await message.reply(
+                            f"Unfortunately, nobody entered the giveaway for the **{giveaway['prize']}**"
                         )
-                    ).set_footer(
-                        text=f"`/giveaway reroll {giveaway['id']}` to reroll the giveaway winners",
-                    ),
-                )
-                return await message.reply(
-                    f"Congratulations {', '.join([f'<@{winner}>' for winner in winners])}! You have won the **{giveaway['prize']}**"
-                )
+                except:
+                    return
 
         next_giveaway = await DataManager.get_next_giveaway()
 
@@ -77,38 +88,49 @@ class GiveawayLooper(commands.Cog):
                 next_giveaway["id"], next_giveaway["guild_id"]
             )
             if winners is False:
+                try:
+                    await message.edit(
+                        view=None,
+                    )
+                    return await message.reply(
+                        f"Unfortunately, nobody entered the giveaway for the **{next_giveaway['prize']}**"
+                    )
+                except:
+                    return
+
+            try:
                 await message.edit(
                     view=None,
-                )
-                return await message.reply(
-                    f"Unfortunately, nobody entered the giveaway for the **{next_giveaway['prize']}**"
-                )
-
-            await message.edit(
-                view=None,
-                embed=discord.Embed(
-                    title=f"{next_giveaway['prize']}",
-                    description=(
-                        next_giveaway["extra_notes"]
-                        if next_giveaway["extra_notes"] is not None
-                        else ""
-                    )
-                    + f"Ended: {discord.utils.format_dt(datetime.datetime.strptime(next_giveaway['end_date'], '%Y-%m-%dT%H:%M:%S.%f'), style='R')}\n"
-                    f"Hosted by: <@{next_giveaway['host_id']}>\n"
-                    f"Entries: {len(next_giveaway['participants'])}\n"
-                    +
-                    (
-                        f"Winners: {','.join([f'<@{winner}>' for winner in winners])}"
-                        if len(winners) > 0
-                        else "Winners: No Winners"
+                    embed=discord.Embed(
+                        title=f"{next_giveaway['prize']}",
+                        description=(
+                            next_giveaway["extra_notes"]
+                            if next_giveaway["extra_notes"] is not None
+                            else ""
+                        )
+                        + f"Ended: {discord.utils.format_dt(datetime.datetime.strptime(next_giveaway['end_date'], '%Y-%m-%dT%H:%M:%S.%f'), style='R')} ({discord.utils.format_dt(datetime.datetime.strptime(next_giveaway['end_date'], '%Y-%m-%dT%H:%M:%S.%f'), style='F')})\n"
+                        f"Hosted by: <@{next_giveaway['host_id']}>\n"
+                        f"Entries: {len(next_giveaway['participants'])}\n"
+                        +
+                        (
+                            f"Winners: {','.join([f'<@{winner}>' for winner in winners])}"
+                            if len(winners) > 0
+                            else "Winners: No Winners"
+                        ),
+                    ).set_footer(
+                        text=f"`/giveaway reroll {next_giveaway['id']}` to reroll the giveaway winners"
                     ),
-                ).set_footer(
-                    text=f"`/giveaway reroll {next_giveaway['id']}` to reroll the giveaway winners"
-                ),
-            )
-            return await message.reply(
-                f"Congratulations {', '.join([f'<@{winner}>' for winner in winners])}! You have won the **{next_giveaway['prize']}**"
-            )
+                )
+                if len(winners) > 0:
+                    return await message.reply(
+                        f"Congratulations {', '.join([f'<@{winner}>' for winner in winners])}! You have won the **{next_giveaway['prize']}**"
+                    )
+                else:
+                    return await message.reply(
+                        f"Unfortunately, nobody entered the giveaway for the **{next_giveaway['prize']}**"
+                    )
+            except:
+                return
 
     # Giveaway Join Listener
     @commands.Cog.listener()
@@ -116,20 +138,23 @@ class GiveawayLooper(commands.Cog):
         giveaway_data = await DataManager.get_giveaway_data(giveaway_id, guild_id)
         channel = self.bot.get_channel(giveaway_data["channel_id"])
         message = await channel.fetch_message(giveaway_id)
-        await message.edit(
-            embed=discord.Embed(
-                title=f"{giveaway_data['prize']}",
-                description=(
-                    f"{giveaway_data['extra_notes']}\n\n"
-                    if giveaway_data["extra_notes"] is not None
-                    else ""
+        try:
+            await message.edit(
+                embed=discord.Embed(
+                    title=f"{giveaway_data['prize']}",
+                    description=(
+                        f"{giveaway_data['extra_notes']}\n\n"
+                        if giveaway_data["extra_notes"] is not None
+                        else ""
+                    )
+                    + f"Ends: {discord.utils.format_dt(datetime.datetime.strptime(giveaway_data['end_date'], '%Y-%m-%dT%H:%M:%S.%f'), style='R')} ({discord.utils.format_dt(datetime.datetime.strptime(giveaway_data['end_date'], '%Y-%m-%dT%H:%M:%S.%f'), style='F')})\n"
+                    f"Hosted by: <@{giveaway_data['host_id']}>\n"
+                    f"Entries: **{len(giveaway_data['participants'])}**\n"
+                    f"Winners: **{giveaway_data['winner_amount']}**",
                 )
-                + f"Ends: {discord.utils.format_dt(datetime.datetime.strptime(giveaway_data['end_date'], '%Y-%m-%dT%H:%M:%S.%f'), style='R')}\n"
-                f"Hosted by: <@{giveaway_data['host_id']}>\n"
-                f"Entries: **{len(giveaway_data['participants'])}**\n"
-                f"Winners: **{giveaway_data['winner_amount']}**",
             )
-        )
+        except:
+            return
 
     # Giveaway Leave Listener
     @commands.Cog.listener()
@@ -137,20 +162,23 @@ class GiveawayLooper(commands.Cog):
         giveaway_data = await DataManager.get_giveaway_data(giveaway_id, guild_id)
         channel = self.bot.get_channel(giveaway_data["channel_id"])
         message = await channel.fetch_message(giveaway_id)
-        await message.edit(
-            embed=discord.Embed(
-                title=f"{giveaway_data['prize']}",
-                description=(
-                    f"{giveaway_data['extra_notes']}\n\n"
-                    if giveaway_data["extra_notes"] is not None
-                    else ""
+        try:
+            await message.edit(
+                embed=discord.Embed(
+                    title=f"{giveaway_data['prize']}",
+                    description=(
+                        f"{giveaway_data['extra_notes']}\n\n"
+                        if giveaway_data["extra_notes"] is not None
+                        else ""
+                    )
+                    + f"Ends: {discord.utils.format_dt(datetime.datetime.strptime(giveaway_data['end_date'], '%Y-%m-%dT%H:%M:%S.%f'), style='R')} ({discord.utils.format_dt(datetime.datetime.strptime(giveaway_data['end_date'], '%Y-%m-%dT%H:%M:%S.%f'), style='F')})\n"
+                    f"Hosted by: <@{giveaway_data['host_id']}>\n"
+                    f"Entries: **{len(giveaway_data['participants'])}**\n"
+                    f"Winners: **{giveaway_data['winner_amount']}**",
                 )
-                + f"Ends: {discord.utils.format_dt(datetime.datetime.strptime(giveaway_data['end_date'], '%Y-%m-%dT%H:%M:%S.%f'), style='R')}\n"
-                f"Hosted by: <@{giveaway_data['host_id']}>\n"
-                f"Entries: **{len(giveaway_data['participants'])}**\n"
-                f"Winners: **{giveaway_data['winner_amount']}**",
             )
-        )
+        except:
+            return
 
     # Manual Giveaway End Listener
     @commands.Cog.listener()
@@ -159,34 +187,37 @@ class GiveawayLooper(commands.Cog):
         channel = self.bot.get_channel(giveaway_data["channel_id"])
         message = await channel.fetch_message(giveaway_id)
         winners = await DataManager.draw_giveaway_winners(giveaway_id, guild_id)
-        await message.edit(
-            embed=discord.Embed(
-                title=f"{giveaway_data['prize']}",
-                description=(
-                    f"{giveaway_data['extra_notes']}\n\n"
-                    if giveaway_data["extra_notes"] is not None
-                    else ""
-                )
-                + f"Ended: {discord.utils.format_dt(datetime.datetime.strptime(giveaway_data['end_date'], '%Y-%m-%dT%H:%M:%S.%f'), style='R')}\n"
-                f"Hosted by: <@{giveaway_data['host_id']}>\n"
-                f"Entries: **{len(giveaway_data['participants'])}**\n"
-                +
-                (
-                    f"Winners: {','.join([f'<@{winner}>' for winner in winners])}"
-                    if len(winners) > 0
-                    else "Winners: No Winners"
-                )
-            ),
-            view=None,
-        )
-        if len(winners) > 0:
-            await message.reply(
-                f"Congratulations {', '.join([f'<@{winner}>' for winner in winners])}! You have won the **{giveaway_data['prize']}**"
+        try:
+            await message.edit(
+                embed=discord.Embed(
+                    title=f"{giveaway_data['prize']}",
+                    description=(
+                        f"{giveaway_data['extra_notes']}\n\n"
+                        if giveaway_data["extra_notes"] is not None
+                        else ""
+                    )
+                    + f"Ended: {discord.utils.format_dt(datetime.datetime.strptime(giveaway_data['end_date'], '%Y-%m-%dT%H:%M:%S.%f'), style='R')} ({discord.utils.format_dt(datetime.datetime.strptime(giveaway_data['end_date'], '%Y-%m-%dT%H:%M:%S.%f'), style='F')})\n"
+                    f"Hosted by: <@{giveaway_data['host_id']}>\n"
+                    f"Entries: **{len(giveaway_data['participants'])}**\n"
+                    +
+                    (
+                        f"Winners: {','.join([f'<@{winner}>' for winner in winners])}"
+                        if len(winners) > 0
+                        else "Winners: No Winners"
+                    )
+                ),
+                view=None,
             )
-        else:
-            await message.reply(
-                f"Unfortunately, nobody entered the giveaway for the **{giveaway_data['prize']}**"
-            )
+            if len(winners) > 0:
+                await message.reply(
+                    f"Congratulations {', '.join([f'<@{winner}>' for winner in winners])}! You have won the **{giveaway_data['prize']}**"
+                )
+            else:
+                await message.reply(
+                    f"Unfortunately, nobody entered the giveaway for the **{giveaway_data['prize']}**"
+                )
+        except:
+            return
 
     # Manual Giveaway Reroll Listener
     @commands.Cog.listener()
@@ -197,35 +228,38 @@ class GiveawayLooper(commands.Cog):
         channel = self.bot.get_channel(giveaway_data["channel_id"])
         message = await channel.fetch_message(giveaway_id)
         winners = await DataManager.draw_giveaway_winners(giveaway_id, guild_id)
-
-        await message.edit(
-            embed=discord.Embed(
-                title=f"{giveaway_data['prize']}",
-                description=(
-                    f"{giveaway_data['extra_notes']}\n\n"
-                    if giveaway_data["extra_notes"] is not None
-                    else ""
+        
+        try:
+            await message.edit(
+                embed=discord.Embed(
+                    title=f"{giveaway_data['prize']}",
+                    description=(
+                        f"{giveaway_data['extra_notes']}\n\n"
+                        if giveaway_data["extra_notes"] is not None
+                        else ""
+                    )
+                    + f"Ended: {discord.utils.format_dt(datetime.datetime.strptime(giveaway_data['end_date'], '%Y-%m-%dT%H:%M:%S.%f'), style='R')} ({discord.utils.format_dt(datetime.datetime.strptime(giveaway_data['end_date'], '%Y-%m-%dT%H:%M:%S.%f'), style='F')})\n"
+                    f"Hosted by: <@{giveaway_data['host_id']}>\n"
+                    f"Entries: **{len(giveaway_data['participants'])}**\n"
+                    +
+                    (
+                        f"Winners: {','.join([f'<@{winner}>' for winner in winners])}"
+                        if len(winners) > 0
+                        else "Winners: No Winners"   
+                    )
                 )
-                + f"Ended: {discord.utils.format_dt(datetime.datetime.strptime(giveaway_data['end_date'], '%Y-%m-%dT%H:%M:%S.%f'), style='R')}\n"
-                f"Hosted by: <@{giveaway_data['host_id']}>\n"
-                f"Entries: **{len(giveaway_data['participants'])}**\n"
-                +
-                (
-                    f"Winners: {','.join([f'<@{winner}>' for winner in winners])}"
-                    if len(winners) > 0
-                    else "Winners: No Winners"   
-                )
             )
-        )
 
-        if len(winners) > 0:
-            await message.reply(
-                f"Congratulations {', '.join([f'<@{winner}>' for winner in winners])}! You have won the **{giveaway_data['prize']}**"
-            )
-        else:
-            await message.reply(
-                f"Unfortunately, nobody entered the giveaway for the **{giveaway_data['prize']}**"
-            )
+            if len(winners) > 0:
+                await message.reply(
+                    f"Congratulations {', '.join([f'<@{winner}>' for winner in winners])}! You have won the **{giveaway_data['prize']}**"
+                )
+            else:
+                await message.reply(
+                    f"Unfortunately, nobody entered the giveaway for the **{giveaway_data['prize']}**"
+                )
+        except:
+            return
 
     # Manual Giveaway Winner Reroll Listener
     @commands.Cog.listener()
@@ -235,25 +269,28 @@ class GiveawayLooper(commands.Cog):
         giveaway_data = await DataManager.get_giveaway_data(giveaway_id, guild_id)
         channel = self.bot.get_channel(giveaway_data["channel_id"])
         message = await channel.fetch_message(giveaway_id)
-        await message.edit(
-            embed=discord.Embed(
-                title=f"{giveaway_data['prize']}",
-                description=(
-                    f"{giveaway_data['extra_notes']}\n\n"
-                    if giveaway_data["extra_notes"] is not None
-                    else ""
+
+        try:
+            await message.edit(
+                embed=discord.Embed(
+                    title=f"{giveaway_data['prize']}",
+                    description=(
+                        f"{giveaway_data['extra_notes']}\n\n"
+                        if giveaway_data["extra_notes"] is not None
+                        else ""
+                    )
+                    + f"Ended: {discord.utils.format_dt(datetime.datetime.strptime(giveaway_data['end_date'], '%Y-%m-%dT%H:%M:%S.%f'), style='R')} ({discord.utils.format_dt(datetime.datetime.strptime(giveaway_data['end_date'], '%Y-%m-%dT%H:%M:%S.%f'), style='F')})\n"
+                    f"Hosted by: <@{giveaway_data['host_id']}>\n"
+                    f"Entries: {len(giveaway_data['participants'])}\n"
+                    f"Winners: {','.join([f'<@{winner}>' for winner in giveaway_data['winners']])}",
                 )
-                + f"Ended: {discord.utils.format_dt(datetime.datetime.strptime(giveaway_data['end_date'], '%Y-%m-%dT%H:%M:%S.%f'), style='R')}\n"
-                f"Hosted by: <@{giveaway_data['host_id']}>\n"
-                f"Entries: {len(giveaway_data['participants'])}\n"
-                f"Winners: {','.join([f'<@{winner}>' for winner in giveaway_data['winners']])}",
             )
-        )
 
-        await message.reply(
-            f"Congratulations <@{new_winner_id}>! You have won the **{giveaway_data['prize']}**"
-        )
-
+            await message.reply(
+                f"Congratulations <@{new_winner_id}>! You have won the **{giveaway_data['prize']}**"
+            )
+        except:
+            return
 
 async def setup(bot):
     await bot.add_cog(GiveawayLooper(bot))
