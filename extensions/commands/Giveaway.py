@@ -72,7 +72,7 @@ class GiveawayModal(discord.ui.Modal, title="Create a Giveaway"):
                 message = await interaction.channel.send(
                     embed=discord.Embed(
                         title=f"{self.prize.value}",
-                        description=(f"{self.description.value}\n" if self.description.value is not None else "")
+                        description=(f"{self.description.value}\n\n" if self.description.value is not None else "")
                         + f"Ends: {discord.utils.format_dt(end_date, style='R')} ({discord.utils.format_dt(end_date, style='F')})\n"
                         f"Hosted by: {interaction.user.mention}\n"
                         f"Entries: **0**\n"
@@ -165,7 +165,7 @@ class Giveaway(commands.GroupCog):
     @app_commands.command(name="create", description="Create a giveaway")
     @app_commands.guild_only()
     @app_commands.default_permissions(manage_guild=True)
-    #@app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id))
+    @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id))
     async def giveaway_create(
         self,
         interaction: discord.Interaction,

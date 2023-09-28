@@ -44,7 +44,7 @@ class GiveawayLooper(commands.Cog):
                         embed=discord.Embed(
                             title=f"{giveaway['prize']}",
                             description=(
-                                giveaway["extra_notes"]
+                                f"{giveaway['extra_notes']}\n\n"
                                 if giveaway["extra_notes"] is not None
                                 else ""
                             )
@@ -104,7 +104,7 @@ class GiveawayLooper(commands.Cog):
                     embed=discord.Embed(
                         title=f"{next_giveaway['prize']}",
                         description=(
-                            next_giveaway["extra_notes"]
+                            f"{next_giveaway['extra_notes']}\n\n"
                             if next_giveaway["extra_notes"] is not None
                             else ""
                         )
