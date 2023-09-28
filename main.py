@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import os
 import traceback
 
@@ -6,6 +7,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
+from extensions.commands.Giveaway import GiveawayJoinView
 from utils import DataManager
 
 DataManager.setup(
@@ -50,13 +52,30 @@ DataManager.setup(
     ]
 )
 
+
+class Bot(commands.Bot):
+    def __init__(self):
+        intents = discord.Intents.all()
+        super().__init__(
+            command_prefix="'",
+            owner_id=705435835306213418,
+            intents=intents,
+        )
+
+    async def setup_hook(self) -> None:
+        self.add_view(GiveawayJoinView(bot))
+
+
+bot = Bot()
+bot.remove_command("help")
+handler = logging.FileHandler(
+    filename="data/discord.log",
+    encoding="utf-8",
+    mode="w",
+)
+
 if "fonts" not in os.listdir("."):
     os.mkdir("fonts")
-
-bot = commands.AutoShardedBot(
-    command_prefix="'", owner_id=705435835306213418, intents=discord.Intents.all()
-)
-bot.remove_command("help")
 
 
 @bot.event
@@ -148,6 +167,7 @@ async def main():
     ]:
         print(f"Please fill out the config.json file before running {__file__}")
     else:
+        discord.utils.setup_logging(handler=handler, level=logging.INFO)
         await bot.start(DataManager.get("config", "token"))
 
 
