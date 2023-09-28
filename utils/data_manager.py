@@ -1,6 +1,8 @@
+import asyncio
 import datetime
 import json
 import os
+import random
 import uuid
 from dataclasses import dataclass
 from typing import Any
@@ -87,8 +89,25 @@ class DataManager:
                 blacklisted_words TEXT ARRAY DEFAULT '{}'::text[],
                 whitelist bigint ARRAY DEFAULT '{}'::bigint[],
                 welcome_message TEXT,
-                warned_users JSONB
+                warned_users JSONB,
+                giveaways JSONB
             );"""
+        )
+
+        await cls.db_connection.execute(
+            """CREATE TABLE IF NOT EXISTS giveaways (
+                id bigint PRIMARY KEY,
+                guild_id bigint,
+                channel_id bigint,
+                end_date TEXT,
+                winner_amount bigint,
+                prize TEXT,
+                extra_notes TEXT,
+                host_id bigint,
+                participants bigint ARRAY DEFAULT '{}'::bigint[],
+                winners bigint ARRAY DEFAULT '{}'::bigint[],
+                ended BOOLEAN DEFAULT FALSE
+            )"""
         )
 
         await cls.db_connection.execute(
@@ -106,6 +125,52 @@ class DataManager:
         return cls.__data.get(path, {}).get(key, None)
 
     @classmethod
+    async def add_guild_data(cls, guild_id: int) -> None:
+        async with cls.db_connection.acquire():
+            await cls.db_connection.execute(
+                "INSERT INTO guilds (id) VALUES ($1)", guild_id
+            )
+
+    @classmethod
+    async def remove_guild_data(cls, guild_id: int) -> None:
+        async with cls.db_connection.acquire():
+            await cls.db_connection.execute(
+                "DELETE FROM guilds WHERE id = $1", guild_id
+            )
+
+    @classmethod
+    async def remove_guilds_column(cls, column: str) -> None:
+        async with cls.db_connection.acquire():
+            columnexists = await cls.db_connection.fetchval(
+                f"SELECT EXISTS (SELECT FROM information_schema.columns WHERE table_name = 'guilds' AND column_name = '{column}')"
+            )
+
+            if columnexists:
+                await cls.db_connection.execute(
+                    f"ALTER TABLE guilds DROP COLUMN IF EXISTS {column}"
+                )
+
+            elif not columnexists:
+                return
+
+    @classmethod
+    async def add_guilds_column(cls, column: str, value: Any) -> None:
+        async with cls.db_connection.acquire():
+            columnexists = await cls.db_connection.fetchval(
+                f"SELECT EXISTS (SELECT FROM information_schema.columns WHERE table_name = 'guilds' AND column_name = '{column}')"
+            )
+
+            if not columnexists:
+                await cls.db_connection.execute(
+                    f"ALTER TABLE guilds ADD COLUMN IF NOT EXISTS {column} {value}"
+                )
+
+            elif columnexists:
+                await cls.db_connection.execute(
+                    f"ALTER TABLE guilds ALTER COLUMN {column} TYPE {value} USING {column}::{value}"
+                )
+
+    @classmethod
     async def get_all_guilds(cls) -> None:
         async with cls.db_connection.acquire():
             rows = await cls.db_connection.fetch("SELECT id FROM guilds")
@@ -121,13 +186,6 @@ class DataManager:
                 "SELECT * FROM guilds WHERE id = $1", guild_id
             )
             return row
-
-    @classmethod
-    async def add_guild_data(cls, guild_id: int) -> None:
-        async with cls.db_connection.acquire():
-            await cls.db_connection.execute(
-                "INSERT INTO guilds (id) VALUES ($1)", guild_id
-            )
 
     @classmethod
     async def edit_guild_data(cls, guild_id: int, key: str, value: Any) -> None:
@@ -170,9 +228,9 @@ class DataManager:
             existing_warnings = await cls.db_connection.fetchval(
                 "SELECT warned_users FROM guilds WHERE id = $1", guild_id
             )
+            new_warning = {str(user_id): [{str(uuid.uuid4()): reason}]}
 
             if existing_warnings is None:
-                new_warning = {str(user_id): [{str(uuid.uuid4()): reason}]}
                 await cls.db_connection.execute(
                     "UPDATE guilds SET warned_users = $1::jsonb WHERE id = $2",
                     json.dumps(new_warning),
@@ -182,9 +240,9 @@ class DataManager:
             else:
                 warned_user_dict = json.loads(existing_warnings)
                 if str(user_id) in warned_user_dict:
-                    warned_user_dict[str(user_id)].append({str(uuid.uuid4()): reason})
+                    warned_user_dict[str(user_id)].append(new_warning)
                 else:
-                    warned_user_dict[str(user_id)] = [{str(uuid.uuid4()): reason}]
+                    warned_user_dict[str(user_id)] = [new_warning]
 
                 await cls.db_connection.execute(
                     "UPDATE guilds SET warned_users = $1::jsonb WHERE id = $2",
@@ -235,6 +293,176 @@ class DataManager:
             if warned_users_json:
                 warned_users_dict = json.loads(warned_users_json)
                 return warned_users_dict.get(str(user_id), [])
+
+    @classmethod
+    async def register_giveaway(
+        cls,
+        giveaway_id: int,
+        guild_id: int,
+        channel_id: int,
+        minutes: int,
+        winners: int,
+        prize: str,
+        extra_notes: str,
+        host_id: int,
+    ) -> None:
+        async with cls.db_connection.acquire():
+            end_date = datetime.datetime.now() + datetime.timedelta(minutes=minutes)
+            await cls.db_connection.execute(
+                "INSERT INTO giveaways (id, guild_id, channel_id, end_date, winner_amount, prize, extra_notes, host_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
+                giveaway_id,
+                guild_id,
+                channel_id,
+                end_date.isoformat(),
+                winners,
+                prize,
+                extra_notes,
+                host_id,
+            )
+
+    @classmethod
+    async def edit_giveaway(
+        cls, giveaway_id: int, guild_id: int, column: str, value: Any
+    ) -> None:
+        async with cls.db_connection.acquire():
+            await cls.db_connection.execute(
+                f"UPDATE giveaways SET {column} = $1 WHERE id = $2 AND guild_id = $3",
+                value,
+                giveaway_id,
+                guild_id,
+            )
+
+    @classmethod
+    async def add_giveaway_participant(cls, giveaway_id: int, user_id: int) -> None:
+        async with cls.db_connection.acquire():
+            participants = await cls.db_connection.fetchval(
+                "SELECT participants FROM giveaways WHERE id = $1", giveaway_id
+            )
+
+            if user_id not in participants:
+                await cls.db_connection.execute(
+                    "UPDATE giveaways SET participants = array_append(participants, $1) WHERE id = $2",
+                    user_id,
+                    giveaway_id,
+                )
+                return True
+
+            elif user_id in participants:
+                return False
+
+    @classmethod
+    async def remove_giveaway_participant(cls, giveaway_id: int, user_id: int) -> None:
+        async with cls.db_connection.acquire():
+            participants = await cls.db_connection.fetchval(
+                "SELECT participants FROM giveaways WHERE id = $1", giveaway_id
+            )
+
+            if user_id in participants:
+                await cls.db_connection.execute(
+                    "UPDATE giveaways SET participants = array_remove(participants, $1) WHERE id = $2",
+                    user_id,
+                    giveaway_id,
+                )
+                return True
+
+            elif user_id not in participants:
+                return False
+
+    @classmethod
+    async def replace_giveaway_winner(
+        cls, giveaway_id: int, guild_id: int, replaced_user_id: int
+    ) -> None:
+        async with cls.db_connection.acquire():
+            giveaway_data = await cls.get_giveaway_data(giveaway_id, guild_id)
+            new_random_winner = random.choice(giveaway_data["participants"])
+            await cls.db_connection.execute(
+                "UPDATE giveaways SET winners = array_replace(winners, $1, $2) WHERE id = $3 AND guild_id = $4",
+                replaced_user_id,
+                new_random_winner,
+                giveaway_id,
+                guild_id,
+            )
+            return new_random_winner
+
+    @classmethod
+    async def get_giveaway_data(cls, giveaway_id: int, guild_id: int) -> None:
+        async with cls.db_connection.acquire():
+            row = await cls.db_connection.fetchrow(
+                "SELECT * FROM giveaways WHERE id = $1 AND guild_id = $2",
+                giveaway_id,
+                guild_id,
+            )
+            return row
+
+    @classmethod
+    async def get_next_giveaway(cls) -> None:
+        async with cls.db_connection.acquire():
+            row = await cls.db_connection.fetchrow(
+                "SELECT * FROM giveaways WHERE end_date > $1 AND ended = FALSE ORDER BY end_date ASC",
+                datetime.datetime.now().isoformat(),
+            )
+            return row
+
+    @classmethod
+    async def end_giveaway(cls, giveaway_id: int, guild_id: int) -> None:
+        async with cls.db_connection.acquire():
+            await cls.db_connection.execute(
+                "UPDATE giveaways SET ended = TRUE WHERE id = $1 AND guild_id = $2",
+                giveaway_id,
+                guild_id,
+            )
+
+    @classmethod
+    async def draw_giveaway_winners(cls, giveaway_id: int, guild_id: int) -> None:
+        async with cls.db_connection.acquire():
+            participants = await cls.db_connection.fetchval(
+                "SELECT participants FROM giveaways WHERE id = $1 AND guild_id = $2",
+                giveaway_id,
+                guild_id,
+            )
+            winneramount = await cls.db_connection.fetchval(
+                "SELECT winner_amount FROM giveaways WHERE id = $1 AND guild_id = $2",
+                giveaway_id,
+                guild_id,
+            )
+
+            winners = await cls.db_connection.fetchval(
+                "SELECT winners FROM giveaways WHERE id = $1 AND guild_id = $2",
+                giveaway_id,
+                guild_id,
+            )
+
+            if participants == "[]":
+                return False
+
+            if winners != "[]":
+                for winner in winners:
+                    await cls.db_connection.execute(
+                        "UPDATE giveaways SET winners = array_remove(winners, $1) WHERE id = $2 AND guild_id = $3",
+                        winner,
+                        giveaway_id,
+                        guild_id,
+                    )
+
+            if len(participants) > winneramount:
+                winners = random.sample(participants, winneramount)
+                for winner in winners:
+                    await cls.db_connection.execute(
+                        "UPDATE giveaways SET winners = array_append(winners, $1) WHERE id = $2 AND guild_id = $3",
+                        winner,
+                        giveaway_id,
+                        guild_id,
+                    )
+                return winners
+            elif len(participants) <= winneramount:
+                for participant in participants:
+                    await cls.db_connection.execute(
+                        "UPDATE giveaways SET winners = array_append(winners, $1) WHERE id = $2 AND guild_id = $3",
+                        participant,
+                        giveaway_id,
+                        guild_id,
+                    )
+                return participants
 
     @classmethod
     async def get_all_users(cls) -> None:
@@ -316,7 +544,7 @@ class DataManager:
                 "SELECT cooldowns FROM users WHERE id = $1", user_id
             )
 
-            end_time = datetime.datetime.utcnow() + datetime.timedelta(
+            end_time = datetime.datetime.now() + datetime.timedelta(
                 seconds=cooldown_seconds
             )
             new_cooldown = {command_name: end_time.isoformat()}
@@ -381,3 +609,11 @@ class DataManager:
             await cls.db_connection.execute(
                 "UPDATE users SET cooldowns = null WHERE id = $1", user_id
             )
+
+
+async def main():
+    await DataManager.initialise()
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
