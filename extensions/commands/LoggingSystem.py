@@ -185,7 +185,7 @@ class Logging(commands.GroupCog):
 
         kick = discord.Embed(
             title="Member Kicked",
-            description=f"{user.mention} Has been kicked from the server",
+            description=f"{user.mention} Has been kicked by {kicker.mention} from the server",
             colour=discord.Colour.red(),
         )
         kick.set_author(icon_url=user.display_avatar, name=user)
