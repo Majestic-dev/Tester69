@@ -7,6 +7,99 @@ from discord.ext import commands
 
 from utils import DataManager
 
+class GiveawayModal(discord.ui.Modal, title="Create a Giveaway"):
+    def __init__(self, bot) -> None:
+        super().__init__()
+        self.bot = bot
+
+    def time_to_minutes(self, time: str) -> None:
+        no_numbers = ''.join([i for i in time if not i.isdigit()]).strip()
+        no_characters = ''.join([i for i in time if not i.isalpha()])
+
+        if no_numbers.lower().startswith("s"):
+            return int(no_characters) / 60
+        elif no_numbers.lower().startswith("m"):
+            return int(no_characters)
+        elif no_numbers.lower().startswith("h"):
+            return int(no_characters) * 60
+        elif no_numbers.lower().startswith("d"):
+            return int(no_characters) * 1440
+        return None
+        
+    def winners_to_int(self, winners: str) -> None:
+        no_characters = ''.join([i for i in winners if not i.isalpha()])
+        return int(no_characters)
+
+
+    duration = discord.ui.TextInput(
+        label="Duration",
+        style=discord.TextStyle.short,
+        placeholder="Ex: 10 minutes",
+        max_length=30
+    )
+
+    winneramount = discord.ui.TextInput(
+        label="Number of winners",
+        style=discord.TextStyle.short,
+        default="1",
+        max_length=3
+    )
+
+    prize = discord.ui.TextInput(
+        label="Prize",
+        style=discord.TextStyle.short,
+        max_length=100
+    )
+
+    description = discord.ui.TextInput(
+        label="Description",
+        style=discord.TextStyle.long,
+        max_length=1000,
+        required=False
+    )
+
+    async def on_submit(self, interaction: discord.Interaction) -> None:
+        time = self.time_to_minutes(self.duration.value)
+        winners = self.winners_to_int(self.winneramount.value)
+
+        if winners is not None:
+            if time is not None:
+                end_date = datetime.datetime.now() + datetime.timedelta(minutes=time)
+                await interaction.response.send_message(
+                    f"Giveaway created!", ephemeral=True
+                )
+
+                message = await interaction.channel.send(
+                    embed=discord.Embed(
+                        title=f"{self.prize.value}",
+                        description=(f"{self.description.value}\n" if self.description.value is not None else "")
+                        + f"Ends: {discord.utils.format_dt(end_date, style='R')} ({discord.utils.format_dt(end_date, style='F')})\n"
+                        f"Hosted by: {interaction.user.mention}\n"
+                        f"Entries: **0**\n"
+                        f"Winners: **{winners}**",
+                    ),
+                    view=GiveawayJoinView(self.bot),
+                )
+
+                await DataManager.register_giveaway(
+                    message.id,
+                    interaction.guild.id,
+                    interaction.channel.id,
+                    time,
+                    winners,
+                    self.prize.value,
+                    self.description.value,
+                    interaction.user.id,
+                )
+            
+            else:
+                await interaction.response.send_message(
+                    f"Invalid time!", ephemeral=True
+                )
+        else:
+            await interaction.response.send_message(
+                f"Invalid winner amount!", ephemeral=True
+            )
 
 class GiveawayLeaveView(discord.ui.View):
     def __init__(self, giveaway_id, bot):
@@ -38,9 +131,9 @@ class GiveawayJoinView(discord.ui.View):
         self.bot = bot
 
     @discord.ui.button(
-        label="Join Giveaway",
-        style=discord.ButtonStyle.green,
+        style=discord.ButtonStyle.blurple,
         custom_id="persistent_view:giveaway",
+        emoji="🎉",
     )
     async def join_giveaway(
         self, interaction: discord.Interaction, button: discord.ui.Button
@@ -72,53 +165,13 @@ class Giveaway(commands.GroupCog):
     @app_commands.command(name="create", description="Create a giveaway")
     @app_commands.guild_only()
     @app_commands.default_permissions(manage_guild=True)
-    @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id))
-    @app_commands.describe(
-        time="How long the giveaway should last in minutes",
-        winners="How many winners the giveaway should have",
-        prize="What the prize of the giveaway is",
-        channel="What channel the giveaway should be in",
-        extra_notes="Any extra notes you want to add to the giveaway",
-    )
+    #@app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id))
     async def giveaway_create(
         self,
         interaction: discord.Interaction,
-        time: int,
-        winners: int,
-        prize: str,
-        channel: Optional[discord.TextChannel],
-        extra_notes: Optional[str],
     ) -> None:
-        if channel is None:
-            channel = interaction.channel
-
-        end_date = datetime.datetime.now() + datetime.timedelta(minutes=time)
-        await interaction.response.send_message(
-            f"Giveaway created in {channel.mention}!", ephemeral=True
-        )
-
-        message = await channel.send(
-            embed=discord.Embed(
-                title=f"{prize}",
-                description=(f"{extra_notes}\n" if extra_notes is not None else "")
-                + f"Ends: {discord.utils.format_dt(end_date, style='R')}\n"
-                f"Hosted by: {interaction.user.mention}\n"
-                f"Entries: **0**\n"
-                f"Winners: **{winners}**",
-            ),
-            view=GiveawayJoinView(self.bot),
-        )
-
-        await DataManager.register_giveaway(
-            message.id,
-            interaction.guild.id,
-            channel.id,
-            time,
-            winners,
-            prize,
-            extra_notes,
-            interaction.user.id,
-        )
+        
+        await interaction.response.send_modal(GiveawayModal(self.bot))
 
     @app_commands.command(name="end", description="End a giveaway")
     @app_commands.guild_only()
