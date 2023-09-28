@@ -1,5 +1,4 @@
 import asyncio
-from datetime import datetime
 from typing import Optional
 
 import discord
@@ -79,7 +78,6 @@ class ServerManagement(commands.Cog):
     @app_commands.default_permissions(manage_guild=True)
     @app_commands.checks.cooldown(1, 600, key=lambda i: (i.guild.id, i.user.id))
     async def disable_appealing(self, interaction: discord.Interaction):
-        guild_data = await DataManager.get_guild_data(interaction.guild.id)
         await DataManager.edit_guild_data(interaction.guild.id, "appeal_link", None)
         await interaction.response.send_message(
             embed=discord.Embed(
@@ -119,8 +117,6 @@ class ServerManagement(commands.Cog):
         category: Optional[discord.CategoryChannel],
         slowmode: Optional[int],
     ):
-        guild_data = await DataManager.get_guild_data(interaction.guild.id)
-        logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
         channeltype = ChannelType(interaction.namespace.channeltype)
 
         channel = await interaction.guild._create_channel(
@@ -172,13 +168,10 @@ class ServerManagement(commands.Cog):
         channel: GuildChannel,
         reason: str = None,
     ):
-        guild_data = await DataManager.get_guild_data(interaction.guild.id)
-        channeltype = discord.ChannelType
-
         await channel.delete(reason=reason)
 
         ChannelDelete = discord.Embed(
-            description=f"<:white_checkmark:1096793014287995061> Deleted {channeltype} channel {channel} ",
+            description=f"<:white_checkmark:1096793014287995061> Deleted {channel.type} channel {channel} ",
             colour=discord.Colour.green(),
         )
 
@@ -312,7 +305,6 @@ class ServerManagement(commands.Cog):
         )
         embed.set_author(url=interaction.user.display_avatar, name=interaction.user)
         embed.set_footer(text=f"User ID: {interaction.user.id}")
-        embed.timestamp = datetime.utcnow()
         await logs_channel.send(embed=embed)
 
         return await interaction.edit_original_response(

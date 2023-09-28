@@ -1,8 +1,8 @@
+import datetime
 import json
 import os
 import random
 import time
-from datetime import datetime
 from typing import Optional
 
 import aiohttp
@@ -275,7 +275,7 @@ class Misc(commands.Cog):
             data = json.loads(await response.text())
             embed = discord.Embed(
                 title=f"COVID-19 Statistics for {search}",
-                description=f"* **Last Updated:** {discord.utils.format_dt(datetime.fromtimestamp(data['updated'] / 1000), style='F')}\n"
+                description=f"* **Last Updated:** {discord.utils.format_dt(datetime.date.fromtimestamp(data['updated'] / 1000), style='F')}\n"
                 f"* **Cases:** {data['cases']}\n"
                 f"* **Deaths:** {data['deaths']}\n"
                 f"* **Recovered:** {data['recovered']}\n"
@@ -319,9 +319,9 @@ class Misc(commands.Cog):
             data = json.loads(await response.text())
             embed = discord.Embed(
                 title=f"Weather for {search}",
-                description=f"* **Last Updated:** {discord.utils.format_dt(datetime.fromtimestamp(data['dt']), style='F')}\n"
-                f"* **Sunrise:** {discord.utils.format_dt(datetime.fromtimestamp(data['sys']['sunrise']), style='T')}\n"
-                f"* **Sunset:** {discord.utils.format_dt(datetime.fromtimestamp(data['sys']['sunset']), style='T')}\n"
+                description=f"* **Last Updated:** {discord.utils.format_dt(datetime.datetime.fromtimestamp(data['dt']), style='F')}\n"
+                f"* **Sunrise:** {discord.utils.format_dt(datetime.datetime.fromtimestamp(data['sys']['sunrise']), style='T')}\n"
+                f"* **Sunset:** {discord.utils.format_dt(datetime.datetime.fromtimestamp(data['sys']['sunset']), style='T')}\n"
                 f"* **Description:** {data['weather'][0]['description']}\n"
                 f"* **Temperature:** {round(data['main']['temp'] - 273.15)}°C\n"
                 f"* **Feels Like:** {round(data['main']['feels_like'] - 273.15)}°C\n"
@@ -381,7 +381,7 @@ class Misc(commands.Cog):
             )
             for i in range(0, 5):
                 embed.add_field(
-                    name=f"{datetime.fromtimestamp(data['list'][i]['dt']).strftime('%H:%M')} - {datetime.fromtimestamp(data['list'][i]['dt']).strftime('%d/%m/%Y')}",
+                    name=f"{datetime.datetime.fromtimestamp(data['list'][i]['dt']).strftime('%H:%M')} - {datetime.datetime.fromtimestamp(data['list'][i]['dt']).strftime('%d/%m/%Y')}",
                     value=f"{data['list'][i]['weather'][0]['description']}\n{round(data['list'][i]['main']['temp'] - 273.15)}°C",
                     inline=True,
                 )
@@ -510,17 +510,19 @@ class Misc(commands.Cog):
             await DataManager.add_cooldown(interaction.user.id, "report", 86400)
 
         elif "report" in cooldowns:
-            startTime = datetime.strptime(cooldowns["report"], "%Y-%m-%dT%H:%M:%S.%f")
-            endTime = datetime.strptime(
-                datetime.utcnow().isoformat(), "%Y-%m-%dT%H:%M:%S.%f"
+            startTime = datetime.datetime.strptime(
+                cooldowns["report"], "%Y-%m-%dT%H:%M:%S.%f"
+            )
+            endTime = datetime.datetime.strptime(
+                datetime.datetime.utcnow().isoformat(), "%Y-%m-%dT%H:%M:%S.%f"
             )
             timeLeft = (startTime - endTime).total_seconds()
 
-            if json.loads(cooldowns)["report"] < datetime.utcnow().isoformat():
+            if json.loads(cooldowns)["report"] < datetime.datetime.utcnow().isoformat():
                 await DataManager.remove_cooldown(interaction.user.id, "report")
                 await DataManager.add_cooldown(interaction.user.id, "report", 86400)
 
-            if json.loads(cooldowns)["report"] > datetime.utcnow().isoformat():
+            if json.loads(cooldowns)["report"] > datetime.datetime.utcnow().isoformat():
                 return await interaction.response.send_message(
                     embed=discord.Embed(
                         description=f"<:white_cross:1096791282023669860> You already sent a report in the last 24 hours, try again <t:{int(time.time() + timeLeft)}:R>",
