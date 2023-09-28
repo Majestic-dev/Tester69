@@ -1,5 +1,3 @@
-from datetime import datetime
-
 import discord
 from discord import app_commands
 from discord.ext import commands
@@ -105,7 +103,6 @@ class WarningSystem(commands.Cog):
         member="The member to get the warnings of",
     )
     async def warnings(self, interaction: discord.Interaction, member: discord.Member):
-        guild_data = await DataManager.get_guild_data(interaction.guild.id)
         warnings = await DataManager.get_user_warnings(interaction.guild.id, member.id)
 
         if warnings is None or len(warnings) == 0:
@@ -118,7 +115,6 @@ class WarningSystem(commands.Cog):
 
         e = discord.Embed(
             title="Warnings",
-            timestamp=datetime.utcnow(),
             colour=discord.Colour.orange(),
         )
         for warn in warnings:

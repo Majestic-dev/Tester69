@@ -1,5 +1,5 @@
 import os
-from typing import Literal, Optional
+from typing import Optional
 
 import discord
 from discord.ext import commands

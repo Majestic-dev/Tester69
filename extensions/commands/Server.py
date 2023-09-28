@@ -1,13 +1,8 @@
-import re
-import time
 from typing import Optional
 
 import discord
-import Paginator
 from discord import app_commands
 from discord.ext import commands
-
-from utils import DataManager
 
 
 class Server(commands.Cog):

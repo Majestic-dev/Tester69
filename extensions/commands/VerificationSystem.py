@@ -1,7 +1,6 @@
 import asyncio
 import os
 import random
-from datetime import datetime
 
 import discord
 from discord import app_commands
