@@ -91,10 +91,20 @@ python main.py
     - Database
         * Migrated from a JSON database (if you call it a one) to PostgreSQL (asyncpg)
 
+## v1.3
+
+    - Miscallaneous
+        * Added a giveaway system (including ending the giveaway immediately, rerolling the giveaway, etc.)
+        * Added discord's logging, everything will be logged in the specified file
+
+    - Database
+        * Added a separate database for the giveaways
+        * Added a function to create a database backup
+
 # TODO
 
 ## V1.3 Focused On Reworking Some Systems
 
+- [x] Add a Giveaway system
 - [ ] Rework the Economy system to be more fun and interactive
 - [ ] Add a Ticket system
-- [ ] Add a Giveaway system
