@@ -107,4 +107,3 @@ python main.py
 
 - [x] Add a Giveaway system
 - [ ] Rework the Economy system to be more fun and interactive
-- [ ] Add a Ticket system
