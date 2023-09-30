@@ -107,7 +107,7 @@ class DataManager:
                 participants bigint ARRAY DEFAULT '{}'::bigint[],
                 winners bigint ARRAY DEFAULT '{}'::bigint[],
                 ended BOOLEAN DEFAULT FALSE
-            )"""
+            );"""
         )
 
         await cls.db_connection.execute(

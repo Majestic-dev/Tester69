@@ -51,12 +51,11 @@ class GiveawayLooper(commands.Cog):
                             + f"Ended: {discord.utils.format_dt(datetime.datetime.strptime(giveaway['end_date'], '%Y-%m-%dT%H:%M:%S.%f'), style='R')} ({discord.utils.format_dt(datetime.datetime.strptime(giveaway['end_date'], '%Y-%m-%dT%H:%M:%S.%f'), style='F')})\n"
                             f"Hosted by: <@{giveaway['host_id']}>\n"
                             f"Entries: {len(giveaway['participants'])}\n"
-                            +
-                            (
+                            + (
                                 f"Winners: {','.join([f'<@{winner}>' for winner in winners])}"
                                 if len(winners) > 0
                                 else "Winners: No Winners"
-                            )
+                            ),
                         ).set_footer(
                             text=f"`/giveaway reroll {giveaway['id']}` to reroll the giveaway winners",
                         ),
@@ -75,7 +74,7 @@ class GiveawayLooper(commands.Cog):
         next_giveaway = await DataManager.get_next_giveaway()
 
         if next_giveaway is None:
-            print("No giveaways to end")
+            pass
         else:
             end_date = datetime.datetime.fromisoformat(next_giveaway["end_date"])
             await discord.utils.sleep_until(end_date)
@@ -111,8 +110,7 @@ class GiveawayLooper(commands.Cog):
                         + f"Ended: {discord.utils.format_dt(datetime.datetime.strptime(next_giveaway['end_date'], '%Y-%m-%dT%H:%M:%S.%f'), style='R')} ({discord.utils.format_dt(datetime.datetime.strptime(next_giveaway['end_date'], '%Y-%m-%dT%H:%M:%S.%f'), style='F')})\n"
                         f"Hosted by: <@{next_giveaway['host_id']}>\n"
                         f"Entries: {len(next_giveaway['participants'])}\n"
-                        +
-                        (
+                        + (
                             f"Winners: {','.join([f'<@{winner}>' for winner in winners])}"
                             if len(winners) > 0
                             else "Winners: No Winners"
@@ -199,12 +197,11 @@ class GiveawayLooper(commands.Cog):
                     + f"Ended: {discord.utils.format_dt(datetime.datetime.strptime(giveaway_data['end_date'], '%Y-%m-%dT%H:%M:%S.%f'), style='R')} ({discord.utils.format_dt(datetime.datetime.strptime(giveaway_data['end_date'], '%Y-%m-%dT%H:%M:%S.%f'), style='F')})\n"
                     f"Hosted by: <@{giveaway_data['host_id']}>\n"
                     f"Entries: **{len(giveaway_data['participants'])}**\n"
-                    +
-                    (
+                    + (
                         f"Winners: {','.join([f'<@{winner}>' for winner in winners])}"
                         if len(winners) > 0
                         else "Winners: No Winners"
-                    )
+                    ),
                 ),
                 view=None,
             )
@@ -221,14 +218,12 @@ class GiveawayLooper(commands.Cog):
 
     # Manual Giveaway Reroll Listener
     @commands.Cog.listener()
-    async def on_manual_giveaway_reroll(
-        self, giveaway_id: int, guild_id: int
-    ):
+    async def on_manual_giveaway_reroll(self, giveaway_id: int, guild_id: int):
         giveaway_data = await DataManager.get_giveaway_data(giveaway_id, guild_id)
         channel = self.bot.get_channel(giveaway_data["channel_id"])
         message = await channel.fetch_message(giveaway_id)
         winners = await DataManager.draw_giveaway_winners(giveaway_id, guild_id)
-        
+
         try:
             await message.edit(
                 embed=discord.Embed(
@@ -241,12 +236,11 @@ class GiveawayLooper(commands.Cog):
                     + f"Ended: {discord.utils.format_dt(datetime.datetime.strptime(giveaway_data['end_date'], '%Y-%m-%dT%H:%M:%S.%f'), style='R')} ({discord.utils.format_dt(datetime.datetime.strptime(giveaway_data['end_date'], '%Y-%m-%dT%H:%M:%S.%f'), style='F')})\n"
                     f"Hosted by: <@{giveaway_data['host_id']}>\n"
                     f"Entries: **{len(giveaway_data['participants'])}**\n"
-                    +
-                    (
+                    + (
                         f"Winners: {','.join([f'<@{winner}>' for winner in winners])}"
                         if len(winners) > 0
-                        else "Winners: No Winners"   
-                    )
+                        else "Winners: No Winners"
+                    ),
                 )
             )
 
@@ -291,6 +285,7 @@ class GiveawayLooper(commands.Cog):
             )
         except:
             return
+
 
 async def setup(bot):
     await bot.add_cog(GiveawayLooper(bot))
