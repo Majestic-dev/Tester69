@@ -2,7 +2,7 @@
 
 [![](https://discord.com/api/guilds/733219077744754750/embed.png)](https://discord.gg/VsDDf8YKBV)
 
-A general-use discord bot coded in discord.py
+A general-use discord bot coded in python using [discord.py](https://github.com/Rapptz/discord.py)
 
 # Big shoutout to [kaJob-dev](https://github.com/kaJob-dev) (kajob. on discord) for guiding me on this project!
 
