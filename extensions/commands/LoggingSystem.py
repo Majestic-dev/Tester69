@@ -291,7 +291,7 @@ class Logging(commands.GroupCog):
 
         create = discord.Embed(
             title="Role Created",
-            description=f"{role.mention} Role has been created",
+            description=f"{role.name} Role has been created",
             colour=discord.Colour.green(),
         )
         create.set_author(icon_url=role.guild.icon, name=role.guild)
@@ -643,7 +643,7 @@ class Logging(commands.GroupCog):
         embed = discord.Embed(
             title="Channel Created",
             description=f"Created {channel.mention} channel",
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.datetime.utcnow(),
             colour=discord.Colour.green(),
         )
 
@@ -664,7 +664,7 @@ class Logging(commands.GroupCog):
         embed = discord.Embed(
             title="Channel Deleted",
             description=f"Deleted channel {channel.name}",
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.datetime.utcnow(),
             colour=discord.Colour.red(),
         )
 
