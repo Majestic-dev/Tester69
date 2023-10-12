@@ -1,3 +1,4 @@
+import asyncio
 import datetime
 import json
 import os
@@ -227,7 +228,7 @@ class Misc(commands.Cog):
                     colour=discord.Colour.red(),
                 )
         await session.close()
-        await Paginator.Simple(ephemeral=True).start(interaction, pages=embeds)
+        await Paginator.Simple().start(interaction, pages=embeds)
 
     @app_commands.command(name="github", description="Get a user's GitHub profile")
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.user.id))
@@ -419,7 +420,7 @@ class Misc(commands.Cog):
         name="transcript", description="Get a transcript of a channel"
     )
     @app_commands.guild_only()
-    @app_commands.default_permissions(administrator=True)
+    @app_commands.default_permissions(manage_guild=True)
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.user.id))
     @app_commands.describe(channel="The channel you want to get the transcript of")
     async def transcript(
@@ -429,10 +430,13 @@ class Misc(commands.Cog):
         messagelist = []
 
         async for message in channel.history(limit=None):
+            asyncio.sleep(1)
             messagelist.append(message)
 
         for message in reversed(messagelist):
-            with open(f"{channel.id}.txt", "a", encoding="utf-8") as f:
+            with open(
+                f"{channel.id}_{interaction.user.id}.txt", "a", encoding="utf-8"
+            ) as f:
                 if message.embeds:
                     f.write(f"\n{message.author} EMBED\n")
                     if message.embeds[0].title:
@@ -463,7 +467,7 @@ class Misc(commands.Cog):
         await interaction.followup.send(
             file=discord.File(f"{channel.id}.txt"), ephemeral=True
         )
-        os.remove(f"{channel.id}.txt")
+        os.remove(f"{channel.id}_{interaction.user.id}.txt")
 
     @app_commands.command(
         name="report", description="Report a bug or issue with the bot"
