@@ -8,29 +8,17 @@ A general-use discord bot coded in python using [discord.py](https://github.com/
 
 # Installation
 
-## Clone the [repository](https://github.com/Majestic-dev/Tester69/)
 ```bash
+# Clone the repository
 git clone https://github.com/Majestic-dev/Tester69.git
-```
 
-## Install [requirements.txt](requirements.txt)
-```bash
+# Install the requirements
 pip install -r requirements.txt
-```
-or
-```bash
-python -m pip install -r requirements.txt
-```
 
-## Running the bot
-
-### change your current directory to the cloned repository
-```bash
+# Change the directory
 cd Tester69
-```
 
-### run the file
-```bash
+# Run the bot
 python main.py
 ```
 
