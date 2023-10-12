@@ -8,6 +8,8 @@ from discord import app_commands
 from discord.ext import commands
 
 from extensions.commands.Giveaway import GiveawayJoinView
+from extensions.commands.TicketSystem import (ClosedTicketViews, PanelViews,
+                                              TicketViews)
 from utils import DataManager
 
 DataManager.setup(
@@ -64,6 +66,15 @@ class Bot(commands.Bot):
 
     async def setup_hook(self) -> None:
         self.add_view(GiveawayJoinView(bot))
+        tickets = await DataManager.get_all_tickets()
+        panels = await DataManager.get_all_panels()
+        for ticket in tickets:
+            for panel in panels:
+                self.add_view(
+                    ClosedTicketViews(bot, panel["id"], ticket["ticket_creator"])
+                )
+                self.add_view(TicketViews(bot, panel["id"], ticket["ticket_creator"]))
+                self.add_view(PanelViews(bot, panel["id"]))
 
 
 bot = Bot()
