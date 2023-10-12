@@ -111,6 +111,18 @@ class DataManager:
         )
 
         await cls.db_connection.execute(
+            """CREATE TABLE IF NOT EXISTS panels (
+                id bigint PRIMARY KEY,
+                guild_id bigint,
+                limit_per_user bigint,
+                panel_title TEXT,
+                panel_description TEXT,
+                panel_moderators bigint ARRAY DEFAULT '{}'::bigint[],
+                tickets JSONB
+            );"""
+        )
+
+        await cls.db_connection.execute(
             """CREATE TABLE IF NOT EXISTS users (
                 id bigint PRIMARY KEY,
                 inventory JSONB,
@@ -125,6 +137,38 @@ class DataManager:
         return cls.__data.get(path, {}).get(key, None)
 
     @classmethod
+    async def add_column(cls, table: str, column_name: str, column_type: Any) -> None:
+        async with cls.db_connection.acquire():
+            columnexists = await cls.db_connection.fetchval(
+                f"SELECT EXISTS (SELECT FROM information_schema.columns WHERE table_name = '{table}' AND column_name = '{column_name}')"
+            )
+
+            if not columnexists:
+                await cls.db_connection.execute(
+                    f"ALTER TABLE {table} ADD COLUMN IF NOT EXISTS {column_name} {column_type}"
+                )
+
+            elif columnexists:
+                await cls.db_connection.execute(
+                    f"ALTER TABLE {table} ALTER COLUMN {column_name} TYPE {column_type} USING {column_name}::{column_type}"
+                )
+
+    @classmethod
+    async def remove_column(cls, table: str, column_name: str) -> None:
+        async with cls.db_connection.acquire():
+            columnexists = await cls.db_connection.fetchval(
+                f"SELECT EXISTS (SELECT FROM information_schema.columns WHERE table_name = '{table}' AND column_name = '{column_name}')"
+            )
+
+            if columnexists:
+                await cls.db_connection.execute(
+                    f"ALTER TABLE {table} DROP COLUMN IF EXISTS {column_name}"
+                )
+
+            elif not columnexists:
+                return
+
+    @classmethod
     async def add_guild_data(cls, guild_id: int) -> None:
         async with cls.db_connection.acquire():
             await cls.db_connection.execute(
@@ -137,38 +181,6 @@ class DataManager:
             await cls.db_connection.execute(
                 "DELETE FROM guilds WHERE id = $1", guild_id
             )
-
-    @classmethod
-    async def remove_guilds_column(cls, column: str) -> None:
-        async with cls.db_connection.acquire():
-            columnexists = await cls.db_connection.fetchval(
-                f"SELECT EXISTS (SELECT FROM information_schema.columns WHERE table_name = 'guilds' AND column_name = '{column}')"
-            )
-
-            if columnexists:
-                await cls.db_connection.execute(
-                    f"ALTER TABLE guilds DROP COLUMN IF EXISTS {column}"
-                )
-
-            elif not columnexists:
-                return
-
-    @classmethod
-    async def add_guilds_column(cls, column: str, value: Any) -> None:
-        async with cls.db_connection.acquire():
-            columnexists = await cls.db_connection.fetchval(
-                f"SELECT EXISTS (SELECT FROM information_schema.columns WHERE table_name = 'guilds' AND column_name = '{column}')"
-            )
-
-            if not columnexists:
-                await cls.db_connection.execute(
-                    f"ALTER TABLE guilds ADD COLUMN IF NOT EXISTS {column} {value}"
-                )
-
-            elif columnexists:
-                await cls.db_connection.execute(
-                    f"ALTER TABLE guilds ALTER COLUMN {column} TYPE {value} USING {column}::{value}"
-                )
 
     @classmethod
     async def get_all_guilds(cls) -> None:
@@ -463,6 +475,169 @@ class DataManager:
                         guild_id,
                     )
                 return participants
+
+    @classmethod
+    async def create_panel(
+        cls,
+        panel_id: int,
+        guild_id: int,
+        limit_per_user: int,
+        panel_title: str,
+        panel_description: str,
+        panel_moderators: list[int],
+    ) -> None:
+        async with cls.db_connection.acquire():
+            await cls.db_connection.execute(
+                "INSERT INTO panels (id, guild_id, limit_per_user, panel_title, panel_description, panel_moderators) VALUES ($1, $2, $3, $4, $5, $6)",
+                panel_id,
+                guild_id,
+                limit_per_user,
+                panel_title,
+                panel_description,
+                panel_moderators,
+            )
+
+    @classmethod
+    async def delete_panel(cls, panel_id: int, guild_id: int) -> None:
+        async with cls.db_connection.acquire():
+            await cls.db_connection.execute(
+                "DELETE FROM panels WHERE id = $1 AND guild_id = $2", panel_id, guild_id
+            )
+
+    @classmethod
+    async def edit_panel(
+        cls, panel_id: int, guild_id: int, column: str, value: Any
+    ) -> None:
+        async with cls.db_connection.acquire():
+            await cls.db_connection.execute(
+                f"UPDATE panels SET {column} = $1 WHERE id = $2 AND guild_id = $3",
+                value,
+                panel_id,
+                guild_id,
+            )
+
+    @classmethod
+    async def edit_panel_moderators(
+        cls, panel_id: int, guild_id: int, panel_moderators: list[int]
+    ) -> None:
+        async with cls.db_connection.acquire():
+            await cls.db_connection.execute(
+                "UPDATE panels SET panel_moderators = $1 WHERE id = $2 AND guild_id = $3",
+                panel_moderators,
+                panel_id,
+                guild_id,
+            )
+
+    @classmethod
+    async def get_panel_data(cls, panel_id: int, guild_id: int) -> None:
+        async with cls.db_connection.acquire():
+            row = await cls.db_connection.fetchrow(
+                "SELECT * FROM panels WHERE id = $1 AND guild_id = $2",
+                panel_id,
+                guild_id,
+            )
+            return row
+
+    @classmethod
+    async def get_all_panels(cls) -> None:
+        async with cls.db_connection.acquire():
+            rows = await cls.db_connection.fetch("SELECT * FROM panels")
+            return rows
+
+    @classmethod
+    async def create_ticket(
+        cls,
+        panel_id: int,
+        guild_id: int,
+        ticket_id: int,
+        ticket_creator: int,
+        closed: bool = False,
+    ) -> None:
+        async with cls.db_connection.acquire():
+            existing_tickets = await cls.db_connection.fetchval(
+                "SELECT tickets FROM panels WHERE id = $1 AND guild_id = $2",
+                panel_id,
+                guild_id,
+            )
+            new_ticket = {
+                "ticket_id": ticket_id,
+                "ticket_creator": ticket_creator,
+                "closed": closed,
+            }
+            if existing_tickets is None:
+                await cls.db_connection.execute(
+                    "UPDATE panels SET tickets = $1::jsonb WHERE id = $2 AND guild_id = $3",
+                    json.dumps([new_ticket]),
+                    panel_id,
+                    guild_id,
+                )
+            else:
+                tickets_dict = json.loads(existing_tickets)
+                tickets_dict.append(new_ticket)
+                await cls.db_connection.execute(
+                    "UPDATE panels SET tickets = $1::jsonb WHERE id = $2 AND guild_id = $3",
+                    json.dumps(tickets_dict),
+                    panel_id,
+                    guild_id,
+                )
+
+    @classmethod
+    async def open_ticket(cls, panel_id: int, ticket_id: int) -> None:
+        async with cls.db_connection.acquire():
+            existing_tickets = await cls.db_connection.fetchval(
+                "SELECT tickets FROM panels WHERE id = $1", panel_id
+            )
+            if existing_tickets:
+                tickets_dict = json.loads(existing_tickets)
+                for ticket in tickets_dict:
+                    if ticket["ticket_id"] == ticket_id:
+                        ticket["closed"] = False
+                        await cls.db_connection.execute(
+                            "UPDATE panels SET tickets = $1::jsonb WHERE id = $2",
+                            json.dumps(tickets_dict),
+                            panel_id,
+                        )
+
+    @classmethod
+    async def close_ticket(cls, panel_id: int, ticket_id: int) -> None:
+        async with cls.db_connection.acquire():
+            existing_tickets = await cls.db_connection.fetchval(
+                "SELECT tickets FROM panels WHERE id = $1", panel_id
+            )
+            if existing_tickets:
+                tickets_dict = json.loads(existing_tickets)
+                for ticket in tickets_dict:
+                    if ticket["ticket_id"] == ticket_id:
+                        ticket["closed"] = True
+                        await cls.db_connection.execute(
+                            "UPDATE panels SET tickets = $1::jsonb WHERE id = $2",
+                            json.dumps(tickets_dict),
+                            panel_id,
+                        )
+
+    @classmethod
+    async def get_ticket(cls, ticket_id: int) -> None:
+        async with cls.db_connection.acquire():
+            rows = await cls.db_connection.fetch("SELECT tickets FROM panels")
+            for row in rows:
+                tickets_dict = json.loads(row["tickets"])
+                for ticket in tickets_dict:
+                    if ticket["ticket_id"] == ticket_id:
+                        return ticket
+
+    @classmethod
+    async def get_all_tickets(cls) -> None:
+        async with cls.db_connection.acquire():
+            rows = await cls.db_connection.fetch("SELECT tickets FROM panels")
+            all_tickets = []
+
+            for row in rows:
+                tickets_dict = row["tickets"]
+                if tickets_dict is not None:
+                    tickets_dict = json.loads(tickets_dict)
+                    for ticket in tickets_dict:
+                        all_tickets.append(ticket)
+            return all_tickets
 
     @classmethod
     async def get_all_users(cls) -> None:
