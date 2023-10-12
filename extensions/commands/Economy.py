@@ -1,11 +1,11 @@
+import datetime
 import json
 import random
 import time
-from datetime import datetime
+import Paginator
 from typing import Optional
 
 import discord
-import Paginator
 from discord import app_commands
 from discord.ext import commands
 
@@ -68,7 +68,7 @@ class DropDown(discord.ui.Select):
                 )
 
             lb_embed.set_author(name="Cash Leaderboard", icon_url=self.bot.user.avatar)
-            lb_embed.timestamp = datetime.utcnow()
+            lb_embed.timestamp = datetime.datetime.utcnow()
             await interaction.response.edit_message(
                 content=None,
                 embed=lb_embed,
@@ -95,7 +95,7 @@ class DropDown(discord.ui.Select):
                 )
 
             lb_embed.set_author(name="Bank Leaderboard", icon_url=self.bot.user.avatar)
-            lb_embed.timestamp = datetime.utcnow()
+            lb_embed.timestamp = datetime.datetime.utcnow()
             await interaction.response.edit_message(
                 embed=lb_embed, view=DropDownView(bot=self.bot, interaction=interaction)
             )
@@ -422,15 +422,15 @@ class Economy(commands.Cog):
                 json.loads(cooldowns)["hourly"], "%Y-%m-%dT%H:%M:%S.%f"
             )
             endTime = datetime.strptime(
-                datetime.utcnow().isoformat(), "%Y-%m-%dT%H:%M:%S.%f"
+                datetime.datetime.utcnow().isoformat(), "%Y-%m-%dT%H:%M:%S.%f"
             )
             timeLeft = (startTime - endTime).total_seconds()
 
-            if json.loads(cooldowns)["hourly"] < datetime.utcnow().isoformat():
+            if json.loads(cooldowns)["hourly"] < datetime.datetime.utcnow().isoformat():
                 await DataManager.remove_cooldown(interaction.user.id, "hourly")
                 await DataManager.add_cooldown(interaction.user.id, "hourly", 3600)
 
-            if json.loads(cooldowns)["hourly"] > datetime.utcnow().isoformat():
+            if json.loads(cooldowns)["hourly"] > datetime.datetime.utcnow().isoformat():
                 return await interaction.response.send_message(
                     embed=discord.Embed(
                         description=f"<:white_cross:1096791282023669860> You already claimed your hourly coins, try again <t:{int(time.time() + timeLeft)}:R>",
@@ -463,15 +463,15 @@ class Economy(commands.Cog):
                 json.loads(cooldowns)["daily"], "%Y-%m-%dT%H:%M:%S.%f"
             )
             endTime = datetime.strptime(
-                datetime.utcnow().isoformat(), "%Y-%m-%dT%H:%M:%S.%f"
+                datetime.datetime.utcnow().isoformat(), "%Y-%m-%dT%H:%M:%S.%f"
             )
             timeLeft = (startTime - endTime).total_seconds()
 
-            if json.loads(cooldowns)["daily"] < datetime.utcnow().isoformat():
+            if json.loads(cooldowns)["daily"] < datetime.datetime.utcnow().isoformat():
                 await DataManager.remove_cooldown(interaction.user.id, "daily")
                 await DataManager.add_cooldown(interaction.user.id, "daily", 86400)
 
-            if json.loads(cooldowns)["daily"] > datetime.utcnow().isoformat():
+            if json.loads(cooldowns)["daily"] > datetime.datetime.utcnow().isoformat():
                 return await interaction.response.send_message(
                     embed=discord.Embed(
                         description=f"<:white_cross:1096791282023669860> You already claimed your daily coins, try again <t:{int(time.time() + timeLeft)}:R>",
@@ -504,15 +504,15 @@ class Economy(commands.Cog):
                 json.loads(cooldowns)["weekly"], "%Y-%m-%dT%H:%M:%S.%f"
             )
             endTime = datetime.strptime(
-                datetime.utcnow().isoformat(), "%Y-%m-%dT%H:%M:%S.%f"
+                datetime.datetime.utcnow().isoformat(), "%Y-%m-%dT%H:%M:%S.%f"
             )
             timeLeft = (startTime - endTime).total_seconds()
 
-            if json.loads(cooldowns)["weekly"] < datetime.utcnow().isoformat():
+            if json.loads(cooldowns)["weekly"] < datetime.datetime.utcnow().isoformat():
                 await DataManager.remove_cooldown(interaction.user.id, "weekly")
                 await DataManager.add_cooldown(interaction.user.id, "weekly", 604800)
 
-            if json.loads(cooldowns)["weekly"] > datetime.utcnow().isoformat():
+            if json.loads(cooldowns)["weekly"] > datetime.datetime.utcnow().isoformat():
                 return await interaction.response.send_message(
                     embed=discord.Embed(
                         description=f"<:white_cross:1096791282023669860> You already claimed your weekly coins, try again <t:{int(time.time() + timeLeft)}:R>",
@@ -545,15 +545,21 @@ class Economy(commands.Cog):
                 json.loads(cooldowns)["monthly"], "%Y-%m-%dT%H:%M:%S.%f"
             )
             endTime = datetime.strptime(
-                datetime.utcnow().isoformat(), "%Y-%m-%dT%H:%M:%S.%f"
+                datetime.datetime.utcnow().isoformat(), "%Y-%m-%dT%H:%M:%S.%f"
             )
             timeLeft = (startTime - endTime).total_seconds()
 
-            if json.loads(cooldowns)["monthly"] < datetime.utcnow().isoformat():
+            if (
+                json.loads(cooldowns)["monthly"]
+                < datetime.datetime.utcnow().isoformat()
+            ):
                 await DataManager.remove_cooldown(interaction.user.id, "monthly")
                 await DataManager.add_cooldown(interaction.user.id, "monthly", 2592000)
 
-            if json.loads(cooldowns)["monthly"] > datetime.utcnow().isoformat():
+            if (
+                json.loads(cooldowns)["monthly"]
+                > datetime.datetime.utcnow().isoformat()
+            ):
                 return await interaction.response.send_message(
                     embed=discord.Embed(
                         description=f"<:white_cross:1096791282023669860> You already claimed your monthly coins, try again <t:{int(time.time() + timeLeft)}:R>",
@@ -742,7 +748,7 @@ class Economy(commands.Cog):
                 )
 
             lb_embed.set_author(name="Cash Leaderboard", icon_url=self.bot.user.avatar)
-            lb_embed.timestamp = datetime.utcnow()
+            lb_embed.timestamp = datetime.datetime.utcnow()
             await interaction.response.send_message(embed=lb_embed, view=view)
 
         elif choices.value == "bank":
@@ -765,7 +771,7 @@ class Economy(commands.Cog):
                 )
 
             lb_embed.set_author(name="Bank Leaderboard", icon_url=self.bot.user.avatar)
-            lb_embed.timestamp = datetime.utcnow()
+            lb_embed.timestamp = datetime.datetime.utcnow()
             await interaction.response.send_message(embed=lb_embed, view=view)
 
     @app_commands.command(name="shop", description="View the shop to buy various items")
