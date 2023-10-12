@@ -5,7 +5,7 @@ from discord.ui import Select, View
 
 
 class HelpSelect(Select):
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: commands.AutoShardedBot):
         super().__init__(
             placeholder="Choose a command category",
             options=[
