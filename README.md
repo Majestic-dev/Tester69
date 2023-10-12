@@ -8,29 +8,17 @@ A general-use discord bot coded in discord.py
 
 # Installation
 
-## Clone the [repository](https://github.com/Majestic-dev/Tester69/)
 ```bash
+# Clone the repository
 git clone https://github.com/Majestic-dev/Tester69.git
-```
 
-## Install [requirements.txt](requirements.txt)
-```bash
+# Install the requirements
 pip install -r requirements.txt
-```
-or
-```bash
-python -m pip install -r requirements.txt
-```
 
-## Running the bot
-
-### change your current directory to the cloned repository
-```bash
+# Change the directory
 cd Tester69
-```
 
-### run the file
-```bash
+# Run the bot
 python main.py
 ```
 
@@ -97,6 +85,9 @@ python main.py
         * Added a giveaway system (including ending the giveaway immediately, rerolling the giveaway, etc.)
         * Added discord's logging, everything will be logged in the specified file
 
+    - Server(management)
+        * Added a ticket system with a panel that guides you through the setup
+
     - Database
         * Added a separate database for the giveaways
         * Added a function to create a database backup
@@ -106,4 +97,6 @@ python main.py
 ## V1.3 Focused On Reworking Some Systems
 
 - [x] Add a Giveaway system
+- [x] Add a ticket system
+- [ ] Create my own paginator
 - [ ] Rework the Economy system to be more fun and interactive
