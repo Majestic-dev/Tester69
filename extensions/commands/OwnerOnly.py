@@ -177,5 +177,5 @@ class OwnerOnly(commands.Cog):
             )
 
 
-async def setup(bot: commands.Bot):
+async def setup(bot: commands.AutoShardedBot):
     await bot.add_cog(OwnerOnly(bot))
