@@ -542,7 +542,21 @@ class DataManager:
     async def get_all_panels(cls) -> None:
         async with cls.db_connection.acquire():
             rows = await cls.db_connection.fetch("SELECT * FROM panels")
-            return rows
+            all_panels = []
+
+            for row in rows:
+                all_panels.append(row)
+            return all_panels
+        
+    @classmethod
+    async def get_all_panel_ids(cls) -> None:
+        async with cls.db_connection.acquire():
+            rows = await cls.db_connection.fetch("SELECT id FROM panels")
+            all_panel_ids = []
+
+            for row in rows:
+                all_panel_ids.append(row["id"])
+            return all_panel_ids
 
     @classmethod
     async def create_ticket(
