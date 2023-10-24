@@ -57,7 +57,7 @@ DataManager.setup(
 
 class Bot(commands.Bot):
     def __init__(self):
-        intents = discord.Intents.all()
+        intents = discord.Intents().all()
         super().__init__(
             command_prefix="'",
             owner_id=705435835306213418,
