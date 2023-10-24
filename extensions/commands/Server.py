@@ -147,7 +147,7 @@ class Server(commands.Cog):
             f"* **Position**: {role.position}\n"
             f"* **Mentionable**: {'Yes' if role.mentionable else 'No'}\n"
             f"* **Members**: {len(role.members)}\n"
-            f"* **Colour**: {role.colour if role.color != discord.Colour.default() else 'No Colour'}\n",
+            f"* **Colour**: {role.colour if role.colour != discord.Colour.default() else 'No Colour'}\n",
             colour=role.colour
             if role.colour != discord.Colour.default()
             else discord.Colour.blurple(),
