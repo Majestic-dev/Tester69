@@ -43,7 +43,7 @@ class Verification(commands.GroupCog):
             font=font,
         )
         rotated_image = verification_background.rotate(
-            random.randint(-50, 50), expand=1, fillcolor=background_colour
+            random.randint(-50, 50), expand=1, fillcolour=background_colour
         )
         blurred_image = rotated_image.filter(ImageFilter.GaussianBlur(3))
 
