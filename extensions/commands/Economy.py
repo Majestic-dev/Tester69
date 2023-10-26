@@ -2,10 +2,10 @@ import datetime
 import json
 import random
 import time
-import Paginator
 from typing import Optional
 
 import discord
+import Paginator
 from discord import app_commands
 from discord.ext import commands
 
