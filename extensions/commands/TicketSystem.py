@@ -18,12 +18,11 @@ class CreateRoleDropdown(discord.ui.RoleSelect):
         self.guild = guild
         self.message = message
 
-
         super().__init__(
             placeholder="Select the panel moderators",
             min_values=1,
             max_values=len(guild.roles),
-            )
+        )
 
     async def callback(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
@@ -53,18 +52,19 @@ class CreateRoleDropdown(discord.ui.RoleSelect):
             [int(value) for value in interaction.data["values"]],
         )
 
+
 class EditRoleDropDown(discord.ui.RoleSelect):
     def __init__(
         self,
         bot: commands.AutoShardedBot,
         panel_id: int,
-        message: discord.Message,
-        interaction: discord.Interaction
+        interaction: discord.Interaction,
+        paneledit,
     ):
         self.bot = bot
         self.panel_id = panel_id
-        self.message = message
         self.interaction = interaction
+        self.paneledit = paneledit
 
         super().__init__(
             placeholder="Select the panel moderators",
@@ -79,8 +79,8 @@ class EditRoleDropDown(discord.ui.RoleSelect):
         )
         await self.interaction.edit_original_response(
             embed=discord.Embed(
-                title=f"{panel_data['panel_title']}",
-                description=f"{panel_data['panel_description']}"
+                title=self.paneledit.panel_title,
+                description=self.paneledit.panel_description
                 + f"\n\nCurrent Panel Moderators: "
                 + ",".join(
                     [
@@ -94,11 +94,10 @@ class EditRoleDropDown(discord.ui.RoleSelect):
             )
         )
 
-        await DataManager.edit_panel_moderators(
-            self.panel_id,
-            interaction.guild.id,
-            [int(value) for value in interaction.data["values"]],
-        )
+        self.paneledit.panel_moderators = [
+            int(value) for value in interaction.data["values"]
+        ]
+
 
 class CreateRoleDropdownView(discord.ui.View):
     def __init__(
@@ -123,18 +122,19 @@ class CreateRoleDropdownView(discord.ui.View):
             )
         )
 
+
 class EditRoleDropdownView(discord.ui.View):
     def __init__(
         self,
         bot: commands.AutoShardedBot,
         panel_id: int,
-        message: discord.Message,
-        interaction: discord.Interaction
+        interaction: discord.Interaction,
+        paneledit,
     ):
         self.bot = bot
         self.panel_id = panel_id
-        self.message = message
         self.interaction = interaction
+        self.paneledit = paneledit
 
         super().__init__()
 
@@ -142,10 +142,11 @@ class EditRoleDropdownView(discord.ui.View):
             EditRoleDropDown(
                 bot=self.bot,
                 panel_id=self.panel_id,
-                message=self.message,
                 interaction=self.interaction,
+                paneledit=self.paneledit,
             )
         )
+
 
 class ChannelDropdown(discord.ui.ChannelSelect):
     def __init__(
@@ -181,10 +182,10 @@ class ChannelDropdown(discord.ui.ChannelSelect):
             )
         )
 
-        await panel.edit(
-            view=PanelViews(self.bot, panel.id)
+        await panel.edit(view=PanelViews(self.bot, panel.id))
+        await DataManager.edit_panel(
+            self.message.id, interaction.guild.id, "id", panel.id
         )
-        await DataManager.edit_panel(self.message.id, interaction.guild.id, "id", panel.id)
 
 
 class ChannelDropdownView(discord.ui.View):
@@ -283,12 +284,14 @@ class CreatePanelEditModal(discord.ui.Modal, title="Edit Panel"):
                 ephemeral=True,
             )
 
+
 class EditPanelEditModal(discord.ui.Modal, title="Edit Panel"):
-    def __init__(self, bot, interaction, panel_id) -> None:
+    def __init__(self, bot, interaction, panel_id, paneledit) -> None:
         super().__init__()
         self.bot = bot
         self.interaction = interaction
         self.panel_id = panel_id
+        self.paneledit = paneledit
 
     panelTitle = discord.ui.TextInput(
         label="Title of the panel",
@@ -312,11 +315,8 @@ class EditPanelEditModal(discord.ui.Modal, title="Edit Panel"):
     async def on_submit(self, interaction: discord.Interaction):
         if self.limitPerUser.value.isnumeric():
             await interaction.response.defer()
-            panel_data = await DataManager.get_panel_data(
-                self.panel_id, interaction.guild.id
-            )
             panel_moderators = [
-                f"<@&{role_id}>" for role_id in panel_data["panel_moderators"]
+                f"<@&{role_id}>" for role_id in self.paneledit.panel_moderators
             ]
             await self.interaction.edit_original_response(
                 embed=discord.Embed(
@@ -330,21 +330,10 @@ class EditPanelEditModal(discord.ui.Modal, title="Edit Panel"):
                     colour=discord.Colour.blurple(),
                 )
             )
-            await DataManager.edit_panel(
-                self.panel_id, interaction.guild.id, "panel_title", self.panelTitle.value
-            )
-            await DataManager.edit_panel(
-                self.panel_id,
-                interaction.guild.id,
-                "panel_description",
-                self.panelDescription.value,
-            )
-            await DataManager.edit_panel(
-                self.panel_id,
-                interaction.guild.id,
-                "limit_per_user",
-                int(self.limitPerUser.value),
-            )
+            self.paneledit.panel_title = self.panelTitle.value
+            self.paneledit.panel_description = self.panelDescription.value
+            self.paneledit.limit_per_user = int(self.limitPerUser.value)
+
         else:
             await interaction.response.send_message(
                 embed=discord.Embed(
@@ -542,6 +531,7 @@ class PanelViews(discord.ui.View):
             TicketCreateModal(self.bot, self.panel_id)
         )
 
+
 class PanelCreationViews(discord.ui.View):
     def __init__(self, bot, executor_id):
         super().__init__()
@@ -553,7 +543,7 @@ class PanelCreationViews(discord.ui.View):
         style=discord.ButtonStyle.blurple,
         custom_id="panel:add_moderators",
         emoji="👮",
-        row=1
+        row=1,
     )
     async def add_moderators(
         self, interaction: discord.Interaction, button: discord.ui.Button
@@ -582,7 +572,7 @@ class PanelCreationViews(discord.ui.View):
         style=discord.ButtonStyle.blurple,
         custom_id="panel:edit_panel",
         emoji="📝",
-        row=1
+        row=1,
     )
     async def edit_panel(
         self, interaction: discord.Interaction, button: discord.ui.Button
@@ -603,7 +593,7 @@ class PanelCreationViews(discord.ui.View):
         style=discord.ButtonStyle.red,
         custom_id="panel:delete_panel",
         emoji="🗑️",
-        row=2
+        row=2,
     )
     async def delete_panel(
         self, interaction: discord.Interaction, button: discord.ui.Button
@@ -626,7 +616,7 @@ class PanelCreationViews(discord.ui.View):
         style=discord.ButtonStyle.green,
         custom_id="panel:submit_panel",
         emoji="✅",
-        row=2
+        row=2,
     )
     async def submit_panel(
         self, interaction: discord.Interaction, button: discord.ui.Button
@@ -664,20 +654,33 @@ class PanelCreationViews(discord.ui.View):
                 ephemeral=True,
             )
 
+
 class PanelEditViews(discord.ui.View):
-    def __init__(self, bot, panel_id, message, interaction):
+    def __init__(
+        self,
+        bot,
+        panel_id,
+        interaction,
+        panel_title,
+        panel_description,
+        limit_per_user,
+        panel_moderators,
+    ):
         super().__init__()
         self.bot = bot
         self.panel_id = panel_id
-        self.message = message
         self.interaction = interaction
+        self.panel_title = panel_title
+        self.panel_description = panel_description
+        self.limit_per_user = limit_per_user
+        self.panel_moderators = panel_moderators
 
     @discord.ui.button(
         label="Edit Panel Moderators",
         style=discord.ButtonStyle.blurple,
         custom_id="panel:add_moderators",
         emoji="👮",
-        row=1
+        row=1,
     )
     async def add_moderators(
         self, interaction: discord.Interaction, button: discord.Button
@@ -686,8 +689,8 @@ class PanelEditViews(discord.ui.View):
             view=EditRoleDropdownView(
                 bot=self.bot,
                 panel_id=self.panel_id,
-                message=self.message,
                 interaction=self.interaction,
+                paneledit=self,
             ),
             ephemeral=True,
         )
@@ -697,19 +700,21 @@ class PanelEditViews(discord.ui.View):
         style=discord.ButtonStyle.blurple,
         custom_id="panel:edit_panel",
         emoji="📝",
-        row=1
+        row=1,
     )
     async def edit_panel(
         self, interaction: discord.Interaction, button: discord.ui.Button
     ):
-        await interaction.response.send_modal(EditPanelEditModal(self.bot, self.interaction, self.panel_id))
+        await interaction.response.send_modal(
+            EditPanelEditModal(self.bot, self.interaction, self.panel_id, self)
+        )
 
     @discord.ui.button(
         label="Delete Panel",
         style=discord.ButtonStyle.red,
         custom_id="panel:delete_panel",
         emoji="🗑️",
-        row=2
+        row=2,
     )
     async def delete_panel(
         self, interaction: discord.Interaction, button: discord.ui.Button
@@ -725,7 +730,7 @@ class PanelEditViews(discord.ui.View):
         style=discord.ButtonStyle.green,
         custom_id="panel:submit_panel",
         emoji="✅",
-        row=2
+        row=2,
     )
     async def submit_panel(
         self, interaction: discord.Interaction, button: discord.ui.Button
@@ -735,6 +740,26 @@ class PanelEditViews(discord.ui.View):
         )
         channel = self.bot.get_channel(interaction.channel.id)
         message = await channel.fetch_message(self.panel_id)
+        await DataManager.edit_panel(
+            self.panel_id, interaction.guild.id, "panel_title", self.panel_title
+        )
+        await DataManager.edit_panel(
+            self.panel_id,
+            interaction.guild.id,
+            "panel_description",
+            self.panel_description,
+        )
+        await DataManager.edit_panel(
+            self.panel_id,
+            interaction.guild.id,
+            "limit_per_user",
+            self.limit_per_user,
+        )
+        await DataManager.edit_panel_moderators(
+            self.panel_id,
+            interaction.guild.id,
+            self.panel_moderators,
+        )
         if panel_data["panel_moderators"]:
             await self.interaction.delete_original_response()
             await message.edit(
@@ -743,7 +768,7 @@ class PanelEditViews(discord.ui.View):
                     description=panel_data["panel_description"],
                     colour=discord.Colour.blurple(),
                 ),
-                view=PanelViews(self.bot, self.panel_id)
+                view=PanelViews(self.bot, self.panel_id),
             )
         else:
             await interaction.response.send_message(
@@ -754,6 +779,7 @@ class PanelEditViews(discord.ui.View):
                 ),
                 ephemeral=True,
             )
+
 
 class Ticket(commands.GroupCog):
     def __init__(self, bot):
@@ -796,25 +822,33 @@ class Ticket(commands.GroupCog):
     @app_commands.guild_only()
     @app_commands.default_permissions(manage_channels=True)
     @app_commands.checks.cooldown(1, 30, key=lambda i: (i.guild.id))
-    async def edit_panel(self, interaction: discord.Interaction, message: discord.Message):
+    async def edit_panel(
+        self, interaction: discord.Interaction, message: discord.Message
+    ):
         if message.id in await DataManager.get_all_panel_ids():
             panel = await DataManager.get_panel_data(message.id, interaction.guild.id)
             await interaction.response.send_message(
                 embed=discord.Embed(
                     title=panel["panel_title"],
-                    description=
-                    panel["panel_description"]
-                    +
-                    (
+                    description=panel["panel_description"]
+                    + (
                         f"\n\nCurrent Panel Moderators: {','.join([f'<@&{role_id}>' for role_id in panel['panel_moderators']])}"
                         if panel["panel_moderators"]
                         else ""
                     ),
                     colour=discord.Colour.blurple(),
-                    ),
-                    ephemeral=True,
-                    view=PanelEditViews(self.bot, message.id, interaction.original_response(), interaction),
-                )
+                ),
+                ephemeral=True,
+                view=PanelEditViews(
+                    self.bot,
+                    message.id,
+                    interaction,
+                    panel["panel_title"],
+                    panel["panel_description"],
+                    panel["limit_per_user"],
+                    panel["panel_moderators"],
+                ),
+            )
         else:
             return await interaction.response.send_message(
                 embed=discord.Embed(
