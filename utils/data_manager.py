@@ -547,7 +547,7 @@ class DataManager:
             for row in rows:
                 all_panels.append(row)
             return all_panels
-        
+
     @classmethod
     async def get_all_panel_ids(cls) -> None:
         async with cls.db_connection.acquire():
