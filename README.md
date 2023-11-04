@@ -92,11 +92,14 @@ python main.py
         * Added a separate database for the giveaways
         * Added a function to create a database backup
 
+    - Paginator
+        * Stopped using the old paginator and created my own one
+
 # TODO
 
 ## V1.3 Focused On Reworking Some Systems
 
 - [x] Add a Giveaway system
 - [x] Add a ticket system
-- [ ] Create my own paginator
+- [x] Create my own paginator
 - [ ] Rework the Economy system to be more fun and interactive
