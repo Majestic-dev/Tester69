@@ -5,7 +5,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from utils import DataManager
+from utils import DataManager, Paginator
 
 
 class GiveawayModal(discord.ui.Modal, title="Create a Giveaway"):
@@ -80,7 +80,7 @@ class GiveawayModal(discord.ui.Modal, title="Create a Giveaway"):
                         f"Entries: **0**\n"
                         f"Winners: **{winners}**",
                     ),
-                    view=GiveawayJoinView(self.bot),
+                    view=GiveawayViews(self.bot),
                 )
 
                 await DataManager.register_giveaway(
@@ -135,13 +135,13 @@ class GiveawayLeaveView(discord.ui.View):
             )
 
 
-class GiveawayJoinView(discord.ui.View):
+class GiveawayViews(discord.ui.View):
     def __init__(self, bot):
         super().__init__(timeout=None)
         self.bot = bot
 
     @discord.ui.button(
-        style=discord.ButtonStyle.blurple,
+        style=discord.ButtonStyle.green,
         custom_id="persistent_view:giveaway",
         emoji="🎉",
     )
@@ -165,6 +165,45 @@ class GiveawayJoinView(discord.ui.View):
                 content="You have already entered this giveaway!",
                 ephemeral=True,
                 view=GiveawayLeaveView(interaction.message.id, self.bot),
+            )
+
+    @discord.ui.button(
+        style=discord.ButtonStyle.gray,
+        custom_id="persistent_view:giveaway_entrants",
+        emoji="👥",
+    )
+    async def view_entrants(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ):
+        giveaway_data = await DataManager.get_giveaway_data(
+            interaction.message.id, interaction.guild.id
+        )
+        if giveaway_data:
+            if len(giveaway_data["participants"]) > 0:
+                embeds = []
+                for i, participant in enumerate(giveaway_data["participants"], start=1):
+                    if i % 10 == 1:
+                        current_page = (i - 1) // 10 + 1
+                        total_pages = (len(giveaway_data["participants"])) // 10 + 1
+                        embed = discord.Embed(
+                            title=f"Giveaway Participants (Page {current_page}/{total_pages})",
+                            description="\n".join(
+                                [
+                                    f"{i}. <@{participant}>"
+                                ]
+                            ),
+                            color=discord.Color.blurple(),
+                        )
+                        embeds.append(embed)
+                if embeds:
+                    await Paginator.Simple(ephemeral=True).start(interaction, embeds)
+            else:
+                await interaction.response.send_message(
+                    content="No entrants yet!", ephemeral=True
+                )
+        else:
+            await interaction.response.send_message(
+                content="Giveaway not found!", ephemeral=True
             )
 
 
