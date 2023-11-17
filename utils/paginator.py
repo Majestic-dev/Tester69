@@ -1,20 +1,39 @@
 import discord
+from discord.ext import commands
 
 
-class PaginationButtons(discord.ui.View):
-    def __init__(self, pages: list[discord.Embed], current_page: int):
-        super().__init__()
-        self.pages = pages
+class paginator_buttons(discord.ui.View):
+    def __init__(
+        self,
+        timeout: int,
+        current_page: int,
+        executor: discord.User,
+        pages: list[discord.Embed],
+    ):
+        super().__init__(timeout=timeout)
+
         self.current_page = current_page
+        self.executor = executor
+        self.pages = pages
+        self.response = None
+
+    async def on_timeout(self) -> None:
+        for child in self.children:
+            child.disabled = True
+
+        await self.response.edit(view=self)
 
     @discord.ui.button(
         style=discord.ButtonStyle.blurple,
-        custom_id="persistent_view:first_page",
         emoji="⏪",
     )
     async def first_page(
         self, interaction: discord.Interaction, button: discord.ui.Button
     ):
+        if interaction.user.id != self.executor.id:
+            return await interaction.response.send_message(
+                "You cannot interact with this menu.", ephemeral=True
+            )
         self.current_page = 0
         self.current_page_number.label = f"{self.current_page + 1}/{len(self.pages)}"
         await interaction.response.edit_message(
@@ -23,12 +42,16 @@ class PaginationButtons(discord.ui.View):
 
     @discord.ui.button(
         style=discord.ButtonStyle.blurple,
-        custom_id="persistent_view:previous_page",
         emoji="⬅️",
     )
     async def previous_page(
         self, interaction: discord.Interaction, button: discord.ui.Button
     ):
+        if interaction.user.id != self.executor.id:
+            return await interaction.response.send_message(
+                "You cannot interact with this menu.", ephemeral=True
+            )
+
         if self.current_page == 0:
             self.current_page = len(self.pages) - 1
             self.current_page_number.label = (
@@ -45,22 +68,31 @@ class PaginationButtons(discord.ui.View):
 
     @discord.ui.button(
         label=f"page",
-        style=discord.ButtonStyle.blurple,
+        style=discord.ButtonStyle.gray,
         disabled=True,
     )
     async def current_page_number(
         self, interaction: discord.Interaction, button: discord.ui.Button
     ):
+        if interaction.user.id != self.executor.id:
+            return await interaction.response.send_message(
+                "You cannot interact with this menu.", ephemeral=True
+            )
+
         return
 
     @discord.ui.button(
         style=discord.ButtonStyle.blurple,
-        custom_id="persistent_view:next_page",
         emoji="➡️",
     )
     async def next_page(
         self, interaction: discord.Interaction, button: discord.ui.Button
     ):
+        if interaction.user.id != self.executor.id:
+            return await interaction.response.send_message(
+                "You cannot interact with this menu.", ephemeral=True
+            )
+
         if len(self.pages) == self.current_page + 1:
             self.current_page = 0
             self.current_page_number.label = (
@@ -78,12 +110,16 @@ class PaginationButtons(discord.ui.View):
 
     @discord.ui.button(
         style=discord.ButtonStyle.blurple,
-        custom_id="persistent_view:last_page",
         emoji="⏩",
     )
     async def last_page(
         self, interaction: discord.Interaction, button: discord.ui.Button
     ):
+        if interaction.user.id != self.executor.id:
+            return await interaction.response.send_message(
+                "You cannot interact with this menu.", ephemeral=True
+            )
+
         self.current_page = len(self.pages) - 1
         self.current_page_number.label = f"{self.current_page + 1}/{len(self.pages)}"
         await interaction.response.edit_message(
@@ -94,22 +130,25 @@ class PaginationButtons(discord.ui.View):
 class Paginator:
     class Simple:
         def __init__(
-            self, initial_page: int = 0, ephemeral: bool = False
+            self, timeout: int = 60, initial_page: int = 0, ephemeral: bool = False
         ):
+            self.timeout = timeout
             self.initial_page = initial_page
             self.ephemeral = ephemeral
 
-        async def start(
-            self, interaction: discord.Interaction, pages: list[discord.Embed]
+        async def paginate(
+            self,
+            ctx: commands.Context | discord.Interaction,
+            pages: list[discord.Embed],
         ):
-            view = PaginationButtons(pages, self.initial_page)
-            try:
-                view.current_page_number.label = f"{self.initial_page + 1}/{len(pages)}"
-                await interaction.response.send_message(
-                    embed=pages[self.initial_page], view=view, ephemeral=self.ephemeral
-                )
-            except discord.errors.InteractionResponded:
-                view.current_page_number.label = f"{self.initial_page + 1}/{len(pages)}"
-                await interaction.edit_original_response(
-                    embed=pages[self.initial_page], view=view
-                )
+            if isinstance(ctx, discord.Interaction):
+                ctx = await commands.Context.from_interaction(ctx)
+
+            view = paginator_buttons(self.timeout, self.initial_page, ctx.author, pages)
+            view.current_page_number.label = f"{self.initial_page + 1}/{len(pages)}"
+
+            view.response = await ctx.reply(
+                embed=pages[self.initial_page],
+                view=view,
+                ephemeral=self.ephemeral,
+            )
