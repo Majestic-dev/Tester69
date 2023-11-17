@@ -8,11 +8,10 @@ from typing import Optional
 
 import aiohttp
 import discord
-import Paginator
 from discord import app_commands
 from discord.ext import commands
 
-from utils import DataManager
+from utils import DataManager, Paginator
 
 
 class Misc(commands.Cog):
@@ -228,7 +227,7 @@ class Misc(commands.Cog):
                     colour=discord.Colour.red(),
                 )
         await session.close()
-        await Paginator.Simple().start(interaction, pages=embeds)
+        await Paginator.Simple().paginate(interaction, pages=embeds)
 
     @app_commands.command(name="github", description="Get a user's GitHub profile")
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.user.id))

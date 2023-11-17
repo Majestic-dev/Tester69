@@ -5,11 +5,10 @@ import time
 from typing import Optional
 
 import discord
-import Paginator
 from discord import app_commands
 from discord.ext import commands
 
-from utils import DataManager
+from utils import DataManager, Paginator
 
 
 class DropDown(discord.ui.Select):
@@ -815,7 +814,7 @@ class Economy(commands.Cog):
 
         embeds.append(cur_embed)
 
-        await Paginator.Simple().start(interaction, pages=embeds)
+        await Paginator.Simple().paginate(interaction, embeds)
 
     async def item_autocomplete(
         self, interaction: discord.Interaction, current: str

@@ -187,16 +187,12 @@ class GiveawayViews(discord.ui.View):
                         total_pages = (len(giveaway_data["participants"])) // 10 + 1
                         embed = discord.Embed(
                             title=f"Giveaway Participants (Page {current_page}/{total_pages})",
-                            description="\n".join(
-                                [
-                                    f"{i}. <@{participant}>"
-                                ]
-                            ),
+                            description="\n".join([f"{i}. <@{participant}>"]),
                             color=discord.Color.blurple(),
                         )
                         embeds.append(embed)
                 if embeds:
-                    await Paginator.Simple(ephemeral=True).start(interaction, embeds)
+                    await Paginator.Simple(ephemeral=True).paginate(interaction, embeds)
             else:
                 await interaction.response.send_message(
                     content="No entrants yet!", ephemeral=True
