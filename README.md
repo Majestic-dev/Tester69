@@ -94,6 +94,7 @@ python main.py
 
     - Paginator
         * Stopped using the old paginator and created my own one
+        * Paginator consists of 5 buttons, where the middle button acts as a "stop" or a "jump to page" button
 
 # TODO
 
