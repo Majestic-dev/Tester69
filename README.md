@@ -84,6 +84,7 @@ python main.py
     - Miscallaneous
         * Added a giveaway system (including ending the giveaway immediately, rerolling the giveaway, etc.)
         * Added discord's logging, everything will be logged in the specified file
+        * Refactored all the files and class names to be in snake_case
 
     - Server(management)
         * Added a ticket system with a panel that guides you through the setup
