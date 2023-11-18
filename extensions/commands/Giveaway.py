@@ -8,7 +8,7 @@ from discord.ext import commands
 from utils import DataManager, Paginator
 
 
-class GiveawayModal(discord.ui.Modal, title="Create a Giveaway"):
+class giveaway_modal(discord.ui.Modal, title="Create a Giveaway"):
     def __init__(self, bot) -> None:
         super().__init__()
         self.bot = bot
@@ -80,7 +80,7 @@ class GiveawayModal(discord.ui.Modal, title="Create a Giveaway"):
                         f"Entries: **0**\n"
                         f"Winners: **{winners}**",
                     ),
-                    view=GiveawayViews(self.bot),
+                    view=giveaway_views(self.bot),
                 )
 
                 await DataManager.register_giveaway(
@@ -111,7 +111,7 @@ class GiveawayModal(discord.ui.Modal, title="Create a Giveaway"):
         )
 
 
-class GiveawayLeaveView(discord.ui.View):
+class giveaway_leave_view(discord.ui.View):
     def __init__(self, giveaway_id, bot):
         super().__init__(timeout=None)
         self.giveaway_id = giveaway_id
@@ -135,7 +135,7 @@ class GiveawayLeaveView(discord.ui.View):
             )
 
 
-class GiveawayViews(discord.ui.View):
+class giveaway_views(discord.ui.View):
     def __init__(self, bot):
         super().__init__(timeout=None)
         self.bot = bot
@@ -164,7 +164,7 @@ class GiveawayViews(discord.ui.View):
             await interaction.response.send_message(
                 content="You have already entered this giveaway!",
                 ephemeral=True,
-                view=GiveawayLeaveView(interaction.message.id, self.bot),
+                view=giveaway_leave_view(interaction.message.id, self.bot),
             )
 
     @discord.ui.button(
@@ -215,7 +215,7 @@ class Giveaway(commands.GroupCog):
         self,
         interaction: discord.Interaction,
     ) -> None:
-        await interaction.response.send_modal(GiveawayModal(self.bot))
+        await interaction.response.send_modal(giveaway_modal(self.bot))
 
     @app_commands.command(name="end", description="End a giveaway")
     @app_commands.guild_only()

@@ -7,9 +7,9 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from extensions.commands.Giveaway import GiveawayViews
-from extensions.commands.TicketSystem import (ClosedTicketViews, PanelViews,
-                                              TicketViews)
+from extensions.commands.Giveaway import giveaway_views
+from extensions.commands.TicketSystem import (closed_ticket_views, panel_views,
+                                              ticket_views)
 from utils import DataManager
 
 DataManager.setup(
@@ -55,7 +55,7 @@ DataManager.setup(
 )
 
 
-class Bot(commands.Bot):
+class bot(commands.Bot):
     def __init__(self):
         intents = discord.Intents().all()
         super().__init__(
@@ -65,19 +65,19 @@ class Bot(commands.Bot):
         )
 
     async def setup_hook(self) -> None:
-        self.add_view(GiveawayViews(bot))
+        self.add_view(giveaway_views(bot))
         tickets = await DataManager.get_all_tickets()
         panels = await DataManager.get_all_panels()
         for ticket in tickets:
             for panel in panels:
                 self.add_view(
-                    ClosedTicketViews(bot, panel["id"], ticket["ticket_creator"])
+                    closed_ticket_views(bot, panel["id"], ticket["ticket_creator"])
                 )
-                self.add_view(TicketViews(bot, panel["id"], ticket["ticket_creator"]))
-                self.add_view(PanelViews(bot, panel["id"]))
+                self.add_view(ticket_views(bot, panel["id"], ticket["ticket_creator"]))
+                self.add_view(panel_views(bot, panel["id"]))
 
 
-bot = Bot()
+bot = bot()
 bot.remove_command("help")
 handler = logging.FileHandler(
     filename="data/discord.log",

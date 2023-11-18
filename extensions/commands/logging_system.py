@@ -8,7 +8,7 @@ from discord.ext import commands
 from utils import DataManager
 
 
-class Logging(commands.GroupCog):
+class logging(commands.GroupCog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -674,4 +674,4 @@ class Logging(commands.GroupCog):
 
 
 async def setup(bot):
-    await bot.add_cog(Logging(bot))
+    await bot.add_cog(logging(bot))

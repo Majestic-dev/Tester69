@@ -10,7 +10,7 @@ from PIL import Image, ImageDraw, ImageFilter, ImageFont
 from utils import DataManager
 
 
-class Verification(commands.GroupCog):
+class verification(commands.GroupCog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -330,4 +330,4 @@ class Verification(commands.GroupCog):
 
 
 async def setup(bot):
-    await bot.add_cog(Verification(bot))
+    await bot.add_cog(verification(bot))

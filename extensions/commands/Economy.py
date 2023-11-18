@@ -11,7 +11,7 @@ from discord.ext import commands
 from utils import DataManager, Paginator
 
 
-class DropDown(discord.ui.Select):
+class leaderboard_dropdown(discord.ui.Select):
     def __init__(self, bot: commands.AutoShardedBot, interaction: discord.Interaction):
         self.bot = bot
         self.executer = interaction.user.id
@@ -71,7 +71,7 @@ class DropDown(discord.ui.Select):
             await interaction.response.edit_message(
                 content=None,
                 embed=lb_embed,
-                view=DropDownView(bot=self.bot, interaction=interaction),
+                view=leaderboard_dropdown_view(bot=self.bot, interaction=interaction),
             )
 
         elif self.values[0] == "bank":
@@ -96,16 +96,16 @@ class DropDown(discord.ui.Select):
             lb_embed.set_author(name="Bank Leaderboard", icon_url=self.bot.user.avatar)
             lb_embed.timestamp = datetime.datetime.utcnow()
             await interaction.response.edit_message(
-                embed=lb_embed, view=DropDownView(bot=self.bot, interaction=interaction)
+                embed=lb_embed, view=leaderboard_dropdown_view(bot=self.bot, interaction=interaction)
             )
 
 
-class DropDownView(discord.ui.View):
+class leaderboard_dropdown_view(discord.ui.View):
     def __init__(self, bot: commands.AutoShardedBot, interaction: discord.Interaction):
         self.bot = bot
         super().__init__()
 
-        self.add_item(DropDown(bot=self.bot, interaction=interaction))
+        self.add_item(leaderboard_dropdown(bot=self.bot, interaction=interaction))
 
 
 def random_choice_from_dict(d):
@@ -117,7 +117,7 @@ def random_choice_from_dict(d):
         rand -= item_data["chance"]
 
 
-class Economy(commands.Cog):
+class economy(commands.Cog):
     def __init__(self, bot: commands.AutoShardedBot):
         self.bot = bot
 
@@ -725,7 +725,7 @@ class Economy(commands.Cog):
     async def leaderboard(
         self, interaction: discord.Interaction, choices: app_commands.Choice[str]
     ):
-        view = DropDownView(bot=self.bot, interaction=interaction)
+        view = leaderboard_dropdown_view(bot=self.bot, interaction=interaction)
 
         if choices.value == "cash":
             user_ids = await DataManager.get_all_users()
@@ -946,4 +946,4 @@ class Economy(commands.Cog):
 
 
 async def setup(bot: commands.AutoShardedBot):
-    await bot.add_cog(Economy(bot))
+    await bot.add_cog(economy(bot))

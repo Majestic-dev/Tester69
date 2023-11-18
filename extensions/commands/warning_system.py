@@ -5,7 +5,7 @@ from discord.ext import commands
 from utils import DataManager
 
 
-class WarningSystem(commands.Cog):
+class warning_system(commands.Cog):
     def __init__(self, bot: commands.AutoShardedBot):
         self.bot = bot
 
@@ -132,4 +132,4 @@ class WarningSystem(commands.Cog):
 
 
 async def setup(bot: commands.AutoShardedBot):
-    await bot.add_cog(WarningSystem(bot))
+    await bot.add_cog(warning_system(bot))

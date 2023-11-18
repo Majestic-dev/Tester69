@@ -14,7 +14,7 @@ from discord.ext import commands
 from utils import DataManager, Paginator
 
 
-class Misc(commands.Cog):
+class misc(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -552,4 +552,4 @@ class Misc(commands.Cog):
 
 
 async def setup(bot):
-    await bot.add_cog(Misc(bot))
+    await bot.add_cog(misc(bot))

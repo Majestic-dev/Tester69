@@ -1,10 +1,8 @@
 import discord
 from discord import app_commands
 from discord.ext import commands
-from discord.ui import Select, View
 
-
-class HelpSelect(Select):
+class help_select(discord.ui.Select):
     def __init__(self, bot: commands.AutoShardedBot):
         super().__init__(
             placeholder="Choose a command category",
@@ -37,11 +35,11 @@ class HelpSelect(Select):
             text=f"{len(commands_mixer)} {cog.__cog_name__} Commands | Credits to: CodeWithPranoy on Youtube"
         )
 
-        view = View().add_item(HelpSelect(self.bot))
+        view = discord.ui.View().add_item(help_select(self.bot))
         await interaction.response.edit_message(embed=embed, view=view)
 
 
-class MainStuff(commands.Cog):
+class main_stuff(commands.Cog):
     def __init__(self, bot: commands.AutoShardedBot):
         self.bot = bot
 
@@ -53,7 +51,7 @@ class MainStuff(commands.Cog):
             colour=discord.Colour.light_gray(),
         )
 
-        view = View().add_item(HelpSelect(self.bot))
+        view = discord.ui.View().add_item(help_select(self.bot))
         await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
 
     @app_commands.command(name="ping", description="Show my ping")
@@ -78,4 +76,4 @@ class MainStuff(commands.Cog):
 
 
 async def setup(bot: commands.AutoShardedBot):
-    await bot.add_cog(MainStuff(bot))
+    await bot.add_cog(main_stuff(bot))

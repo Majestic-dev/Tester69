@@ -5,7 +5,7 @@ from discord.ext import commands
 from utils import DataManager
 
 
-class CreateRoleDropdown(discord.ui.RoleSelect):
+class create_role_dropdown(discord.ui.RoleSelect):
     def __init__(
         self,
         bot: commands.AutoShardedBot,
@@ -53,7 +53,7 @@ class CreateRoleDropdown(discord.ui.RoleSelect):
         )
 
 
-class EditRoleDropDown(discord.ui.RoleSelect):
+class edit_role_dropdown(discord.ui.RoleSelect):
     def __init__(
         self,
         bot: commands.AutoShardedBot,
@@ -99,7 +99,7 @@ class EditRoleDropDown(discord.ui.RoleSelect):
         ]
 
 
-class CreateRoleDropdownView(discord.ui.View):
+class create_role_dropdown_view(discord.ui.View):
     def __init__(
         self,
         bot: commands.AutoShardedBot,
@@ -114,7 +114,7 @@ class CreateRoleDropdownView(discord.ui.View):
         super().__init__()
 
         self.add_item(
-            CreateRoleDropdown(
+            create_role_dropdown(
                 bot=self.bot,
                 interaction=self.interaction,
                 guild=self.guild,
@@ -123,7 +123,7 @@ class CreateRoleDropdownView(discord.ui.View):
         )
 
 
-class EditRoleDropdownView(discord.ui.View):
+class edit_role_dropdown_view(discord.ui.View):
     def __init__(
         self,
         bot: commands.AutoShardedBot,
@@ -139,7 +139,7 @@ class EditRoleDropdownView(discord.ui.View):
         super().__init__()
 
         self.add_item(
-            EditRoleDropDown(
+            edit_role_dropdown(
                 bot=self.bot,
                 panel_id=self.panel_id,
                 interaction=self.interaction,
@@ -148,7 +148,7 @@ class EditRoleDropdownView(discord.ui.View):
         )
 
 
-class ChannelDropdown(discord.ui.ChannelSelect):
+class channel_dropdown(discord.ui.ChannelSelect):
     def __init__(
         self,
         bot: commands.AutoShardedBot,
@@ -182,13 +182,13 @@ class ChannelDropdown(discord.ui.ChannelSelect):
             )
         )
 
-        await panel.edit(view=PanelViews(self.bot, panel.id))
+        await panel.edit(view=panel_views(self.bot, panel.id))
         await DataManager.edit_panel(
             self.message.id, interaction.guild.id, "id", panel.id
         )
 
 
-class ChannelDropdownView(discord.ui.View):
+class channel_dropdown_view(discord.ui.View):
     def __init__(
         self,
         bot: commands.AutoShardedBot,
@@ -204,7 +204,7 @@ class ChannelDropdownView(discord.ui.View):
         super().__init__()
 
         self.add_item(
-            ChannelDropdown(
+            channel_dropdown(
                 bot=self.bot,
                 interaction=self.interaction,
                 message=self.message,
@@ -213,7 +213,7 @@ class ChannelDropdownView(discord.ui.View):
         )
 
 
-class CreatePanelEditModal(discord.ui.Modal, title="Edit Panel"):
+class create_panel_edit_modal(discord.ui.Modal, title="Edit Panel"):
     def __init__(self, bot) -> None:
         super().__init__()
         self.bot = bot
@@ -285,7 +285,7 @@ class CreatePanelEditModal(discord.ui.Modal, title="Edit Panel"):
             )
 
 
-class EditPanelEditModal(discord.ui.Modal, title="Edit Panel"):
+class edit_panel_edit_modal(discord.ui.Modal, title="Edit Panel"):
     def __init__(self, bot, interaction, panel_id, paneledit) -> None:
         super().__init__()
         self.bot = bot
@@ -345,7 +345,7 @@ class EditPanelEditModal(discord.ui.Modal, title="Edit Panel"):
             )
 
 
-class TicketCreateModal(discord.ui.Modal, title="Create a Ticket"):
+class create_ticket_modal(discord.ui.Modal, title="Create a Ticket"):
     def __init__(self, bot, panel_id) -> None:
         super().__init__()
         self.bot = bot
@@ -389,12 +389,12 @@ class TicketCreateModal(discord.ui.Modal, title="Create a Ticket"):
                 description=self.detailedReason.value,
                 colour=discord.Colour.blurple(),
             ),
-            view=TicketViews(self.bot, self.panel_id, interaction.user.id),
+            view=ticket_views(self.bot, self.panel_id, interaction.user.id),
         )
         await message.pin()
 
 
-class ClosedTicketViews(discord.ui.View):
+class closed_ticket_views(discord.ui.View):
     def __init__(self, bot, panel_id, user_id):
         super().__init__(timeout=None)
         self.bot = bot
@@ -437,7 +437,7 @@ class ClosedTicketViews(discord.ui.View):
         await interaction.channel.delete()
 
 
-class TicketViews(discord.ui.View):
+class ticket_views(discord.ui.View):
     def __init__(self, bot, panel_id, user_id):
         super().__init__(timeout=None)
         self.bot = bot
@@ -486,11 +486,11 @@ class TicketViews(discord.ui.View):
                     description=f"Ticket closed by {interaction.user.mention}",
                     colour=discord.Colour.red(),
                 ),
-                view=ClosedTicketViews(self.bot, self.panel_id, self.user_id),
+                view=closed_ticket_views(self.bot, self.panel_id, self.user_id),
             )
 
 
-class PanelViews(discord.ui.View):
+class panel_views(discord.ui.View):
     def __init__(self, bot, panel_id):
         super().__init__(timeout=None)
         self.bot = bot
@@ -528,11 +528,11 @@ class PanelViews(discord.ui.View):
             )
 
         await interaction.response.send_modal(
-            TicketCreateModal(self.bot, self.panel_id)
+            create_ticket_modal(self.bot, self.panel_id)
         )
 
 
-class PanelCreationViews(discord.ui.View):
+class panel_creation_views(discord.ui.View):
     def __init__(self, bot, executor_id):
         super().__init__()
         self.bot = bot
@@ -558,7 +558,7 @@ class PanelCreationViews(discord.ui.View):
                 ephemeral=True,
             )
         await interaction.response.send_message(
-            view=CreateRoleDropdownView(
+            view=create_role_dropdown_view(
                 bot=self.bot,
                 interaction=interaction,
                 guild=interaction.guild,
@@ -586,7 +586,7 @@ class PanelCreationViews(discord.ui.View):
                 ),
                 ephemeral=True,
             )
-        await interaction.response.send_modal(CreatePanelEditModal(self.bot))
+        await interaction.response.send_modal(create_panel_edit_modal(self.bot))
 
     @discord.ui.button(
         label="Delete Panel",
@@ -636,7 +636,7 @@ class PanelCreationViews(discord.ui.View):
         if panel_data["panel_moderators"]:
             await interaction.message.delete()
             await interaction.response.send_message(
-                view=ChannelDropdownView(
+                view=channel_dropdown_view(
                     bot=self.bot,
                     interaction=interaction,
                     message=interaction.message,
@@ -655,7 +655,7 @@ class PanelCreationViews(discord.ui.View):
             )
 
 
-class PanelEditViews(discord.ui.View):
+class panel_edit_views(discord.ui.View):
     def __init__(
         self,
         bot,
@@ -686,7 +686,7 @@ class PanelEditViews(discord.ui.View):
         self, interaction: discord.Interaction, button: discord.Button
     ):
         await interaction.response.send_message(
-            view=EditRoleDropdownView(
+            view=edit_role_dropdown_view(
                 bot=self.bot,
                 panel_id=self.panel_id,
                 interaction=self.interaction,
@@ -706,7 +706,7 @@ class PanelEditViews(discord.ui.View):
         self, interaction: discord.Interaction, button: discord.ui.Button
     ):
         await interaction.response.send_modal(
-            EditPanelEditModal(self.bot, self.interaction, self.panel_id, self)
+            edit_panel_edit_modal(self.bot, self.interaction, self.panel_id, self)
         )
 
     @discord.ui.button(
@@ -768,7 +768,7 @@ class PanelEditViews(discord.ui.View):
                     description=panel_data["panel_description"],
                     colour=discord.Colour.blurple(),
                 ),
-                view=PanelViews(self.bot, self.panel_id),
+                view=panel_views(self.bot, self.panel_id),
             )
         else:
             await interaction.response.send_message(
@@ -781,7 +781,7 @@ class PanelEditViews(discord.ui.View):
             )
 
 
-class Ticket(commands.GroupCog):
+class ticket(commands.GroupCog):
     def __init__(self, bot):
         self.bot = bot
         self.ctx_menu = app_commands.ContextMenu(
@@ -806,7 +806,7 @@ class Ticket(commands.GroupCog):
                 description="Create a ticket panel",
                 colour=discord.Colour.blurple(),
             ),
-            view=PanelCreationViews(self.bot, interaction.user.id),
+            view=panel_creation_views(self.bot, interaction.user.id),
         )
         message = await interaction.original_response()
 
@@ -839,7 +839,7 @@ class Ticket(commands.GroupCog):
                     colour=discord.Colour.blurple(),
                 ),
                 ephemeral=True,
-                view=PanelEditViews(
+                view=panel_edit_views(
                     self.bot,
                     message.id,
                     interaction,
@@ -861,4 +861,4 @@ class Ticket(commands.GroupCog):
 
 
 async def setup(bot: commands.AutoShardedBot):
-    await bot.add_cog(Ticket(bot))
+    await bot.add_cog(ticket(bot))

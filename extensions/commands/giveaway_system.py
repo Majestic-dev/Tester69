@@ -6,7 +6,7 @@ from discord.ext import commands, tasks
 from utils import DataManager
 
 
-class GiveawayLooper(commands.Cog):
+class giveaway_looper(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.giveawayloop.start()
@@ -288,4 +288,4 @@ class GiveawayLooper(commands.Cog):
 
 
 async def setup(bot):
-    await bot.add_cog(GiveawayLooper(bot))
+    await bot.add_cog(giveaway_looper(bot))

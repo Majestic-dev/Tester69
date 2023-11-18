@@ -7,7 +7,7 @@ from discord.ext import commands
 from utils import DataManager
 
 
-class OwnerOnly(commands.Cog):
+class owner_only(commands.Cog):
     def __init__(self, bot: commands.AutoShardedBot):
         self.bot = bot
 
@@ -178,4 +178,4 @@ class OwnerOnly(commands.Cog):
 
 
 async def setup(bot: commands.AutoShardedBot):
-    await bot.add_cog(OwnerOnly(bot))
+    await bot.add_cog(owner_only(bot))

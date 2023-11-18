@@ -10,7 +10,7 @@ from discord.ext import commands
 from utils import DataManager
 
 
-class ServerManagement(commands.Cog):
+class server_management(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -528,4 +528,4 @@ class ServerManagement(commands.Cog):
 
 
 async def setup(bot):
-    await bot.add_cog(ServerManagement(bot))
+    await bot.add_cog(server_management(bot))
