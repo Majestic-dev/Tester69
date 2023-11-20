@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from typing import Any
 
 import asyncpg
+import discord
 
 
 @dataclass
@@ -319,7 +320,7 @@ class DataManager:
         host_id: int,
     ) -> None:
         async with cls.db_connection.acquire():
-            end_date = datetime.datetime.now() + datetime.timedelta(minutes=minutes)
+            end_date = discord.utils.utcnow() + datetime.timedelta(minutes=minutes)
             await cls.db_connection.execute(
                 "INSERT INTO giveaways (id, guild_id, channel_id, end_date, winner_amount, prize, extra_notes, host_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
                 giveaway_id,
@@ -411,7 +412,7 @@ class DataManager:
         async with cls.db_connection.acquire():
             row = await cls.db_connection.fetchrow(
                 "SELECT * FROM giveaways WHERE end_date > $1 AND ended = FALSE ORDER BY end_date ASC",
-                datetime.datetime.now().isoformat(),
+                discord.utils.utcnow().isoformat(),
             )
             return row
 
@@ -733,7 +734,7 @@ class DataManager:
                 "SELECT cooldowns FROM users WHERE id = $1", user_id
             )
 
-            end_time = datetime.datetime.now() + datetime.timedelta(
+            end_time = discord.utils.utcnow() + datetime.timedelta(
                 seconds=cooldown_seconds
             )
             new_cooldown = {command_name: end_time.isoformat()}

@@ -86,7 +86,7 @@ class logging(commands.GroupCog):
         )
         join.set_author(icon_url=member.display_avatar, name=member)
         join.set_footer(text=f"ID: {member.id}")
-        join.timestamp = datetime.datetime.now()
+        join.timestamp = discord.utils.utcnow()
         await logs_channel.send(embed=join)
 
     # Member Leave Listener
@@ -110,7 +110,7 @@ class logging(commands.GroupCog):
             )
             leave.set_author(icon_url=member.display_avatar, name=member)
             leave.set_footer(text=f"ID: {member.id}")
-            leave.timestamp = datetime.datetime.now()
+            leave.timestamp = discord.utils.utcnow()
             await logs_channel.send(embed=leave)
 
     # Warning Listener
@@ -136,7 +136,7 @@ class logging(commands.GroupCog):
         warning.add_field(name="Reason", value=f"```{reason}```")
         warning.set_author(icon_url=warned.display_avatar, name=warned)
         warning.set_footer(text=f"ID: {warned.id}")
-        warning.timestamp = datetime.datetime.now()
+        warning.timestamp = discord.utils.utcnow()
         await logs_channel.send(embed=warning)
 
     # Member Timeout Listener
@@ -164,7 +164,7 @@ class logging(commands.GroupCog):
         timeout.add_field(
             name="Timed Out Until",
             value=discord.utils.format_dt(
-                datetime.datetime.now() + datetime.timedelta(seconds=timedout_until),
+                discord.utils.utcnow() + datetime.timedelta(seconds=timedout_until),
                 "F",
             ),
         )
@@ -190,7 +190,7 @@ class logging(commands.GroupCog):
         )
         kick.set_author(icon_url=user.display_avatar, name=user)
         kick.set_footer(text=f"ID: {user.id}")
-        kick.timestamp = datetime.datetime.now()
+        kick.timestamp = discord.utils.utcnow()
         await logs_channel.send(embed=kick)
 
     # Member Ban Listener
@@ -215,7 +215,7 @@ class logging(commands.GroupCog):
         )
         ban.set_author(icon_url=banned.display_avatar, name=banned)
         ban.set_footer(text=f"ID: {banned.id}")
-        ban.timestamp = datetime.datetime.now()
+        ban.timestamp = discord.utils.utcnow()
         await logs_channel.send(embed=ban)
 
     # Member Unban Listener
@@ -234,7 +234,7 @@ class logging(commands.GroupCog):
         )
         unban.set_author(icon_url=user.display_avatar, name=user)
         unban.set_footer(text=f"ID: {user.id}")
-        unban.timestamp = datetime.datetime.now()
+        unban.timestamp = discord.utils.utcnow()
         await logs_channel.send(embed=unban)
 
     # Member Update Listener
@@ -277,7 +277,7 @@ class logging(commands.GroupCog):
             return
         update.set_author(icon_url=after.display_avatar, name=after)
         update.set_footer(text=f"ID: {before.id}")
-        update.timestamp = datetime.datetime.now()
+        update.timestamp = discord.utils.utcnow()
         return await logs_channel.send(embed=update)
 
     # Role Create Listener
@@ -296,7 +296,7 @@ class logging(commands.GroupCog):
         )
         create.set_author(icon_url=role.guild.icon, name=role.guild)
         create.set_footer(text=f"Role ID: {role.id}")
-        create.timestamp = datetime.datetime.now()
+        create.timestamp = discord.utils.utcnow()
         await logs_channel.send(embed=create)
 
     # Role Delete Listener
@@ -315,7 +315,7 @@ class logging(commands.GroupCog):
         )
         delete.set_author(icon_url=role.guild.icon, name=role.guild)
         delete.set_footer(text=f"Role ID: {role.id}")
-        delete.timestamp = datetime.datetime.now()
+        delete.timestamp = discord.utils.utcnow()
         await logs_channel.send(embed=delete)
 
     # Role Update Listener
@@ -361,7 +361,7 @@ class logging(commands.GroupCog):
             return
         update.set_author(icon_url=before.guild.icon, name=before.guild)
         update.set_footer(text=f"Role ID: {before.id}")
-        update.timestamp = datetime.datetime.now()
+        update.timestamp = discord.utils.utcnow()
         return await logs_channel.send(embed=update)
 
     # Voice Channel Listener
@@ -421,7 +421,7 @@ class logging(commands.GroupCog):
             return
         voice.set_author(icon_url=member.display_avatar, name=member)
         voice.set_footer(text=f"ID: {member.id}")
-        voice.timestamp = datetime.datetime.now()
+        voice.timestamp = discord.utils.utcnow()
         return await logs_channel.send(embed=voice)
 
     # Blacklisted Word Listener
@@ -539,7 +539,7 @@ class logging(commands.GroupCog):
 
         edit.set_author(icon_url=after.author.avatar, name=f"{before.author}")
         edit.set_footer(text=f"Author ID: {before.author.id}")
-        edit.timestamp = datetime.datetime.now()
+        edit.timestamp = discord.utils.utcnow()
         await logs_channel.send(embed=edit)
 
     # Delete Logs
@@ -628,7 +628,7 @@ class logging(commands.GroupCog):
         embed.set_footer(
             text=f"Author ID: {message.author.id} | Message ID: {message.id}"
         )
-        embed.timestamp = datetime.datetime.now()
+        embed.timestamp = discord.utils.utcnow()
         await logs_channel.send(embed=embed)
 
     # Channel Create Listener
@@ -643,7 +643,7 @@ class logging(commands.GroupCog):
         embed = discord.Embed(
             title="Channel Created",
             description=f"Created {channel.mention} channel",
-            timestamp=datetime.datetime.utcnow(),
+            timestamp=discord.utils.utcnow(),
             colour=discord.Colour.green(),
         )
 
@@ -664,7 +664,7 @@ class logging(commands.GroupCog):
         embed = discord.Embed(
             title="Channel Deleted",
             description=f"Deleted channel {channel.name}",
-            timestamp=datetime.datetime.utcnow(),
+            timestamp=discord.utils.utcnow(),
             colour=discord.Colour.red(),
         )
 

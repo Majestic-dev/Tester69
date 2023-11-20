@@ -16,7 +16,7 @@ class giveaway_looper(commands.Cog):
         async with DataManager.db_connection.acquire():
             ended_giveaways = await DataManager.db_connection.fetch(
                 "SELECT * FROM giveaways WHERE end_date < $1 AND ended = FALSE",
-                datetime.datetime.now().isoformat(),
+                discord.utils.utcnow().isoformat(),
             )
             ended_giveaways = [dict(giveaway) for giveaway in ended_giveaways]
 

@@ -517,15 +517,15 @@ class misc(commands.Cog):
                 cooldowns["report"], "%Y-%m-%dT%H:%M:%S.%f"
             )
             endTime = datetime.datetime.strptime(
-                datetime.datetime.utcnow().isoformat(), "%Y-%m-%dT%H:%M:%S.%f"
+                discord.utils.utcnow().isoformat(), "%Y-%m-%dT%H:%M:%S.%f"
             )
             timeLeft = (startTime - endTime).total_seconds()
 
-            if json.loads(cooldowns)["report"] < datetime.datetime.utcnow().isoformat():
+            if json.loads(cooldowns)["report"] < discord.utils.utcnow().isoformat():
                 await DataManager.remove_cooldown(interaction.user.id, "report")
                 await DataManager.add_cooldown(interaction.user.id, "report", 86400)
 
-            if json.loads(cooldowns)["report"] > datetime.datetime.utcnow().isoformat():
+            if json.loads(cooldowns)["report"] > discord.utils.utcnow().isoformat():
                 return await interaction.response.send_message(
                     embed=discord.Embed(
                         description=f"<:white_cross:1096791282023669860> You already sent a report in the last 24 hours, try again <t:{int(time.time() + timeLeft)}:R>",

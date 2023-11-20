@@ -62,7 +62,7 @@ class giveaway_modal(discord.ui.Modal, title="Create a Giveaway"):
 
         if winners is not None:
             if time is not None:
-                end_date = datetime.datetime.now() + datetime.timedelta(minutes=time)
+                end_date = discord.utils.utcnow() + datetime.timedelta(minutes=time)
                 await interaction.response.send_message(
                     f"Giveaway created!", ephemeral=True
                 )
@@ -241,7 +241,7 @@ class Giveaway(commands.GroupCog):
                     int(giveaway_id),
                     interaction.guild.id,
                     "end_date",
-                    datetime.datetime.now().isoformat(),
+                    discord.utils.utcnow().isoformat(),
                 )
                 self.bot.dispatch(
                     "manual_giveaway_end", int(giveaway_id), interaction.guild.id

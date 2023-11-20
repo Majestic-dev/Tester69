@@ -1,8 +1,11 @@
 import discord
 from discord.ext import commands
 
+
 class jump_to_page_modal(discord.ui.Modal, title="Jump to page"):
-    def __init__(self, timeout: int, pages: list[discord.Embed], message: discord.Message) -> None:
+    def __init__(
+        self, timeout: int, pages: list[discord.Embed], message: discord.Message
+    ) -> None:
         super().__init__()
         self.timeout = timeout
         self.pages = pages
@@ -17,7 +20,7 @@ class jump_to_page_modal(discord.ui.Modal, title="Jump to page"):
             )
             return False
         return True
-    
+
     page_number = discord.ui.TextInput(
         label="Enter a page number",
         style=discord.TextStyle.short,
@@ -27,12 +30,20 @@ class jump_to_page_modal(discord.ui.Modal, title="Jump to page"):
 
     async def on_submit(self, interaction: discord.Interaction) -> None:
         if await self.check_pages(interaction, int(self.page_number.value)):
-            view=paginator_buttons(self.timeout, int(self.page_number.value) - 1, interaction.user, self.pages)
-            view.current_page_number.label = f"{int(self.page_number.value)}/{len(self.pages)}"
+            view = paginator_buttons(
+                self.timeout,
+                int(self.page_number.value) - 1,
+                interaction.user,
+                self.pages,
+            )
+            view.current_page_number.label = (
+                f"{int(self.page_number.value)}/{len(self.pages)}"
+            )
             await self.message.edit(
                 embed=self.pages[int(self.page_number.value) - 1], view=view
             )
             await interaction.response.defer()
+
 
 class on_page_counter_click(discord.ui.View):
     def __init__(
@@ -41,7 +52,7 @@ class on_page_counter_click(discord.ui.View):
         pages: list[discord.Embed],
         original_message: discord.Message,
         interaction: discord.Interaction,
-        message: discord.Message
+        message: discord.Message,
     ):
         super().__init__()
 
@@ -57,27 +68,25 @@ class on_page_counter_click(discord.ui.View):
     )
     async def stop_pagination(
         self, interaction: discord.Interaction, button: discord.ui.Button
-    ):  
+    ):
         self.stop_pagination.disabled = True
         self.jump_to_page.disabled = True
 
-        await self.original_message.edit(
-            view=None
-        )
+        await self.original_message.edit(view=None)
         await interaction.response.defer()
-        await self.interaction.edit_original_response(
-            view=self
-        )
+        await self.interaction.edit_original_response(view=self)
+
     @discord.ui.button(
         label="Jump to page",
         style=discord.ButtonStyle.gray,
     )
     async def jump_to_page(
         self, interaction: discord.Interaction, button: discord.ui.Button
-    ):  
+    ):
         await interaction.response.send_modal(
             jump_to_page_modal(self.timeout, self.pages, self.message)
         )
+
 
 class paginator_buttons(discord.ui.View):
     def __init__(
@@ -155,10 +164,16 @@ class paginator_buttons(discord.ui.View):
             return await interaction.response.send_message(
                 "You cannot interact with this menu.", ephemeral=True
             )
-        
+
         await interaction.response.send_message(
-            view=on_page_counter_click(self.executor, self.pages, interaction.message, interaction, self.response),
-            ephemeral=True
+            view=on_page_counter_click(
+                self.executor,
+                self.pages,
+                interaction.message,
+                interaction,
+                self.response,
+            ),
+            ephemeral=True,
         )
 
     @discord.ui.button(

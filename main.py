@@ -8,8 +8,8 @@ from discord import app_commands
 from discord.ext import commands
 
 from extensions.commands.giveaway import giveaway_views
-from extensions.commands.ticket_system import (closed_ticket_views, panel_views,
-                                              ticket_views)
+from extensions.commands.ticket_system import (closed_ticket_views,
+                                               panel_views, ticket_views)
 from utils import DataManager
 
 DataManager.setup(
