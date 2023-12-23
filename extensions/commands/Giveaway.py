@@ -188,7 +188,7 @@ class giveaway_views(discord.ui.View):
                         embed = discord.Embed(
                             title=f"Giveaway Participants (Page {current_page}/{total_pages})",
                             description="\n".join([f"{i}. <@{participant}>"]),
-                            color=discord.Color.blurple(),
+                            colour=discord.Colour.blurple(),
                         )
                         embeds.append(embed)
                 if embeds:
