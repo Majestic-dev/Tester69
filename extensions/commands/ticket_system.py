@@ -757,15 +757,15 @@ class panel_edit_views(discord.ui.View):
         )
         await DataManager.edit_panel_moderators(
             self.panel_id,
-            interaction.guild.id,
+            interaction.guild.id, 
             self.panel_moderators,
         )
-        if panel_data["panel_moderators"]:
+        if panel_data["panel_moderators"]: 
             await self.interaction.delete_original_response()
             await message.edit(
                 embed=discord.Embed(
-                    title=panel_data["panel_title"],
-                    description=panel_data["panel_description"],
+                    title=panel_data["panel_title"], 
+                    description=panel_data["panel_description"], 
                     colour=discord.Colour.blurple(),
                 ),
                 view=panel_views(self.bot, self.panel_id),
@@ -798,12 +798,12 @@ class ticket(commands.GroupCog):
     )
     @app_commands.guild_only()
     @app_commands.default_permissions(manage_channels=True)
-    @app_commands.checks.cooldown(1, 30, key=lambda i: (i.guild.id))
-    async def ticket(self, interaction: discord.Interaction):
+    @app_commands.checks.cooldown(1, 30, key=lambda i: (i.guild.id)) 
+    async def ticket(self, interaction: discord.Interaction, panel_title: str, panel_description: str):
         await interaction.response.send_message(
             embed=discord.Embed(
-                title="Ticket Panel Creation",
-                description="Create a ticket panel",
+                title=panel_title,
+                description=panel_description,
                 colour=discord.Colour.blurple(),
             ),
             view=panel_creation_views(self.bot, interaction.user.id),
@@ -812,28 +812,28 @@ class ticket(commands.GroupCog):
 
         await DataManager.create_panel(
             message.id,
-            interaction.guild.id,
+            interaction.guild.id, 
             1,
-            "Ticket Panel",
-            "Ticket Panel Decsription",
+            panel_title,
+            panel_description,
             [],
         )
 
     @app_commands.guild_only()
     @app_commands.default_permissions(manage_channels=True)
-    @app_commands.checks.cooldown(1, 30, key=lambda i: (i.guild.id))
+    @app_commands.checks.cooldown(1, 30, key=lambda i: (i.guild.id)) 
     async def edit_panel(
         self, interaction: discord.Interaction, message: discord.Message
     ):
-        if message.id in await DataManager.get_all_panel_ids():
-            panel = await DataManager.get_panel_data(message.id, interaction.guild.id)
+        if message.id in await DataManager.get_all_panel_ids(): 
+            panel = await DataManager.get_panel_data(message.id, interaction.guild.id) 
             await interaction.response.send_message(
                 embed=discord.Embed(
-                    title=panel["panel_title"],
-                    description=panel["panel_description"]
+                    title=panel["panel_title"], 
+                    description=panel["panel_description"] 
                     + (
-                        f"\n\nCurrent Panel Moderators: {','.join([f'<@&{role_id}>' for role_id in panel['panel_moderators']])}"
-                        if panel["panel_moderators"]
+                        f"\n\nCurrent Panel Moderators: {','.join([f'<@&{role_id}>' for role_id in panel['panel_moderators']])}" 
+                        if panel["panel_moderators"] 
                         else ""
                     ),
                     colour=discord.Colour.blurple(),
@@ -843,10 +843,10 @@ class ticket(commands.GroupCog):
                     self.bot,
                     message.id,
                     interaction,
-                    panel["panel_title"],
-                    panel["panel_description"],
-                    panel["limit_per_user"],
-                    panel["panel_moderators"],
+                    panel["panel_title"], 
+                    panel["panel_description"], 
+                    panel["limit_per_user"], 
+                    panel["panel_moderators"], 
                 ),
             )
         else:
