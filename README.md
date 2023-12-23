@@ -12,11 +12,14 @@ A general-use discord bot coded in python using [discord.py](https://github.com/
 # Clone the repository
 git clone https://github.com/Majestic-dev/Tester69.git
 
-# Install the requirements
-pip install -r requirements.txt
-
 # Change the directory
 cd Tester69
+
+# Create a virtual environment (optional)
+python -m venv venv
+
+# Install the requirements
+pip install -r requirements.txt
 
 # Run the bot
 python main.py
