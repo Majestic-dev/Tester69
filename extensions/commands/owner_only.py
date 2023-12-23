@@ -15,7 +15,7 @@ class owner_only(commands.Cog):
     @commands.is_owner()
     async def add(
         self,
-        ctx,
+        ctx: commands.Context,
         amount: int,
         member: Optional[discord.Member] = None,
     ):
