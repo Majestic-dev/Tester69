@@ -68,8 +68,8 @@ class bot(commands.Bot):
         self.add_view(giveaway_views(bot))
         tickets = await DataManager.get_all_tickets()
         panels = await DataManager.get_all_panels()
-        for ticket in tickets:
-            for panel in panels:
+        for ticket in tickets: 
+            for panel in panels: 
                 self.add_view(
                     closed_ticket_views(bot, panel["id"], ticket["ticket_creator"])
                 )
@@ -77,8 +77,8 @@ class bot(commands.Bot):
                 self.add_view(panel_views(bot, panel["id"]))
 
 
-bot = bot()
-bot.remove_command("help")
+bot = bot() 
+bot.remove_command("help") 
 handler = logging.FileHandler(
     filename="data/discord.log",
     encoding="utf-8",
@@ -89,24 +89,24 @@ if "fonts" not in os.listdir("."):
     os.mkdir("fonts")
 
 
-@bot.event
+@bot.event 
 async def on_ready():
     await bot.change_presence(
         status=discord.Status.online,
         activity=discord.Game(f"/help | https://discord.gg/VsDDf8YKBV"),
-    )
+    ) 
 
     try:
         for root, _, files in os.walk("extensions"):
             for file in files:
                 if file.endswith(".py"):
-                    await bot.load_extension(root.replace("\\", ".") + "." + file[:-3])
+                    await bot.load_extension(root.replace("\\", ".") + "." + file[:-3]) 
     except commands.ExtensionAlreadyLoaded:
         pass
-    await bot.tree.sync()
+    await bot.tree.sync() 
 
 
-@bot.tree.error
+@bot.tree.error 
 async def on_app_command_error(
     interaction: discord.Interaction, error: app_commands.AppCommandError
 ):
@@ -120,7 +120,7 @@ async def on_app_command_error(
             ),
         )
     else:
-        return await bot.get_user(bot.owner_id).send(
+        return await bot.get_user(bot.owner_id).send( 
             embed=discord.Embed(
                 title="Error",
                 description=f"```py\n{traceback.format_exc()}\n```",
@@ -129,9 +129,9 @@ async def on_app_command_error(
         )
 
 
-@bot.event
+@bot.event 
 async def on_error(event, *args, **kwargs):
-    return await bot.get_user(bot.owner_id).send(
+    return await bot.get_user(bot.owner_id).send( 
         embed=discord.Embed(
             title="Error",
             description=f"```py\n{traceback.format_exc()}\n```",
@@ -140,7 +140,7 @@ async def on_error(event, *args, **kwargs):
     )
 
 
-@bot.event
+@bot.event 
 async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandNotFound):
         return
@@ -154,7 +154,7 @@ async def on_command_error(ctx, error):
         )
 
     else:
-        return await bot.get_user(bot.owner_id).send(
+        return await bot.get_user(bot.owner_id).send( 
             embed=discord.Embed(
                 description=f"```py\n{traceback.format_exc()}\n```",
                 colour=discord.Colour.red(),
@@ -179,7 +179,7 @@ async def main():
         print(f"Please fill out the config.json file before running {__file__}")
     else:
         discord.utils.setup_logging(handler=handler, level=logging.INFO)
-        await bot.start(DataManager.get("config", "token"))
+        await bot.start(DataManager.get("config", "token")) 
 
 
 if __name__ == "__main__":
