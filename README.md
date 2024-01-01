@@ -18,6 +18,9 @@ cd Tester69
 # Create a virtual environment (optional)
 python -m venv venv
 
+# Activate the virtual environment (if you created one)
+source venv/bin/activate
+
 # Install the requirements
 pip install -r requirements.txt
 
