@@ -125,8 +125,8 @@ class economy(commands.Cog):
     @app_commands.command(name="pay", description="Pay someone some 🪙")
     @app_commands.checks.cooldown(1, 600, key=lambda i: (i.user.id))
     @app_commands.describe(
-        user="The user you want to pay the money to",
-        amount="The amount of money you want to pay",
+        user="The user you want to send the money to",
+        amount="The amount of money you want to send",
     )
     async def pay(
         self, interaction: discord.Interaction, user: discord.User, amount: int

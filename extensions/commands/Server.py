@@ -234,7 +234,7 @@ class server(commands.Cog):
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
     @app_commands.command(
-        name="serverbanner", description="Get the banner of the server"
+        name="serverbanner", description="Get the banner of the current server"
     )
     @app_commands.guild_only()
     @app_commands.checks.cooldown(1, 20, key=lambda i: (i.guild.id, i.user.id))

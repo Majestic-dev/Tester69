@@ -217,7 +217,7 @@ class Giveaway(commands.GroupCog):
     ) -> None:
         await interaction.response.send_modal(giveaway_modal(self.bot))
 
-    @app_commands.command(name="end", description="End a giveaway")
+    @app_commands.command(name="end", description="End a giveaway by the ID")
     @app_commands.guild_only()
     @app_commands.default_permissions(manage_guild=True)
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id))

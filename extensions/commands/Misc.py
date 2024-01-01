@@ -346,7 +346,7 @@ class misc(commands.Cog):
 
     @app_commands.command(
         name="forecast",
-        description="Get the weather forecast for a location (3 hour intervals)",
+        description="Get the weather forecast for a location (in 3 hour intervals)",
     )
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.user.id))
     @app_commands.describe(

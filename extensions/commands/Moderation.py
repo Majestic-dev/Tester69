@@ -305,7 +305,7 @@ class moderation(commands.Cog):
 
     @app_commands.command(
         name="unban",
-        description="Unbans the user by their discord ID",
+        description="Unban the user by their discord ID",
     )
     @app_commands.guild_only()
     @app_commands.default_permissions(ban_members=True)
