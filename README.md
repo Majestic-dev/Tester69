@@ -42,6 +42,8 @@ python main.py
 
 [Code Security](.github/SECURITY.md)
 
+![Tester69 Official Icon (AI Generated)](Tester69_icon.jpg)
+
 # Version Changelogs
 
 ## v1.1
