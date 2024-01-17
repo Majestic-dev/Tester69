@@ -793,10 +793,17 @@ class economy(commands.Cog):
             emoji = DataManager.get("economy", "items")[item]["emoji"]
 
             if price != 0:
-                if item.lower() in user_data["inventory"]:
+                try:
+                    if item.lower() in user_data["inventory"]:
+                        cur_embed.add_field(
+                            name=f"{emoji} **{item.title()}**"
+                            + f" ({json.loads(user_data['inventory'])[item.lower()]}) - {price} 🪙",
+                            value=f"{description}",
+                            inline=False,
+                        )
+                except:
                     cur_embed.add_field(
-                        name=f"{emoji} **{item.title()}**"
-                        + f" ({json.loads(user_data['inventory'])[item.lower()]}) - {price} 🪙",
+                        name=f"{emoji} **{item.title()}**" + f" - {price} 🪙",
                         value=f"{description}",
                         inline=False,
                     )
