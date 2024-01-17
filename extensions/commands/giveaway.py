@@ -175,22 +175,26 @@ class giveaway_views(discord.ui.View):
     async def view_entrants(
         self, interaction: discord.Interaction, button: discord.ui.Button
     ):
+        # await interaction.response.send_message("This button is currently not working", ephemeral=True)
         giveaway_data = await DataManager.get_giveaway_data(
             interaction.message.id, interaction.guild.id
         )
         if giveaway_data:
             if len(giveaway_data["participants"]) > 0:
                 embeds = []
+                page_participants = []
                 for i, participant in enumerate(giveaway_data["participants"], start=1):
-                    if i % 10 == 1:
+                    page_participants.append(f"{i}. <@{participant}>")
+                    if i % 10 == 0 or i == len(giveaway_data["participants"]):
                         current_page = (i - 1) // 10 + 1
                         total_pages = (len(giveaway_data["participants"])) // 10 + 1
                         embed = discord.Embed(
                             title=f"Giveaway Participants (Page {current_page}/{total_pages})",
-                            description="\n".join([f"{i}. <@{participant}>"]),
+                            description="\n".join(page_participants),
                             colour=discord.Colour.blurple(),
                         )
                         embeds.append(embed)
+                        page_participants = []
                 if embeds:
                     await Paginator.Simple(ephemeral=True).paginate(interaction, embeds)
             else:
