@@ -11,7 +11,7 @@ class giveaway_looper(commands.Cog):
         self.bot = bot
         self.giveawayloop.start()
 
-    @tasks.loop(minutes=1)
+    @tasks.loop(seconds=10)
     async def giveawayloop(self):
         async with DataManager.db_connection.acquire():
             ended_giveaways = await DataManager.db_connection.fetch(
@@ -27,6 +27,8 @@ class giveaway_looper(commands.Cog):
                 winners = await DataManager.draw_giveaway_winners(
                     giveaway["id"], giveaway["guild_id"]
                 )
+                end_date = datetime.datetime.strptime(giveaway["end_date"], "%Y-%m-%dT%H:%M:%S.%f%z")
+
                 if winners is False:
                     try:
                         await message.edit(
@@ -48,7 +50,7 @@ class giveaway_looper(commands.Cog):
                                 if giveaway["extra_notes"] is not None
                                 else ""
                             )
-                            + f"Ended: {discord.utils.format_dt(datetime.datetime.strptime(giveaway['end_date'], '%Y-%m-%dT%H:%M:%S.%f'), style='R')} ({discord.utils.format_dt(datetime.datetime.strptime(giveaway['end_date'], '%Y-%m-%dT%H:%M:%S.%f'), style='F')})\n"
+                            + f"Ended: {discord.utils.format_dt(end_date, style='R')} ({discord.utils.format_dt(end_date, style='F')})\n"
                             f"Hosted by: <@{giveaway['host_id']}>\n"
                             f"Entries: {len(giveaway['participants'])}\n"
                             + (
@@ -86,6 +88,8 @@ class giveaway_looper(commands.Cog):
             winners = await DataManager.draw_giveaway_winners(
                 next_giveaway["id"], next_giveaway["guild_id"]
             )
+            end_date = datetime.datetime.strptime(giveaway["end_date"], "%Y-%m-%dT%H:%M:%S.%f%z")
+
             if winners is False:
                 try:
                     await message.edit(
@@ -107,7 +111,7 @@ class giveaway_looper(commands.Cog):
                             if next_giveaway["extra_notes"] is not None
                             else ""
                         )
-                        + f"Ended: {discord.utils.format_dt(datetime.datetime.strptime(next_giveaway['end_date'], '%Y-%m-%dT%H:%M:%S.%f'), style='R')} ({discord.utils.format_dt(datetime.datetime.strptime(next_giveaway['end_date'], '%Y-%m-%dT%H:%M:%S.%f'), style='F')})\n"
+                        + f"Ended: {discord.utils.format_dt(end_date, style='R')} ({discord.utils.format_dt(end_date, style='F')})\n"
                         f"Hosted by: <@{next_giveaway['host_id']}>\n"
                         f"Entries: {len(next_giveaway['participants'])}\n"
                         + (
@@ -136,6 +140,8 @@ class giveaway_looper(commands.Cog):
         giveaway_data = await DataManager.get_giveaway_data(giveaway_id, guild_id)
         channel = self.bot.get_channel(giveaway_data["channel_id"])
         message = await channel.fetch_message(giveaway_id)
+        end_date = datetime.datetime.strptime(giveaway_data["end_date"], "%Y-%m-%dT%H:%M:%S.%f%z")
+
         try:
             await message.edit(
                 embed=discord.Embed(
@@ -145,13 +151,14 @@ class giveaway_looper(commands.Cog):
                         if giveaway_data["extra_notes"] is not None
                         else ""
                     )
-                    + f"Ends: {discord.utils.format_dt(datetime.datetime.strptime(giveaway_data['end_date'], '%Y-%m-%dT%H:%M:%S.%f'), style='R')} ({discord.utils.format_dt(datetime.datetime.strptime(giveaway_data['end_date'], '%Y-%m-%dT%H:%M:%S.%f'), style='F')})\n"
+                    + f"Ends: {discord.utils.format_dt(end_date, style='R')} ({discord.utils.format_dt(end_date, style='F')})\n"
                     f"Hosted by: <@{giveaway_data['host_id']}>\n"
                     f"Entries: **{len(giveaway_data['participants'])}**\n"
                     f"Winners: **{giveaway_data['winner_amount']}**",
                 )
             )
-        except:
+        except Exception as e:
+            print(e)
             return
 
     # Giveaway Leave Listener
@@ -160,6 +167,8 @@ class giveaway_looper(commands.Cog):
         giveaway_data = await DataManager.get_giveaway_data(giveaway_id, guild_id)
         channel = self.bot.get_channel(giveaway_data["channel_id"])
         message = await channel.fetch_message(giveaway_id)
+        end_date = datetime.datetime.strptime(giveaway_data["end_date"], "%Y-%m-%dT%H:%M:%S.%f%z")
+
         try:
             await message.edit(
                 embed=discord.Embed(
@@ -169,7 +178,7 @@ class giveaway_looper(commands.Cog):
                         if giveaway_data["extra_notes"] is not None
                         else ""
                     )
-                    + f"Ends: {discord.utils.format_dt(datetime.datetime.strptime(giveaway_data['end_date'], '%Y-%m-%dT%H:%M:%S.%f'), style='R')} ({discord.utils.format_dt(datetime.datetime.strptime(giveaway_data['end_date'], '%Y-%m-%dT%H:%M:%S.%f'), style='F')})\n"
+                    + f"Ends: {discord.utils.format_dt(end_date, style='R')} ({discord.utils.format_dt(end_date, style='F')})\n"
                     f"Hosted by: <@{giveaway_data['host_id']}>\n"
                     f"Entries: **{len(giveaway_data['participants'])}**\n"
                     f"Winners: **{giveaway_data['winner_amount']}**",
@@ -185,6 +194,8 @@ class giveaway_looper(commands.Cog):
         channel = self.bot.get_channel(giveaway_data["channel_id"])
         message = await channel.fetch_message(giveaway_id)
         winners = await DataManager.draw_giveaway_winners(giveaway_id, guild_id)
+        end_date = datetime.datetime.strptime(giveaway_data["end_date"], "%Y-%m-%dT%H:%M:%S.%f%z")
+
         try:
             await message.edit(
                 embed=discord.Embed(
@@ -194,7 +205,7 @@ class giveaway_looper(commands.Cog):
                         if giveaway_data["extra_notes"] is not None
                         else ""
                     )
-                    + f"Ended: {discord.utils.format_dt(datetime.datetime.strptime(giveaway_data['end_date'], '%Y-%m-%dT%H:%M:%S.%f'), style='R')} ({discord.utils.format_dt(datetime.datetime.strptime(giveaway_data['end_date'], '%Y-%m-%dT%H:%M:%S.%f'), style='F')})\n"
+                    + f"Ended: {discord.utils.format_dt(end_date, style='R')} ({discord.utils.format_dt(end_date, style='F')})\n"
                     f"Hosted by: <@{giveaway_data['host_id']}>\n"
                     f"Entries: **{len(giveaway_data['participants'])}**\n"
                     + (
@@ -213,7 +224,8 @@ class giveaway_looper(commands.Cog):
                 await message.reply(
                     f"Unfortunately, nobody entered the giveaway for the **{giveaway_data['prize']}**"
                 )
-        except:
+        except Exception as e:
+            print(e)
             return
 
     # Manual Giveaway Reroll Listener
@@ -223,6 +235,7 @@ class giveaway_looper(commands.Cog):
         channel = self.bot.get_channel(giveaway_data["channel_id"])
         message = await channel.fetch_message(giveaway_id)
         winners = await DataManager.draw_giveaway_winners(giveaway_id, guild_id)
+        end_date = datetime.datetime.strptime(giveaway_data["end_date"], "%Y-%m-%dT%H:%M:%S.%f%z")
 
         try:
             await message.edit(
@@ -233,7 +246,7 @@ class giveaway_looper(commands.Cog):
                         if giveaway_data["extra_notes"] is not None
                         else ""
                     )
-                    + f"Ended: {discord.utils.format_dt(datetime.datetime.strptime(giveaway_data['end_date'], '%Y-%m-%dT%H:%M:%S.%f'), style='R')} ({discord.utils.format_dt(datetime.datetime.strptime(giveaway_data['end_date'], '%Y-%m-%dT%H:%M:%S.%f'), style='F')})\n"
+                    + f"Ended: {discord.utils.format_dt(end_date, style='R')} ({discord.utils.format_dt(end_date, style='F')})\n"
                     f"Hosted by: <@{giveaway_data['host_id']}>\n"
                     f"Entries: **{len(giveaway_data['participants'])}**\n"
                     + (
@@ -263,6 +276,7 @@ class giveaway_looper(commands.Cog):
         giveaway_data = await DataManager.get_giveaway_data(giveaway_id, guild_id)
         channel = self.bot.get_channel(giveaway_data["channel_id"])
         message = await channel.fetch_message(giveaway_id)
+        end_date = datetime.datetime.strptime(giveaway_data["end_date"], "%Y-%m-%dT%H:%M:%S.%f%z")
 
         try:
             await message.edit(
@@ -273,7 +287,7 @@ class giveaway_looper(commands.Cog):
                         if giveaway_data["extra_notes"] is not None
                         else ""
                     )
-                    + f"Ended: {discord.utils.format_dt(datetime.datetime.strptime(giveaway_data['end_date'], '%Y-%m-%dT%H:%M:%S.%f'), style='R')} ({discord.utils.format_dt(datetime.datetime.strptime(giveaway_data['end_date'], '%Y-%m-%dT%H:%M:%S.%f'), style='F')})\n"
+                    + f"Ended: {discord.utils.format_dt(end_date, style='R')} ({discord.utils.format_dt(end_date, style='F')})\n"
                     f"Hosted by: <@{giveaway_data['host_id']}>\n"
                     f"Entries: {len(giveaway_data['participants'])}\n"
                     f"Winners: {','.join([f'<@{winner}>' for winner in giveaway_data['winners']])}",
