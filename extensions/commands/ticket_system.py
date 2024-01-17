@@ -820,7 +820,7 @@ class ticket(commands.GroupCog):
         )
 
     @app_commands.guild_only()
-    @app_commands.default_permissions(manage_channels=True)
+    @app_commands.default_permissions(administrator=True)
     @app_commands.checks.cooldown(1, 30, key=lambda i: (i.guild.id)) 
     async def edit_panel(
         self, interaction: discord.Interaction, message: discord.Message
