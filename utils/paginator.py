@@ -237,13 +237,18 @@ class Paginator:
             pages: list[discord.Embed],
         ):
             if isinstance(ctx, discord.Interaction):
-                ctx = await commands.Context.from_interaction(ctx) 
+                view = paginator_buttons(self.timeout, self.initial_page, ctx.user, pages)
+                view.current_page_number.label = f"{self.initial_page + 1}/{len(pages)}"
+                view.response = await ctx.response.send_message(
+                    embed=pages[self.initial_page], view=view, ephemeral=self.ephemeral
+                )
+            
+            else:
+                view = paginator_buttons(self.timeout, self.initial_page, ctx.author, pages) 
+                view.current_page_number.label = f"{self.initial_page + 1}/{len(pages)}"
 
-            view = paginator_buttons(self.timeout, self.initial_page, ctx.author, pages) 
-            view.current_page_number.label = f"{self.initial_page + 1}/{len(pages)}"
-
-            view.response = await ctx.reply( 
-                embed=pages[self.initial_page],
-                view=view,
-                ephemeral=self.ephemeral,
-            )
+                view.response = await ctx.reply( 
+                    embed=pages[self.initial_page],
+                    view=view,
+                    ephemeral=self.ephemeral,
+                )
