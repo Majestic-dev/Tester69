@@ -261,20 +261,29 @@ class logging(commands.GroupCog):
         if before.roles != after.roles:
             update.add_field(
                 name="Member Roles Updated",
-                value=f"**Before: `{', '.join([role.name for role in before.roles])}`\nAfter: `{', '.join([role.name for role in after.roles])}`**",
+                value=f"**Before: `{', '.join([role.name for role in before.roles])}`**\n"
+                f"**After: `{', '.join([role.name for role in after.roles])}`**\n"
+                + 
+                (f"**Roles Added: `{', '.join([role.name for role in set(after.roles) - set(before.roles)])}`**\n"
+                if len(set(after.roles) - set(before.roles)) > 0
+                else f"**Roles Removed: `{', '.join([role.name for role in set(before.roles) - set(after.roles)])}`**\n")
             )
+
         if before.nick != after.nick:
             update.add_field(
                 name="Member Nickname Updated",
                 value=f"**Before: {nick} \nAfter: {nick2}**",
             )
+
         if before.name != after.name:
             update.add_field(
                 name="Member Username Updated",
                 value=f"**Before: {before.name} \nAfter: {after.name}**",
             )
+
         if len(update.fields) <= 0:
             return
+
         update.set_author(icon_url=after.display_avatar, name=after)
         update.set_footer(text=f"ID: {before.id}")
         update.timestamp = discord.utils.utcnow()
