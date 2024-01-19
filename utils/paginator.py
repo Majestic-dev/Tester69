@@ -164,6 +164,9 @@ class paginator_buttons(discord.ui.View):
             return await interaction.response.send_message(
                 "You cannot interact with this menu.", ephemeral=True
             )
+        
+        if self.response is None:
+            await interaction.response.send_message("You cannot interact with this menu on ephemeral messages!", ephemeral=True)
 
         await interaction.response.send_message(
             view=on_page_counter_click(
@@ -239,15 +242,18 @@ class Paginator:
             if isinstance(ctx, discord.Interaction):
                 view = paginator_buttons(self.timeout, self.initial_page, ctx.user, pages)
                 view.current_page_number.label = f"{self.initial_page + 1}/{len(pages)}"
-                view.response = await ctx.response.send_message(
-                    embed=pages[self.initial_page], view=view, ephemeral=self.ephemeral
+
+                view.response = await ctx.response.send_message( 
+                    embed=pages[self.initial_page],
+                    view=view,
+                    ephemeral=self.ephemeral,
                 )
-            
-            else:
+
+            elif isinstance(ctx, commands.Context):
                 view = paginator_buttons(self.timeout, self.initial_page, ctx.author, pages) 
                 view.current_page_number.label = f"{self.initial_page + 1}/{len(pages)}"
 
-                view.response = await ctx.reply( 
+                view.response = await ctx.reply(
                     embed=pages[self.initial_page],
                     view=view,
                     ephemeral=self.ephemeral,
