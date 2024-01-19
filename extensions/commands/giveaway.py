@@ -175,7 +175,6 @@ class giveaway_views(discord.ui.View):
     async def view_entrants(
         self, interaction: discord.Interaction, button: discord.ui.Button
     ):
-        # await interaction.response.send_message("This button is currently not working", ephemeral=True)
         giveaway_data = await DataManager.get_giveaway_data(
             interaction.message.id, interaction.guild.id
         )
