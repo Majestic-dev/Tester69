@@ -67,15 +67,22 @@ class bot(commands.Bot):
     async def setup_hook(self) -> None:
         self.add_view(giveaway_views(bot))
         tickets = await DataManager.get_all_tickets()
+        
         panels = await DataManager.get_all_panels()
-        for ticket in tickets: 
-            for panel in panels: 
+        
+        for panel in panels: 
+            channel = await self.fetch_channel(panel["channel_id"])
+            try:
+                if await channel.fetch_message(panel["id"]):
+                    self.add_view(panel_views(bot, panel["id"]))
+            except discord.errors.NotFound:
+                continue
+
+            for ticket in tickets:
                 self.add_view(
                     closed_ticket_views(bot, panel["id"], ticket["ticket_creator"])
                 )
                 self.add_view(ticket_views(bot, panel["id"], ticket["ticket_creator"]))
-                self.add_view(panel_views(bot, panel["id"]))
-
 
 bot = bot() 
 bot.remove_command("help") 

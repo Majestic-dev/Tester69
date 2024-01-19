@@ -226,8 +226,8 @@ class create_panel_edit_modal(discord.ui.Modal, title="Edit Panel"):
 
     panelDescription = discord.ui.TextInput(
         label="Description of the panel",
-        style=discord.TextStyle.short,
-        max_length=100,
+        style=discord.TextStyle.long,
+        max_length=4000,
     )
 
     limitPerUser = discord.ui.TextInput(
@@ -359,9 +359,9 @@ class create_ticket_modal(discord.ui.Modal, title="Create a Ticket"):
 
     detailedReason = discord.ui.TextInput(
         label="Detailed reason for creating a ticket",
-        style=discord.TextStyle.short,
+        style=discord.TextStyle.long,
         required=False,
-        max_length=500,
+        max_length=4000,
     )
 
     async def on_submit(self, interaction: discord.Interaction):
@@ -812,6 +812,7 @@ class ticket(commands.GroupCog):
 
         await DataManager.create_panel(
             message.id,
+            message.channel.id,
             interaction.guild.id, 
             1,
             panel_title,

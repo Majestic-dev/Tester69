@@ -114,6 +114,7 @@ class DataManager:
         await cls.db_connection.execute(
             """CREATE TABLE IF NOT EXISTS panels (
                 id bigint PRIMARY KEY,
+                channel_id bigint,
                 guild_id bigint,
                 limit_per_user bigint,
                 panel_title TEXT,
@@ -481,6 +482,7 @@ class DataManager:
     async def create_panel(
         cls,
         panel_id: int,
+        channel_id: int,
         guild_id: int,
         limit_per_user: int,
         panel_title: str,
@@ -489,8 +491,9 @@ class DataManager:
     ) -> None:
         async with cls.db_connection.acquire():
             await cls.db_connection.execute(
-                "INSERT INTO panels (id, guild_id, limit_per_user, panel_title, panel_description, panel_moderators) VALUES ($1, $2, $3, $4, $5, $6)",
+                "INSERT INTO panels (id, channel_id, guild_id, limit_per_user, panel_title, panel_description, panel_moderators) VALUES ($1, $2, $3, $4, $5, $6, $7)",
                 panel_id,
+                channel_id,
                 guild_id,
                 limit_per_user,
                 panel_title,
