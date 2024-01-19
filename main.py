@@ -76,6 +76,7 @@ class bot(commands.Bot):
                 if await channel.fetch_message(panel["id"]):
                     self.add_view(panel_views(bot, panel["id"]))
             except discord.errors.NotFound:
+                await DataManager.delete_panel(panel["id"], panel["guild_id"])
                 continue
 
             for ticket in tickets:
