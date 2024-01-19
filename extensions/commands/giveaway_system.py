@@ -23,7 +23,10 @@ class giveaway_looper(commands.Cog):
             for giveaway in ended_giveaways:
                 await DataManager.end_giveaway(giveaway["id"], giveaway["guild_id"])
                 channel = self.bot.get_channel(giveaway["channel_id"])
-                message = await channel.fetch_message(giveaway["id"])
+                try:
+                    message = await channel.fetch_message(giveaway["id"])
+                except discord.NotFound:
+                    return
                 winners = await DataManager.draw_giveaway_winners(
                     giveaway["id"], giveaway["guild_id"]
                 )
@@ -88,7 +91,7 @@ class giveaway_looper(commands.Cog):
             winners = await DataManager.draw_giveaway_winners(
                 next_giveaway["id"], next_giveaway["guild_id"]
             )
-            end_date = datetime.datetime.strptime(giveaway["end_date"], "%Y-%m-%dT%H:%M:%S.%f%z")
+            end_date = datetime.datetime.strptime(next_giveaway["end_date"], "%Y-%m-%dT%H:%M:%S.%f%z")
 
             if winners is False:
                 try:
