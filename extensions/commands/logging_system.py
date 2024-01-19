@@ -263,10 +263,11 @@ class logging(commands.GroupCog):
                 name="Member Roles Updated",
                 value=f"**Before: `{', '.join([role.name for role in before.roles])}`**\n"
                 f"**After: `{', '.join([role.name for role in after.roles])}`**\n"
-                + 
-                (f"**Roles Added: `{', '.join([role.name for role in set(after.roles) - set(before.roles)])}`**\n"
-                if len(set(after.roles) - set(before.roles)) > 0
-                else f"**Roles Removed: `{', '.join([role.name for role in set(before.roles) - set(after.roles)])}`**\n")
+                + (
+                    f"**Roles Added: `{', '.join([role.name for role in set(after.roles) - set(before.roles)])}`**\n"
+                    if len(set(after.roles) - set(before.roles)) > 0
+                    else f"**Roles Removed: `{', '.join([role.name for role in set(before.roles) - set(after.roles)])}`**\n"
+                ),
             )
 
         if before.nick != after.nick:

@@ -43,7 +43,7 @@ class verification(commands.GroupCog):
             font=font,
         )
         rotated_image = verification_background.rotate(
-            random.randint(-50, 50), expand=True, fillcolour=background_colour 
+            random.randint(-50, 50), expand=True, fillcolour=background_colour
         )
         blurred_image = rotated_image.filter(ImageFilter.GaussianBlur(3))
 
@@ -65,13 +65,13 @@ class verification(commands.GroupCog):
     @app_commands.guild_only()
     @app_commands.default_permissions(administrator=True)
     async def disable_verification(self, interaction: discord.Interaction):
-        verification_channel = await DataManager.get_guild_data(interaction.guild.id)[ 
+        verification_channel = await DataManager.get_guild_data(interaction.guild.id)[
             "verification_channel_id"
         ]
         verification_logs_channel = await DataManager.get_guild_data(
-            interaction.guild.id 
-        )["verification_logs_channel_id"] 
-        unverified_role = await DataManager.get_guild_data(interaction.guild.id)[ 
+            interaction.guild.id
+        )["verification_logs_channel_id"]
+        unverified_role = await DataManager.get_guild_data(interaction.guild.id)[
             "unverified_role_id"
         ]
 
@@ -95,13 +95,13 @@ class verification(commands.GroupCog):
         )
 
         await DataManager.edit_guild_data(
-            interaction.guild.id, "verification_channel_id", None 
+            interaction.guild.id, "verification_channel_id", None
         )
         await DataManager.edit_guild_data(
-            interaction.guild.id, "verification_logs_channel_id", None 
+            interaction.guild.id, "verification_logs_channel_id", None
         )
         await DataManager.edit_guild_data(
-            interaction.guild.id, "unverified_role_id", None 
+            interaction.guild.id, "unverified_role_id", None
         )
 
     @app_commands.command(
@@ -109,7 +109,7 @@ class verification(commands.GroupCog):
         description="Setup the verification system",
     )
     @app_commands.guild_only()
-    @app_commands.checks.cooldown(1, 60, key=lambda i: (i.guild.id, i.user.id)) 
+    @app_commands.checks.cooldown(1, 60, key=lambda i: (i.guild.id, i.user.id))
     @app_commands.default_permissions(administrator=True)
     @app_commands.describe(
         verification_channel="The channel where users will send the verification code",
@@ -143,15 +143,15 @@ class verification(commands.GroupCog):
         await interaction.response.send_message(embed=verification)
 
         await DataManager.edit_guild_data(
-            interaction.guild.id, "verification_channel_id", verification_channel.id 
+            interaction.guild.id, "verification_channel_id", verification_channel.id
         )
         await DataManager.edit_guild_data(
-            interaction.guild.id, 
+            interaction.guild.id,
             "verification_logs_channel_id",
             verification_logs_channel.id,
         )
         await DataManager.edit_guild_data(
-            interaction.guild.id, "unverified_role_id", unverified_role.id 
+            interaction.guild.id, "unverified_role_id", unverified_role.id
         )
 
     @commands.Cog.listener()
@@ -159,10 +159,10 @@ class verification(commands.GroupCog):
         if member.bot:
             return
         guild_data = await DataManager.get_guild_data(member.guild.id)
-        welcome_message = guild_data["welcome_message"] 
-        verification_channel = guild_data["verification_channel_id"] 
-        verification_logs_channel = guild_data["verification_logs_channel_id"] 
-        unverified_role = member.guild.get_role(guild_data["unverified_role_id"]) 
+        welcome_message = guild_data["welcome_message"]
+        verification_channel = guild_data["verification_channel_id"]
+        verification_logs_channel = guild_data["verification_logs_channel_id"]
+        unverified_role = member.guild.get_role(guild_data["unverified_role_id"])
 
         if (
             verification_channel == None
@@ -180,12 +180,12 @@ class verification(commands.GroupCog):
         else:
             verification_channel = self.bot.get_channel(verification_channel)
             verification_logs_channel = self.bot.get_channel(
-                guild_data["verification_logs_channel_id"] 
+                guild_data["verification_logs_channel_id"]
             )
 
-            self.generate_img(code := str(random.randint(11111, 99999)), member.id) 
+            self.generate_img(code := str(random.randint(11111, 99999)), member.id)
 
-            await member.add_roles(unverified_role) 
+            await member.add_roles(unverified_role)
             dm_channel = await member.create_dm()
 
             try:
@@ -199,7 +199,7 @@ class verification(commands.GroupCog):
                     f"{member.mention} Please enable your direct messages to verify yourself, rejoin once done. Thanks!"
                 )
                 await asyncio.sleep(30)
-                return await message.delete() 
+                return await message.delete()
 
         check = (
             lambda m: m.channel == dm_channel
@@ -232,12 +232,12 @@ class verification(commands.GroupCog):
             if message.content == code:
                 try:
                     await message.delete()
-                    await member.remove_roles(unverified_role) 
+                    await member.remove_roles(unverified_role)
                 except:
-                    await member.remove_roles(unverified_role) 
+                    await member.remove_roles(unverified_role)
 
                 verification_logs_channel = self.bot.get_channel(
-                    guild_data["verification_logs_channel_id"] 
+                    guild_data["verification_logs_channel_id"]
                 )
 
                 await verification_logs_channel.send(
@@ -273,7 +273,7 @@ class verification(commands.GroupCog):
                 )
 
             elif message.content.lower() == "reset":
-                self.generate_img(code := str(random.randint(11111, 99999)), member.id) 
+                self.generate_img(code := str(random.randint(11111, 99999)), member.id)
 
                 await dm_channel.send(
                     f'Please enter the code seen in the image. If the code is too blurry and you can not see it type "reset".\n By verifying yourself you accept the rules of the server you are trying to verify in',
@@ -299,7 +299,7 @@ class verification(commands.GroupCog):
                     )
                 )
 
-                self.generate_img(code := str(random.randint(11111, 99999)), member.id) 
+                self.generate_img(code := str(random.randint(11111, 99999)), member.id)
 
                 await dm_channel.send(
                     f'Please enter the code seen in the image. If the code is too blurry and you can not see it type "reset".\n By verifying yourself you accept the rules of the server you are trying to verify in',

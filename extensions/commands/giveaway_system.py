@@ -30,7 +30,9 @@ class giveaway_looper(commands.Cog):
                 winners = await DataManager.draw_giveaway_winners(
                     giveaway["id"], giveaway["guild_id"]
                 )
-                end_date = datetime.datetime.strptime(giveaway["end_date"], "%Y-%m-%dT%H:%M:%S.%f%z")
+                end_date = datetime.datetime.strptime(
+                    giveaway["end_date"], "%Y-%m-%dT%H:%M:%S.%f%z"
+                )
 
                 if winners is False:
                     try:
@@ -91,7 +93,9 @@ class giveaway_looper(commands.Cog):
             winners = await DataManager.draw_giveaway_winners(
                 next_giveaway["id"], next_giveaway["guild_id"]
             )
-            end_date = datetime.datetime.strptime(next_giveaway["end_date"], "%Y-%m-%dT%H:%M:%S.%f%z")
+            end_date = datetime.datetime.strptime(
+                next_giveaway["end_date"], "%Y-%m-%dT%H:%M:%S.%f%z"
+            )
 
             if winners is False:
                 try:
@@ -143,7 +147,9 @@ class giveaway_looper(commands.Cog):
         giveaway_data = await DataManager.get_giveaway_data(giveaway_id, guild_id)
         channel = self.bot.get_channel(giveaway_data["channel_id"])
         message = await channel.fetch_message(giveaway_id)
-        end_date = datetime.datetime.strptime(giveaway_data["end_date"], "%Y-%m-%dT%H:%M:%S.%f%z")
+        end_date = datetime.datetime.strptime(
+            giveaway_data["end_date"], "%Y-%m-%dT%H:%M:%S.%f%z"
+        )
 
         try:
             await message.edit(
@@ -170,7 +176,9 @@ class giveaway_looper(commands.Cog):
         giveaway_data = await DataManager.get_giveaway_data(giveaway_id, guild_id)
         channel = self.bot.get_channel(giveaway_data["channel_id"])
         message = await channel.fetch_message(giveaway_id)
-        end_date = datetime.datetime.strptime(giveaway_data["end_date"], "%Y-%m-%dT%H:%M:%S.%f%z")
+        end_date = datetime.datetime.strptime(
+            giveaway_data["end_date"], "%Y-%m-%dT%H:%M:%S.%f%z"
+        )
 
         try:
             await message.edit(
@@ -197,7 +205,9 @@ class giveaway_looper(commands.Cog):
         channel = self.bot.get_channel(giveaway_data["channel_id"])
         message = await channel.fetch_message(giveaway_id)
         winners = await DataManager.draw_giveaway_winners(giveaway_id, guild_id)
-        end_date = datetime.datetime.strptime(giveaway_data["end_date"], "%Y-%m-%dT%H:%M:%S.%f%z")
+        end_date = datetime.datetime.strptime(
+            giveaway_data["end_date"], "%Y-%m-%dT%H:%M:%S.%f%z"
+        )
 
         try:
             await message.edit(
@@ -238,7 +248,9 @@ class giveaway_looper(commands.Cog):
         channel = self.bot.get_channel(giveaway_data["channel_id"])
         message = await channel.fetch_message(giveaway_id)
         winners = await DataManager.draw_giveaway_winners(giveaway_id, guild_id)
-        end_date = datetime.datetime.strptime(giveaway_data["end_date"], "%Y-%m-%dT%H:%M:%S.%f%z")
+        end_date = datetime.datetime.strptime(
+            giveaway_data["end_date"], "%Y-%m-%dT%H:%M:%S.%f%z"
+        )
 
         try:
             await message.edit(
@@ -279,7 +291,9 @@ class giveaway_looper(commands.Cog):
         giveaway_data = await DataManager.get_giveaway_data(giveaway_id, guild_id)
         channel = self.bot.get_channel(giveaway_data["channel_id"])
         message = await channel.fetch_message(giveaway_id)
-        end_date = datetime.datetime.strptime(giveaway_data["end_date"], "%Y-%m-%dT%H:%M:%S.%f%z")
+        end_date = datetime.datetime.strptime(
+            giveaway_data["end_date"], "%Y-%m-%dT%H:%M:%S.%f%z"
+        )
 
         try:
             await message.edit(

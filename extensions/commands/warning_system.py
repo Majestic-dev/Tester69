@@ -14,7 +14,7 @@ class warning_system(commands.Cog):
     )
     @app_commands.guild_only()
     @app_commands.default_permissions(manage_messages=True)
-    @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id)) 
+    @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id))
     @app_commands.describe(
         user="The user to warn",
         reason="The reason for the warning",
@@ -30,7 +30,7 @@ class warning_system(commands.Cog):
                 )
             )
 
-        if interaction.user.top_role <= user.top_role: 
+        if interaction.user.top_role <= user.top_role:
             return await interaction.response.send_message(
                 embed=discord.Embed(
                     description="<:white_cross:1096791282023669860> You can't warn your superiors",
@@ -38,8 +38,8 @@ class warning_system(commands.Cog):
                 )
             )
 
-        bot = interaction.guild.get_member(self.bot.user.id) 
-        if bot.top_role <= user.top_role: 
+        bot = interaction.guild.get_member(self.bot.user.id)
+        if bot.top_role <= user.top_role:
             return await interaction.response.send_message(
                 embed=discord.Embed(
                     description="<:white_cross:1096791282023669860> I can't warn my superiors",
@@ -48,7 +48,7 @@ class warning_system(commands.Cog):
             )
 
         await DataManager.register_warning(
-            interaction.guild.id, 
+            interaction.guild.id,
             user.id,
             f"{reason} - Warned by {interaction.user.name}",
         )
@@ -71,12 +71,12 @@ class warning_system(commands.Cog):
     @app_commands.command(name="delwarn", description="Deletes the warning by UUID")
     @app_commands.guild_only()
     @app_commands.default_permissions(manage_messages=True)
-    @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id)) 
+    @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id))
     @app_commands.describe(
         uuid="The UUID of the warning to delete, use the `/warnings <user>` command to get the UUID",
     )
     async def delwarn(self, interaction: discord.Interaction, uuid: str):
-        delwarn = await DataManager.delete_warning(interaction.guild.id, uuid) 
+        delwarn = await DataManager.delete_warning(interaction.guild.id, uuid)
 
         if delwarn == True:
             return await interaction.response.send_message(
@@ -98,12 +98,12 @@ class warning_system(commands.Cog):
     )
     @app_commands.guild_only()
     @app_commands.default_permissions(manage_messages=True)
-    @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id)) 
+    @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id))
     @app_commands.describe(
         member="The member to get the warnings of",
     )
     async def warnings(self, interaction: discord.Interaction, member: discord.Member):
-        warnings = await DataManager.get_user_warnings(interaction.guild.id, member.id) 
+        warnings = await DataManager.get_user_warnings(interaction.guild.id, member.id)
 
         if warnings is None or len(warnings) == 0:
             return await interaction.response.send_message(
@@ -117,7 +117,7 @@ class warning_system(commands.Cog):
             title="Warnings",
             colour=discord.Colour.orange(),
         )
-        for warn in warnings: 
+        for warn in warnings:
             for warn_uuid in warn:
                 e.add_field(
                     name=f"UUID: `{warn_uuid}`",
