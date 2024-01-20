@@ -418,11 +418,11 @@ class economy(commands.Cog):
             await DataManager.add_cooldown(interaction.user.id, "hourly", 3600)
 
         elif "hourly" in cooldowns:
-            startTime = datetime.strptime(
-                json.loads(cooldowns)["hourly"], "%Y-%m-%dT%H:%M:%S.%f"
+            startTime = datetime.datetime.strptime(
+                json.loads(cooldowns)["hourly"], "%Y-%m-%dT%H:%M:%S.%f%z"
             )
             endTime = datetime.strptime(
-                discord.utils.utcnow().isoformat(), "%Y-%m-%dT%H:%M:%S.%f"
+                discord.utils.utcnow().isoformat(), "%Y-%m-%dT%H:%M:%S.%f%z"
             )
             timeLeft = (startTime - endTime).total_seconds()
 
@@ -435,7 +435,8 @@ class economy(commands.Cog):
                     embed=discord.Embed(
                         description=f"<:white_cross:1096791282023669860> You already claimed your hourly coins, try again <t:{int(time.time() + timeLeft)}:R>",
                         colour=discord.Colour.red(),
-                    )
+                    ),
+                    ephemeral=True
                 )
 
         await DataManager.edit_user_data(
@@ -459,11 +460,11 @@ class economy(commands.Cog):
             await DataManager.add_cooldown(interaction.user.id, "daily", 86400)
 
         elif "daily" in cooldowns:
-            startTime = datetime.strptime(
-                json.loads(cooldowns)["daily"], "%Y-%m-%dT%H:%M:%S.%f"
+            startTime = datetime.datetime.strptime(
+                json.loads(cooldowns)["daily"], "%Y-%m-%dT%H:%M:%S.%f%z"
             )
-            endTime = datetime.strptime(
-                discord.utils.utcnow().isoformat(), "%Y-%m-%dT%H:%M:%S.%f"
+            endTime = datetime.datetime.strptime(
+                discord.utils.utcnow().isoformat(), "%Y-%m-%dT%H:%M:%S.%f%z"
             )
             timeLeft = (startTime - endTime).total_seconds()
 
@@ -476,7 +477,8 @@ class economy(commands.Cog):
                     embed=discord.Embed(
                         description=f"<:white_cross:1096791282023669860> You already claimed your daily coins, try again <t:{int(time.time() + timeLeft)}:R>",
                         colour=discord.Colour.red(),
-                    )
+                    ),
+                    ephemeral=True
                 )
 
         await DataManager.edit_user_data(
@@ -500,11 +502,11 @@ class economy(commands.Cog):
             await DataManager.add_cooldown(interaction.user.id, "weekly", 604800)
 
         elif "weekly" in cooldowns:
-            startTime = datetime.strptime(
-                json.loads(cooldowns)["weekly"], "%Y-%m-%dT%H:%M:%S.%f"
+            startTime = datetime.datetime.strptime(
+                json.loads(cooldowns)["weekly"], "%Y-%m-%dT%H:%M:%S.%f%z"
             )
-            endTime = datetime.strptime(
-                discord.utils.utcnow().isoformat(), "%Y-%m-%dT%H:%M:%S.%f"
+            endTime = datetime.datetime.strptime(
+                discord.utils.utcnow().isoformat(), "%Y-%m-%dT%H:%M:%S.%f%z"
             )
             timeLeft = (startTime - endTime).total_seconds()
 
@@ -517,7 +519,8 @@ class economy(commands.Cog):
                     embed=discord.Embed(
                         description=f"<:white_cross:1096791282023669860> You already claimed your weekly coins, try again <t:{int(time.time() + timeLeft)}:R>",
                         colour=discord.Colour.red(),
-                    )
+                    ),
+                    ephemeral=True
                 )
 
         await DataManager.edit_user_data(
@@ -541,11 +544,11 @@ class economy(commands.Cog):
             await DataManager.add_cooldown(interaction.user.id, "monthly", 2592000)
 
         elif "monthly" in cooldowns:
-            startTime = datetime.strptime(
-                json.loads(cooldowns)["monthly"], "%Y-%m-%dT%H:%M:%S.%f"
+            startTime = datetime.datetime.strptime(
+                json.loads(cooldowns)["monthly"], "%Y-%m-%dT%H:%M:%S.%f%z"
             )
-            endTime = datetime.strptime(
-                discord.utils.utcnow().isoformat(), "%Y-%m-%dT%H:%M:%S.%f"
+            endTime = datetime.datetime.strptime(
+                discord.utils.utcnow().isoformat(), "%Y-%m-%dT%H:%M:%S.%f%z"
             )
             timeLeft = (startTime - endTime).total_seconds()
 
@@ -558,7 +561,8 @@ class economy(commands.Cog):
                     embed=discord.Embed(
                         description=f"<:white_cross:1096791282023669860> You already claimed your monthly coins, try again <t:{int(time.time() + timeLeft)}:R>",
                         colour=discord.Colour.red(),
-                    )
+                    ),
+                    ephemeral=True
                 )
 
         await DataManager.edit_user_data(
