@@ -436,7 +436,7 @@ class economy(commands.Cog):
                         description=f"<:white_cross:1096791282023669860> You already claimed your hourly coins, try again <t:{int(time.time() + timeLeft)}:R>",
                         colour=discord.Colour.red(),
                     ),
-                    ephemeral=True
+                    ephemeral=True,
                 )
 
         await DataManager.edit_user_data(
@@ -478,7 +478,7 @@ class economy(commands.Cog):
                         description=f"<:white_cross:1096791282023669860> You already claimed your daily coins, try again <t:{int(time.time() + timeLeft)}:R>",
                         colour=discord.Colour.red(),
                     ),
-                    ephemeral=True
+                    ephemeral=True,
                 )
 
         await DataManager.edit_user_data(
@@ -520,7 +520,7 @@ class economy(commands.Cog):
                         description=f"<:white_cross:1096791282023669860> You already claimed your weekly coins, try again <t:{int(time.time() + timeLeft)}:R>",
                         colour=discord.Colour.red(),
                     ),
-                    ephemeral=True
+                    ephemeral=True,
                 )
 
         await DataManager.edit_user_data(
@@ -562,7 +562,7 @@ class economy(commands.Cog):
                         description=f"<:white_cross:1096791282023669860> You already claimed your monthly coins, try again <t:{int(time.time() + timeLeft)}:R>",
                         colour=discord.Colour.red(),
                     ),
-                    ephemeral=True
+                    ephemeral=True,
                 )
 
         await DataManager.edit_user_data(

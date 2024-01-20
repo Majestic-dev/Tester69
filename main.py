@@ -125,7 +125,7 @@ async def on_app_command_error(
             embed=discord.Embed(
                 description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.0f} seconds before using this command again.",
                 colour=discord.Colour.red(),
-            )
+            ),
         )
 
     else:

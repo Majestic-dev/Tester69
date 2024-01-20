@@ -112,7 +112,7 @@ class paginator_buttons(discord.ui.View):
             await self.response.edit(view=self)
         else:
             pass
-        
+
     @discord.ui.button(
         style=discord.ButtonStyle.blurple,
         emoji="⏪",
