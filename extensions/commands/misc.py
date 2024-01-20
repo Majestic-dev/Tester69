@@ -259,46 +259,6 @@ class misc(commands.Cog):
         await session.close()
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
-    @app_commands.command(
-        name="covid", description="Get the COVID-19 stats for a country"
-    )
-    @app_commands.checks.cooldown(1, 10, key=lambda i: (i.user.id))
-    @app_commands.describe(
-        search="The country you want to search the COVID-19 stats for"
-    )
-    async def covid(self, interaction: discord.Interaction, *, search: str):
-        session = aiohttp.ClientSession()
-        try:
-            response = await session.get(
-                f"https://corona.lmao.ninja/v2/countries/{search}"
-            )
-            data = json.loads(await response.text())
-            embed = discord.Embed(
-                title=f"COVID-19 Statistics for {search}",
-                description=f"* **Last Updated:** {discord.utils.format_dt(datetime.date.fromtimestamp(data['updated'] / 1000), style='F')}\n"
-                f"* **Cases:** {data['cases']}\n"
-                f"* **Deaths:** {data['deaths']}\n"
-                f"* **Recovered:** {data['recovered']}\n"
-                f"* **Active:** {data['active']}\n"
-                f"* **Critical:** {data['critical']}\n"
-                f"* **Cases Today:** {data['todayCases']}\n"
-                f"* **Deaths Today:** {data['todayDeaths']}\n"
-                f"* **Tests:** {data['tests']}\n"
-                f"* **Population:** {data['population']}",
-                colour=discord.Colour.dark_red(),
-            )
-
-            embed.set_footer(
-                icon_url=interaction.user.avatar,
-                text=f"Requested by - {interaction.user} | Powered by NovelCOVID API ❤️",
-            )
-            embed.set_thumbnail(url=data["countryInfo"]["flag"])
-        except KeyError:
-            embed = discord.Embed(colour=discord.Colour.red())
-            embed.description = "<:white_cross:1096791282023669860> Couldn't find a country with that name"
-        await session.close()
-        await interaction.response.send_message(embed=embed, ephemeral=True)
-
     @app_commands.command(name="weather", description="Get the weather for a location")
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.user.id))
     @app_commands.describe(search="The location you want to search the weather for")
@@ -514,10 +474,10 @@ class misc(commands.Cog):
 
         elif "report" in cooldowns:
             startTime = datetime.datetime.strptime(
-                cooldowns["report"], "%Y-%m-%dT%H:%M:%S.%f"
+                cooldowns["report"], "%Y-%m-%dT%H:%M:%S.%f%z"
             )
             endTime = datetime.datetime.strptime(
-                discord.utils.utcnow().isoformat(), "%Y-%m-%dT%H:%M:%S.%f"
+                discord.utils.utcnow().isoformat(), "%Y-%m-%dT%H:%M:%S.%f%z"
             )
             timeLeft = (startTime - endTime).total_seconds()
 
