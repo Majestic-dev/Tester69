@@ -125,8 +125,9 @@ async def on_app_command_error(
             embed=discord.Embed(
                 description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.0f} seconds before using this command again.",
                 colour=discord.Colour.red(),
-            ),
+            )
         )
+
     else:
         return await bot.get_user(bot.owner_id).send(
             embed=discord.Embed(
@@ -154,12 +155,7 @@ async def on_command_error(ctx, error):
         return
 
     if isinstance(error, commands.NotOwner):
-        return await ctx.reply(
-            embed=discord.Embed(
-                description="<:white_cross:1096791282023669860> You are not the owner of this bot",
-                colour=discord.Colour.red(),
-            )
-        )
+        return
 
     else:
         return await bot.get_user(bot.owner_id).send(
