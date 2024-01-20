@@ -108,8 +108,11 @@ class paginator_buttons(discord.ui.View):
         for child in self.children:
             child.disabled = True
 
-        await self.response.edit(view=self)
-
+        if self.response is not None:
+            await self.response.edit(view=self)
+        else:
+            pass
+        
     @discord.ui.button(
         style=discord.ButtonStyle.blurple,
         emoji="⏪",
