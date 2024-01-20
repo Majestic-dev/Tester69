@@ -18,6 +18,13 @@ class misc(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    @app_commands.command(name="source", description="Get the source code for the bot")
+    @app_commands.checks.cooldown(1, 10, key=lambda i: (i.user.id))
+    async def source(self, interaction: discord.Interaction):
+        await interaction.response.send_message(
+            content="https://github.com/Majestic-dev/Tester69/tree/main", ephemeral=True
+        )
+
     @app_commands.command(
         name="search_giphy", description="Search a gif by keyword from Giphy"
     )
