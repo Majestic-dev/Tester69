@@ -1,5 +1,6 @@
 import datetime
 import os
+import re
 
 import discord
 from discord import app_commands
@@ -467,8 +468,8 @@ class logging(commands.GroupCog):
             return
 
         filtered_words_data = await DataManager.get_guild_filtered_words(message.guild.id)
-        words_in_blacklist = filtered_words_data["blacklisted_words"]
-        content = message.content.lower()
+        words_in_blacklist = [re.sub(r'\W+', ' ', word.lower()).strip() for word in filtered_words_data["blacklisted_words"]]
+        content = re.sub(r'\W+', ' ', message.content.lower().strip())
 
         if (
             filtered_words_data["whitelist"] is None
@@ -477,7 +478,7 @@ class logging(commands.GroupCog):
         ):
             return
 
-        if any(word in words_in_blacklist for word in content.split(" ")):
+        if any(word in content for word in words_in_blacklist):
             await message.delete()
 
     # Message Edit Logs
@@ -599,10 +600,11 @@ class logging(commands.GroupCog):
         if logs_channel == None:
             return
 
-        words_in_blacklist = filtered_words_data["blacklisted_words"]
-        content = message.content.lower()
-        content2 = message.content.split(" ")
-        bad_words_said = "\n".join(list(set(content2) & set(words_in_blacklist)))
+        words_in_blacklist = [re.sub(r'\W+', ' ', word.lower()).strip() for word in filtered_words_data["blacklisted_words"]]
+        print(words_in_blacklist)
+        content = re.sub(r'\W+', ' ', message.content.lower().strip())
+        print(content)
+        bad_words_said = [word for word in words_in_blacklist if word in content]
 
         if (
             message.author.bot == True
@@ -642,9 +644,9 @@ class logging(commands.GroupCog):
 
         if len(message.content) > 0:
             embed.add_field(name="**Content**", value=f"{message.content}")
-        if any(word in words_in_blacklist for word in content.split(" ")):
-            embed.add_field(name="**Reason**", value="Blacklisted Word")
-            embed.add_field(name="**Detailed Reason**", value=f"`{bad_words_said}`")
+        if any(word in content for word in words_in_blacklist):
+            embed.add_field(name="**Reason**", value="Blacklisted Word(s)")
+            embed.add_field(name="**Detailed Reason**", value=f"`{'`, `'.join(bad_words_said)}`")
         if len(message.attachments) > 1:
             embed.add_field(
                 name="Attachments",
@@ -667,7 +669,7 @@ class logging(commands.GroupCog):
         )
         embed.timestamp = discord.utils.utcnow()
 
-        if bad_words_said != "" and blocked_words_channel != None:
+        if any(word in content for word in words_in_blacklist) and blocked_words_channel != None:
             await blocked_words_channel.send(
                 embed=embed
             )
