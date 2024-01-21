@@ -87,11 +87,18 @@ class DataManager:
                 verification_logs_channel_id bigint,
                 logs_channel_id bigint,
                 appeal_link TEXT,
-                blacklisted_words TEXT ARRAY DEFAULT '{}'::text[],
-                whitelist bigint ARRAY DEFAULT '{}'::bigint[],
                 welcome_message TEXT,
                 warned_users JSONB,
                 giveaways JSONB
+            );"""
+        )
+
+        await cls.db_connection.execute(
+            """CREATE TABLE IF NOT EXISTS filtered_words (
+                guild_id bigint PRIMARY KEY,
+                channel_id bigint,
+                blacklisted_words TEXT ARRAY DEFAULT '{}'::text[],
+                whitelist bigint ARRAY DEFAULT '{}'::bigint[]
             );"""
         )
 
@@ -178,6 +185,13 @@ class DataManager:
             )
 
     @classmethod
+    async def add_filtered_words_data(cls, guild_id: int) -> None:
+        async with cls.db_connection.acquire():
+            await cls.db_connection.execute(
+                "INSERT INTO filtered_words (guild_id) VALUES ($1)", guild_id
+            )
+
+    @classmethod
     async def remove_guild_data(cls, guild_id: int) -> None:
         async with cls.db_connection.acquire():
             await cls.db_connection.execute(
@@ -189,6 +203,12 @@ class DataManager:
         async with cls.db_connection.acquire():
             rows = await cls.db_connection.fetch("SELECT id FROM guilds")
             return [row["id"] for row in rows]
+        
+    @classmethod
+    async def get_all_guilds_filtered_words(cls) -> None:
+        async with cls.db_connection.acquire():
+            rows = await cls.db_connection.fetch("SELECT guild_id FROM filtered_words")
+            return [row["guild_id"] for row in rows]
 
     @classmethod
     async def get_guild_data(cls, guild_id: int) -> None:
@@ -212,13 +232,34 @@ class DataManager:
             )
 
     @classmethod
+    async def get_guild_filtered_words(cls, guild_id: int) -> None:
+        async with cls.db_connection.acquire():
+            if guild_id not in await cls.get_all_guilds_filtered_words():
+                await cls.add_filtered_words_data(guild_id)
+
+            row = await cls.db_connection.fetchrow(
+                "SELECT * FROM filtered_words WHERE guild_id = $1", guild_id
+            )
+            return row
+        
+    @classmethod
+    async def edit_filtered_words_channel(cls, guild_id: int, channel_id: int) -> None:
+        async with cls.db_connection.acquire():
+            if guild_id not in await cls.get_all_guilds_filtered_words():
+                await cls.add_filtered_words_data(guild_id)
+
+            await cls.db_connection.execute(
+                "UPDATE filtered_words SET channel_id = $1 WHERE guild_id = $2", channel_id, guild_id
+            )
+
+    @classmethod
     async def edit_blacklisted_words(cls, guild_id: int, words: list[str]) -> None:
         async with cls.db_connection.acquire():
             if guild_id not in await cls.get_all_guilds():
                 await cls.add_guild_data(guild_id)
 
             await cls.db_connection.execute(
-                "UPDATE guilds SET blacklisted_words = $1 WHERE id = $2",
+                "UPDATE filtered_words SET blacklisted_words = $1 WHERE guild_id = $2",
                 words,
                 guild_id,
             )
@@ -230,7 +271,7 @@ class DataManager:
                 await cls.add_guild_data(guild_id)
 
             await cls.db_connection.execute(
-                "UPDATE guilds SET whitelist = $1 WHERE id = $2", whitelist, guild_id
+                "UPDATE filtered_words SET whitelist = $1 WHERE guild_id = $2", whitelist, guild_id
             )
 
     @classmethod

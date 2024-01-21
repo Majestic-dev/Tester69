@@ -4,6 +4,7 @@ import os
 import discord
 from discord import app_commands
 from discord.ext import commands
+from typing import Optional
 
 from utils import DataManager
 
@@ -13,27 +14,49 @@ class logging(commands.GroupCog):
         self.bot = bot
 
     @app_commands.command(
-        name="set_channel", description="Set where all server logs will be sent"
+        name="set_channel", description="Set where all server logs will be sent and optionally where all blocked words will be sent"
     )
     @app_commands.describe(
-        channel="Choose the channel where all server logs will be sent"
+        logging_channel="Choose the channel where all server logs will be sent",
+        blocked_words_channel="Choose the channel where all blocked words will be sent",
     )
     @app_commands.guild_only()
     @app_commands.default_permissions(administrator=True)
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.user.id))
     async def set_logs_channel(
-        self, interaction: discord.Interaction, channel: discord.TextChannel
+        self, interaction: discord.Interaction, logging_channel: discord.TextChannel, blocked_words_channel: Optional[discord.TextChannel] = None
     ):
-        await interaction.response.send_message(
-            embed=discord.Embed(
-                description=f"<:white_checkmark:1096793014287995061> Set the logging channel to {channel.mention}",
-                colour=discord.Colour.green(),
-            )
-        )
+        if blocked_words_channel == None:
+            data = await DataManager.get_guild_filtered_words(interaction.guild.id)
+            if data["channel_id"] != None:
+                await DataManager.edit_filtered_words_channel(interaction.guild.id, None)
 
-        await DataManager.edit_guild_data(
-            interaction.guild.id, "logs_channel_id", channel.id
-        )
+            await interaction.response.send_message(
+                embed=discord.Embed(
+                    description=f"<:white_checkmark:1096793014287995061> Set the logging channel to {logging_channel.mention}",
+                    colour=discord.Colour.green(),
+                )
+            )
+
+            await DataManager.edit_guild_data(
+                interaction.guild.id, "logs_channel_id", logging_channel.id
+            )
+        
+        elif blocked_words_channel != None:
+            await interaction.response.send_message(
+                embed=discord.Embed(
+                    description=f"<:white_checkmark:1096793014287995061> Set the logging channel to {logging_channel.mention} and the blocked words channel to {blocked_words_channel.mention}",
+                    colour=discord.Colour.green(),
+                )
+            )
+
+            await DataManager.edit_guild_data(
+                interaction.guild.id, "logs_channel_id", logging_channel.id
+            )
+
+            await DataManager.edit_filtered_words_channel(
+                interaction.guild.id, blocked_words_channel.id
+            )
 
     @app_commands.command(name="disable", description="Disable logging for this server")
     @app_commands.default_permissions(administrator=True)
@@ -443,14 +466,14 @@ class logging(commands.GroupCog):
         if message.channel.type == discord.channel.ChannelType.private:
             return
 
-        guild_data = await DataManager.get_guild_data(message.guild.id)
-        words_in_blacklist = guild_data["blacklisted_words"]
+        filtered_words_data = await DataManager.get_guild_filtered_words(message.guild.id)
+        words_in_blacklist = filtered_words_data["blacklisted_words"]
         content = message.content.lower()
 
         if (
-            guild_data["whitelist"] is None
-            or message.author.id in guild_data["whitelist"]
-            or any(role.id in guild_data["whitelist"] for role in message.author.roles)
+            filtered_words_data["whitelist"] is None
+            or message.author.id in filtered_words_data["whitelist"]
+            or any(role.id in filtered_words_data["whitelist"] for role in message.author.roles)
         ):
             return
 
@@ -465,7 +488,9 @@ class logging(commands.GroupCog):
 
         guild_data = await DataManager.get_guild_data(before.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
-        words_in_blacklist = guild_data["blacklisted_words"]
+        filtered_words_data = await DataManager.get_guild_filtered_words(before.guild.id)
+        words_in_blacklist = filtered_words_data["blacklisted_words"]
+        blocked_words_channel = self.bot.get_channel(filtered_words_data["channel_id"])
         content = after.content.lower()
 
         if before.author.bot and before.channel != logs_channel:
@@ -477,8 +502,8 @@ class logging(commands.GroupCog):
         if logs_channel == None:
             return
 
-        if before.author.id in guild_data["whitelist"] or any(
-            role.id in guild_data["whitelist"] for role in before.author.roles
+        if before.author.id in filtered_words_data["whitelist"] or any(
+            role.id in filtered_words_data["whitelist"] for role in before.author.roles
         ):
             return
 
@@ -565,6 +590,8 @@ class logging(commands.GroupCog):
 
         guild_data = await DataManager.get_guild_data(message.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
+        filtered_words_data = await DataManager.get_guild_filtered_words(message.guild.id)
+        blocked_words_channel = self.bot.get_channel(filtered_words_data["channel_id"])
 
         if message.author.bot and message.channel != logs_channel:
             return
@@ -572,7 +599,7 @@ class logging(commands.GroupCog):
         if logs_channel == None:
             return
 
-        words_in_blacklist = guild_data["blacklisted_words"]
+        words_in_blacklist = filtered_words_data["blacklisted_words"]
         content = message.content.lower()
         content2 = message.content.split(" ")
         bad_words_said = "\n".join(list(set(content2) & set(words_in_blacklist)))
@@ -639,7 +666,13 @@ class logging(commands.GroupCog):
             text=f"Author ID: {message.author.id} | Message ID: {message.id}"
         )
         embed.timestamp = discord.utils.utcnow()
-        await logs_channel.send(embed=embed)
+
+        if bad_words_said != "" and blocked_words_channel != None:
+            await blocked_words_channel.send(
+                embed=embed
+            )
+        else:
+            await logs_channel.send(embed=embed)
 
     # Channel Create Listener
     @commands.Cog.listener()

@@ -315,41 +315,53 @@ class server_management(commands.Cog):
         )
 
     @app_commands.command(
-        name="add_blacklisted_word",
-        description="Add a word to the blacklisted words list.",
+        name="add_blacklisted_words",
+        description="Add words to the blacklisted words list",
     )
     @app_commands.guild_only()
     @app_commands.default_permissions(administrator=True)
     @app_commands.describe(
-        blacklisted_word="The word to add to the blacklisted words list"
+        blacklisted_words="The word(s) to add to the blacklisted words list, if adding multiple, separate them by commas (a, b)"
     )
     async def add_blacklisted_word(
-        self, interaction: discord.Interaction, blacklisted_word: str
+        self, interaction: discord.Interaction, blacklisted_words: str
     ):
-        guild_data = await DataManager.get_guild_data(interaction.guild.id)
-        blacklisted_words = guild_data["blacklisted_words"]
+        await interaction.response.defer(ephemeral=True)
+        filtered_words = await DataManager.get_guild_filtered_words(interaction.guild.id)
+        old_existing_words = filtered_words["blacklisted_words"]
+        new_existing_words = old_existing_words.copy()
+        words_not_added = []
 
-        if (
-            blacklisted_words is None
-            or blacklisted_word.lower() not in blacklisted_words
-        ):
-            blacklisted_words.append(blacklisted_word.lower())
-            await DataManager.edit_blacklisted_words(
-                interaction.guild.id, blacklisted_words
-            )
-            return await interaction.response.send_message(
-                ephemeral=True,
-                embed=discord.Embed(
-                    description=f'<:white_checkmark:1096793014287995061> Added "{blacklisted_word.lower()}" to blacklisted words list',
-                    colour=discord.Colour.green(),
-                ),
-            )
+        for i in blacklisted_words.split(","):
+            if i.strip() in old_existing_words:
+                words_not_added.append(i.strip())
+                pass
+            elif i.strip() not in old_existing_words:
+                new_existing_words.append(i.strip())
 
-        elif blacklisted_word.lower() in blacklisted_words:
-            return await interaction.response.send_message(
-                ephemeral=True,
+        await DataManager.edit_blacklisted_words(
+            interaction.guild.id, new_existing_words
+        )
+
+        if len(words_not_added) >= 0 and (len(new_existing_words) > len(old_existing_words)):
+            return await interaction.edit_original_response(
                 embed=discord.Embed(
-                    description=f'<:white_cross:1096791282023669860> Could not add "{blacklisted_word.lower()}" to blacklisted words list, because it already exists there',
+                    description=
+                    (f"<:white_checkmark:1096793014287995061> Added the following words to the blacklisted words list:\n\n"
+                    f"`{', '.join(list(set(new_existing_words) - set(old_existing_words)))}`\n\n")
+                    +
+                    (f"Could not add the following words to the blacklisted words list because they already exist there:\n"
+                    f"`{', '.join(words_not_added)}`"
+                    if len(words_not_added) > 0 else ""),
+                    colour=discord.Colour.green()
+                )
+            )
+        
+        elif len(words_not_added) > 0 and (len(new_existing_words) == len(old_existing_words)):
+            return await interaction.edit_original_response(
+                embed=discord.Embed(
+                    description=
+                    f"<:white_cross:1096791282023669860> Could not add any of the words to the blacklisted words list because they already exist there!",
                     colour=discord.Colour.orange(),
                 ),
             )
@@ -357,8 +369,8 @@ class server_management(commands.Cog):
     async def word_autocomplete(
         self, interaction: discord.Interaction, current: str
     ) -> list[app_commands.Choice[str]]:
-        guild_data = await DataManager.get_guild_data(interaction.guild.id)
-        words_in_blacklist = guild_data["blacklisted_words"]
+        filtered_words = await DataManager.get_guild_filtered_words(interaction.guild.id)
+        words_in_blacklist = filtered_words["blacklisted_words"]
 
         return [
             app_commands.Choice(name=word, value=word) for word in words_in_blacklist
@@ -377,8 +389,8 @@ class server_management(commands.Cog):
     async def remove_blacklisted_word(
         self, interaction: discord.Interaction, blacklisted_word: str
     ):
-        guild_data = await DataManager.get_guild_data(interaction.guild.id)
-        blacklisted_words = guild_data["blacklisted_words"]
+        filtered_words = await DataManager.get_guild_filtered_words(interaction.guild.id)
+        blacklisted_words = filtered_words["blacklisted_words"]
 
         if (
             blacklisted_words is None
@@ -457,8 +469,8 @@ class server_management(commands.Cog):
     async def whitelist_remove(
         self, interaction: discord.Interaction, whitelist: discord.User | discord.Role
     ):
-        guild_data = await DataManager.get_guild_data(interaction.guild.id)
-        wlist = guild_data["whitelist"]
+        filtered_words_data = await DataManager.get_guild_filtered_words(interaction.guild.id)
+        wlist = filtered_words_data["whitelist"]
 
         if wlist is None or whitelist.id not in wlist:
             return await interaction.response.send_message(
