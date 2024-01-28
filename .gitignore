@@ -5,5 +5,5 @@
 __pycache__
 fonts
 test.py
-WorldRender.py
+worldrender.py
 data_manager_new.py
