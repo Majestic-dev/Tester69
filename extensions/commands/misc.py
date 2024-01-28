@@ -5,6 +5,7 @@ import os
 import random
 import time
 from typing import Optional
+from io import BytesIO
 
 import aiohttp
 import discord
@@ -393,47 +394,49 @@ class misc(commands.Cog):
         self, interaction: discord.Interaction, channel: discord.TextChannel
     ):
         await interaction.response.defer(ephemeral=True)
-        messagelist = []
+        
+        messages = [message async for message in channel.history(limit=None)]
+        transcript = ""
 
-        async for message in channel.history(limit=None):
-            asyncio.sleep(1)
-            messagelist.append(message)
-
-        for message in reversed(messagelist):
-            with open(
-                f"{channel.id}_{interaction.user.id}.txt", "a", encoding="utf-8"
-            ) as f:
-                if message.embeds:
-                    f.write(f"\n{message.author} EMBED\n")
-                    if message.embeds[0].title:
-                        f.write(f"TITLE - {message.embeds[0].title}\n")
-                    if message.embeds[0].description:
-                        f.write(f"DESCRIPTION - {message.embeds[0].description}\n")
-                    if len(message.embeds[0].fields) > 0:
-                        for field in message.embeds[0].fields:
-                            f.write(f"FIELD - {field.name} - {field.value}\n")
-                    if message.embeds[0].footer:
-                        f.write(f"FOOTER - {message.embeds[0].footer.text}\n")
-                    if message.embeds[0].image:
-                        f.write(f"IMAGE - {message.embeds[0].image.url}\n")
-                    if message.embeds[0].thumbnail:
-                        f.write(f"THUMBNAIL - {message.embeds[0].thumbnail.url}\n")
-                    if message.embeds[0].author:
-                        f.write(f"AUTHOR - {message.embeds[0].author.name}\n")
-                    if message.embeds[0].url:
-                        f.write(f"EMBED URL LINK - {message.embeds[0].url}\n")
-                    f.write(f"MESSAGE LINK - {message.jump_url}\n\n")
-                    continue
-                if message.attachments:
-                    f.write(f"\n{message.author} ATTACHMENT\n")
-                    f.write(f"ATTACHMENT URL - {message.attachments[0].url}\n")
-                    f.write(f"MESSAGE LINK - {message.jump_url}\n\n")
-                    continue
-                f.write(f"{message.author} - {message.content} - {message.jump_url}\n")
-        await interaction.followup.send(
-            file=discord.File(f"{channel.id}.txt"), ephemeral=True
+        for message in reversed(messages):
+            if message.embeds:
+                transcript += f"\n\n{message.author}#{message.author.discriminator} EMBED\n\n"
+                if message.embeds[0].title:
+                    transcript += f"Title - {message.embeds[0].title}\n"
+                if message.embeds[0].description:
+                    transcript += f"Description - {message.embeds[0].description}\n"
+                if message.embeds[0].fields:
+                    for field in message.embeds[0].fields:
+                        transcript += f"{field.name} - {field.value}\n"
+                if message.embeds[0].footer:
+                    transcript += f"Footer - {message.embeds[0].footer.text}\n"
+                if message.embeds[0].image:
+                    transcript += f"Image - {message.embeds[0].image.url}\n"
+                if message.embeds[0].thumbnail:
+                    transcript += f"Thumbnail - {message.embeds[0].thumbnail.url}\n"
+                if message.embeds[0].author:
+                    transcript += f"Author - {message.embeds[0].author.name}\n"
+                if message.embeds[0].url:
+                    transcript += f"URL - {message.embeds[0].url}\n"
+                transcript += f"Message Link - {message.jump_url}\n\n"
+                continue
+            if message.attachments:
+                transcript += f"\n\n{message.author}#{message.author.discriminator} ATTACHMENT(S)\n\n"
+                for attachment in message.attachments:
+                    transcript += f"{attachment.url}\n"
+                transcript += f"Message Link - {message.jump_url}\n\n"
+                continue
+            if message.content:
+                transcript += f"\n{message.author}#{message.author.discriminator} ({message.author.id}): {message.content}"
+                continue
+            
+        buffer = BytesIO(transcript.encode("utf8"))
+        await channel.send(
+            content=f"Transcript for {interaction.channel.mention}",
+            file=discord.File(
+                fp=buffer, filename=f"transcript-{interaction.channel.name}.txt"
+            )
         )
-        os.remove(f"{channel.id}_{interaction.user.id}.txt")
 
     @app_commands.command(
         name="report", description="Report a bug or issue with the bot"
