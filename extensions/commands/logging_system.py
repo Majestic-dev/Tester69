@@ -487,12 +487,14 @@ class logging(commands.GroupCog):
         if before.channel.type == discord.channel.ChannelType.private:
             return
 
-        guild_data = await DataManager.get_guild_data(before.guild.id)
+        guild_data = await DataManager.get_guild_data(after.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
-        filtered_words_data = await DataManager.get_guild_filtered_words(before.guild.id)
-        words_in_blacklist = filtered_words_data["blacklisted_words"]
+        filtered_words_data = await DataManager.get_guild_filtered_words(after.guild.id)
         blocked_words_channel = self.bot.get_channel(filtered_words_data["channel_id"])
         content = after.content.lower()
+
+        words_in_blacklist = [re.sub(r'\W+', ' ', word.lower()).strip() for word in filtered_words_data["blacklisted_words"]]
+        content = re.sub(r'\W+', ' ', after.content.lower().strip())
 
         if before.author.bot and before.channel != logs_channel:
             return
@@ -508,7 +510,7 @@ class logging(commands.GroupCog):
         ):
             return
 
-        if any(word in words_in_blacklist for word in content.split(" ")):
+        if any(word in content for word in words_in_blacklist) and blocked_words_channel != None:
             return await after.delete()
 
         edit = discord.Embed(
@@ -601,9 +603,7 @@ class logging(commands.GroupCog):
             return
 
         words_in_blacklist = [re.sub(r'\W+', ' ', word.lower()).strip() for word in filtered_words_data["blacklisted_words"]]
-        print(words_in_blacklist)
         content = re.sub(r'\W+', ' ', message.content.lower().strip())
-        print(content)
         bad_words_said = [word for word in words_in_blacklist if word in content]
 
         if (

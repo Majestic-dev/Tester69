@@ -426,8 +426,8 @@ class server_management(commands.Cog):
     async def whitelist_add(
         self, interaction: discord.Interaction, whitelist: discord.User | discord.Role
     ):
-        guild_data = await DataManager.get_guild_data(interaction.guild.id)
-        wlist = guild_data["whitelist"]
+        guild_filtered_words_data = await DataManager.get_guild_filtered_words(interaction.guild.id)
+        wlist = guild_filtered_words_data["whitelist"]
 
         if wlist is None or whitelist.id not in wlist:
             wlist.append(whitelist.id)
