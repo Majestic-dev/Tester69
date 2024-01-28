@@ -69,20 +69,21 @@ class bot(commands.Bot):
         tickets = await DataManager.get_all_tickets()
         panels = await DataManager.get_all_panels()
 
-        for panel in panels:
-            channel = await self.fetch_channel(panel["channel_id"])
-            try:
-                if await channel.fetch_message(panel["id"]):
-                    self.add_view(panel_views(bot, panel["id"]))
-            except discord.errors.NotFound:
-                await DataManager.delete_panel(panel["id"], panel["guild_id"])
-                continue
+        try:
+            for panel in panels:
+                channel = await self.fetch_channel(panel["channel_id"])
+                try:
+                    if await channel.fetch_message(panel["id"]):
+                        self.add_view(view=panel_views(bot, panel["id"]), message_id=panel["id"])
+                except discord.errors.NotFound:
+                    await DataManager.delete_panel(panel["id"], panel["guild_id"])
+                    continue
 
-            for ticket in tickets:
-                self.add_view(
-                    closed_ticket_views(bot, panel["id"], ticket["ticket_creator"])
-                )
-                self.add_view(ticket_views(bot, panel["id"], ticket["ticket_creator"]))
+                for ticket in tickets:
+                    self.add_view(view=closed_ticket_views(bot, panel["id"], ticket["ticket_creator"], ticket["ticket_id"]))
+                    self.add_view(view=ticket_views(bot, panel["id"], ticket["ticket_creator"]))
+        except Exception as e:
+            print(e)
 
 
 bot = bot()

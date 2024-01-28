@@ -1,8 +1,92 @@
 import discord
+from io import BytesIO
+import asyncio
 from discord import app_commands
 from discord.ext import commands
 
 from utils import DataManager
+
+class send_transcript_dropdown(discord.ui.ChannelSelect):
+    def __init__(
+        self,
+        bot: commands.AutoShardedBot,
+        interaction: discord.Interaction
+    ):
+        self.bot = bot
+        self.interaction = interaction
+
+        super().__init__(
+            channel_types=[discord.ChannelType.text],
+            placeholder="Select where to send the transcript",
+            min_values=1,
+            max_values=1,
+        )
+    
+    async def callback(self, interaction: discord.Interaction):
+        await interaction.response.defer(ephemeral=True)
+        
+        messages = [message async for message in interaction.channel.history(limit=None)]
+        transcript = ""
+
+        for message in reversed(messages):
+            if message.embeds:
+                transcript += f"\n\n{message.author}#{message.author.discriminator} EMBED\n\n"
+                if message.embeds[0].title:
+                    transcript += f"Title - {message.embeds[0].title}\n"
+                if message.embeds[0].description:
+                    transcript += f"Description - {message.embeds[0].description}\n"
+                if message.embeds[0].fields:
+                    for field in message.embeds[0].fields:
+                        transcript += f"{field.name} - {field.value}\n"
+                if message.embeds[0].footer:
+                    transcript += f"Footer - {message.embeds[0].footer.text}\n"
+                if message.embeds[0].image:
+                    transcript += f"Image - {message.embeds[0].image.url}\n"
+                if message.embeds[0].thumbnail:
+                    transcript += f"Thumbnail - {message.embeds[0].thumbnail.url}\n"
+                if message.embeds[0].author:
+                    transcript += f"Author - {message.embeds[0].author.name}\n"
+                if message.embeds[0].url:
+                    transcript += f"URL - {message.embeds[0].url}\n"
+                transcript += f"Message Link - {message.jump_url}\n\n"
+                continue
+            if message.attachments:
+                transcript += f"\n\n{message.author}#{message.author.discriminator} ATTACHMENT(S)\n\n"
+                for attachment in message.attachments:
+                    transcript += f"{attachment.url}\n"
+                transcript += f"Message Link - {message.jump_url}\n\n"
+                continue
+            if message.content:
+                transcript += f"\n{message.author}#{message.author.discriminator} ({message.author.id}): {message.content}"
+                continue
+            
+        buffer = BytesIO(transcript.encode("utf8"))
+        channel = self.interaction.guild.get_channel(int(interaction.data["values"][0]))
+        await channel.send(
+            content=f"Transcript for {interaction.channel.name}",
+            file=discord.File(
+                fp=buffer, filename=f"transcript-{interaction.channel.name}.txt"
+            )
+        )
+
+
+class send_transcript_dropdown_view(discord.ui.View):
+    def __init__(
+        self,
+        bot: commands.AutoShardedBot,
+        interaction: discord.Interaction,
+    ):
+        self.bot = bot
+        self.interaction = interaction
+
+        super().__init__()
+
+        self.add_item(
+            send_transcript_dropdown(
+                bot=self.bot,
+                interaction=self.interaction
+            )
+        )
 
 
 class create_role_dropdown(discord.ui.RoleSelect):
@@ -371,9 +455,6 @@ class create_ticket_modal(discord.ui.Modal, title="Create a Ticket"):
         ticket = await interaction.channel.create_thread(
             name=f"ticket-{interaction.user.name}",
         )
-        await DataManager.create_ticket(
-            self.panel_id, interaction.guild.id, ticket.id, interaction.user.id
-        )
         await ticket.add_user(interaction.user)
 
         await interaction.response.send_message(
@@ -391,15 +472,19 @@ class create_ticket_modal(discord.ui.Modal, title="Create a Ticket"):
             ),
             view=ticket_views(self.bot, self.panel_id, interaction.user.id),
         )
+        await DataManager.create_ticket(
+            self.panel_id, interaction.guild.id, message.id, interaction.user.id
+        )
         await message.pin()
 
 
 class closed_ticket_views(discord.ui.View):
-    def __init__(self, bot, panel_id, user_id):
+    def __init__(self, bot, panel_id: int, user_id: int, ticket_id: int):
         super().__init__(timeout=None)
         self.bot = bot
         self.panel_id = panel_id
         self.user_id = user_id
+        self.ticket_id = ticket_id
 
     @discord.ui.button(
         label="Reopen Ticket",
@@ -410,19 +495,21 @@ class closed_ticket_views(discord.ui.View):
     async def reopen_ticket(
         self, interaction: discord.Interaction, button: discord.ui.Button
     ):
-        await interaction.response.defer(ephemeral=True)
-        ticket = await DataManager.get_ticket(interaction.channel.id)
-        await DataManager.open_ticket(self.panel_id, interaction.channel.id)
-        user = self.bot.get_user(self.user_id)
-        await interaction.delete_original_response()
-        await interaction.channel.add_user(user)
-        await interaction.channel.send(
-            embed=discord.Embed(
-                title="Ticket Reopened",
-                description=f"Ticket reopened by {interaction.user.mention}",
-                colour=discord.Colour.green(),
+        try:
+            await interaction.response.defer(ephemeral=True)
+            await DataManager.open_ticket(self.panel_id, self.ticket_id)
+            user = self.bot.get_user(self.user_id)
+            await interaction.delete_original_response()
+            await interaction.channel.add_user(user)
+            await interaction.channel.send(
+                embed=discord.Embed(
+                    title="Ticket Reopened",
+                    description=f"Ticket reopened by {interaction.user.mention}",
+                    colour=discord.Colour.green(),
+                )
             )
-        )
+        except Exception as e:
+            print(e)
 
     @discord.ui.button(
         label="Delete Ticket",
@@ -435,6 +522,23 @@ class closed_ticket_views(discord.ui.View):
     ):
         await interaction.response.defer(ephemeral=True)
         await interaction.channel.delete()
+
+    @discord.ui.button(
+        label="Transcript Ticket",
+        style=discord.ButtonStyle.blurple,
+        custom_id="ticket:transcript_ticket",
+        emoji="📜",
+    )
+    async def transcript_ticket(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ):
+        await interaction.response.send_message(
+            view=send_transcript_dropdown_view(
+                bot=self.bot,
+                interaction=interaction,
+            ),
+            ephemeral=True,
+        )
 
 
 class ticket_views(discord.ui.View):
@@ -453,7 +557,7 @@ class ticket_views(discord.ui.View):
     async def close_ticket(
         self, interaction: discord.Interaction, button: discord.ui.Button
     ):
-        ticket = await DataManager.get_ticket(interaction.channel.id)
+        ticket = await DataManager.get_ticket(interaction.message.id)
         if ticket["closed"] == True:
             await interaction.response.send_message(
                 embed=discord.Embed(
@@ -461,33 +565,52 @@ class ticket_views(discord.ui.View):
                     description="This ticket has already been closed",
                     colour=discord.Colour.red(),
                 ),
-                ephemeral=True,
+                ephemeral=True
             )
 
         elif ticket["closed"] == False:
-            await DataManager.close_ticket(self.panel_id, interaction.channel.id)
+            await interaction.response.defer()
+            await DataManager.close_ticket(self.panel_id, interaction.message.id)
             panel_data = await DataManager.get_panel_data(
                 self.panel_id, interaction.guild.id
             )
-            for user in await interaction.channel.fetch_members():
-                member = interaction.guild.get_member(user.id)
-                if any(
-                    role.id in panel_data["panel_moderators"] for role in member.roles
-                ):
-                    continue
-                else:
-                    await interaction.channel.remove_user(member)
+            try:
+                for user in await interaction.channel.fetch_members():
+                    member = interaction.guild.get_member(user.id)
+                    if member:
+                        if any(
+                            role.id in panel_data["panel_moderators"] for role in member.roles
+                        ):
+                            continue
+                        else:
+                            await interaction.channel.remove_user(member)
+                    else:
+                        continue
 
-            user = self.bot.get_user(self.user_id)
-            await interaction.channel.remove_user(user)
-            await interaction.response.send_message(
-                embed=discord.Embed(
-                    title="Ticket Closed",
-                    description=f"Ticket closed by {interaction.user.mention}",
-                    colour=discord.Colour.red(),
-                ),
-                view=closed_ticket_views(self.bot, self.panel_id, self.user_id),
-            )
+                try:
+                    user = self.bot.get_user(self.user_id)
+                    await interaction.channel.remove_user(user)
+
+                    await interaction.channel.send(
+                        embed=discord.Embed(
+                            title="Ticket Closed",
+                            description=f"Ticket closed by {interaction.user.mention}",
+                            colour=discord.Colour.red(),
+                        ),
+                        view=closed_ticket_views(self.bot, self.panel_id, self.user_id, interaction.message.id),
+                    )
+                    
+                except AttributeError:
+                    await interaction.channel.send(
+                        embed=discord.Embed(
+                            title="Ticket Closed",
+                            description=f"Ticket closed by {interaction.user.mention}",
+                            colour=discord.Colour.red(),
+                        ),
+                        view=closed_ticket_views(self.bot, self.panel_id, self.user_id, interaction.message.id),
+                    )
+            except Exception as e:
+                print(e)
 
 
 class panel_views(discord.ui.View):
@@ -505,31 +628,35 @@ class panel_views(discord.ui.View):
     async def create_ticket(
         self, interaction: discord.Interaction, button: discord.ui.Button
     ):
-        panel_data = await DataManager.get_panel_data(
-            self.panel_id, interaction.guild.id
-        )
-        i = 0
-        for thread in interaction.channel.threads:
-            if thread.name == f"ticket-{interaction.user.name}":
-                try:
-                    await thread.fetch_member(interaction.user.id)
-                    i += 1
-                except discord.errors.NotFound:
-                    continue
-
-        if i >= panel_data["limit_per_user"]:
-            return await interaction.response.send_message(
-                embed=discord.Embed(
-                    title="Too Many Tickets Opened",
-                    description="You already have the maximum amount of tickets open, please close the other tickets before creating a new one",
-                    colour=discord.Colour.red(),
-                ),
-                ephemeral=True,
+        try:
+            panel_data = await DataManager.get_panel_data(
+                self.panel_id, interaction.guild.id
             )
+            i = 0
+            for thread in interaction.channel.threads:
+                if thread.name == f"ticket-{interaction.user.name}":
+                    try:
+                        await thread.fetch_member(interaction.user.id)
+                        i += 1
+                        asyncio.sleep(0.1)
+                    except discord.errors.NotFound:
+                        continue
 
-        await interaction.response.send_modal(
-            create_ticket_modal(self.bot, self.panel_id)
-        )
+            if i >= panel_data["limit_per_user"]:
+                return await interaction.response.send_message(
+                    embed=discord.Embed(
+                        title="Too Many Tickets Opened",
+                        description="You already have the maximum amount of tickets open, please close the other tickets before creating a new one",
+                        colour=discord.Colour.red(),
+                    ),
+                    ephemeral=True,
+                )
+
+            await interaction.response.send_modal(
+                create_ticket_modal(self.bot, self.panel_id)
+            )
+        except Exception as e:
+            print(e)
 
 
 class panel_creation_views(discord.ui.View):
