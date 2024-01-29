@@ -35,17 +35,17 @@ class giveaway_looper(commands.Cog):
                 )
 
                 if winners is False:
-                    try:
+                    if message:
                         await message.edit(
                             view=None,
                         )
                         return await message.reply(
                             f"Unfortunately, nobody entered the giveaway for the **{giveaway['prize']}**"
                         )
-                    except:
+                    else:
                         return
 
-                try:
+                if message:
                     await message.edit(
                         view=None,
                         embed=discord.Embed(
@@ -75,7 +75,7 @@ class giveaway_looper(commands.Cog):
                         return await message.reply(
                             f"Unfortunately, nobody entered the giveaway for the **{giveaway['prize']}**"
                         )
-                except:
+                else:
                     return
 
         next_giveaway = await DataManager.get_next_giveaway()
@@ -98,17 +98,17 @@ class giveaway_looper(commands.Cog):
             )
 
             if winners is False:
-                try:
+                if message:
                     await message.edit(
                         view=None,
                     )
                     return await message.reply(
                         f"Unfortunately, nobody entered the giveaway for the **{next_giveaway['prize']}**"
                     )
-                except:
+                else:
                     return
 
-            try:
+            if message:
                 await message.edit(
                     view=None,
                     embed=discord.Embed(
@@ -138,7 +138,7 @@ class giveaway_looper(commands.Cog):
                     return await message.reply(
                         f"Unfortunately, nobody entered the giveaway for the **{next_giveaway['prize']}**"
                     )
-            except:
+            else:
                 return
 
     # Giveaway Join Listener
@@ -151,7 +151,7 @@ class giveaway_looper(commands.Cog):
             giveaway_data["end_date"], "%Y-%m-%dT%H:%M:%S.%f%z"
         )
 
-        try:
+        if message:
             await message.edit(
                 embed=discord.Embed(
                     title=f"{giveaway_data['prize']}",
@@ -166,8 +166,7 @@ class giveaway_looper(commands.Cog):
                     f"Winners: **{giveaway_data['winner_amount']}**",
                 )
             )
-        except Exception as e:
-            print(e)
+        else:
             return
 
     # Giveaway Leave Listener
@@ -180,7 +179,7 @@ class giveaway_looper(commands.Cog):
             giveaway_data["end_date"], "%Y-%m-%dT%H:%M:%S.%f%z"
         )
 
-        try:
+        if message:
             await message.edit(
                 embed=discord.Embed(
                     title=f"{giveaway_data['prize']}",
@@ -195,7 +194,7 @@ class giveaway_looper(commands.Cog):
                     f"Winners: **{giveaway_data['winner_amount']}**",
                 )
             )
-        except:
+        else:
             return
 
     # Manual Giveaway End Listener
@@ -209,7 +208,7 @@ class giveaway_looper(commands.Cog):
             giveaway_data["end_date"], "%Y-%m-%dT%H:%M:%S.%f%z"
         )
 
-        try:
+        if message:
             await message.edit(
                 embed=discord.Embed(
                     title=f"{giveaway_data['prize']}",
@@ -237,8 +236,7 @@ class giveaway_looper(commands.Cog):
                 await message.reply(
                     f"Unfortunately, nobody entered the giveaway for the **{giveaway_data['prize']}**"
                 )
-        except Exception as e:
-            print(e)
+        else:
             return
 
     # Manual Giveaway Reroll Listener
@@ -252,7 +250,7 @@ class giveaway_looper(commands.Cog):
             giveaway_data["end_date"], "%Y-%m-%dT%H:%M:%S.%f%z"
         )
 
-        try:
+        if message:
             await message.edit(
                 embed=discord.Embed(
                     title=f"{giveaway_data['prize']}",
@@ -280,7 +278,7 @@ class giveaway_looper(commands.Cog):
                 await message.reply(
                     f"Unfortunately, nobody entered the giveaway for the **{giveaway_data['prize']}**"
                 )
-        except:
+        else:
             return
 
     # Manual Giveaway Winner Reroll Listener
@@ -295,7 +293,7 @@ class giveaway_looper(commands.Cog):
             giveaway_data["end_date"], "%Y-%m-%dT%H:%M:%S.%f%z"
         )
 
-        try:
+        if message:
             await message.edit(
                 embed=discord.Embed(
                     title=f"{giveaway_data['prize']}",
@@ -314,7 +312,7 @@ class giveaway_looper(commands.Cog):
             await message.reply(
                 f"Congratulations <@{new_winner_id}>! You have won the **{giveaway_data['prize']}**"
             )
-        except:
+        else:
             return
 
 

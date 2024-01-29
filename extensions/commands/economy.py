@@ -302,20 +302,16 @@ class economy(commands.Cog):
                     colour=discord.Colour.red(),
                 )
             )
+        
+        items = DataManager.get("economy", "items")
+        if not items:
+            print("where are the items gang")
 
         user_data = await DataManager.get_user_data(interaction.user.id)
-        try:
-            user_inv = json.loads(user_data["inventory"])
-        except:
-            return await interaction.response.send_message(
-                embed=discord.Embed(
-                    description="<:white_cross:1096791282023669860> Something went wrong :(",
-                    colour=discord.Colour.orange(),
-                )
-            )
-        
-        if DataManager.get("economy", "items")[item.lower()]:
-            item1 = DataManager.get("economy", "items")[item.lower()]
+        user_inv = json.loads(user_data["inventory"])
+        item1 = items.get(item.lower(), None)
+
+        if item1:
             if user_data["inventory"] is None or item.lower() not in user_data["inventory"]:
                 return await interaction.response.send_message(
                     embed=discord.Embed(
@@ -342,6 +338,13 @@ class economy(commands.Cog):
                 embed=discord.Embed(
                     description=f"<:white_checkmark:1096793014287995061> Sold {amount} **{item1['emoji']} {item1['name']}** for **{(int(amount) * price)} 🪙**",
                     colour=discord.Colour.green(),
+                )
+            )
+        else:
+            await interaction.response.send_message(
+                embed=discord.Embed(
+                    description="<:white_cross:1096791282023669860> That item doesn't exist",
+                    colour=discord.Colour.red(),
                 )
             )
 
@@ -820,12 +823,12 @@ class economy(commands.Cog):
                         value=f"{description}",
                         inline=False,
                     )
-                else:
-                    cur_embed.add_field(
-                        name=f"{emoji} **{item.title()}**" + f" - {price} 🪙",
-                        value=f"{description}",
-                        inline=False,
-                    )
+            else:
+                cur_embed.add_field(
+                    name=f"{emoji} **{item.title()}**" + f" - {price} 🪙",
+                    value=f"{description}",
+                    inline=False,
+                )
 
         embeds.append(cur_embed)
 

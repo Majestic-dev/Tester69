@@ -121,21 +121,16 @@ class logging(commands.GroupCog):
 
         if logs_channel == None:
             return
-
-        try:
-            await member.guild.fetch_ban(member)
-            return
-
-        except:
-            leave = discord.Embed(
-                title="Member Left",
-                description=f"{member.mention} Has left the server",
-                colour=discord.Colour.red(),
-            )
-            leave.set_author(icon_url=member.display_avatar, name=member)
-            leave.set_footer(text=f"ID: {member.id}")
-            leave.timestamp = discord.utils.utcnow()
-            await logs_channel.send(embed=leave)
+        
+        leave = discord.Embed(
+            title="Member Left",
+            description=f"{member.mention} Has left the server",
+            colour=discord.Colour.red(),
+        )
+        leave.set_author(icon_url=member.display_avatar, name=member)
+        leave.set_footer(text=f"ID: {member.id}")
+        leave.timestamp = discord.utils.utcnow()
+        await logs_channel.send(embed=leave)
 
     # Warning Listener
     @commands.Cog.listener()

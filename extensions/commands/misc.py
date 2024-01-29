@@ -519,6 +519,21 @@ class misc(commands.Cog):
             ),
             ephemeral=True,
         )
+    
+    @app_commands.command(
+        name="test"
+    )
+    async def test(self, ctx) -> None:
+        embeds = []
+        for i in range(0, 10):
+            embeds.append(
+                discord.Embed(
+                    title=f"Page {i + 1}",
+                    description=f"This is page {i + 1}",
+                    colour=discord.Colour.random(),
+                )
+            )
+        await Paginator.Simple(timeout=10, ephemeral=True).paginate(ctx, embeds)
 
 
 async def setup(bot):
