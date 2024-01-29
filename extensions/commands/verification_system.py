@@ -170,10 +170,10 @@ class verification(commands.GroupCog):
             and unverified_role == None
         ):
             if welcome_message != None:
-                try:
-                    dm_channel = await member.create_dm()
+                dm_channel = await member.create_dm()
+                if dm_channel:
                     return await dm_channel.send(welcome_message)
-                except:
+                else:
                     return
             return
 
@@ -188,13 +188,13 @@ class verification(commands.GroupCog):
             await member.add_roles(unverified_role)
             dm_channel = await member.create_dm()
 
-            try:
+            if dm_channel:
                 await dm_channel.send(
                     f'Please enter the code seen in the image. If the code is too blurry and you can not see it type "reset".\n By verifying yourself you accept the rules of the server you are trying to verify in',
                     file=discord.File(f"{member.id}.png"),
                 )
                 os.remove(f"{member.id}.png")
-            except:
+            else:
                 await verification_channel.send(
                     f"{member.mention} Please enable your direct messages to verify yourself, rejoin once done. Thanks!"
                 )
@@ -256,12 +256,10 @@ class verification(commands.GroupCog):
                     )
                 )
                 if welcome_message != None:
-                    try:
-                        await dm_channel.send(welcome_message)
-                    except:
+                    if await dm_channel.send(welcome_message):
                         return
-
-                return
+                    else:
+                        return
 
             elif message.content.lower() == "cancel":
                 return await dm_channel.send(
