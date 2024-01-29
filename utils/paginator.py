@@ -84,7 +84,7 @@ class on_page_counter_click(discord.ui.View):
         self, interaction: discord.Interaction, button: discord.ui.Button
     ):
         await interaction.response.send_modal(
-            jump_to_page_modal(self.timeout, self.pages, self.message)
+            jump_to_page_modal(self.timeout, self.pages, self.original_message)
         )
 
 
@@ -108,10 +108,7 @@ class paginator_buttons(discord.ui.View):
         for child in self.children:
             child.disabled = True
 
-        if self.response is not None:
-            await self.response.edit(view=self)
-        else:
-            pass
+        await self.response.edit(view=self)
 
     @discord.ui.button(
         style=discord.ButtonStyle.blurple,
@@ -168,7 +165,7 @@ class paginator_buttons(discord.ui.View):
                 "You cannot interact with this menu.", ephemeral=True
             )
 
-        if self.response is None and self.response.ephemeral:
+        if self.response is None:
             await interaction.response.send_message(
                 "You cannot interact with this menu on ephemeral messages!",
                 ephemeral=True,
@@ -178,9 +175,9 @@ class paginator_buttons(discord.ui.View):
             view=on_page_counter_click(
                 self.executor,
                 self.pages,
-                interaction.message,
-                interaction,
                 self.response,
+                interaction,
+                interaction.message,
             ),
             ephemeral=True,
         )
@@ -251,11 +248,13 @@ class Paginator:
                 )
                 view.current_page_number.label = f"{self.initial_page + 1}/{len(pages)}"
 
-                view.response = await ctx.response.send_message(
+                await ctx.response.send_message(
                     embed=pages[self.initial_page],
                     view=view,
                     ephemeral=self.ephemeral,
                 )
+
+                view.response = await ctx.original_response()
 
             elif isinstance(ctx, commands.Context):
                 view = paginator_buttons(
