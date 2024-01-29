@@ -123,7 +123,11 @@ class server(commands.Cog):
             f"* **Roles**: {', '.join([role.mention for role in interaction.guild.get_member(user.id).roles if role.name != '@everyone'])}\n",
             colour=discord.Colour.blurple(),
         )
-        embed.set_thumbnail(url=user.avatar.url)
+        
+        try:
+            embed.set_thumbnail(url=user.avatar.url)
+        except:
+            pass
 
         await interaction.response.send_message(embed=embed, ephemeral=True)
 

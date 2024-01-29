@@ -168,7 +168,7 @@ class paginator_buttons(discord.ui.View):
                 "You cannot interact with this menu.", ephemeral=True
             )
 
-        if self.response is None:
+        if self.response is None and self.response.ephemeral:
             await interaction.response.send_message(
                 "You cannot interact with this menu on ephemeral messages!",
                 ephemeral=True,

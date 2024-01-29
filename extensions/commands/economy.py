@@ -210,7 +210,7 @@ class economy(commands.Cog):
         description="Grab a rifle from the shop and go hunting for some animals",
     )
     @app_commands.checks.cooldown(1, 600, key=lambda i: (i.user.id))
-    async def hunt(self, interaction: discord.Interaction):
+    async def hunt(self, interaction: discord.Interaction): 
         chances = []
         for item, count in DataManager.get("economy", "hunting items").items():
             chances.append(count["chance"])
@@ -304,37 +304,46 @@ class economy(commands.Cog):
             )
 
         user_data = await DataManager.get_user_data(interaction.user.id)
-        user_inv = json.loads(user_data["inventory"])
-        item1 = DataManager.get("economy", "items")[item.lower()]
-
-        if user_data["inventory"] is None or item.lower() not in user_data["inventory"]:
+        try:
+            user_inv = json.loads(user_data["inventory"])
+        except:
             return await interaction.response.send_message(
                 embed=discord.Embed(
-                    description="<:white_cross:1096791282023669860> You don't have any of that item",
+                    description="<:white_cross:1096791282023669860> Something went wrong :(",
                     colour=discord.Colour.orange(),
                 )
             )
+        
+        if DataManager.get("economy", "items")[item.lower()]:
+            item1 = DataManager.get("economy", "items")[item.lower()]
+            if user_data["inventory"] is None or item.lower() not in user_data["inventory"]:
+                return await interaction.response.send_message(
+                    embed=discord.Embed(
+                        description="<:white_cross:1096791282023669860> You don't have any of that item",
+                        colour=discord.Colour.orange(),
+                    )
+                )
 
-        if int(user_inv[item]) < amount:
-            return await interaction.response.send_message(
+            if int(user_inv[item]) < amount:
+                return await interaction.response.send_message(
+                    embed=discord.Embed(
+                        description="<:white_cross:1096791282023669860> You don't have enough of that item",
+                        colour=discord.Colour.orange(),
+                    )
+                )
+
+            price = item1["sell price"]
+            await DataManager.edit_user_data(
+                interaction.user.id, "balance", user_data["balance"] + (int(amount) * price)
+            )
+            await DataManager.edit_user_inventory(interaction.user.id, item, -int(amount))
+
+            await interaction.response.send_message(
                 embed=discord.Embed(
-                    description="<:white_cross:1096791282023669860> You don't have enough of that item",
-                    colour=discord.Colour.orange(),
+                    description=f"<:white_checkmark:1096793014287995061> Sold {amount} **{item1['emoji']} {item1['name']}** for **{(int(amount) * price)} 🪙**",
+                    colour=discord.Colour.green(),
                 )
             )
-
-        price = item1["sell price"]
-        await DataManager.edit_user_data(
-            interaction.user.id, "balance", user_data["balance"] + (int(amount) * price)
-        )
-        await DataManager.edit_user_inventory(interaction.user.id, item, -int(amount))
-
-        await interaction.response.send_message(
-            embed=discord.Embed(
-                description=f"<:white_checkmark:1096793014287995061> Sold {amount} **{item1['emoji']} {item1['name']}** for **{(int(amount) * price)} 🪙**",
-                colour=discord.Colour.green(),
-            )
-        )
 
     @app_commands.command(
         name="rob", description="Rob the mentioned user out of their 🪙"
@@ -421,7 +430,7 @@ class economy(commands.Cog):
             startTime = datetime.datetime.strptime(
                 json.loads(cooldowns)["hourly"], "%Y-%m-%dT%H:%M:%S.%f%z"
             )
-            endTime = datetime.strptime(
+            endTime = datetime.datetime.strptime(
                 discord.utils.utcnow().isoformat(), "%Y-%m-%dT%H:%M:%S.%f%z"
             )
             timeLeft = (startTime - endTime).total_seconds()
