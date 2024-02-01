@@ -495,21 +495,18 @@ class closed_ticket_views(discord.ui.View):
     async def reopen_ticket(
         self, interaction: discord.Interaction, button: discord.ui.Button
     ):
-        try:
-            await interaction.response.defer(ephemeral=True)
-            await DataManager.open_ticket(self.panel_id, self.ticket_id)
-            user = self.bot.get_user(self.user_id)
-            await interaction.delete_original_response()
-            await interaction.channel.add_user(user)
-            await interaction.channel.send(
-                embed=discord.Embed(
-                    title="Ticket Reopened",
-                    description=f"Ticket reopened by {interaction.user.mention}",
-                    colour=discord.Colour.green(),
-                )
+        await interaction.response.defer(ephemeral=True)
+        await DataManager.open_ticket(self.panel_id, self.ticket_id)
+        user = self.bot.get_user(self.user_id)
+        await interaction.delete_original_response()
+        await interaction.channel.add_user(user)
+        await interaction.channel.send(
+            embed=discord.Embed(
+                title="Ticket Reopened",
+                description=f"Ticket reopened by {interaction.user.mention}",
+                colour=discord.Colour.green(),
             )
-        except Exception as e:
-            print(e)
+        )
 
     @discord.ui.button(
         label="Delete Ticket",
@@ -574,50 +571,46 @@ class ticket_views(discord.ui.View):
             panel_data = await DataManager.get_panel_data(
                 self.panel_id, interaction.guild.id
             )
-            try:
-                for user in await interaction.channel.fetch_members():
-                    member = interaction.guild.get_member(user.id)
-                    if member:
-                        if any(
-                            role.id in panel_data["panel_moderators"] for role in member.roles
-                        ):
-                            continue
-                        else:
-                            await interaction.channel.remove_user(member)
-                    else:
+            for user in await interaction.channel.fetch_members():
+                member = interaction.guild.get_member(user.id)
+                if member:
+                    if any(
+                        role.id in panel_data["panel_moderators"] for role in member.roles
+                    ):
                         continue
+                    else:
+                        await interaction.channel.remove_user(member)
+                else:
+                    continue
 
-                try:
-                    user = self.bot.get_user(self.user_id)
-                    await interaction.channel.remove_user(user)
+            try:
+                user = self.bot.get_user(self.user_id)
+                await interaction.channel.remove_user(user)
 
-                    await interaction.channel.send(
-                        embed=discord.Embed(
-                            title="Ticket Closed",
-                            description=f"Ticket closed by {interaction.user.mention}",
-                            colour=discord.Colour.red(),
-                        ),
-                        view=closed_ticket_views(self.bot, self.panel_id, self.user_id, interaction.message.id),
-                    )
-                    
-                except AttributeError:
-                    await interaction.channel.send(
-                        embed=discord.Embed(
-                            title="Ticket Closed",
-                            description=f"Ticket closed by {interaction.user.mention}",
-                            colour=discord.Colour.red(),
-                        ),
-                        view=closed_ticket_views(self.bot, self.panel_id, self.user_id, interaction.message.id),
-                    )
-            except Exception as e:
-                print(e)
+                await interaction.channel.send(
+                    embed=discord.Embed(
+                        title="Ticket Closed",
+                        description=f"Ticket closed by {interaction.user.mention}",
+                        colour=discord.Colour.red(),
+                    ),
+                    view=closed_ticket_views(self.bot, self.panel_id, self.user_id, interaction.message.id),
+                )
+                
+            except AttributeError:
+                await interaction.channel.send(
+                    embed=discord.Embed(
+                        title="Ticket Closed",
+                        description=f"Ticket closed by {interaction.user.mention}",
+                        colour=discord.Colour.red(),
+                    ),
+                    view=closed_ticket_views(self.bot, self.panel_id, self.user_id, interaction.message.id),
+                )
 
 
 class panel_views(discord.ui.View):
-    def __init__(self, bot, panel_id):
+    def __init__(self, bot):
         super().__init__(timeout=None)
         self.bot = bot
-        self.panel_id = panel_id
 
     @discord.ui.button(
         label="Create Ticket",
@@ -628,35 +621,32 @@ class panel_views(discord.ui.View):
     async def create_ticket(
         self, interaction: discord.Interaction, button: discord.ui.Button
     ):
-        try:
-            panel_data = await DataManager.get_panel_data(
-                self.panel_id, interaction.guild.id
-            )
-            i = 0
-            for thread in interaction.channel.threads:
-                if thread.name == f"ticket-{interaction.user.name}":
-                    try:
-                        await thread.fetch_member(interaction.user.id)
-                        i += 1
-                        asyncio.sleep(0.1)
-                    except discord.errors.NotFound:
-                        continue
+        panel_data = await DataManager.get_panel_data(
+            interaction.message.id, interaction.guild.id
+        )
+        i = 0
+        for thread in interaction.channel.threads:
+            if thread.name == f"ticket-{interaction.user.name}":
+                try:
+                    await thread.fetch_member(interaction.user.id)
+                    i += 1
+                    asyncio.sleep(0.1)
+                except discord.errors.NotFound:
+                    continue
 
-            if i >= panel_data["limit_per_user"]:
-                return await interaction.response.send_message(
-                    embed=discord.Embed(
-                        title="Too Many Tickets Opened",
-                        description="You already have the maximum amount of tickets open, please close the other tickets before creating a new one",
-                        colour=discord.Colour.red(),
-                    ),
-                    ephemeral=True,
-                )
-
-            await interaction.response.send_modal(
-                create_ticket_modal(self.bot, self.panel_id)
+        if i >= panel_data["limit_per_user"]:
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    title="Too Many Tickets Opened",
+                    description="You already have the maximum amount of tickets open, please close the other tickets before creating a new one",
+                    colour=discord.Colour.red(),
+                ),
+                ephemeral=True,
             )
-        except Exception as e:
-            print(e)
+
+        await interaction.response.send_modal(
+            create_ticket_modal(self.bot, interaction.message.id)
+        )
 
 
 class panel_creation_views(discord.ui.View):
