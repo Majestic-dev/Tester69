@@ -148,23 +148,30 @@ class giveaway_views(discord.ui.View):
     async def join_giveaway(
         self, interaction: discord.Interaction, button: discord.ui.Button
     ):
-        if await DataManager.add_giveaway_participant(
-            interaction.message.id, interaction.user.id
+        if await DataManager.get_giveaway_data(
+            interaction.message.id, interaction.guild.id
         ):
-            await interaction.response.send_message(
-                content="Successfully entered the giveaway!", ephemeral=True
-            )
+            if await DataManager.add_giveaway_participant(
+                interaction.message.id, interaction.user.id
+            ):
+                await interaction.response.send_message(
+                    content="Successfully entered the giveaway!", ephemeral=True
+                )
 
-            self.bot.dispatch(
-                "giveaway_join",
-                interaction.message.id,
-                interaction.guild.id,
-            )
+                self.bot.dispatch(
+                    "giveaway_join",
+                    interaction.message.id,
+                    interaction.guild.id,
+                )
+            else:
+                await interaction.response.send_message(
+                    content="You have already entered this giveaway!",
+                    ephemeral=True,
+                    view=giveaway_leave_view(interaction.message.id, self.bot),
+                )
         else:
             await interaction.response.send_message(
-                content="You have already entered this giveaway!",
-                ephemeral=True,
-                view=giveaway_leave_view(interaction.message.id, self.bot),
+                content="Giveaway not found!", ephemeral=True
             )
 
     @discord.ui.button(
