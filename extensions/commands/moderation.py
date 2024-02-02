@@ -305,40 +305,65 @@ class moderation(commands.Cog):
 
     @app_commands.command(
         name="unban",
-        description="Unban the user by their discord ID",
+        description="Unban the user by their discord ID or username",
     )
     @app_commands.guild_only()
     @app_commands.default_permissions(ban_members=True)
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id))
-    @app_commands.describe(member="The user to unban")
-    async def unban(self, interaction: discord.Interaction, member: int):
-        try:
-            member = await self.bot.fetch_user(member)
-            entry = await interaction.guild.fetch_ban(member)
-            await interaction.guild.unban(entry.user)
-            dm_channel = await member.create_dm()
-
-            await dm_channel.send(
-                embed=discord.Embed(
-                    description=f"<:white_checkmark:1096793014287995061> You have been unbanned from {interaction.guild.name}",
-                    colour=discord.Colour.green(),
-                )
-            )
-            return await interaction.response.send_message(
-                embed=discord.Embed(
-                    description=f"<:white_checkmark:1096793014287995061> unbanned {member.mention}",
-                    colour=discord.Colour.green(),
-                )
-            )
-
-        except:
-            return await interaction.response.send_message(
-                embed=discord.Embed(
-                    description=f"<:white_cross:1096791282023669860> That user is not banned",
-                    colour=discord.Colour.red(),
-                )
-            )
-
+    @app_commands.describe(member="The user to unban (by ID or username)")
+    async def unban(self, interaction: discord.Interaction, member: str):
+        await interaction.response.defer()
+        bans = [entry async for entry in interaction.guild.bans(limit=None)]
+        for entry in bans:
+            if member.isdigit() and self.bot.get_user(int(member)):
+                if any(entry.user.id == int(member) for entry in bans):
+                    await interaction.guild.unban(entry.user)
+                    return await interaction.edit_original_response(
+                        embed=discord.Embed(
+                            description=f"<:white_checkmark:1096793014287995061> Successfully unbanned {entry.user.mention}",
+                            colour=discord.Colour.green(),
+                        )
+                    )
+                else:
+                    return await interaction.edit_original_response(
+                        embed=discord.Embed(
+                            description="<:white_cross:1096791282023669860> Could not find that user",
+                            colour=discord.Colour.orange(),
+                        )
+                    )
+            else:
+                if any(member in entry.user.name for entry in bans):
+                    if entry.user.name == member:
+                        await interaction.guild.unban(entry.user)
+                        return await interaction.edit_original_response(
+                            embed=discord.Embed(
+                                description=f"<:white_checkmark:1096793014287995061> Successfully unbanned {entry.user.mention}",
+                                colour=discord.Colour.green(),
+                            )
+                        )
+                    else:
+                        return await interaction.edit_original_response(
+                            embed=discord.Embed(
+                                description=
+                                (
+                                    "<:white_cross:1096791282023669860> Could not find that user"
+                                )
+                                +
+                                (
+                                    f", did you mean any of these similar usernames?\n\n {'\n'.join([f"* {entry.user.mention} - {entry.user.id} - {entry.user.name}" for entry in bans if member in entry.user.name])}"
+                                    if len(member) >= 3 and len([entry.user.name for entry in bans if member in entry.user.name]) > 0
+                                    else ""
+                                ),
+                                colour=discord.Colour.orange(),
+                            )
+                        )
+                else:
+                    return await interaction.edit_original_response(
+                        embed=discord.Embed(
+                            description="<:white_cross:1096791282023669860> Could not find that user",
+                            colour=discord.Colour.orange(),
+                        )
+                    )
 
 async def setup(bot: commands.AutoShardedBot):
     await bot.add_cog(moderation(bot))
