@@ -2,6 +2,9 @@
 
 [![](https://discord.com/api/guilds/733219077744754750/embed.png)](https://discord.gg/Xjn4uvk6KS)
 
+> [!WARNING]
+> This project uses python version 3.12.1, and uses features from that version. The project will not work on any lower version of python.
+
 A general-use discord bot coded in python using [discord.py](https://github.com/Rapptz/discord.py)
 
 # Big shoutout to [kaJob-dev](https://github.com/kaJob-dev) (kajob. on discord) for guiding me on this project!
