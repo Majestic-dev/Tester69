@@ -328,7 +328,7 @@ class moderation(commands.Cog):
                     return await interaction.edit_original_response(
                         embed=discord.Embed(
                             description="<:white_cross:1096791282023669860> Could not find that user",
-                            colour=discord.Colour.orange(),
+                            colour=discord.Colour.red(),
                         )
                     )
             else:
@@ -354,14 +354,14 @@ class moderation(commands.Cog):
                                     if len(member) >= 3 and len([entry.user.name for entry in bans if member in entry.user.name]) > 0
                                     else ""
                                 ),
-                                colour=discord.Colour.orange(),
+                                colour=discord.Colour.red(),
                             )
                         )
                 else:
                     return await interaction.edit_original_response(
                         embed=discord.Embed(
                             description="<:white_cross:1096791282023669860> Could not find that user",
-                            colour=discord.Colour.orange(),
+                            colour=discord.Colour.red(),
                         )
                     )
 
