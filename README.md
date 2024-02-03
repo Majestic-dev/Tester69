@@ -3,7 +3,7 @@
 [![](https://discord.com/api/guilds/733219077744754750/embed.png)](https://discord.gg/Xjn4uvk6KS)
 
 > [!WARNING]
-> This project uses python version 3.12.1, and uses features from that version. The project will not work on any python version below 3.12 version of python.
+> This project uses python version 3.12.1, and uses features from that version. The project will not work on any python version below 3.12
 
 A general-use discord bot coded in python using [discord.py](https://github.com/Rapptz/discord.py)
 
