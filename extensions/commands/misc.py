@@ -4,8 +4,8 @@ import json
 import os
 import random
 import time
-from typing import Optional
 from io import BytesIO
+from typing import Optional
 
 import aiohttp
 import discord
@@ -394,13 +394,15 @@ class misc(commands.Cog):
         self, interaction: discord.Interaction, channel: discord.TextChannel
     ):
         await interaction.response.defer(ephemeral=True)
-        
+
         messages = [message async for message in channel.history(limit=None)]
         transcript = ""
 
         for message in reversed(messages):
             if message.embeds:
-                transcript += f"\n\n{message.author}#{message.author.discriminator} EMBED\n\n"
+                transcript += (
+                    f"\n\n{message.author}#{message.author.discriminator} EMBED\n\n"
+                )
                 if message.embeds[0].title:
                     transcript += f"Title - {message.embeds[0].title}\n"
                 if message.embeds[0].description:
@@ -429,13 +431,13 @@ class misc(commands.Cog):
             if message.content:
                 transcript += f"\n{message.author}#{message.author.discriminator} ({message.author.id}): {message.content}"
                 continue
-            
+
         buffer = BytesIO(transcript.encode("utf8"))
         await channel.send(
             content=f"Transcript for {interaction.channel.mention}",
             file=discord.File(
                 fp=buffer, filename=f"transcript-{interaction.channel.name}.txt"
-            )
+            ),
         )
 
     @app_commands.command(
@@ -519,10 +521,8 @@ class misc(commands.Cog):
             ),
             ephemeral=True,
         )
-    
-    @app_commands.command(
-        name="test"
-    )
+
+    @app_commands.command(name="test")
     async def test(self, ctx) -> None:
         embeds = []
         for i in range(0, 10):

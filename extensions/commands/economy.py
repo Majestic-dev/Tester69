@@ -210,7 +210,7 @@ class economy(commands.Cog):
         description="Grab a rifle from the shop and go hunting for some animals",
     )
     @app_commands.checks.cooldown(1, 600, key=lambda i: (i.user.id))
-    async def hunt(self, interaction: discord.Interaction): 
+    async def hunt(self, interaction: discord.Interaction):
         chances = []
         for item, count in DataManager.get("economy", "hunting items").items():
             chances.append(count["chance"])
@@ -302,7 +302,7 @@ class economy(commands.Cog):
                     colour=discord.Colour.red(),
                 )
             )
-        
+
         items = DataManager.get("economy", "items")
         if not items:
             print("where are the items gang")
@@ -312,7 +312,10 @@ class economy(commands.Cog):
         item1 = items.get(item.lower(), None)
 
         if item1:
-            if user_data["inventory"] is None or item.lower() not in user_data["inventory"]:
+            if (
+                user_data["inventory"] is None
+                or item.lower() not in user_data["inventory"]
+            ):
                 return await interaction.response.send_message(
                     embed=discord.Embed(
                         description="<:white_cross:1096791282023669860> You don't have any of that item",
@@ -330,9 +333,13 @@ class economy(commands.Cog):
 
             price = item1["sell price"]
             await DataManager.edit_user_data(
-                interaction.user.id, "balance", user_data["balance"] + (int(amount) * price)
+                interaction.user.id,
+                "balance",
+                user_data["balance"] + (int(amount) * price),
             )
-            await DataManager.edit_user_inventory(interaction.user.id, item, -int(amount))
+            await DataManager.edit_user_inventory(
+                interaction.user.id, item, -int(amount)
+            )
 
             await interaction.response.send_message(
                 embed=discord.Embed(

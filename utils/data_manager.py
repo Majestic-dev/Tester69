@@ -203,7 +203,7 @@ class DataManager:
         async with cls.db_connection.acquire():
             rows = await cls.db_connection.fetch("SELECT id FROM guilds")
             return [row["id"] for row in rows]
-        
+
     @classmethod
     async def get_all_guilds_filtered_words(cls) -> None:
         async with cls.db_connection.acquire():
@@ -241,7 +241,7 @@ class DataManager:
                 "SELECT * FROM filtered_words WHERE guild_id = $1", guild_id
             )
             return row
-        
+
     @classmethod
     async def edit_filtered_words_channel(cls, guild_id: int, channel_id: int) -> None:
         async with cls.db_connection.acquire():
@@ -249,7 +249,9 @@ class DataManager:
                 await cls.add_filtered_words_data(guild_id)
 
             await cls.db_connection.execute(
-                "UPDATE filtered_words SET channel_id = $1 WHERE guild_id = $2", channel_id, guild_id
+                "UPDATE filtered_words SET channel_id = $1 WHERE guild_id = $2",
+                channel_id,
+                guild_id,
             )
 
     @classmethod
@@ -271,7 +273,9 @@ class DataManager:
                 await cls.add_guild_data(guild_id)
 
             await cls.db_connection.execute(
-                "UPDATE filtered_words SET whitelist = $1 WHERE guild_id = $2", whitelist, guild_id
+                "UPDATE filtered_words SET whitelist = $1 WHERE guild_id = $2",
+                whitelist,
+                guild_id,
             )
 
     @classmethod

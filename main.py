@@ -73,8 +73,17 @@ class bot(commands.Bot):
         try:
             for panel in panels:
                 for ticket in tickets:
-                    self.add_view(view=closed_ticket_views(bot, panel["id"], ticket["ticket_creator"], ticket["ticket_id"]))
-                    self.add_view(view=ticket_views(bot, panel["id"], ticket["ticket_creator"]))
+                    self.add_view(
+                        view=closed_ticket_views(
+                            bot,
+                            panel["id"],
+                            ticket["ticket_creator"],
+                            ticket["ticket_id"],
+                        )
+                    )
+                    self.add_view(
+                        view=ticket_views(bot, panel["id"], ticket["ticket_creator"])
+                    )
         except Exception as e:
             print(e)
 

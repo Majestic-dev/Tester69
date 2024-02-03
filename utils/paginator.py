@@ -40,7 +40,7 @@ class jump_to_page_modal(discord.ui.Modal, title="Jump to page"):
                 f"{int(self.page_number.value)}/{len(self.pages)}"
             )
             view.response = self.message
-            
+
             await self.message.edit(
                 embed=self.pages[int(self.page_number.value) - 1], view=view
             )

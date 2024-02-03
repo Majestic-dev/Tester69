@@ -1,17 +1,15 @@
-import discord
-from io import BytesIO
 import asyncio
+from io import BytesIO
+
+import discord
 from discord import app_commands
 from discord.ext import commands
 
 from utils import DataManager
 
+
 class send_transcript_dropdown(discord.ui.ChannelSelect):
-    def __init__(
-        self,
-        bot: commands.AutoShardedBot,
-        interaction: discord.Interaction
-    ):
+    def __init__(self, bot: commands.AutoShardedBot, interaction: discord.Interaction):
         self.bot = bot
         self.interaction = interaction
 
@@ -21,16 +19,20 @@ class send_transcript_dropdown(discord.ui.ChannelSelect):
             min_values=1,
             max_values=1,
         )
-    
+
     async def callback(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
-        
-        messages = [message async for message in interaction.channel.history(limit=None)]
+
+        messages = [
+            message async for message in interaction.channel.history(limit=None)
+        ]
         transcript = ""
 
         for message in reversed(messages):
             if message.embeds:
-                transcript += f"\n\n{message.author}#{message.author.discriminator} EMBED\n\n"
+                transcript += (
+                    f"\n\n{message.author}#{message.author.discriminator} EMBED\n\n"
+                )
                 if message.embeds[0].title:
                     transcript += f"Title - {message.embeds[0].title}\n"
                 if message.embeds[0].description:
@@ -59,14 +61,14 @@ class send_transcript_dropdown(discord.ui.ChannelSelect):
             if message.content:
                 transcript += f"\n{message.author}#{message.author.discriminator} ({message.author.id}): {message.content}"
                 continue
-            
+
         buffer = BytesIO(transcript.encode("utf8"))
         channel = self.interaction.guild.get_channel(int(interaction.data["values"][0]))
         await channel.send(
             content=f"Transcript for {interaction.channel.name}",
             file=discord.File(
                 fp=buffer, filename=f"transcript-{interaction.channel.name}.txt"
-            )
+            ),
         )
 
 
@@ -82,10 +84,7 @@ class send_transcript_dropdown_view(discord.ui.View):
         super().__init__()
 
         self.add_item(
-            send_transcript_dropdown(
-                bot=self.bot,
-                interaction=self.interaction
-            )
+            send_transcript_dropdown(bot=self.bot, interaction=self.interaction)
         )
 
 
@@ -562,7 +561,7 @@ class ticket_views(discord.ui.View):
                     description="This ticket has already been closed",
                     colour=discord.Colour.red(),
                 ),
-                ephemeral=True
+                ephemeral=True,
             )
 
         elif ticket["closed"] == False:
@@ -575,7 +574,8 @@ class ticket_views(discord.ui.View):
                 member = interaction.guild.get_member(user.id)
                 if member:
                     if any(
-                        role.id in panel_data["panel_moderators"] for role in member.roles
+                        role.id in panel_data["panel_moderators"]
+                        for role in member.roles
                     ):
                         continue
                     else:
@@ -593,9 +593,11 @@ class ticket_views(discord.ui.View):
                         description=f"Ticket closed by {interaction.user.mention}",
                         colour=discord.Colour.red(),
                     ),
-                    view=closed_ticket_views(self.bot, self.panel_id, self.user_id, interaction.message.id),
+                    view=closed_ticket_views(
+                        self.bot, self.panel_id, self.user_id, interaction.message.id
+                    ),
                 )
-                
+
             except AttributeError:
                 await interaction.channel.send(
                     embed=discord.Embed(
@@ -603,7 +605,9 @@ class ticket_views(discord.ui.View):
                         description=f"Ticket closed by {interaction.user.mention}",
                         colour=discord.Colour.red(),
                     ),
-                    view=closed_ticket_views(self.bot, self.panel_id, self.user_id, interaction.message.id),
+                    view=closed_ticket_views(
+                        self.bot, self.panel_id, self.user_id, interaction.message.id
+                    ),
                 )
 
 
