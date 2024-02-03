@@ -351,7 +351,7 @@ class moderation(commands.Cog):
                                 +
                                 (
                                     f", did you mean any of these similar usernames?\n\n {'\n'.join([f"* {entry.user.mention} - {entry.user.id} - {entry.user.name}" for entry in bans if member in entry.user.name])}"
-                                    if len(member) >= 3 and len([entry.user.name for entry in bans if member in entry.user.name]) > 0
+                                    if len(member) >= 2 and len([entry.user.name for entry in bans if member in entry.user.name]) > 0
                                     else ""
                                 ),
                                 colour=discord.Colour.red(),
