@@ -858,8 +858,15 @@ class economy(commands.Cog):
                     colour=discord.Colour.red(),
                 )
             )
-
-        price = DataManager.get("economy", "shop items")[item.lower()]["price"]
+        try:
+            price = DataManager.get("economy", "shop items")[item.lower()]["price"]
+        except KeyError:
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    description="<:white_cross:1096791282023669860> Can't buy that item, because it doesn't exist",
+                    colour=discord.Colour.red(),
+                )
+            )
         user_data = await DataManager.get_user_data(interaction.user.id)
 
         if item == "fishing pole":
