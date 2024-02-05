@@ -2,6 +2,8 @@ import datetime
 import os
 import re
 from typing import Optional
+from PIL import Image
+from io import BytesIO
 
 import discord
 from discord import app_commands
@@ -676,7 +678,20 @@ class logging(commands.GroupCog):
                 inline=False,
             )
         elif len(message.attachments) == 1:
-            embed.set_image(url=message.attachments[0].url)
+            image = Image.open(BytesIO(await message.attachments[0].read()))
+            buffer = BytesIO()
+            image.save(buffer, format="PNG")
+            buffer.seek(0)
+            f = discord.File(fp=buffer, filename="image.png")
+            embed.set_image(url="attachment://image.png")
+            embed.set_author(
+            icon_url=message.author.display_avatar, name=f"{message.author}"
+            )
+            embed.set_footer(
+                text=f"Author ID: {message.author.id} | Message ID: {message.id}"
+            )
+            embed.timestamp = discord.utils.utcnow()
+            return await logs_channel.send(embed=embed, file=f)
         if len(message.stickers) >= 1:
             embed.add_field(
                 name="Stickers",
