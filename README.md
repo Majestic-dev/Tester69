@@ -9,6 +9,8 @@ A general-use discord bot coded in python using [discord.py](https://github.com/
 
 # Big shoutout to [kaJob-dev](https://github.com/kaJob-dev) (kajob. on discord) for guiding me on this project!
 
+## Big shoutout to the sponsors: [DafuqDEV](https://github.com/DafuqDEV)
+
 # Installation
 
 ```bash
