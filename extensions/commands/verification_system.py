@@ -5,6 +5,7 @@ import random
 import discord
 from discord import app_commands
 from discord.ext import commands
+from io import BytesIO
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 from utils import DataManager
@@ -13,6 +14,7 @@ from utils import DataManager
 class verification(commands.GroupCog):
     def __init__(self, bot):
         self.bot = bot
+        self.buffer = None
 
     def generate_img(self, code: int, member_id: int) -> None:
         background_colour = (
@@ -43,7 +45,7 @@ class verification(commands.GroupCog):
             font=font,
         )
         rotated_image = verification_background.rotate(
-            random.randint(-50, 50), expand=True, fillcolour=background_colour
+            random.randint(-50, 50), expand=True, fillcolor=background_colour
         )
         blurred_image = rotated_image.filter(ImageFilter.GaussianBlur(3))
 
@@ -56,7 +58,9 @@ class verification(commands.GroupCog):
                 random.choice([(0, 0, 0), (255, 255, 255)]),
             )
 
-        blurred_image.save(f"{member_id}.png")
+        self.buffer = BytesIO()
+        blurred_image.save(self.buffer, "png")
+        self.buffer.seek(0)
 
     @app_commands.command(
         name="disable",
@@ -189,11 +193,11 @@ class verification(commands.GroupCog):
             dm_channel = await member.create_dm()
 
             if dm_channel:
+                buffer = self.buffer
                 await dm_channel.send(
                     f'Please enter the code seen in the image. If the code is too blurry and you can not see it type "reset".\n By verifying yourself you accept the rules of the server you are trying to verify in',
-                    file=discord.File(f"{member.id}.png"),
+                    file=discord.File(fp=buffer, filename="verification.png"),
                 )
-                os.remove(f"{member.id}.png")
             else:
                 await verification_channel.send(
                     f"{member.mention} Please enable your direct messages to verify yourself, rejoin once done. Thanks!"
@@ -260,6 +264,7 @@ class verification(commands.GroupCog):
                         return
                     else:
                         return
+                return
 
             elif message.content.lower() == "cancel":
                 return await dm_channel.send(
@@ -272,10 +277,10 @@ class verification(commands.GroupCog):
 
             elif message.content.lower() == "reset":
                 self.generate_img(code := str(random.randint(11111, 99999)), member.id)
-
+                buffer = self.buffer
                 await dm_channel.send(
                     f'Please enter the code seen in the image. If the code is too blurry and you can not see it type "reset".\n By verifying yourself you accept the rules of the server you are trying to verify in',
-                    file=discord.File(f"{member.id}.png"),
+                    file=discord.File(fp=buffer, filename="verification.png")
                 )
 
                 await verification_logs_channel.send(
@@ -285,8 +290,6 @@ class verification(commands.GroupCog):
                         colour=discord.Colour.red(),
                     )
                 )
-
-                os.remove(f"{member.id}.png")
             else:
                 fail_count -= 1
                 await dm_channel.send(
@@ -298,10 +301,10 @@ class verification(commands.GroupCog):
                 )
 
                 self.generate_img(code := str(random.randint(11111, 99999)), member.id)
-
+                buffer = self.buffer
                 await dm_channel.send(
                     f'Please enter the code seen in the image. If the code is too blurry and you can not see it type "reset".\n By verifying yourself you accept the rules of the server you are trying to verify in',
-                    file=discord.File(f"{member.id}.png"),
+                    file=discord.File(fp=buffer, filename="verification.png"),
                 )
 
                 await verification_logs_channel.send(
