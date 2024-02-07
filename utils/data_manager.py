@@ -683,7 +683,10 @@ class DataManager:
         async with cls.db_connection.acquire():
             rows = await cls.db_connection.fetch("SELECT tickets FROM panels")
             for row in rows:
-                tickets_dict = json.loads(row["tickets"])
+                try:
+                    tickets_dict = json.loads(row["tickets"])
+                except TypeError:
+                    continue
                 for ticket in tickets_dict:
                     if ticket["ticket_id"] == ticket_id:
                         return ticket
