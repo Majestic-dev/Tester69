@@ -156,7 +156,6 @@ class paginator_buttons(discord.ui.View):
         )
 
     @discord.ui.button(
-        label=f"page",
         style=discord.ButtonStyle.gray,
     )
     async def current_page_number(
