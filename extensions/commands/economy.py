@@ -605,12 +605,21 @@ class economy(commands.Cog):
             colour=discord.Colour.green(),
         )
 
-        for item, count in json.loads(user_data["inventory"]).items():
-            name = f"{DataManager.get('economy', 'items')[item.lower()]['emoji']} {item} - {count}"
-            inv_embed.add_field(
-                name=f"{name}",
-                value=f"{DataManager.get('economy', 'items')[item.lower()]['type']}",
-                inline=False,
+        try:
+            for item, count in json.loads(user_data["inventory"]).items():
+                if count != 0:
+                    name = f"{DataManager.get('economy', 'items')[item.lower()]['emoji']} {item} - {count}"
+                    inv_embed.add_field(
+                        name=f"{name}",
+                        value=f"{DataManager.get('economy', 'items')[item.lower()]['type']}",
+                        inline=False,
+                    )
+        except TypeError:
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    description="<:white_cross:1096791282023669860> You don't have any items in your inventory",
+                    colour=discord.Colour.orange(),
+                )
             )
 
         if len(inv_embed.fields) == 0:
@@ -831,11 +840,7 @@ class economy(commands.Cog):
                         inline=False,
                     )
             else:
-                cur_embed.add_field(
-                    name=f"{emoji} **{item.title()}**" + f" - {price} 🪙",
-                    value=f"{description}",
-                    inline=False,
-                )
+                pass
 
         embeds.append(cur_embed)
 
@@ -950,7 +955,10 @@ class economy(commands.Cog):
         except KeyError:
             itemsowned = 0
 
-        percentage_of_net = (itemsowned * item1["sell price"]) / balance * 100
+        try:
+            percentage_of_net = (itemsowned * item1["sell price"]) / balance * 100
+        except ZeroDivisionError:
+            percentage_of_net = 0
 
         embed = discord.Embed(
             title=f"{item1['name']}",
