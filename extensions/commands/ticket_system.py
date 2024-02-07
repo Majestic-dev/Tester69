@@ -889,7 +889,7 @@ class panel_edit_views(discord.ui.View):
                     description=panel_data["panel_description"],
                     colour=discord.Colour.blurple(),
                 ),
-                view=panel_views(self.bot, self.panel_id),
+                view=panel_views(self.bot),
             )
         else:
             await interaction.response.send_message(
