@@ -104,7 +104,7 @@ class create_role_dropdown(discord.ui.RoleSelect):
         super().__init__(
             placeholder="Select the panel moderators",
             min_values=1,
-            max_values=len(guild.roles),
+            max_values=25,
         )
 
     async def callback(self, interaction: discord.Interaction):
