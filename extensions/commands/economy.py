@@ -643,20 +643,28 @@ class economy(commands.Cog):
         user_data = await DataManager.get_user_data(interaction.user.id)
 
         if amount == "all":
-            await DataManager.edit_user_data(
-                interaction.user.id, "bank", user_data["bank"] + user_data["balance"]
-            )
-            await DataManager.edit_user_data(
-                interaction.user.id,
-                "balance",
-                user_data["balance"] - user_data["balance"],
-            )
-            return await interaction.response.send_message(
-                embed=discord.Embed(
-                    description="<:white_checkmark:1096793014287995061> Deposited all your 🪙 in the bank",
-                    colour=discord.Colour.green(),
+            if user_data["balance"] != 0:
+                await DataManager.edit_user_data(
+                    interaction.user.id, "bank", user_data["bank"] + user_data["balance"]
                 )
-            )
+                await DataManager.edit_user_data(
+                    interaction.user.id,
+                    "balance",
+                    user_data["balance"] - user_data["balance"],
+                )
+                return await interaction.response.send_message(
+                    embed=discord.Embed(
+                        description="<:white_checkmark:1096793014287995061> Deposited all your 🪙 in the bank",
+                        colour=discord.Colour.green(),
+                    )
+                )
+            else:
+                return await interaction.response.send_message(
+                    embed=discord.Embed(
+                        description="<:white_cross:1096791282023669860> You don't have any 🪙 to deposit",
+                        colour=discord.Colour.orange(),
+                    )
+                )
 
         if amount.isnumeric() == False:
             return await interaction.response.send_message(
