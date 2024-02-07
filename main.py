@@ -131,6 +131,15 @@ async def on_app_command_error(
             ),
         )
 
+    elif isinstance(error, app_commands.errors.MissingPermissions):
+        return await interaction.response.send_message(
+            ephemeral=True,
+            embed=discord.Embed(
+                description="<:white_cross:1096791282023669860> You are missing the required permissions to use this command.",
+                colour=discord.Colour.red(),
+            ),
+        )
+
     else:
         return await bot.get_user(bot.owner_id).send(
             embed=discord.Embed(
