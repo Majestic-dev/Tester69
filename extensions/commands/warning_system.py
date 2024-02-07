@@ -13,7 +13,7 @@ class warning_system(commands.Cog):
         name="warn", description="Warns the mentioned user with a custom warning reason"
     )
     @app_commands.guild_only()
-    @app_commands.default_permissions(manage_messages=True)
+    @app_commands.checks.has_permissions(manage_messages=True)
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id))
     @app_commands.describe(
         user="The user to warn",
@@ -70,7 +70,7 @@ class warning_system(commands.Cog):
 
     @app_commands.command(name="delwarn", description="Deletes the warning by UUID")
     @app_commands.guild_only()
-    @app_commands.default_permissions(manage_messages=True)
+    @app_commands.checks.has_permissions(manage_messages=True)
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id))
     @app_commands.describe(
         uuid="The UUID of the warning to delete, use the `/warnings <user>` command to get the UUID",
@@ -97,7 +97,7 @@ class warning_system(commands.Cog):
         name="warnings", description="get the warning list of the user"
     )
     @app_commands.guild_only()
-    @app_commands.default_permissions(manage_messages=True)
+    @app_commands.checks.has_permissions(manage_messages=True)
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id))
     @app_commands.describe(
         member="The member to get the warnings of",

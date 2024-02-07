@@ -14,7 +14,7 @@ class moderation(commands.Cog):
 
     @app_commands.command(name="timeout", description="Timeouts the mentioned user")
     @app_commands.guild_only()
-    @app_commands.default_permissions(manage_roles=True)
+    @app_commands.checks.has_permissions(manage_roles=True)
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id))
     @app_commands.describe(
         member="The user to mute",
@@ -83,7 +83,7 @@ class moderation(commands.Cog):
         name="untimeout", description="Removes the timeout from the mentioned user"
     )
     @app_commands.guild_only()
-    @app_commands.default_permissions(manage_roles=True)
+    @app_commands.checks.has_permissions(manage_roles=True)
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id))
     @app_commands.describe(member="The user to remove the timeout from")
     async def untimeout(self, interaction: discord.Interaction, member: discord.Member):
@@ -131,7 +131,7 @@ class moderation(commands.Cog):
 
     @app_commands.command(name="kick", description="Kicks the mentioned user")
     @app_commands.guild_only()
-    @app_commands.default_permissions(kick_members=True)
+    @app_commands.checks.has_permissions(kick_members=True)
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id))
     @app_commands.describe(
         member="The user to kick",
@@ -206,7 +206,7 @@ class moderation(commands.Cog):
 
     @app_commands.command(name="ban", description="Bans the mentioned user")
     @app_commands.guild_only()
-    @app_commands.default_permissions(ban_members=True)
+    @app_commands.checks.has_permissions(ban_members=True)
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id))
     @app_commands.describe(
         member="The user to ban",
@@ -309,7 +309,7 @@ class moderation(commands.Cog):
         description="Unban the user by their discord ID or username",
     )
     @app_commands.guild_only()
-    @app_commands.default_permissions(ban_members=True)
+    @app_commands.checks.has_permissions(ban_members=True)
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id, i.user.id))
     @app_commands.describe(member="The user to unban (by ID or username)")
     async def unban(self, interaction: discord.Interaction, member: str):

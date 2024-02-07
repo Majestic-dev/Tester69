@@ -265,7 +265,7 @@ class channel_dropdown(discord.ui.ChannelSelect):
             )
         )
 
-        await panel.edit(view=panel_views(self.bot, panel.id))
+        await panel.edit(view=panel_views(self.bot))
         await DataManager.edit_panel(
             self.message.id, interaction.guild.id, "id", panel.id
         )
@@ -634,7 +634,7 @@ class panel_views(discord.ui.View):
                 try:
                     await thread.fetch_member(interaction.user.id)
                     i += 1
-                    asyncio.sleep(0.1)
+                    await asyncio.sleep(0.1)
                 except discord.errors.NotFound:
                     continue
 
@@ -918,7 +918,7 @@ class ticket(commands.GroupCog):
         name="create_panel", description="Create a ticket panel in the current category"
     )
     @app_commands.guild_only()
-    @app_commands.default_permissions(manage_channels=True)
+    @app_commands.checks.has_permissions(manage_channels=True)
     @app_commands.checks.cooldown(1, 30, key=lambda i: (i.guild.id))
     async def ticket(
         self, interaction: discord.Interaction, panel_title: str, panel_description: str
@@ -944,7 +944,7 @@ class ticket(commands.GroupCog):
         )
 
     @app_commands.guild_only()
-    @app_commands.default_permissions(administrator=True)
+    @app_commands.checks.has_permissions(administrator=True)
     @app_commands.checks.cooldown(1, 30, key=lambda i: (i.guild.id))
     async def edit_panel(
         self, interaction: discord.Interaction, message: discord.Message

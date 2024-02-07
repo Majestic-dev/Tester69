@@ -387,7 +387,7 @@ class misc(commands.Cog):
         name="transcript", description="Get a transcript of a channel"
     )
     @app_commands.guild_only()
-    @app_commands.default_permissions(manage_guild=True)
+    @app_commands.checks.has_permissions(manage_guild=True)
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.user.id))
     @app_commands.describe(channel="The channel you want to get the transcript of")
     async def transcript(

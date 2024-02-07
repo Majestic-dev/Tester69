@@ -25,7 +25,7 @@ class logging(commands.GroupCog):
         blocked_words_channel="Choose the channel where all blocked words will be sent",
     )
     @app_commands.guild_only()
-    @app_commands.default_permissions(administrator=True)
+    @app_commands.checks.has_permissions(administrator=True)
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.user.id))
     async def set_logs_channel(
         self,
@@ -68,7 +68,7 @@ class logging(commands.GroupCog):
             )
 
     @app_commands.command(name="disable", description="Disable logging for this server")
-    @app_commands.default_permissions(administrator=True)
+    @app_commands.checks.has_permissions(administrator=True)
     async def disable_logs(self, interaction: discord.Interaction):
         guild_data = await DataManager.get_guild_data(interaction.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])

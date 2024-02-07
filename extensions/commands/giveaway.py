@@ -190,7 +190,8 @@ class giveaway_views(discord.ui.View):
                 embeds = []
                 page_participants = []
                 for i, participant in enumerate(giveaway_data["participants"], start=1):
-                    page_participants.append(f"{i}. <@{participant}>")
+                    participant = interaction.guild.get_member(participant)
+                    page_participants.append(f"{i}. {participant.mention}")
                     if i % 10 == 0 or i == len(giveaway_data["participants"]):
                         current_page = (i - 1) // 10 + 1
                         total_pages = (len(giveaway_data["participants"])) // 10 + 1
@@ -213,13 +214,13 @@ class giveaway_views(discord.ui.View):
             )
 
 
-class Giveaway(commands.GroupCog):
+class giveaway(commands.GroupCog):
     def __init__(self, bot):
         self.bot = bot
 
     @app_commands.command(name="create", description="Create a giveaway")
     @app_commands.guild_only()
-    @app_commands.default_permissions(manage_guild=True)
+    @app_commands.checks.has_permissions(manage_guild=True)
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id))
     async def giveaway_create(
         self,
@@ -229,7 +230,7 @@ class Giveaway(commands.GroupCog):
 
     @app_commands.command(name="end", description="End a giveaway by the ID")
     @app_commands.guild_only()
-    @app_commands.default_permissions(manage_guild=True)
+    @app_commands.checks.has_permissions(manage_guild=True)
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id))
     @app_commands.describe(giveaway_id="The ID of the giveaway you want to end")
     async def giveaway_end(
@@ -270,7 +271,7 @@ class Giveaway(commands.GroupCog):
 
     @app_commands.command(name="reroll", description="Reroll a giveaway")
     @app_commands.guild_only()
-    @app_commands.default_permissions(manage_guild=True)
+    @app_commands.checks.has_permissions(manage_guild=True)
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id))
     @app_commands.describe(
         giveaway_id="The ID of the giveaway/giveaway winner you want to reroll"
@@ -339,4 +340,4 @@ class Giveaway(commands.GroupCog):
 
 
 async def setup(bot):
-    await bot.add_cog(Giveaway(bot))
+    await bot.add_cog(giveaway(bot))

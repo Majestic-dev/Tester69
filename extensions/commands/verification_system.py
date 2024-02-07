@@ -63,7 +63,7 @@ class verification(commands.GroupCog):
         description="Disable the verification system",
     )
     @app_commands.guild_only()
-    @app_commands.default_permissions(administrator=True)
+    @app_commands.checks.has_permissions(administrator=True)
     async def disable_verification(self, interaction: discord.Interaction):
         verification_channel = await DataManager.get_guild_data(interaction.guild.id)[
             "verification_channel_id"
@@ -110,7 +110,7 @@ class verification(commands.GroupCog):
     )
     @app_commands.guild_only()
     @app_commands.checks.cooldown(1, 60, key=lambda i: (i.guild.id, i.user.id))
-    @app_commands.default_permissions(administrator=True)
+    @app_commands.checks.has_permissions(administrator=True)
     @app_commands.describe(
         verification_channel="The channel where users will send the verification code",
         verification_logs_channel="The channel where the bot will send the verification logs",
