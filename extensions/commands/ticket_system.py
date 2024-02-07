@@ -297,28 +297,34 @@ class channel_dropdown_view(discord.ui.View):
 
 
 class create_panel_edit_modal(discord.ui.Modal, title="Edit Panel"):
-    def __init__(self, bot) -> None:
+    def __init__(self, bot, title: str, description: str) -> None:
         super().__init__()
         self.bot = bot
 
-    panelTitle = discord.ui.TextInput(
-        label="Title of the panel",
-        style=discord.TextStyle.short,
-        max_length=50,
-    )
+        self.panelTitle = discord.ui.TextInput(
+            label="Title of the panel",
+            style=discord.TextStyle.short,
+            default=title,
+            max_length=50,
+        )
 
-    panelDescription = discord.ui.TextInput(
-        label="Description of the panel",
-        style=discord.TextStyle.long,
-        max_length=4000,
-    )
+        self.panelDescription = discord.ui.TextInput(
+            label="Description of the panel",
+            style=discord.TextStyle.long,
+            default=description,
+            max_length=4000,
+        )
 
-    limitPerUser = discord.ui.TextInput(
-        label="Limit per user",
-        style=discord.TextStyle.short,
-        default=1,
-        max_length=3,
-    )
+        self.limitPerUser = discord.ui.TextInput(
+            label="Limit per user",
+            style=discord.TextStyle.short,
+            default=1,
+            max_length=3,
+        )
+
+        self.add_item(self.panelTitle)
+        self.add_item(self.panelDescription)
+        self.add_item(self.limitPerUser)
 
     async def on_submit(self, interaction: discord.Interaction):
         if self.limitPerUser.value.isnumeric():
@@ -369,31 +375,37 @@ class create_panel_edit_modal(discord.ui.Modal, title="Edit Panel"):
 
 
 class edit_panel_edit_modal(discord.ui.Modal, title="Edit Panel"):
-    def __init__(self, bot, interaction, panel_id, paneledit) -> None:
+    def __init__(self, bot, interaction, panel_id, paneledit, title: str, description: str) -> None:
         super().__init__()
         self.bot = bot
         self.interaction = interaction
         self.panel_id = panel_id
         self.paneledit = paneledit
 
-    panelTitle = discord.ui.TextInput(
-        label="Title of the panel",
-        style=discord.TextStyle.short,
-        max_length=50,
-    )
+        self.panelTitle = discord.ui.TextInput(
+            label="Title of the panel",
+            style=discord.TextStyle.short,
+            default=title,
+            max_length=100,
+        )
 
-    panelDescription = discord.ui.TextInput(
-        label="Description of the panel",
-        style=discord.TextStyle.short,
-        max_length=100,
-    )
+        self.panelDescription = discord.ui.TextInput(
+            label="Description of the panel",
+            style=discord.TextStyle.long,
+            default=description,
+            max_length=4000,
+        )
 
-    limitPerUser = discord.ui.TextInput(
-        label="Limit per user",
-        style=discord.TextStyle.short,
-        default=1,
-        max_length=3,
-    )
+        self.limitPerUser = discord.ui.TextInput(
+            label="Limit per user",
+            style=discord.TextStyle.short,
+            default=1,
+            max_length=3,
+        )
+
+        self.add_item(self.panelTitle)
+        self.add_item(self.panelDescription)
+        self.add_item(self.limitPerUser)
 
     async def on_submit(self, interaction: discord.Interaction):
         if self.limitPerUser.value.isnumeric():
@@ -654,10 +666,12 @@ class panel_views(discord.ui.View):
 
 
 class panel_creation_views(discord.ui.View):
-    def __init__(self, bot, executor_id):
+    def __init__(self, bot, executor_id: int, title: str, description: str):
         super().__init__()
         self.bot = bot
         self.executor_id = executor_id
+        self.title = title
+        self.description = description
 
     @discord.ui.button(
         label="Edit Panel Moderators",
@@ -707,7 +721,7 @@ class panel_creation_views(discord.ui.View):
                 ),
                 ephemeral=True,
             )
-        await interaction.response.send_modal(create_panel_edit_modal(self.bot))
+        await interaction.response.send_modal(create_panel_edit_modal(self.bot, self.title, self.description))
 
     @discord.ui.button(
         label="Delete Panel",
@@ -826,8 +840,9 @@ class panel_edit_views(discord.ui.View):
     async def edit_panel(
         self, interaction: discord.Interaction, button: discord.ui.Button
     ):
+        panel_data = await DataManager.get_panel_data(self.panel_id, interaction.guild.id)
         await interaction.response.send_modal(
-            edit_panel_edit_modal(self.bot, self.interaction, self.panel_id, self)
+            edit_panel_edit_modal(self.bot, self.interaction, self.panel_id, self, panel_data["panel_title"], panel_data["panel_description"])
         )
 
     @discord.ui.button(
@@ -929,7 +944,7 @@ class ticket(commands.GroupCog):
                 description=panel_description,
                 colour=discord.Colour.blurple(),
             ),
-            view=panel_creation_views(self.bot, interaction.user.id),
+            view=panel_creation_views(self.bot, interaction.user.id, panel_title, panel_description),
         )
         message = await interaction.original_response()
 
