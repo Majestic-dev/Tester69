@@ -157,9 +157,6 @@ class edit_role_dropdown(discord.ui.RoleSelect):
 
     async def callback(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
-        panel_data = await DataManager.get_panel_data(
-            self.panel_id, interaction.guild.id
-        )
         await self.interaction.edit_original_response(
             embed=discord.Embed(
                 title=self.paneledit.panel_title,
@@ -900,8 +897,8 @@ class panel_edit_views(discord.ui.View):
             await self.interaction.delete_original_response()
             await message.edit(
                 embed=discord.Embed(
-                    title=panel_data["panel_title"],
-                    description=panel_data["panel_description"],
+                    title=self.panel_title,
+                    description=self.panel_description,
                     colour=discord.Colour.blurple(),
                 ),
                 view=panel_views(self.bot),
