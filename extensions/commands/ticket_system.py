@@ -581,16 +581,21 @@ class ticket_views(discord.ui.View):
             )
             for user in await interaction.channel.fetch_members():
                 member = interaction.guild.get_member(user.id)
-                if member:
-                    if any(
-                        role.id in panel_data["panel_moderators"]
-                        for role in member.roles
-                    ):
-                        continue
+                try:
+                    if member:
+                        if any(
+                            role.id in panel_data["panel_moderators"]
+                            for role in member.roles
+                        ):
+                            continue
+                        else:
+                            await interaction.channel.remove_user(member)
                     else:
-                        await interaction.channel.remove_user(member)
-                else:
-                    continue
+                        continue
+                except TypeError as e:
+                    print(panel_data)
+                    print(self.panel_id)
+                    print(e)
 
             try:
                 user = self.bot.get_user(self.user_id)
