@@ -2,7 +2,7 @@ import datetime
 import os
 import re
 from typing import Optional
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 from io import BytesIO
 
 import discord
@@ -237,7 +237,7 @@ class logging(commands.GroupCog):
 
         ban = discord.Embed(
             title="Member Banned",
-            description=f"{banned.mention} Has been banned by {banner} from the server\nReason: {reason}",
+            description=f"{banned.mention} Has been banned by {banner} from the server\n\nReason: `{reason}`",
             colour=discord.Colour.red(),
         )
         ban.set_author(icon_url=banned.display_avatar, name=banned)
@@ -678,12 +678,15 @@ class logging(commands.GroupCog):
                 inline=False,
             )
         elif len(message.attachments) == 1:
-            image = Image.open(BytesIO(await message.attachments[0].read()))
-            buffer = BytesIO()
-            image.save(buffer, format="PNG")
-            buffer.seek(0)
-            f = discord.File(fp=buffer, filename="image.png")
-            embed.set_image(url="attachment://image.png")
+            try:
+                image = Image.open(BytesIO(await message.attachments[0].read()))
+                buffer = BytesIO()
+                image.save(buffer, format="PNG")
+                buffer.seek(0)
+                f = discord.File(fp=buffer, filename="image.png")
+                embed.set_image(url="attachment://image.png")
+            except UnidentifiedImageError:
+                embed.set_image(url=message.attachments[0].url)
             embed.set_author(
             icon_url=message.author.display_avatar, name=f"{message.author}"
             )
