@@ -196,7 +196,7 @@ class moderation(commands.Cog):
                 else:
                     pass
 
-            except Exception as exc:
+            except Exception:
                 await interaction.response.send_message(
                     embed=discord.Embed(
                         description=f"<:white_cross:1096791282023669860> Could not kick {member.mention}",
