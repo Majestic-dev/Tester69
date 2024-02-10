@@ -124,10 +124,8 @@ class server(commands.Cog):
             colour=discord.Colour.blurple(),
         )
 
-        try:
+        if user.avatar is not None:
             embed.set_thumbnail(url=user.avatar.url)
-        except:
-            pass
 
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
