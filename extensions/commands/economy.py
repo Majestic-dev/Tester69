@@ -887,7 +887,8 @@ class economy(commands.Cog):
     ) -> list[app_commands.Choice[str]]:
         shop_items = DataManager.get("economy", "shop items").keys()
 
-        return [app_commands.Choice(name=item, value=item) for item in shop_items]
+        return [app_commands.Choice(name=item, value=item) for item in shop_items
+                if item.lower().startswith(current.lower()) or len(current) < 1]
 
     @app_commands.command(name="buy_item", description="Buy an item")
     @app_commands.autocomplete(item=item_autocomplete)
