@@ -2,6 +2,7 @@ import datetime
 import json
 import random
 import time
+import string
 from typing import Optional
 
 import discord
@@ -219,13 +220,20 @@ class economy(commands.Cog):
         item_emoji = DataManager.get("economy", "items")[item_name[0]]["emoji"]
         user_data = await DataManager.get_user_data(interaction.user.id)
 
+        if user_data["inventory"] is not None:
+            inventory = json.loads(user_data["inventory"])
+        else:
+            inventory = {}
+        
         if (
             user_data["inventory"] is None
             or "hunting rifle" not in user_data["inventory"]
+            or inventory["hunting rifle"] == 0
         ):
+            item_emoji = DataManager.get("economy", "items")["hunting rifle"]["emoji"]
             return await interaction.response.send_message(
                 embed=discord.Embed(
-                    description="<:white_cross:1096791282023669860> You need a **<:hunting_rifle:1101060264713003028> Hunting Rifle** to hunt some animals `/buy_item`",
+                    description=f"<:white_cross:1096791282023669860> You need a **{item_emoji} Hunting Rifle** to hunt some animals `/buy_item`",
                     colour=discord.Colour.red(),
                 )
             )
@@ -253,13 +261,20 @@ class economy(commands.Cog):
         item_emoji = DataManager.get("economy", "items")[item_name[0]]["emoji"]
         user_data = await DataManager.get_user_data(interaction.user.id)
 
+        if user_data["inventory"] is not None:
+            inventory = json.loads(user_data["inventory"])
+        else:
+            inventory = {}
+
         if (
             user_data["inventory"] is None
             or "fishing pole" not in user_data["inventory"]
+            or inventory["fishing pole"] == 0
         ):
+            item_emoji = DataManager.get("economy", "items")["fishing pole"]["emoji"]
             return await interaction.response.send_message(
                 embed=discord.Embed(
-                    description="<:white_cross:1096791282023669860> You need a **<:fishing_pole:1101061913938509855> Fishing Pole** to fish `/buy_item`",
+                    description=f"<:white_cross:1096791282023669860> You need a **{item_emoji} Fishing Pole** to fish `/buy_item`",
                     colour=discord.Colour.red(),
                 )
             )
@@ -308,7 +323,17 @@ class economy(commands.Cog):
             print("where are the items gang")
 
         user_data = await DataManager.get_user_data(interaction.user.id)
-        user_inv = json.loads(user_data["inventory"])
+        
+        if user_data["inventory"] is not None and json.loads(user_data["inventory"]):
+            user_inv = json.loads(user_data["inventory"])
+        else:
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    description="<:white_cross:1096791282023669860> You don't have any items in your inventory",
+                    colour=discord.Colour.orange(),
+                )
+            )
+    
         item1 = items.get(item.lower(), None)
 
         if item1:
@@ -605,7 +630,7 @@ class economy(commands.Cog):
             colour=discord.Colour.green(),
         )
 
-        try:
+        if user_data["inventory"] is not None:
             for item, count in json.loads(user_data["inventory"]).items():
                 if count != 0:
                     name = f"{DataManager.get('economy', 'items')[item.lower()]['emoji']} {item} - {count}"
@@ -614,7 +639,8 @@ class economy(commands.Cog):
                         value=f"{DataManager.get('economy', 'items')[item.lower()]['type']}",
                         inline=False,
                     )
-        except TypeError:
+
+        else:
             return await interaction.response.send_message(
                 embed=discord.Embed(
                     description="<:white_cross:1096791282023669860> You don't have any items in your inventory",
@@ -833,7 +859,7 @@ class economy(commands.Cog):
             emoji = DataManager.get("economy", "items")[item]["emoji"]
 
             if price != 0:
-                try:
+                if user_data["inventory"] is not None:
                     if item.lower() in user_data["inventory"]:
                         cur_embed.add_field(
                             name=f"{emoji} **{item.title()}**"
@@ -841,7 +867,7 @@ class economy(commands.Cog):
                             value=f"{description}",
                             inline=False,
                         )
-                except:
+                else:
                     cur_embed.add_field(
                         name=f"{emoji} **{item.title()}**" + f" - {price} 🪙",
                         value=f"{description}",
@@ -878,9 +904,12 @@ class economy(commands.Cog):
                     colour=discord.Colour.red(),
                 )
             )
-        try:
-            price = DataManager.get("economy", "shop items")[item.lower()]["price"]
-        except KeyError:
+        
+        shop_items = DataManager.get("economy", "shop items")
+
+        if item.lower() in shop_items:
+            price = shop_items[item.lower()]["price"]
+        else:
             return await interaction.response.send_message(
                 embed=discord.Embed(
                     description="<:white_cross:1096791282023669860> Can't buy that item, because it doesn't exist",
@@ -888,11 +917,7 @@ class economy(commands.Cog):
                 )
             )
         user_data = await DataManager.get_user_data(interaction.user.id)
-
-        if item == "fishing pole":
-            item1 = "**<:fishing_pole:1101061913938509855> Fishing Pole**"
-        if item == "hunting rifle":
-            item1 = "**<:hunting_rifle:1101060264713003028> Hunting Rifle**"
+        economy_items = DataManager.get("economy", "items")
 
         if (int(amount) * price) > user_data["balance"]:
             return await interaction.response.send_message(
@@ -918,11 +943,11 @@ class economy(commands.Cog):
         )
         await interaction.response.send_message(
             embed=discord.Embed(
-                description=f"{interaction.user.mention} Bought {amount} {item1} and paid **{(int(amount) * price)}** 🪙",
+                description=f"{interaction.user.mention} Bought {amount} **{economy_items[item.lower()]["emoji"]} {string.capwords(item.lower())}** and paid **{(int(amount) * price)}** 🪙",
                 colour=discord.Colour.from_rgb(43, 45, 49),
             )
             .set_author(
-                name=f"Successful {item} Purchase",
+                name=f"Successful {string.capwords(item.lower())} Purchase",
                 icon_url=interaction.user.display_avatar,
             )
             .set_footer(text="Thank you for your purchase!")
@@ -957,15 +982,18 @@ class economy(commands.Cog):
         emoji = self.bot.get_emoji(item1["emoji_id"])
         balance = user_data["balance"]
 
-        try:
+        if user_data["inventory"] is not None:
             itemsowned = json.loads(user_data["inventory"])
-            itemsowned = itemsowned[item.lower()]
-        except KeyError:
+            if item.lower() in itemsowned:
+                itemsowned = itemsowned[item.lower()]
+            else:
+                itemsowned = 0
+        else:
             itemsowned = 0
 
-        try:
+        if user_data["balance"] != 0:
             percentage_of_net = (itemsowned * item1["sell price"]) / balance * 100
-        except ZeroDivisionError:
+        else:
             percentage_of_net = 0
 
         embed = discord.Embed(
