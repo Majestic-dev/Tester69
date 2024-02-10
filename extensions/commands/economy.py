@@ -224,7 +224,7 @@ class economy(commands.Cog):
             inventory = json.loads(user_data["inventory"])
         else:
             inventory = {}
-        
+
         if (
             user_data["inventory"] is None
             or "hunting rifle" not in user_data["inventory"]
@@ -323,7 +323,7 @@ class economy(commands.Cog):
             print("where are the items gang")
 
         user_data = await DataManager.get_user_data(interaction.user.id)
-        
+
         if user_data["inventory"] is not None and json.loads(user_data["inventory"]):
             user_inv = json.loads(user_data["inventory"])
         else:
@@ -333,7 +333,7 @@ class economy(commands.Cog):
                     colour=discord.Colour.orange(),
                 )
             )
-    
+
         item1 = items.get(item.lower(), None)
 
         if item1:
@@ -671,7 +671,9 @@ class economy(commands.Cog):
         if amount == "all":
             if user_data["balance"] != 0:
                 await DataManager.edit_user_data(
-                    interaction.user.id, "bank", user_data["bank"] + user_data["balance"]
+                    interaction.user.id,
+                    "bank",
+                    user_data["bank"] + user_data["balance"],
                 )
                 await DataManager.edit_user_data(
                     interaction.user.id,
@@ -904,7 +906,7 @@ class economy(commands.Cog):
                     colour=discord.Colour.red(),
                 )
             )
-        
+
         shop_items = DataManager.get("economy", "shop items")
 
         if item.lower() in shop_items:
