@@ -33,6 +33,14 @@ class Gambling(commands.Cog):
     ):
         user_data = await DataManager.get_user_data(interaction.user.id)
 
+        if bet > 5000000:
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    description="<:white_cross:1096791282023669860> You cannot bet more than 5,000,000 🪙",
+                    colour=discord.Colour.orange(),
+                )
+            )
+
         if bet > user_data["balance"]:
             return await interaction.response.send_message(
                 embed=discord.Embed(
@@ -82,6 +90,14 @@ class Gambling(commands.Cog):
     @app_commands.describe(bet="The amount of 🪙 you want to bet")
     async def gamble(self, interaction: discord.Interaction, bet: int):
         user_data = await DataManager.get_user_data(interaction.user.id)
+
+        if bet > 5000000:
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    description="<:white_cross:1096791282023669860> You cannot bet more than 5,000,000 🪙",
+                    colour=discord.Colour.orange(),
+                )
+            )
 
         if bet > user_data["balance"]:
             return await interaction.response.send_message(
@@ -135,6 +151,14 @@ class Gambling(commands.Cog):
     @app_commands.describe(bet="The amount of 🪙 you want to bet")
     async def snakeeyes(self, interaction: discord.Interaction, bet: int):
         user_data = await DataManager.get_user_data(interaction.user.id)
+        
+        if bet > 5000000:
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    description="<:white_cross:1096791282023669860> You cannot bet more than 5,000,000 🪙",
+                    colour=discord.Colour.orange(),
+                )
+            )
 
         if bet > user_data["balance"]:
             return await interaction.response.send_message(
@@ -197,6 +221,14 @@ class Gambling(commands.Cog):
     @app_commands.describe(bet="The amount of 🪙 you want to bet")
     async def slots(self, interaction: discord.Interaction, bet: int):
         user_data = await DataManager.get_user_data(interaction.user.id)
+
+        if bet > 5000000:
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    description="<:white_cross:1096791282023669860> You cannot bet more than 5,000,000 🪙",
+                    colour=discord.Colour.orange(),
+                )
+            )
 
         if bet > user_data["balance"]:
             return await interaction.response.send_message(
