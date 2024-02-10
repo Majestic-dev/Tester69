@@ -185,7 +185,6 @@ class moderation(commands.Cog):
                     reason=reason,
                 )
 
-                
                 if member.create_dm():
                     await member.dm_channel.send(
                         embed=discord.Embed(
@@ -333,7 +332,10 @@ class moderation(commands.Cog):
                         )
                     )
 
-            elif re.match(r"(?P<name>(?:[a-zA-Z0-9_]|(?<!\.)\.(?!\.)){2,32})(?P<disc>#[0-9]{0,4})?", member):
+            elif re.match(
+                r"(?P<name>(?:[a-zA-Z0-9_]|(?<!\.)\.(?!\.)){2,32})(?P<disc>#[0-9]{0,4})?",
+                member,
+            ):
                 if any(member in entry.user.name for entry in bans):
                     if entry.user.name == member:
                         await interaction.guild.unban(entry.user)
@@ -346,14 +348,19 @@ class moderation(commands.Cog):
                     else:
                         return await interaction.edit_original_response(
                             embed=discord.Embed(
-                                description=
-                                (
+                                description=(
                                     "<:white_cross:1096791282023669860> Could not find that user"
                                 )
-                                +
-                                (
+                                + (
                                     f", did you mean any of these similar usernames?\n\n {'\n'.join([f"* {entry.user.mention} - {entry.user.id} - {entry.user.name}" for entry in bans if member in entry.user.name])}"
-                                    if len([entry.user.name for entry in bans if member in entry.user.name]) > 0
+                                    if len(
+                                        [
+                                            entry.user.name
+                                            for entry in bans
+                                            if member in entry.user.name
+                                        ]
+                                    )
+                                    > 0
                                     else ""
                                 ),
                                 colour=discord.Colour.red(),
@@ -373,6 +380,7 @@ class moderation(commands.Cog):
                         colour=discord.Colour.red(),
                     )
                 )
+
 
 async def setup(bot: commands.AutoShardedBot):
     await bot.add_cog(moderation(bot))
