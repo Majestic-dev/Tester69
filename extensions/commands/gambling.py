@@ -151,7 +151,7 @@ class Gambling(commands.Cog):
     @app_commands.describe(bet="The amount of 🪙 you want to bet")
     async def snakeeyes(self, interaction: discord.Interaction, bet: int):
         user_data = await DataManager.get_user_data(interaction.user.id)
-        
+
         if bet > 5000000:
             return await interaction.response.send_message(
                 embed=discord.Embed(

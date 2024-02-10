@@ -1,13 +1,13 @@
 import datetime
 import os
 import re
-from typing import Optional
-from PIL import Image, UnidentifiedImageError
 from io import BytesIO
+from typing import Optional
 
 import discord
 from discord import app_commands
 from discord.ext import commands
+from PIL import Image, UnidentifiedImageError
 
 from utils import DataManager
 
@@ -688,7 +688,7 @@ class logging(commands.GroupCog):
             except UnidentifiedImageError:
                 embed.set_image(url=message.attachments[0].url)
             embed.set_author(
-            icon_url=message.author.display_avatar, name=f"{message.author}"
+                icon_url=message.author.display_avatar, name=f"{message.author}"
             )
             embed.set_footer(
                 text=f"Author ID: {message.author.id} | Message ID: {message.id}"

@@ -372,7 +372,9 @@ class create_panel_edit_modal(discord.ui.Modal, title="Edit Panel"):
 
 
 class edit_panel_edit_modal(discord.ui.Modal, title="Edit Panel"):
-    def __init__(self, bot, interaction, panel_id, paneledit, title: str, description: str) -> None:
+    def __init__(
+        self, bot, interaction, panel_id, paneledit, title: str, description: str
+    ) -> None:
         super().__init__()
         self.bot = bot
         self.interaction = interaction
@@ -723,7 +725,9 @@ class panel_creation_views(discord.ui.View):
                 ),
                 ephemeral=True,
             )
-        await interaction.response.send_modal(create_panel_edit_modal(self.bot, self.title, self.description))
+        await interaction.response.send_modal(
+            create_panel_edit_modal(self.bot, self.title, self.description)
+        )
 
     @discord.ui.button(
         label="Delete Panel",
@@ -842,9 +846,18 @@ class panel_edit_views(discord.ui.View):
     async def edit_panel(
         self, interaction: discord.Interaction, button: discord.ui.Button
     ):
-        panel_data = await DataManager.get_panel_data(self.panel_id, interaction.guild.id)
+        panel_data = await DataManager.get_panel_data(
+            self.panel_id, interaction.guild.id
+        )
         await interaction.response.send_modal(
-            edit_panel_edit_modal(self.bot, self.interaction, self.panel_id, self, panel_data["panel_title"], panel_data["panel_description"])
+            edit_panel_edit_modal(
+                self.bot,
+                self.interaction,
+                self.panel_id,
+                self,
+                panel_data["panel_title"],
+                panel_data["panel_description"],
+            )
         )
 
     @discord.ui.button(
@@ -946,7 +959,9 @@ class ticket(commands.GroupCog):
                 description=panel_description,
                 colour=discord.Colour.blurple(),
             ),
-            view=panel_creation_views(self.bot, interaction.user.id, panel_title, panel_description),
+            view=panel_creation_views(
+                self.bot, interaction.user.id, panel_title, panel_description
+            ),
         )
         message = await interaction.original_response()
 

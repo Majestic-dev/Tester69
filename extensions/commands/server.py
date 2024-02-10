@@ -150,9 +150,11 @@ class server(commands.Cog):
             f"* **Mentionable**: {'Yes' if role.mentionable else 'No'}\n"
             f"* **Members**: {len(role.members)}\n"
             f"* **Colour**: {role.colour if role.colour != discord.Colour.default() else 'No Colour'}\n",
-            colour=role.colour
-            if role.colour != discord.Colour.default()
-            else discord.Colour.blurple(),
+            colour=(
+                role.colour
+                if role.colour != discord.Colour.default()
+                else discord.Colour.blurple()
+            ),
         )
         embed.set_thumbnail(url=role.icon)
 

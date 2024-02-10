@@ -1,11 +1,11 @@
 import asyncio
 import os
 import random
+from io import BytesIO
 
 import discord
 from discord import app_commands
 from discord.ext import commands
-from io import BytesIO
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 from utils import DataManager
@@ -280,7 +280,7 @@ class verification(commands.GroupCog):
                 buffer = self.buffer
                 await dm_channel.send(
                     f'Please enter the code seen in the image. If the code is too blurry and you can not see it type "reset".\n By verifying yourself you accept the rules of the server you are trying to verify in',
-                    file=discord.File(fp=buffer, filename="verification.png")
+                    file=discord.File(fp=buffer, filename="verification.png"),
                 )
 
                 await verification_logs_channel.send(

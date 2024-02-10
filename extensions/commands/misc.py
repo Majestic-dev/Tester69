@@ -160,7 +160,9 @@ class misc(commands.Cog):
         data = await response.text()
         await session.close()
         await interaction.response.send_message(
-            embed=discord.Embed(description=f"🤣 {data}", colour=discord.Colour.green()),
+            embed=discord.Embed(
+                description=f"🤣 {data}", colour=discord.Colour.green()
+            ),
             ephemeral=True,
         )
 
