@@ -1,12 +1,14 @@
 import datetime
 import os
 import re
+import asyncio
 from io import BytesIO
 from typing import Optional
 
 import discord
 from discord import app_commands
 from discord.ext import commands
+from concurrent.futures import ThreadPoolExecutor
 from PIL import Image, UnidentifiedImageError
 
 from utils import DataManager
@@ -15,6 +17,12 @@ from utils import DataManager
 class logging(commands.GroupCog):
     def __init__(self, bot):
         self.bot = bot
+
+    async def open_image(data):
+        loop = asyncio.get_event_loop()
+        with ThreadPoolExecutor() as pool:
+            image = await loop.run_in_executor(pool, Image.open, data)
+        return image
 
     @app_commands.command(
         name="set_channel",
@@ -679,7 +687,8 @@ class logging(commands.GroupCog):
             )
         elif len(message.attachments) == 1:
             try:
-                image = Image.open(BytesIO(await message.attachments[0].read()))
+                data = await message.attachments[0].read()
+                image = await self.open_image(BytesIO(data))
                 buffer = BytesIO()
                 image.save(buffer, format="PNG")
                 buffer.seek(0)
