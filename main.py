@@ -151,7 +151,7 @@ async def on_app_command_error(
 
 
 @bot.event
-async def on_error(event, *args, **kwargs):
+async def on_error():
     return await bot.get_user(bot.owner_id).send(
         embed=discord.Embed(
             title="Error",
@@ -162,7 +162,7 @@ async def on_error(event, *args, **kwargs):
 
 
 @bot.event
-async def on_command_error(ctx, error):
+async def on_command_error(error):
     if isinstance(error, commands.CommandNotFound):
         return
 
