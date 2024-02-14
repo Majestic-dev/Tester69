@@ -383,7 +383,10 @@ class server_management(commands.Cog):
         words_in_blacklist = filtered_words["blacklisted_words"]
 
         return [
-            app_commands.Choice(name=word, value=word) for word in words_in_blacklist
+            app_commands.Choice(name=word, value=word)
+            for word in words_in_blacklist
+            if word.lower().startswith(current.lower())
+            or len(current) < 1
         ]
 
     @app_commands.command(
