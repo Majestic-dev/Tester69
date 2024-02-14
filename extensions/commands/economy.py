@@ -983,7 +983,11 @@ class economy(commands.Cog):
         user_data = await DataManager.get_user_data(interaction.user.id)
         item1 = DataManager.get("economy", "items")[item.lower()]
         emoji = self.bot.get_emoji(item1["emoji_id"])
-        balance = user_data["balance"]
+        whole_balance = user_data["balance"] + user_data["bank"]
+        user_inv = user_data["inventory"]
+        economy_items = DataManager.get("economy", "items")
+        for item in json.loads(user_inv):
+            whole_balance += economy_items[item.lower()]["sell price"] * json.loads(user_inv)[item]
 
         if user_data["inventory"] is not None:
             itemsowned = json.loads(user_data["inventory"])
@@ -994,8 +998,8 @@ class economy(commands.Cog):
         else:
             itemsowned = 0
 
-        if user_data["balance"] != 0:
-            percentage_of_net = (itemsowned * item1["sell price"]) / balance * 100
+        if whole_balance != 0:
+            percentage_of_net = (itemsowned * item1["sell price"]) / whole_balance * 100
         else:
             percentage_of_net = 0
 
