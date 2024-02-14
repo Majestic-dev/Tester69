@@ -18,12 +18,6 @@ class logging(commands.GroupCog):
     def __init__(self, bot):
         self.bot = bot
 
-    async def open_image(data):
-        loop = asyncio.get_event_loop()
-        with ThreadPoolExecutor() as pool:
-            image = await loop.run_in_executor(pool, Image.open, data)
-        return image
-
     @app_commands.command(
         name="set_channel",
         description="Set where all server logs will be sent and optionally where all blocked words will be sent",
@@ -687,8 +681,7 @@ class logging(commands.GroupCog):
             )
         elif len(message.attachments) == 1:
             try:
-                data = await message.attachments[0].read()
-                image = await self.open_image(BytesIO(data))
+                image = Image.open(BytesIO(await message.attachments[0].read()))
                 buffer = BytesIO()
                 image.save(buffer, format="PNG")
                 buffer.seek(0)
