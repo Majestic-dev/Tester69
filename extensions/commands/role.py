@@ -90,7 +90,7 @@ class role(commands.GroupCog):
 
         await interaction.response.send_message(
             embed=discord.Embed(
-                description=f"<:white_checkmark:1096793014287995061> added {role.mention} to {user.mention}",
+                description=f"<:white_checkmark:1096793014287995061> Added {role.mention} role to {user.mention}",
                 colour=discord.Colour.green(),
             )
         )
@@ -138,7 +138,7 @@ class role(commands.GroupCog):
 
         await interaction.response.send_message(
             embed=discord.Embed(
-                description=f"<:white_checkmark:1096793014287995061> removed {role.mention} from {user.mention}",
+                description=f"<:white_checkmark:1096793014287995061> Removed {role.mention} role from {user.mention}",
                 colour=discord.Colour.green(),
             )
         )
