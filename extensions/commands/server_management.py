@@ -189,102 +189,6 @@ class server_management(commands.Cog):
         await interaction.response.send_message(embed=ChannelDelete)
 
     @app_commands.command(
-        name="add_role", description="Add a role to the mentioned user"
-    )
-    @app_commands.guild_only()
-    @app_commands.checks.has_permissions(manage_roles=True)
-    @app_commands.checks.cooldown(1, 7, key=lambda i: (i.guild.id, i.user.id))
-    @app_commands.describe(
-        user="The user to add the role to", role="The role to add to the user"
-    )
-    async def add_role(
-        self,
-        interaction: discord.Interaction,
-        user: discord.Member,
-        role: discord.Role,
-    ):
-        if role in user.roles:
-            return await interaction.response.send_message(
-                embed=discord.Embed(
-                    description="<:white_cross:1096791282023669860> That user already has that role",
-                    colour=discord.Colour.red(),
-                )
-            )
-
-        bot = interaction.guild.get_member(self.bot.user.id)
-        if bot.top_role <= role:
-            return await interaction.response.send_message(
-                embed=discord.Embed(
-                    description="<:white_cross:1096791282023669860> I cannot add a role higher than my highest role",
-                    colour=discord.Colour.red(),
-                )
-            )
-
-        if interaction.user.top_role <= role:
-            return await interaction.response.send_message(
-                embed=discord.Embed(
-                    description="<:white_cross:1096791282023669860> You cannot add a role higher than your highest role",
-                    colour=discord.Colour.red(),
-                )
-            )
-
-        await interaction.response.send_message(
-            embed=discord.Embed(
-                description=f"<:white_checkmark:1096793014287995061> added {role.mention} to {user.mention}",
-                colour=discord.Colour.green(),
-            )
-        )
-        await user.add_roles(role)
-
-    @app_commands.command(
-        name="remove_role", description="Remove a role from the mentioned user"
-    )
-    @app_commands.guild_only()
-    @app_commands.checks.has_permissions(manage_roles=True)
-    @app_commands.checks.cooldown(1, 7, key=lambda i: (i.guild.id, i.user.id))
-    @app_commands.describe(
-        user="The user to remove the role from", role="The role to remove from the user"
-    )
-    async def remove_role(
-        self,
-        interaction: discord.Interaction,
-        user: discord.Member,
-        role: discord.Role,
-    ):
-        if role not in user.roles:
-            return await interaction.response.send_message(
-                embed=discord.Embed(
-                    description="<:white_cross:1096791282023669860> That user does not have that role.",
-                    colour=discord.Colour.red(),
-                )
-            )
-
-        bot = interaction.guild.get_member(self.bot.user.id)
-        if bot.top_role <= role:
-            return await interaction.response.send_message(
-                embed=discord.Embed(
-                    description="<:white_cross:1096791282023669860> I cannot remove a role that is higher than my highest role.",
-                    colour=discord.Colour.red(),
-                )
-            )
-
-        if interaction.user.top_role <= role:
-            return await interaction.response.send_message(
-                embed=discord.Embed(
-                    description="<:white_cross:1096791282023669860> You cannot remove a role that is higher than your highest role.",
-                    colour=discord.Colour.red(),
-                )
-            )
-
-        await interaction.response.send_message(
-            embed=discord.Embed(
-                description=f"<:white_checkmark:1096793014287995061> removed {role.mention} from {user.mention}",
-                colour=discord.Colour.green(),
-            )
-        )
-        await user.remove_roles(role)
-
-    @app_commands.command(
         name="purge", description="Purge a custom amount of messages from this channel"
     )
     @app_commands.guild_only()
@@ -433,96 +337,6 @@ class server_management(commands.Cog):
             )
 
     @app_commands.command(
-        name="whitelist_add", description="Add a user in the whitelist"
-    )
-    @app_commands.guild_only()
-    @app_commands.checks.has_permissions(administrator=True)
-    @app_commands.describe(whitelist="The user or role to add to the whitelist")
-    async def whitelist_add(
-        self, interaction: discord.Interaction, whitelist: discord.User | discord.Role
-    ):
-        guild_filtered_words_data = await DataManager.get_guild_filtered_words(
-            interaction.guild.id
-        )
-        wlist = guild_filtered_words_data["whitelist"]
-
-        if wlist is None or whitelist.id not in wlist:
-            wlist.append(whitelist.id)
-            await DataManager.edit_whitelist(interaction.guild.id, wlist)
-            await interaction.response.send_message(
-                ephemeral=True,
-                embed=discord.Embed(
-                    description=f"<:white_checkmark:1096793014287995061> Added {whitelist.mention} to whitelist",
-                    colour=discord.Colour.green(),
-                ),
-            )
-
-        elif whitelist.id in wlist:
-            return await interaction.response.send_message(
-                ephemeral=True,
-                embed=discord.Embed(
-                    description=f"<:white_cross:1096791282023669860> Could not add {whitelist.mention} to the whitelist because they already are in the whitelist",
-                    colour=discord.Colour.orange(),
-                ),
-            )
-
-        if isinstance(whitelist, discord.Role):
-            return
-
-        dm_channel = await whitelist.create_dm()
-        await dm_channel.send(
-            embed=discord.Embed(
-                description=f"<:white_checkmark:1096793014287995061> You have been whitelisted in {interaction.guild.name} by {interaction.user.mention}",
-                colour=discord.Colour.green(),
-            )
-        )
-
-    @app_commands.command(
-        name="whitelist_remove", description="Remove a user from the whitelist"
-    )
-    @app_commands.guild_only()
-    @app_commands.checks.has_permissions(administrator=True)
-    @app_commands.describe(whitelist="The user or role to remove from the whitelist")
-    async def whitelist_remove(
-        self, interaction: discord.Interaction, whitelist: discord.User | discord.Role
-    ):
-        filtered_words_data = await DataManager.get_guild_filtered_words(
-            interaction.guild.id
-        )
-        wlist = filtered_words_data["whitelist"]
-
-        if wlist is None or whitelist.id not in wlist:
-            return await interaction.response.send_message(
-                ephemeral=True,
-                embed=discord.Embed(
-                    description=f"<:white_cross:1096791282023669860> Could not remove {whitelist.mention} from the whitelist because they are not in it",
-                    colour=discord.Colour.orange(),
-                ),
-            )
-
-        elif whitelist.id in wlist:
-            wlist.remove(whitelist.id)
-            await DataManager.edit_whitelist(interaction.guild.id, wlist)
-            await interaction.response.send_message(
-                ephemeral=True,
-                embed=discord.Embed(
-                    description=f"<:white_checkmark:1096793014287995061> Removed {whitelist.mention} from whitelist",
-                    colour=discord.Colour.green(),
-                ),
-            )
-
-        if isinstance(whitelist, discord.Role):
-            return
-
-        dm_channel = await whitelist.create_dm()
-        await dm_channel.send(
-            embed=discord.Embed(
-                description=f"<:white_cross:1096791282023669860> You have been removed from the whitelist in {interaction.guild.name} by {interaction.user.mention}",
-                colour=discord.Colour.red(),
-            )
-        )
-
-    @app_commands.command(
         name="set_welcome_message",
         description="Add a welcome message that will be sent to users DMs when they join the server",
     )
@@ -556,6 +370,68 @@ class server_management(commands.Cog):
                 colour=discord.Colour.green(),
             )
         )
+
+    @app_commands.command(
+        name="whitelist", description="Add or remove an user from the whitelist"
+    )
+    @app_commands.guild_only()
+    @app_commands.checks.has_permissions(administrator=True)
+    @app_commands.choices(
+        choice=[
+            app_commands.Choice(name="Add", value="add"),
+            app_commands.Choice(name="Remove", value="remove"),
+        ]
+    )
+    @app_commands.describe(whitelist="The user to add or remove from the whitelist")
+    async def whitelist(
+        self, interaction: discord.Interaction, whitelist: discord.User | discord.Role, choice: app_commands.Choice[str]
+    ):
+        guild_filtered_words_data = await DataManager.get_guild_filtered_words(
+                interaction.guild.id
+            )
+        wlist = guild_filtered_words_data["whitelist"]
+
+        if choice.value == "add":
+            if wlist is None or whitelist.id not in wlist:
+                wlist.append(whitelist.id)
+                await DataManager.edit_whitelist(interaction.guild.id, wlist)
+                await interaction.response.send_message(
+                    ephemeral=True,
+                    embed=discord.Embed(
+                        description=f"<:white_checkmark:1096793014287995061> Added {whitelist.mention} to the whitelist",
+                        colour=discord.Colour.green(),
+                    ),
+                )
+
+            elif whitelist.id in wlist:
+                return await interaction.response.send_message(
+                    ephemeral=True,
+                    embed=discord.Embed(
+                        description=f"<:white_cross:1096791282023669860> Could not add {whitelist.mention} to the whitelist because they are already in the whitelist",
+                        colour=discord.Colour.orange(),
+                    ),
+                )
+
+        elif choice.value == "remove":
+            if wlist is None or whitelist.id not in wlist:
+                return await interaction.response.send_message(
+                    ephemeral=True,
+                    embed=discord.Embed(
+                        description=f"<:white_cross:1096791282023669860> Could not remove {whitelist.mention} from the whitelist because they are not in the whitelist",
+                        colour=discord.Colour.orange(),
+                    ),
+                )
+
+            elif whitelist.id in wlist:
+                wlist.remove(whitelist.id)
+                await DataManager.edit_whitelist(interaction.guild.id, wlist)
+                await interaction.response.send_message(
+                    ephemeral=True,
+                    embed=discord.Embed(
+                        description=f"<:white_checkmark:1096793014287995061> Removed {whitelist.mention} from the whitelist",
+                        colour=discord.Colour.green(),
+                    ),
+                )
 
 
 async def setup(bot):
