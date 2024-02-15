@@ -14,7 +14,7 @@ class server(commands.Cog):
     )
     @app_commands.guild_only()
     @app_commands.checks.cooldown(1, 20, key=lambda i: (i.guild.id, i.user.id))
-    async def serverinfo(self, interaction: discord.Interaction):
+    async def serverinfo(self, interaction: discord.Interaction, ephemeral: bool = True):
         guild = interaction.guild
 
         embed = discord.Embed(
@@ -37,9 +37,63 @@ class server(commands.Cog):
         )
 
         embed.set_thumbnail(url=guild.icon)
+        embed.set_image(url=guild.banner)
         embed.set_author(name=guild.name, icon_url=guild.icon)
 
-        await interaction.response.send_message(embed=embed, ephemeral=True)
+        await interaction.response.send_message(embed=embed, ephemeral=ephemeral)
+
+    @app_commands.command(
+        name="membercount", description="Get the member count of the server"
+    )
+    @app_commands.guild_only()
+    @app_commands.checks.cooldown(1, 20, key=lambda i: (i.guild.id, i.user.id))
+    async def membercount(self, interaction: discord.Interaction):
+        guild = interaction.guild
+        embed = discord.Embed(
+            title=f"Member Count",
+            description=f"Total Members: {guild.member_count}",
+            colour=discord.Colour.blurple(),
+        )
+        await interaction.response.send_message(embed=embed)
+
+    @app_commands.command(name="servericon", description="Get the icon of the server")
+    @app_commands.guild_only()
+    @app_commands.checks.cooldown(1, 20, key=lambda i: (i.guild.id, i.user.id))
+    async def servericon(self, interaction: discord.Interaction, ephemeral: bool = True):
+        embed = discord.Embed(
+            title=f"{interaction.guild.name}'s Icon",
+            colour=discord.Colour.darker_gray(),
+        )
+        embed.set_author(
+            name=f"{interaction.guild.name}", icon_url=interaction.guild.icon
+        )
+        embed.set_image(url=interaction.guild.icon)
+        await interaction.response.send_message(embed=embed, ephemeral=ephemeral)
+
+    @app_commands.command(
+        name="serverbanner", description="Get the banner of the current server"
+    )
+    @app_commands.guild_only()
+    @app_commands.checks.cooldown(1, 20, key=lambda i: (i.guild.id, i.user.id))
+    async def serverbanner(self, interaction: discord.Interaction, ephemeral: bool = True):
+        if interaction.guild.banner is not None:
+            embed = discord.Embed(
+                title=f"{interaction.guild.name}'s Banner",
+                colour=discord.Colour.darker_gray(),
+            )
+            embed.set_author(
+                name=f"{interaction.guild.name}", icon_url=interaction.guild.icon
+            )
+            embed.set_image(url=interaction.guild.banner)
+            await interaction.response.send_message(embed=embed, ephemeral=ephemeral)
+        else:
+            await interaction.response.send_message(
+                embed=discord.Embed(
+                    description="<:white_cross:1096791282023669860> This server does not have a banner",
+                    colour=discord.Colour.red(),
+                ),
+                ephemeral=True,
+            )
 
     @app_commands.command(name="userinfo", description="Get information about a user")
     @app_commands.guild_only()
@@ -49,6 +103,7 @@ class server(commands.Cog):
         self,
         interaction: discord.Interaction,
         user: Optional[discord.User] = None,
+        ephemeral: bool = True,
     ):
         if user is None:
             user = interaction.user
@@ -127,41 +182,31 @@ class server(commands.Cog):
         if user.avatar is not None:
             embed.set_thumbnail(url=user.avatar.url)
 
-        await interaction.response.send_message(embed=embed, ephemeral=True)
-
-    @app_commands.command(name="roleinfo", description="Get information about a role")
-    @app_commands.guild_only()
-    @app_commands.checks.cooldown(1, 20, key=lambda i: (i.guild.id, i.user.id))
-    @app_commands.describe(role="The role to get information about")
-    async def roleinfo(
-        self,
-        interaction: discord.Interaction,
-        role: Optional[discord.Role] = None,
-    ):
-        if role is None:
-            role = interaction.guild.default_role
-
-        embed = discord.Embed(
-            description=f"* **Role Name**: {role.name}\n"
-            f"* **Role ID**: `{role.id}`\n"
-            f"* **Created At**: {discord.utils.format_dt(role.created_at, style='F')}\n"
-            f"* **Hoisted**: {'Yes' if role.hoist else 'No'}\n"
-            f"* **Position**: {role.position}\n"
-            f"* **Mentionable**: {'Yes' if role.mentionable else 'No'}\n"
-            f"* **Members**: {len(role.members)}\n"
-            f"* **Colour**: {role.colour if role.colour != discord.Colour.default() else 'No Colour'}\n",
-            colour=(
-                role.colour
-                if role.colour != discord.Colour.default()
-                else discord.Colour.blurple()
-            ),
-        )
-        embed.set_thumbnail(url=role.icon)
-
-        await interaction.response.send_message(embed=embed, ephemeral=True)
+        await interaction.response.send_message(embed=embed, ephemeral=ephemeral)
 
     @app_commands.command(
-        name="channelinfo", description="Get information about a channel"
+        name="avatar", description="Get the avatar of an user or yourself"
+    )
+    @app_commands.checks.cooldown(1, 20, key=lambda i: (i.guild.id, i.user.id))
+    @app_commands.describe(user="The user to get the avatar of, defaults to yourself")
+    async def avatar(
+        self,
+        interaction: discord.Interaction,
+        user: Optional[discord.User] = None,
+        ephemeral: bool = True,
+    ):
+        if user is None:
+            user = interaction.user
+
+        embed = discord.Embed(
+            title=f"{user.name}'s Avatar", colour=discord.Colour.darker_gray()
+        )
+        embed.set_author(name=f"{user.name}#{user.discriminator}", icon_url=user.avatar)
+        embed.set_image(url=user.avatar)
+        await interaction.response.send_message(embed=embed, ephemeral=ephemeral)
+
+    @app_commands.command(
+        name="info", description="Get information about a channel"
     )
     @app_commands.guild_only()
     @app_commands.checks.cooldown(1, 20, key=lambda i: (i.guild.id, i.user.id))
@@ -170,6 +215,7 @@ class server(commands.Cog):
         self,
         interaction: discord.Interaction,
         channel: Optional[discord.TextChannel] = None,
+        ephemeral: bool = True,
     ):
         if channel is None:
             channel = interaction.channel
@@ -187,81 +233,7 @@ class server(commands.Cog):
         )
         embed.set_thumbnail(url=channel.guild.icon)
 
-        await interaction.response.send_message(embed=embed, ephemeral=True)
-
-    @app_commands.command(
-        name="membercount", description="Get the member count of the server"
-    )
-    @app_commands.guild_only()
-    @app_commands.checks.cooldown(1, 20, key=lambda i: (i.guild.id, i.user.id))
-    async def membercount(self, interaction: discord.Interaction):
-        guild = interaction.guild
-        embed = discord.Embed(
-            title=f"Member Count",
-            description=f"Total Members: {guild.member_count}",
-            colour=discord.Colour.blurple(),
-        )
-        await interaction.response.send_message(embed=embed)
-
-    @app_commands.command(
-        name="avatar", description="Get the avatar of a user or yourself"
-    )
-    @app_commands.checks.cooldown(1, 20, key=lambda i: (i.guild.id, i.user.id))
-    @app_commands.describe(user="The user to get the avatar of, defaults to yourself")
-    async def avatar(
-        self,
-        interaction: discord.Interaction,
-        user: Optional[discord.User] = None,
-    ):
-        if user is None:
-            user = interaction.user
-
-        embed = discord.Embed(
-            title=f"{user.name}'s Avatar", colour=discord.Colour.darker_gray()
-        )
-        embed.set_author(name=f"{user.name}#{user.discriminator}", icon_url=user.avatar)
-        embed.set_image(url=user.avatar)
-        await interaction.response.send_message(embed=embed, ephemeral=True)
-
-    @app_commands.command(name="servericon", description="Get the icon of the server")
-    @app_commands.guild_only()
-    @app_commands.checks.cooldown(1, 20, key=lambda i: (i.guild.id, i.user.id))
-    async def servericon(self, interaction: discord.Interaction):
-        embed = discord.Embed(
-            title=f"{interaction.guild.name}'s Icon",
-            colour=discord.Colour.darker_gray(),
-        )
-        embed.set_author(
-            name=f"{interaction.guild.name}", icon_url=interaction.guild.icon
-        )
-        embed.set_image(url=interaction.guild.icon)
-        await interaction.response.send_message(embed=embed, ephemeral=True)
-
-    @app_commands.command(
-        name="serverbanner", description="Get the banner of the current server"
-    )
-    @app_commands.guild_only()
-    @app_commands.checks.cooldown(1, 20, key=lambda i: (i.guild.id, i.user.id))
-    async def serverbanner(self, interaction: discord.Interaction):
-        if interaction.guild.banner is not None:
-            embed = discord.Embed(
-                title=f"{interaction.guild.name}'s Banner",
-                colour=discord.Colour.darker_gray(),
-            )
-            embed.set_author(
-                name=f"{interaction.guild.name}", icon_url=interaction.guild.icon
-            )
-            embed.set_image(url=interaction.guild.banner)
-            await interaction.response.send_message(embed=embed, ephemeral=True)
-        else:
-            await interaction.response.send_message(
-                embed=discord.Embed(
-                    description="<:white_cross:1096791282023669860> This server does not have a banner",
-                    colour=discord.Colour.red(),
-                ),
-                ephemeral=True,
-            )
-
+        await interaction.response.send_message(embed=embed, ephemeral=ephemeral)
 
 async def setup(bot):
     await bot.add_cog(server(bot))
