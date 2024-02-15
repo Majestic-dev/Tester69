@@ -14,7 +14,9 @@ class server(commands.Cog):
     )
     @app_commands.guild_only()
     @app_commands.checks.cooldown(1, 20, key=lambda i: (i.guild.id, i.user.id))
-    async def serverinfo(self, interaction: discord.Interaction, ephemeral: bool = True):
+    async def serverinfo(
+        self, interaction: discord.Interaction, ephemeral: bool = True
+    ):
         guild = interaction.guild
 
         embed = discord.Embed(
@@ -59,7 +61,9 @@ class server(commands.Cog):
     @app_commands.command(name="servericon", description="Get the icon of the server")
     @app_commands.guild_only()
     @app_commands.checks.cooldown(1, 20, key=lambda i: (i.guild.id, i.user.id))
-    async def servericon(self, interaction: discord.Interaction, ephemeral: bool = True):
+    async def servericon(
+        self, interaction: discord.Interaction, ephemeral: bool = True
+    ):
         embed = discord.Embed(
             title=f"{interaction.guild.name}'s Icon",
             colour=discord.Colour.darker_gray(),
@@ -75,7 +79,9 @@ class server(commands.Cog):
     )
     @app_commands.guild_only()
     @app_commands.checks.cooldown(1, 20, key=lambda i: (i.guild.id, i.user.id))
-    async def serverbanner(self, interaction: discord.Interaction, ephemeral: bool = True):
+    async def serverbanner(
+        self, interaction: discord.Interaction, ephemeral: bool = True
+    ):
         if interaction.guild.banner is not None:
             embed = discord.Embed(
                 title=f"{interaction.guild.name}'s Banner",
@@ -205,9 +211,7 @@ class server(commands.Cog):
         embed.set_image(url=user.avatar)
         await interaction.response.send_message(embed=embed, ephemeral=ephemeral)
 
-    @app_commands.command(
-        name="info", description="Get information about a channel"
-    )
+    @app_commands.command(name="info", description="Get information about a channel")
     @app_commands.guild_only()
     @app_commands.checks.cooldown(1, 20, key=lambda i: (i.guild.id, i.user.id))
     @app_commands.describe(channel="The channel to get information about")
@@ -234,6 +238,7 @@ class server(commands.Cog):
         embed.set_thumbnail(url=channel.guild.icon)
 
         await interaction.response.send_message(embed=embed, ephemeral=ephemeral)
+
 
 async def setup(bot):
     await bot.add_cog(server(bot))

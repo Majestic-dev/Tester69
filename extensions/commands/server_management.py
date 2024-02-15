@@ -289,8 +289,7 @@ class server_management(commands.Cog):
         return [
             app_commands.Choice(name=word, value=word)
             for word in words_in_blacklist
-            if word.lower().startswith(current.lower())
-            or len(current) < 1
+            if word.lower().startswith(current.lower()) or len(current) < 1
         ]
 
     @app_commands.command(
@@ -384,11 +383,14 @@ class server_management(commands.Cog):
     )
     @app_commands.describe(whitelist="The user to add or remove from the whitelist")
     async def whitelist(
-        self, interaction: discord.Interaction, whitelist: discord.User | discord.Role, choice: app_commands.Choice[str]
+        self,
+        interaction: discord.Interaction,
+        whitelist: discord.User | discord.Role,
+        choice: app_commands.Choice[str],
     ):
         guild_filtered_words_data = await DataManager.get_guild_filtered_words(
-                interaction.guild.id
-            )
+            interaction.guild.id
+        )
         wlist = guild_filtered_words_data["whitelist"]
 
         if choice.value == "add":

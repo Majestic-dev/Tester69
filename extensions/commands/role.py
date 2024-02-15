@@ -18,25 +18,23 @@ class role(commands.GroupCog):
         ephemeral: bool = True,
     ):
         embed = discord.Embed(
-            description=
-            (
-            f"* **Role Name**: {role.name}\n"
-            f"* **Role ID**: `{role.id}`\n"
-            f"* **Created At**: {discord.utils.format_dt(role.created_at, style='F')}\n"
-            f"* **Displayed Separately From Other Roles**: {'Yes' if role.hoist else 'No'}\n"
-            f"* **Position**: {role.position}\n"
-            f"* **Mentionable By Anyone**: {'Yes' if role.mentionable else 'No'}\n"
-            f"* **Members**: {len(role.members)}\n"
-            f"* **Colour**: `{role.colour if role.colour != discord.Colour.default() else 'No Colour'}`\n"
+            description=(
+                f"* **Role Name**: {role.name}\n"
+                f"* **Role ID**: `{role.id}`\n"
+                f"* **Created At**: {discord.utils.format_dt(role.created_at, style='F')}\n"
+                f"* **Displayed Separately From Other Roles**: {'Yes' if role.hoist else 'No'}\n"
+                f"* **Position**: {role.position}\n"
+                f"* **Mentionable By Anyone**: {'Yes' if role.mentionable else 'No'}\n"
+                f"* **Members**: {len(role.members)}\n"
+                f"* **Colour**: `{role.colour if role.colour != discord.Colour.default() else 'No Colour'}`\n"
             )
-            +
-            (
-            f"* **Permissions**: {', '.join([perm.replace('_', ' ').title() for perm, value in role.permissions if value])}\n\n"
-            if role.permissions else "* **Permissions**: This role has no permissions set for it.\n\n"
+            + (
+                f"* **Permissions**: {', '.join([perm.replace('_', ' ').title() for perm, value in role.permissions if value])}\n\n"
+                if role.permissions
+                else "* **Permissions**: This role has no permissions set for it.\n\n"
             )
-            +
-            (
-            f"* **Members List**: {', '.join([member.mention for member in role.members])}"
+            + (
+                f"* **Members List**: {', '.join([member.mention for member in role.members])}"
             ),
             colour=(
                 role.colour
@@ -48,9 +46,7 @@ class role(commands.GroupCog):
 
         await interaction.response.send_message(embed=embed, ephemeral=ephemeral)
 
-    @app_commands.command(
-        name="add", description="Add a role to the mentioned user"
-    )
+    @app_commands.command(name="add", description="Add a role to the mentioned user")
     @app_commands.guild_only()
     @app_commands.checks.has_permissions(manage_roles=True)
     @app_commands.checks.cooldown(1, 7, key=lambda i: (i.guild.id, i.user.id))

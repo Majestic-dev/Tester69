@@ -688,7 +688,7 @@ class logging(commands.GroupCog):
                 f = discord.File(fp=buffer, filename="image.png")
                 embed.set_image(url="attachment://image.png")
                 embed.set_author(
-                icon_url=message.author.display_avatar, name=f"{message.author}"
+                    icon_url=message.author.display_avatar, name=f"{message.author}"
                 )
                 embed.set_footer(
                     text=f"Author ID: {message.author.id} | Message ID: {message.id}"
