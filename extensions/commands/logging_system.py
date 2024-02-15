@@ -687,6 +687,14 @@ class logging(commands.GroupCog):
                 buffer.seek(0)
                 f = discord.File(fp=buffer, filename="image.png")
                 embed.set_image(url="attachment://image.png")
+                embed.set_author(
+                icon_url=message.author.display_avatar, name=f"{message.author}"
+                )
+                embed.set_footer(
+                    text=f"Author ID: {message.author.id} | Message ID: {message.id}"
+                )
+                embed.timestamp = discord.utils.utcnow()
+                return await logs_channel.send(embed=embed, file=f)
             except UnidentifiedImageError:
                 embed.set_image(url=message.attachments[0].url)
             embed.set_author(
@@ -696,7 +704,7 @@ class logging(commands.GroupCog):
                 text=f"Author ID: {message.author.id} | Message ID: {message.id}"
             )
             embed.timestamp = discord.utils.utcnow()
-            return await logs_channel.send(embed=embed, file=f)
+            return await logs_channel.send(embed=embed, file=message.attachments[0].url)
         if len(message.stickers) >= 1:
             embed.add_field(
                 name="Stickers",
