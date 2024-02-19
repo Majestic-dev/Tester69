@@ -190,8 +190,7 @@ class giveaway_views(discord.ui.View):
                 embeds = []
                 page_participants = []
                 for i, participant in enumerate(giveaway_data["participants"], start=1):
-                    participant = interaction.guild.get_member(participant)
-                    page_participants.append(f"{i}. {participant.mention}")
+                    page_participants.append(f"{i}. <@{participant}>")
                     if i % 10 == 0 or i == len(giveaway_data["participants"]):
                         current_page = (i - 1) // 10 + 1
                         total_pages = (len(giveaway_data["participants"])) // 10 + 1
