@@ -120,7 +120,6 @@ class logging(commands.GroupCog):
         )
         join.set_author(icon_url=member.display_avatar, name=member)
         join.set_footer(text=f"ID: {member.id}")
-        join.timestamp = discord.utils.utcnow()
         await logs_channel.send(embed=join)
 
     # Member Leave Listener
@@ -139,7 +138,6 @@ class logging(commands.GroupCog):
         )
         leave.set_author(icon_url=member.display_avatar, name=member)
         leave.set_footer(text=f"ID: {member.id}")
-        leave.timestamp = discord.utils.utcnow()
         await logs_channel.send(embed=leave)
 
     # Warning Listener
@@ -165,7 +163,6 @@ class logging(commands.GroupCog):
         warning.add_field(name="Reason", value=f"```{reason}```")
         warning.set_author(icon_url=warned.display_avatar, name=warned)
         warning.set_footer(text=f"ID: {warned.id}")
-        warning.timestamp = discord.utils.utcnow()
         await logs_channel.send(embed=warning)
 
     # Member Timeout Listener
@@ -219,7 +216,6 @@ class logging(commands.GroupCog):
         )
         kick.set_author(icon_url=user.display_avatar, name=user)
         kick.set_footer(text=f"ID: {user.id}")
-        kick.timestamp = discord.utils.utcnow()
         await logs_channel.send(embed=kick)
 
     # Member Ban Listener
@@ -244,7 +240,6 @@ class logging(commands.GroupCog):
         )
         ban.set_author(icon_url=banned.display_avatar, name=banned)
         ban.set_footer(text=f"ID: {banned.id}")
-        ban.timestamp = discord.utils.utcnow()
         await logs_channel.send(embed=ban)
 
     # Member Unban Listener
@@ -263,7 +258,6 @@ class logging(commands.GroupCog):
         )
         unban.set_author(icon_url=user.display_avatar, name=user)
         unban.set_footer(text=f"ID: {user.id}")
-        unban.timestamp = discord.utils.utcnow()
         await logs_channel.send(embed=unban)
 
     # Member Update Listener
@@ -316,7 +310,6 @@ class logging(commands.GroupCog):
 
         update.set_author(icon_url=after.display_avatar, name=after)
         update.set_footer(text=f"ID: {before.id}")
-        update.timestamp = discord.utils.utcnow()
         return await logs_channel.send(embed=update)
 
     # Role Create Listener
@@ -335,7 +328,6 @@ class logging(commands.GroupCog):
         )
         create.set_author(icon_url=role.guild.icon, name=role.guild)
         create.set_footer(text=f"Role ID: {role.id}")
-        create.timestamp = discord.utils.utcnow()
         await logs_channel.send(embed=create)
 
     # Role Delete Listener
@@ -354,7 +346,6 @@ class logging(commands.GroupCog):
         )
         delete.set_author(icon_url=role.guild.icon, name=role.guild)
         delete.set_footer(text=f"Role ID: {role.id}")
-        delete.timestamp = discord.utils.utcnow()
         await logs_channel.send(embed=delete)
 
     # Role Update Listener
@@ -400,7 +391,6 @@ class logging(commands.GroupCog):
             return
         update.set_author(icon_url=before.guild.icon, name=before.guild)
         update.set_footer(text=f"Role ID: {before.id}")
-        update.timestamp = discord.utils.utcnow()
         return await logs_channel.send(embed=update)
 
     # Voice Channel Listener
@@ -460,7 +450,6 @@ class logging(commands.GroupCog):
             return
         voice.set_author(icon_url=member.display_avatar, name=member)
         voice.set_footer(text=f"ID: {member.id}")
-        voice.timestamp = discord.utils.utcnow()
         return await logs_channel.send(embed=voice)
 
     # Blacklisted Word Listener
@@ -596,7 +585,6 @@ class logging(commands.GroupCog):
 
         edit.set_author(icon_url=after.author.avatar, name=f"{before.author}")
         edit.set_footer(text=f"Author ID: {before.author.id}")
-        edit.timestamp = discord.utils.utcnow()
         await logs_channel.send(embed=edit)
 
     # Delete Logs
@@ -650,8 +638,7 @@ class logging(commands.GroupCog):
             colour=discord.Colour.orange(),
         )
         if len(message.content) >= 1024:
-            with open(f"{message.author.id}_delete.txt", "a") as n:
-                n.write(message.content)
+            buffer = BytesIO(message.content.encode("utf8"))
 
             embed = discord.Embed(
                 title="Message Deleted (Too Long)",
@@ -662,9 +649,8 @@ class logging(commands.GroupCog):
                 icon_url=message.author.display_avatar, name=message.author
             )
             await logs_channel.send(
-                embed=embed, file=discord.File(f"{message.author.id}_delete.txt")
+                embed=embed, file=discord.File(fp=buffer, filename=f"{message.author}({message.author.id}).txt")
             )
-            return os.remove(f"{message.author.id}_delete.txt")
 
         if len(message.content) > 0:
             embed.add_field(name="**Content**", value=f"{message.content}")
@@ -693,7 +679,6 @@ class logging(commands.GroupCog):
                 embed.set_footer(
                     text=f"Author ID: {message.author.id} | Message ID: {message.id}"
                 )
-                embed.timestamp = discord.utils.utcnow()
                 return await logs_channel.send(embed=embed, file=f)
             except UnidentifiedImageError:
                 embed.set_image(url=message.attachments[0].url)
@@ -703,8 +688,7 @@ class logging(commands.GroupCog):
             embed.set_footer(
                 text=f"Author ID: {message.author.id} | Message ID: {message.id}"
             )
-            embed.timestamp = discord.utils.utcnow()
-            return await logs_channel.send(embed=embed, file=message.attachments[0].url)
+            return await logs_channel.send(embed=embed)
         if len(message.stickers) >= 1:
             embed.add_field(
                 name="Stickers",
@@ -717,7 +701,6 @@ class logging(commands.GroupCog):
         embed.set_footer(
             text=f"Author ID: {message.author.id} | Message ID: {message.id}"
         )
-        embed.timestamp = discord.utils.utcnow()
 
         if (
             any(word in content for word in words_in_blacklist)
@@ -739,7 +722,6 @@ class logging(commands.GroupCog):
         embed = discord.Embed(
             title="Channel Created",
             description=f"Created {channel.mention} channel",
-            timestamp=discord.utils.utcnow(),
             colour=discord.Colour.green(),
         )
 
@@ -760,7 +742,6 @@ class logging(commands.GroupCog):
         embed = discord.Embed(
             title="Channel Deleted",
             description=f"Deleted channel {channel.name}",
-            timestamp=discord.utils.utcnow(),
             colour=discord.Colour.red(),
         )
 
