@@ -68,7 +68,6 @@ class leaderboard_dropdown(discord.ui.Select):
                 )
 
             lb_embed.set_author(name="Cash Leaderboard", icon_url=self.bot.user.avatar)
-            lb_embed.timestamp = discord.utils.utcnow()
             await interaction.response.edit_message(
                 content=None,
                 embed=lb_embed,
@@ -95,7 +94,6 @@ class leaderboard_dropdown(discord.ui.Select):
                 )
 
             lb_embed.set_author(name="Bank Leaderboard", icon_url=self.bot.user.avatar)
-            lb_embed.timestamp = discord.utils.utcnow()
             await interaction.response.edit_message(
                 embed=lb_embed,
                 view=leaderboard_dropdown_view(bot=self.bot, interaction=interaction),
@@ -183,9 +181,10 @@ class economy(commands.Cog):
     async def balance(
         self, interaction: discord.Interaction, user: Optional[discord.User] = None
     ):
+        await interaction.response.defer()
         if user == None:
             user_data = await DataManager.get_user_data(interaction.user.id)
-            await interaction.response.send_message(
+            await interaction.edit_original_response(
                 embed=discord.Embed(
                     title=f"{interaction.user}'s Balance",
                     description=(
@@ -196,7 +195,7 @@ class economy(commands.Cog):
             )
         else:
             user_data = await DataManager.get_user_data(user.id)
-            await interaction.response.send_message(
+            await interaction.edit_original_response(
                 embed=discord.Embed(
                     title=f"{user}'s Balance",
                     description=(
@@ -810,7 +809,6 @@ class economy(commands.Cog):
                 )
 
             lb_embed.set_author(name="Cash Leaderboard", icon_url=self.bot.user.avatar)
-            lb_embed.timestamp = discord.utils.utcnow()
             await interaction.response.send_message(embed=lb_embed, view=view)
 
         elif choices.value == "bank":
@@ -833,7 +831,6 @@ class economy(commands.Cog):
                 )
 
             lb_embed.set_author(name="Bank Leaderboard", icon_url=self.bot.user.avatar)
-            lb_embed.timestamp = discord.utils.utcnow()
             await interaction.response.send_message(embed=lb_embed, view=view)
 
     @app_commands.command(name="shop", description="View the shop to buy various items")
@@ -989,15 +986,15 @@ class economy(commands.Cog):
         whole_balance = user_data["balance"] + user_data["bank"]
         user_inv = user_data["inventory"]
         economy_items = DataManager.get("economy", "items")
-        for item in json.loads(user_inv):
+        for item_owned in json.loads(user_inv):
             whole_balance += (
-                economy_items[item.lower()]["sell price"] * json.loads(user_inv)[item]
+                economy_items[item.lower()]["sell price"] * json.loads(user_inv)[item_owned]
             )
 
-        if user_data["inventory"] is not None:
-            itemsowned = json.loads(user_data["inventory"])
-            if item.lower() in itemsowned:
-                itemsowned = itemsowned[item.lower()]
+        if user_inv is not None:
+            inv = json.loads(user_inv)
+            if item.lower() in inv:
+                itemsowned = inv[item.lower()]
             else:
                 itemsowned = 0
         else:
