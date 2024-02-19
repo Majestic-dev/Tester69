@@ -262,7 +262,6 @@ class moderation(commands.Cog):
                             embed=discord.Embed(
                                 title="You have been banned from the server",
                                 description=f"You have been banned from {interaction.guild.nam}. Appeal for unban at {appeal_link}",
-                                timestamp=discord.utils.utcnow(),
                                 colour=discord.Colour.red(),
                             )
                         )
