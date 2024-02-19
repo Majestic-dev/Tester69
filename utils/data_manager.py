@@ -4,47 +4,13 @@ import json
 import os
 import random
 import uuid
-from dataclasses import dataclass
 from typing import Any
 
 import asyncpg
 import discord
 
 
-@dataclass
-class Inventory:
-    id: int
-    items: dict[str, Any] = None
-
-
-@dataclass
-class User:
-    id: int
-    inventory: dict[str, Any] = None
-    cooldowns: dict[str, Any] = None
-    balance: int = None
-    bank: int = None
-
-
-@dataclass
-class Guild:
-    id: int
-    muted_role_id: int = None
-    muted_user_roles: dict[str, Any] = None
-    unverified_role_id: int = None
-    verification_channel_id: int = None
-    verification_logs_channel_id: int = None
-    logs_channel_id: int = None
-    appeal_link: str = None
-    blacklisted_words: list[str] = None
-    whitelist: list[int] = None
-    welcome_message: str = None
-    warned_users: dict[str, Any] = None
-
-
 class DataManager:
-    guilds: dict[str, Guild] = {}
-    users: dict[str, User] = {}
     __data: dict[str, str] = {}
     initialised = False
 
@@ -68,7 +34,11 @@ class DataManager:
                     continue
 
                 with open(os.path.join(root, file), "r") as f:
-                    cls.__data[file[:-5]] = json.load(f)
+                    try:
+                        cls.__data[file[:-5]] = json.load(f)
+                    except json.JSONDecodeError:
+                        print(f"Failed to load {file}")
+                        print(f"File content: {f.read()}")
 
         DataManager.initialised = True
 
@@ -137,7 +107,8 @@ class DataManager:
                 inventory JSONB,
                 cooldowns JSONB,
                 balance bigint DEFAULT 0,
-                bank bigint DEFAULT 0
+                bank bigint DEFAULT 0,
+                mining_xp bigint DEFAULT 0
             );"""
         )
 
@@ -737,6 +708,16 @@ class DataManager:
 
             await cls.db_connection.execute(
                 f"UPDATE users SET {key} = $1 WHERE id = $2", value, user_id
+            )
+
+    @classmethod
+    async def edit_user_mining_xp(cls, user_id: int, amount: int) -> None:
+        async with cls.db_connection.acquire():
+            if user_id not in await cls.get_all_users():
+                await cls.add_user_data(user_id)
+
+            await cls.db_connection.execute(
+                "UPDATE users SET mining_xp = $1 WHERE id = $2", amount, user_id
             )
 
     @classmethod
