@@ -82,9 +82,7 @@ class giveaway_looper(commands.Cog):
 
         if next_giveaway is None:
             pass
-        else:
-            end_date = datetime.datetime.fromisoformat(next_giveaway["end_date"])
-            await discord.utils.sleep_until(end_date)
+        elif next_giveaway["end_date"] >= discord.utils.utcnow().isoformat():
             channel = self.bot.get_channel(next_giveaway["channel_id"])
             message = await channel.fetch_message(next_giveaway["id"])
             await DataManager.end_giveaway(
@@ -140,6 +138,8 @@ class giveaway_looper(commands.Cog):
                     )
             else:
                 return
+        else:
+            return
 
     # Giveaway Join Listener
     @commands.Cog.listener()
