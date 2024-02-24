@@ -152,7 +152,7 @@ async def on_app_command_error(
         logging.error(f"An error occurred: {error}")
 
 @bot.event
-async def on_command_error(error):
+async def on_command_error(ctx: commands.Context, error: commands.CommandError):
     if isinstance(error, commands.CommandNotFound):
         return
 
