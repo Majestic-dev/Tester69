@@ -1,14 +1,12 @@
 import datetime
 import os
 import re
-import asyncio
 from io import BytesIO
 from typing import Optional
 
 import discord
 from discord import app_commands
 from discord.ext import commands
-from concurrent.futures import ThreadPoolExecutor
 from PIL import Image, UnidentifiedImageError
 
 from utils import DataManager
