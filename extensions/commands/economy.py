@@ -619,27 +619,13 @@ class economy(commands.Cog):
         )
 
     @app_commands.command(
-        name="inventory", description="Check the contents of your inventory"
+    name="inventory", description="Check the contents of your inventory"
     )
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.user.id))
     async def inventory(self, interaction: discord.Interaction):
         user_data = await DataManager.get_user_data(interaction.user.id)
 
-        inv_embed = discord.Embed(
-            colour=discord.Colour.green(),
-        )
-
-        if user_data["inventory"] is not None:
-            for item, count in json.loads(user_data["inventory"]).items():
-                if count != 0:
-                    name = f"{DataManager.get('economy', 'items')[item.lower()]['emoji']} {item} - {count}"
-                    inv_embed.add_field(
-                        name=f"{name}",
-                        value=f"{DataManager.get('economy', 'items')[item.lower()]['type']}",
-                        inline=False,
-                    )
-
-        else:
+        if user_data["inventory"] is None:
             return await interaction.response.send_message(
                 embed=discord.Embed(
                     description="<:white_cross:1096791282023669860> You don't have any items in your inventory",
@@ -647,7 +633,10 @@ class economy(commands.Cog):
                 )
             )
 
-        if len(inv_embed.fields) == 0:
+        inventory = json.loads(user_data["inventory"])
+        items = [(item, count) for item, count in inventory.items() if count != 0]
+
+        if not items:
             return await interaction.response.send_message(
                 embed=discord.Embed(
                     description="<:white_cross:1096791282023669860> You don't have any items in your inventory",
@@ -655,11 +644,23 @@ class economy(commands.Cog):
                 )
             )
 
-        inv_embed.set_author(
-            name=interaction.user.name + "'s inventory",
-            icon_url=interaction.user.display_avatar,
-        )
-        await interaction.response.send_message(embed=inv_embed)
+        embeds = []
+        for i in range(0, len(items), 10):
+            inv_embed = discord.Embed(colour=discord.Colour.green())
+            for item, count in items[i:i+10]:
+                name = f"{DataManager.get('economy', 'items')[item.lower()]['emoji']} {item} - {count}"
+                inv_embed.add_field(
+                    name=f"{name}",
+                    value=f"{DataManager.get('economy', 'items')[item.lower()]['type']}",
+                    inline=False,
+                )
+            inv_embed.set_author(
+                name=interaction.user.name + "'s inventory" + f" page {i//10 + 1}/" + str(len(items)//10 + 1),
+                icon_url=interaction.user.display_avatar,
+            )
+            embeds.append(inv_embed)
+
+        await Paginator.Simple().paginate(interaction, embeds)
 
     @app_commands.command(name="deposit", description="Deposit money into your bank")
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.user.id))
