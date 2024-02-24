@@ -1,7 +1,7 @@
 import asyncio
 import logging
 import os
-import sys
+import aiohttp
 import traceback
 
 import discord
@@ -120,7 +120,7 @@ async def on_ready():
                 try:
                     await bot.load_extension(extension_name)
                 except discord.ext.commands.errors.ExtensionAlreadyLoaded:
-                    print(f"Extension {extension_name} is already loaded.")
+                    await bot.reload_extension(extension_name)
     await bot.tree.sync()
 
 
@@ -189,4 +189,7 @@ async def main():
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except aiohttp.client_exceptions.ClientConnectorError as e:
+        logging.warning(f"A network error occurred: {e}")
