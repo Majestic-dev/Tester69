@@ -29,22 +29,27 @@ class jump_to_page_modal(discord.ui.Modal, title="Jump to page"):
     )
 
     async def on_submit(self, interaction: discord.Interaction) -> None:
-        if await self.check_pages(interaction, int(self.page_number.value)):
-            view = paginator_buttons(
-                self.timeout,
-                int(self.page_number.value) - 1,
-                interaction.user,
-                self.pages,
-            )
-            view.current_page_number.label = (
-                f"{int(self.page_number.value)}/{len(self.pages)}"
-            )
-            view.response = self.message
+        if self.page_number.value.isnumeric():
+            if await self.check_pages(interaction, int(self.page_number.value)):
+                view = paginator_buttons(
+                    self.timeout,
+                    int(self.page_number.value) - 1,
+                    interaction.user,
+                    self.pages,
+                )
+                view.current_page_number.label = (
+                    f"{int(self.page_number.value)}/{len(self.pages)}"
+                )
+                view.response = self.message
 
-            await self.message.edit(
-                embed=self.pages[int(self.page_number.value) - 1], view=view
+                await self.message.edit(
+                    embed=self.pages[int(self.page_number.value) - 1], view=view
+                )
+                await interaction.response.defer()
+        else:
+            await interaction.response.send_message(
+                "That page number is invalid.", ephemeral=True
             )
-            await interaction.response.defer()
 
 
 class on_page_counter_click(discord.ui.View):
