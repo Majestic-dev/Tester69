@@ -69,6 +69,18 @@ class bot(commands.Bot):
         )
 
     async def setup_hook(self) -> None:
+        for root, _, files in os.walk("extensions"):
+            for file in files:
+                if file.endswith(".py"):
+                    extension_name = root.replace("\\", ".") + "." + file[:-3]
+                    if extension_name in bot.extensions:
+                        await bot.unload_extension(extension_name)
+                    try:
+                        await bot.load_extension(extension_name)
+                    except discord.ext.commands.errors.ExtensionAlreadyLoaded:
+                        await bot.reload_extension(extension_name)
+        await bot.tree.sync()
+        
         self.add_view(giveaway_views(bot))
         self.add_view(panel_views(bot))
         tickets = await DataManager.get_all_tickets()
@@ -110,19 +122,6 @@ async def on_ready():
         status=discord.Status.online,
         activity=discord.Game(f"/help | https://discord.gg/VsDDf8YKBV"),
     )
-
-    for root, _, files in os.walk("extensions"):
-        for file in files:
-            if file.endswith(".py"):
-                extension_name = root.replace("\\", ".") + "." + file[:-3]
-                if extension_name in bot.extensions:
-                    await bot.unload_extension(extension_name)
-                try:
-                    await bot.load_extension(extension_name)
-                except discord.ext.commands.errors.ExtensionAlreadyLoaded:
-                    await bot.reload_extension(extension_name)
-    await bot.tree.sync()
-
 
 @bot.tree.error
 async def on_app_command_error(
