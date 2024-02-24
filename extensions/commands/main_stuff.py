@@ -28,7 +28,7 @@ class help_select(discord.ui.Select):
         embed = discord.Embed(
             title=f"{cog.__cog_name__} Commands",
             description="\n".join(
-                f"**/{command.name}:** `{command.description}`"
+                f"* **/{command.name}:** `{command.description}`\n"
                 for command in commands_mixer
             ),
             colour=discord.Colour.light_gray(),
@@ -64,16 +64,6 @@ class main_stuff(commands.Cog):
         )
 
         await interaction.response.send_message(embed=Ping, ephemeral=True)
-
-    @app_commands.command(name="prefix", description="Show my prefix")
-    async def prefix(self, interaction: discord.Interaction):
-        Prefix = discord.Embed(
-            title="Prefix",
-            description="Tester69 uses slash commands, enter `/` or `/help` and you will see all the available commands",
-            colour=discord.Colour.light_gray(),
-        )
-
-        await interaction.response.send_message(embed=Prefix, ephemeral=True)
 
 
 async def setup(bot: commands.AutoShardedBot):
