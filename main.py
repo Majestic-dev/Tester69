@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import os
+import sys
 import traceback
 
 import discord
@@ -8,8 +9,11 @@ from discord import app_commands
 from discord.ext import commands
 
 from extensions.commands.giveaway import giveaway_views
-from extensions.commands.ticket_system import (closed_ticket_views,
-                                               panel_views, ticket_views)
+from extensions.commands.ticket_system import (
+    closed_ticket_views,
+    panel_views,
+    ticket_views,
+)
 from utils import DataManager
 
 DataManager.setup(
@@ -110,10 +114,13 @@ async def on_ready():
     for root, _, files in os.walk("extensions"):
         for file in files:
             if file.endswith(".py"):
+                extension_name = root.replace("\\", ".") + "." + file[:-3]
+                if extension_name in bot.extensions:
+                    await bot.unload_extension(extension_name)
                 try:
-                    await bot.load_extension(root.replace("\\", ".") + "." + file[:-3])
-                except commands.ExtensionAlreadyLoaded:
-                    pass
+                    await bot.load_extension(extension_name)
+                except discord.ext.commands.errors.ExtensionAlreadyLoaded:
+                    print(f"Extension {extension_name} is already loaded.")
     await bot.tree.sync()
 
 
@@ -121,19 +128,20 @@ async def on_ready():
 async def on_app_command_error(
     interaction: discord.Interaction, error: app_commands.AppCommandError
 ):
+    await interaction.response.defer(ephemeral=True)
+
     if isinstance(error, app_commands.CommandOnCooldown):
-        return await interaction.response.send_message(
-            delete_after=error.retry_after,
-            ephemeral=True,
+        await interaction.edit_original_response(
             embed=discord.Embed(
                 description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.0f} seconds before using this command again.",
                 colour=discord.Colour.red(),
             ),
         )
+        await asyncio.sleep(error.retry_after)
+        return await interaction.delete_original_response()
 
     elif isinstance(error, app_commands.errors.MissingPermissions):
-        return await interaction.response.send_message(
-            ephemeral=True,
+        return await interaction.edit_original_response(
             embed=discord.Embed(
                 description="<:white_cross:1096791282023669860> You are missing the required permissions to use this command.",
                 colour=discord.Colour.red(),
@@ -141,25 +149,7 @@ async def on_app_command_error(
         )
 
     else:
-        return await bot.get_user(bot.owner_id).send(
-            embed=discord.Embed(
-                title="Error",
-                description=f"```py\n{traceback.format_exc()}\n```",
-                colour=discord.Colour.red(),
-            )
-        )
-
-
-@bot.event
-async def on_error():
-    return await bot.get_user(bot.owner_id).send(
-        embed=discord.Embed(
-            title="Error",
-            description=f"```py\n{traceback.format_exc()}\n```",
-            colour=discord.Colour.red(),
-        )
-    )
-
+        logging.error(f"An error occurred: {error}")
 
 @bot.event
 async def on_command_error(error):
