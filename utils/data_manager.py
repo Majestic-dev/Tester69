@@ -50,6 +50,17 @@ class DataManager:
         )
 
         await cls.db_connection.execute(
+            """CREATE TABLE IF NOT EXISTS users (
+                id bigint PRIMARY KEY,
+                inventory JSONB,
+                cooldowns JSONB,
+                balance bigint DEFAULT 0,
+                bank bigint DEFAULT 0,
+                mining_xp bigint DEFAULT 0
+            );"""
+        )
+
+        await cls.db_connection.execute(
             """CREATE TABLE IF NOT EXISTS guilds (
                 id bigint PRIMARY KEY,
                 unverified_role_id bigint,
@@ -58,8 +69,7 @@ class DataManager:
                 logs_channel_id bigint,
                 appeal_link TEXT,
                 welcome_message TEXT,
-                warned_users JSONB,
-                giveaways JSONB
+                warned_users JSONB
             );"""
         )
 
@@ -96,19 +106,14 @@ class DataManager:
                 limit_per_user bigint,
                 panel_title TEXT,
                 panel_description TEXT,
-                panel_moderators bigint ARRAY DEFAULT '{}'::bigint[],
-                tickets JSONB
+                panel_moderators bigint ARRAY DEFAULT '{}'::bigint[]
             );"""
         )
 
         await cls.db_connection.execute(
-            """CREATE TABLE IF NOT EXISTS users (
-                id bigint PRIMARY KEY,
-                inventory JSONB,
-                cooldowns JSONB,
-                balance bigint DEFAULT 0,
-                bank bigint DEFAULT 0,
-                mining_xp bigint DEFAULT 0
+            """CREATE TABLE IF NOT EXISTS tickets (
+                panel_id bigint PRIMARY KEY,
+                tickets JSONB
             );"""
         )
 
@@ -149,6 +154,127 @@ class DataManager:
                 return
 
     @classmethod
+    async def user_check(cls, user_id: int) -> None:
+        async with cls.db_connection.acquire():
+            userexists = await cls.db_connection.fetchval(
+                "SELECT EXISTS (SELECT 1 FROM users WHERE id = $1)", user_id
+            )
+
+            if not userexists:
+                await cls.add_user_data(user_id)
+
+    @classmethod
+    async def add_user_data(cls, user_id: int) -> None:
+        async with cls.db_connection.acquire():
+            await cls.db_connection.execute(
+                "INSERT INTO users (id) VALUES ($1)", user_id
+            )
+
+    @classmethod
+    async def get_all_users(cls) -> None:
+        async with cls.db_connection.acquire():
+            rows = await cls.db_connection.fetch("SELECT id FROM users")
+            return [row["id"] for row in rows]
+
+    @classmethod
+    async def get_user_data(cls, user_id: int) -> None:
+        await cls.user_check(user_id)
+        async with cls.db_connection.acquire():
+            return await cls.db_connection.fetchrow(
+                "SELECT * FROM users WHERE id = $1", user_id
+            )
+
+    @classmethod
+    async def edit_user_data(cls, user_id: int, column: str, value: Any) -> None:
+        await cls.user_check(user_id)
+        async with cls.db_connection.acquire():
+            return await cls.db_connection.execute(
+                f"UPDATE users SET {column} = $1 WHERE id = $2", value, user_id
+            )
+
+    @classmethod
+    async def edit_user_inventory(cls, user_id: int, item: str, amount: int) -> None:
+        await cls.user_check(user_id)
+        async with cls.db_connection.acquire():
+            user_data = await cls.get_user_data(user_id)
+            if user_data["inventory"] is None:
+                return await cls.edit_user_data(
+                    user_id, "inventory", json.dumps({item: amount})
+                )
+
+            elif user_data["inventory"] is not None:
+                if item not in user_data["inventory"]:
+                    user_inventory = json.loads(user_data["inventory"])
+                    user_inventory[item] = amount
+                    return await cls.edit_user_data(
+                        user_id, "inventory", json.dumps(user_inventory)
+                    )
+
+                elif item in user_data["inventory"]:
+                    user_inventory = json.loads(user_data["inventory"])
+                    user_inventory[item] += amount
+                    return await cls.edit_user_data(
+                        user_id, "inventory", json.dumps(user_inventory)
+                    )
+
+    @classmethod
+    async def add_cooldown(cls, user_id: int, command_name: str, seconds: int) -> None:
+        await cls.user_check(user_id)
+        async with cls.db_connection.acquire():
+            user_data = await cls.get_user_data(user_id)
+            end_time = discord.utils.utcnow() + datetime.timedelta(seconds=seconds)
+            if user_data["cooldowns"] is None:
+                return await cls.edit_user_data(
+                    user_id,
+                    "cooldowns",
+                    json.dumps({command_name: end_time.isoformat()}),
+                )
+
+            elif user_data["cooldowns"] is not None:
+                if command_name not in user_data["cooldowns"]:
+                    user_cooldowns = json.loads(user_data["cooldowns"])
+                    user_cooldowns[command_name] = end_time.isoformat()
+                    return await cls.edit_user_data(
+                        user_id, "cooldowns", json.dumps(user_cooldowns)
+                    )
+
+                elif command_name in user_data["cooldowns"]:
+                    user_cooldowns = json.loads(user_data["cooldowns"])
+                    user_cooldowns[command_name] = end_time.isoformat()
+                    return await cls.edit_user_data(
+                        user_id, "cooldowns", json.dumps(user_cooldowns)
+                    )
+
+    @classmethod
+    async def remove_cooldown(cls, user_id: int, command_name: str) -> bool:
+        await cls.user_check(user_id)
+        async with cls.db_connection.acquire():
+            user_data = await cls.get_user_data(user_id)
+            if command_name == "all":
+                return await cls.edit_user_data(user_id, "cooldowns", None)
+            elif user_data["cooldowns"] is not None:
+                user_cooldowns = json.loads(user_data["cooldowns"])
+                if command_name in user_cooldowns:
+                    del user_cooldowns[command_name]
+                    await cls.edit_user_data(
+                        user_id, "cooldowns", json.dumps(user_cooldowns)
+                    )
+                    return True
+                elif command_name not in user_cooldowns:
+                    return False
+
+    @classmethod
+    async def guild_check(cls, guild_id: int) -> None:
+        async with cls.db_connection.acquire():
+            guildexists = await cls.db_connection.fetchval(
+                "SELECT EXISTS (SELECT 1 FROM guilds WHERE id = $1)", guild_id
+            )
+
+            if not guildexists:
+                await cls.add_guild_data(cls, guild_id)
+
+    classmethod
+
     async def add_guild_data(cls, guild_id: int) -> None:
         async with cls.db_connection.acquire():
             await cls.db_connection.execute(
@@ -156,173 +282,103 @@ class DataManager:
             )
 
     @classmethod
-    async def add_filtered_words_data(cls, guild_id: int) -> None:
+    async def get_guild_data(cls, guild_id: int) -> None:
+        await cls.guild_check(guild_id)
+        async with cls.db_connection.acquire():
+            return await cls.db_connection.fetchrow(
+                "SELECT * FROM guilds WHERE id = $1", guild_id
+            )
+
+    @classmethod
+    async def edit_guild_data(cls, guild_id: int, column: str, value: Any) -> None:
+        await cls.guild_check(guild_id)
+        async with cls.db_connection.acquire():
+            return await cls.db_connection.execute(
+                f"UPDATE guilds SET {column} = $1 WHERE id = $2", value, guild_id
+            )
+
+    @classmethod
+    async def register_warning(cls, guild_id: int, user_id: int, reason: str) -> None:
+        await cls.guild_check(guild_id)
+        async with cls.db_connection.acquire():
+            warning = {str(uuid.uuid4()): reason}
+            guild_data = await cls.get_guild_data(guild_id)
+            warned_users = guild_data["warned_users"]
+            if warned_users is None:
+                warned_users = {}
+            elif warned_users is not None:
+                warned_users = json.loads(warned_users)
+            if str(user_id) not in warned_users:
+                warned_users[str(user_id)] = [warning]
+            else:
+                warned_users[str(user_id)].append(warning)
+            return await cls.edit_guild_data(
+                guild_id, "warned_users", json.dumps(warned_users)
+            )
+
+    @classmethod
+    async def delete_warning(cls, guild_id: int, warning_uuid: uuid.uuid4) -> bool:
+        await cls.guild_check(guild_id)
+        async with cls.db_connection.acquire():
+            guild_data = await cls.get_guild_data(guild_id)
+            warned_users = json.loads(guild_data["warned_users"])
+            for user_id in warned_users:
+                for warning in warned_users[user_id]:
+                    if warning_uuid in warning:
+                        warned_users[user_id].remove(warning)
+                        await cls.edit_guild_data(
+                            guild_id, "warned_users", json.dumps(warned_users)
+                        )
+                        return True
+                    elif warning_uuid not in warning:
+                        return False
+
+    @classmethod
+    async def get_user_warnings(cls, guild_id: int, user_id: int) -> None:
+        await cls.guild_check(guild_id)
+        async with cls.db_connection.acquire():
+            guild_data = await cls.get_guild_data(guild_id)
+            if guild_data["warned_users"] is None:
+                return []
+            elif guild_data["warned_users"] is not None:
+                warned_users = json.loads(guild_data["warned_users"])
+                return warned_users.get(str(user_id), [])
+
+    @classmethod
+    async def filter_check(cls, guild_id: int) -> None:
+        await cls.guild_check(guild_id)
+        async with cls.db_connection.acquire():
+            filterexists = await cls.db_connection.fetchrow(
+                "SELECT * FROM filtered_words WHERE guild_id = $1", guild_id
+            )
+
+            if not filterexists:
+                cls.add_filter_data(guild_id)
+
+    @classmethod
+    async def get_filter_data(cls, guild_id: int) -> None:
+        await cls.filter_check(guild_id)
+        async with cls.db_connection.acquire():
+            return await cls.db_connection.fetchrow(
+                "SELECT * FROM filtered_words WHERE guild_id = $1", guild_id
+            )
+
+    @classmethod
+    async def add_filter_data(cls, guild_id: int) -> None:
         async with cls.db_connection.acquire():
             await cls.db_connection.execute(
                 "INSERT INTO filtered_words (guild_id) VALUES ($1)", guild_id
             )
 
     @classmethod
-    async def remove_guild_data(cls, guild_id: int) -> None:
+    async def edit_filter_data(cls, guild_id: int, column: str, value: Any) -> None:
+        await cls.filter_check(guild_id)
         async with cls.db_connection.acquire():
-            await cls.db_connection.execute(
-                "DELETE FROM guilds WHERE id = $1", guild_id
-            )
-
-    @classmethod
-    async def get_all_guilds(cls) -> None:
-        async with cls.db_connection.acquire():
-            rows = await cls.db_connection.fetch("SELECT id FROM guilds")
-            return [row["id"] for row in rows]
-
-    @classmethod
-    async def get_all_guilds_filtered_words(cls) -> None:
-        async with cls.db_connection.acquire():
-            rows = await cls.db_connection.fetch("SELECT guild_id FROM filtered_words")
-            return [row["guild_id"] for row in rows]
-
-    @classmethod
-    async def get_guild_data(cls, guild_id: int) -> None:
-        async with cls.db_connection.acquire():
-            if guild_id not in await cls.get_all_guilds():
-                await cls.add_guild_data(guild_id)
-
-            row = await cls.db_connection.fetchrow(
-                "SELECT * FROM guilds WHERE id = $1", guild_id
-            )
-            return row
-
-    @classmethod
-    async def edit_guild_data(cls, guild_id: int, key: str, value: Any) -> None:
-        async with cls.db_connection.acquire():
-            if guild_id not in await cls.get_all_guilds():
-                await cls.add_guild_data(guild_id)
-
-            await cls.db_connection.execute(
-                f"UPDATE guilds SET {key} = $1 WHERE id = $2", value, guild_id
-            )
-
-    @classmethod
-    async def get_guild_filtered_words(cls, guild_id: int) -> None:
-        async with cls.db_connection.acquire():
-            if guild_id not in await cls.get_all_guilds_filtered_words():
-                await cls.add_filtered_words_data(guild_id)
-
-            row = await cls.db_connection.fetchrow(
-                "SELECT * FROM filtered_words WHERE guild_id = $1", guild_id
-            )
-            return row
-
-    @classmethod
-    async def edit_filtered_words_channel(cls, guild_id: int, channel_id: int) -> None:
-        async with cls.db_connection.acquire():
-            if guild_id not in await cls.get_all_guilds_filtered_words():
-                await cls.add_filtered_words_data(guild_id)
-
-            await cls.db_connection.execute(
-                "UPDATE filtered_words SET channel_id = $1 WHERE guild_id = $2",
-                channel_id,
+            return await cls.db_connection.execute(
+                f"UPDATE filtered_words SET {column} = $1 WHERE guild_id = $2",
+                value,
                 guild_id,
             )
-
-    @classmethod
-    async def edit_blacklisted_words(cls, guild_id: int, words: list[str]) -> None:
-        async with cls.db_connection.acquire():
-            if guild_id not in await cls.get_all_guilds():
-                await cls.add_guild_data(guild_id)
-
-            await cls.db_connection.execute(
-                "UPDATE filtered_words SET blacklisted_words = $1 WHERE guild_id = $2",
-                words,
-                guild_id,
-            )
-
-    @classmethod
-    async def edit_whitelist(cls, guild_id: int, whitelist: list[int]) -> None:
-        async with cls.db_connection.acquire():
-            if guild_id not in await cls.get_all_guilds():
-                await cls.add_guild_data(guild_id)
-
-            await cls.db_connection.execute(
-                "UPDATE filtered_words SET whitelist = $1 WHERE guild_id = $2",
-                whitelist,
-                guild_id,
-            )
-
-    @classmethod
-    async def register_warning(cls, guild_id: int, user_id: int, reason: str) -> None:
-        async with cls.db_connection.acquire():
-            if guild_id not in await cls.get_all_guilds():
-                await cls.add_guild_data(guild_id)
-
-            existing_warnings = await cls.db_connection.fetchval(
-                "SELECT warned_users FROM guilds WHERE id = $1", guild_id
-            )
-            new_warning = {str(user_id): [{str(uuid.uuid4()): reason}]}
-
-            if existing_warnings is None:
-                await cls.db_connection.execute(
-                    "UPDATE guilds SET warned_users = $1::jsonb WHERE id = $2",
-                    json.dumps(new_warning),
-                    guild_id,
-                )
-
-            else:
-                warned_user_dict = json.loads(existing_warnings)
-                if str(user_id) in warned_user_dict:
-                    warned_user_dict[str(user_id)].append(new_warning)
-                else:
-                    warned_user_dict[str(user_id)] = [new_warning]
-
-                await cls.db_connection.execute(
-                    "UPDATE guilds SET warned_users = $1::jsonb WHERE id = $2",
-                    json.dumps(warned_user_dict),
-                    guild_id,
-                )
-
-    @classmethod
-    async def delete_warning(cls, guild_id: int, warning_uuid: uuid.uuid4) -> None:
-        async with cls.db_connection.acquire():
-            if guild_id not in await cls.get_all_guilds():
-                await cls.add_guild_data(guild_id)
-
-            warned_users_json = await cls.db_connection.fetchval(
-                "SELECT warned_users FROM guilds WHERE id  = $1 FOR UPDATE", guild_id
-            )
-
-            if warned_users_json:
-                warned_users_dict = json.loads(warned_users_json)
-                found = False
-                for user_warnings in warned_users_dict.values():
-                    for warning in user_warnings:
-                        if warning.get(warning_uuid):
-                            user_warnings.remove(warning)
-                            found = True
-                            break
-
-                if found:
-                    await cls.db_connection.execute(
-                        "UPDATE guilds SET warned_users = $1::jsonb WHERE id = $2",
-                        json.dumps(warned_users_dict),
-                        guild_id,
-                    )
-                    return True
-                else:
-                    return False
-
-    @classmethod
-    async def get_user_warnings(cls, guild_id: int, user_id: int) -> None:
-        async with cls.db_connection.acquire():
-            if guild_id not in await cls.get_all_guilds():
-                await cls.add_guild_data(guild_id)
-
-            warned_users_json = await cls.db_connection.fetchval(
-                "SELECT warned_users FROM guilds where id = $1", guild_id
-            )
-
-            if warned_users_json:
-                warned_users_dict = json.loads(warned_users_json)
-                return warned_users_dict.get(str(user_id), [])
 
     @classmethod
     async def register_giveaway(
@@ -336,10 +392,11 @@ class DataManager:
         extra_notes: str,
         host_id: int,
     ) -> None:
+        await cls.guild_check(guild_id)
         async with cls.db_connection.acquire():
             end_date = discord.utils.utcnow() + datetime.timedelta(minutes=minutes)
             await cls.db_connection.execute(
-                "INSERT INTO giveaways (id, guild_id, channel_id, end_date, winner_amount, prize, extra_notes, host_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
+                "INSERT INTO giveaways (id, guild_id, channel_id, end_date, winner_amount, prize, extra_notes, host_id) VALUES ($1, $2, $3, $4, $5, $6, $7)",
                 giveaway_id,
                 guild_id,
                 channel_id,
@@ -351,148 +408,43 @@ class DataManager:
             )
 
     @classmethod
-    async def edit_giveaway(
-        cls, giveaway_id: int, guild_id: int, column: str, value: Any
+    async def get_giveaway_data(cls, giveaway_id: int) -> None:
+        async with cls.db_connection.acquire():
+            return await cls.db_connection.fetchrow(
+                "SELECT * FROM giveaways WHERE id = $1", giveaway_id
+            )
+
+    @classmethod
+    async def edit_giveaway_data(
+        cls, giveaway_id: int, column: str, value: Any
     ) -> None:
         async with cls.db_connection.acquire():
-            await cls.db_connection.execute(
-                f"UPDATE giveaways SET {column} = $1 WHERE id = $2 AND guild_id = $3",
-                value,
-                giveaway_id,
-                guild_id,
+            return await cls.db_connection.execute(
+                f"UPDATE giveaways SET {column} = $1 WHERE id = $2", value, giveaway_id
             )
 
     @classmethod
-    async def add_giveaway_participant(cls, giveaway_id: int, user_id: int) -> None:
+    async def draw_giveaway_winners(cls, giveaway_id: int) -> list[int]:
         async with cls.db_connection.acquire():
-            participants = await cls.db_connection.fetchval(
-                "SELECT participants FROM giveaways WHERE id = $1", giveaway_id
+            giveaway_data = await cls.get_giveaway_data(giveaway_id)
+            winners = random.sample(
+                giveaway_data["participants"], giveaway_data["winner_amount"]
             )
-
-            if user_id not in participants:
-                await cls.db_connection.execute(
-                    "UPDATE giveaways SET participants = array_append(participants, $1) WHERE id = $2",
-                    user_id,
+            await cls.edit_giveaway_data(giveaway_id, "winners", winners)
+            for winner in winners:
+                await cls.edit_giveaway_data(
                     giveaway_id,
+                    "participants",
+                    giveaway_data["participants"].remove(winner),
                 )
-                return True
-
-            elif user_id in participants:
-                return False
+            await cls.edit_giveaway_data(giveaway_id, "ended", True)
+            return winners
 
     @classmethod
-    async def remove_giveaway_participant(cls, giveaway_id: int, user_id: int) -> None:
+    async def get_all_panels(cls) -> None:
         async with cls.db_connection.acquire():
-            participants = await cls.db_connection.fetchval(
-                "SELECT participants FROM giveaways WHERE id = $1", giveaway_id
-            )
-
-            if user_id in participants:
-                await cls.db_connection.execute(
-                    "UPDATE giveaways SET participants = array_remove(participants, $1) WHERE id = $2",
-                    user_id,
-                    giveaway_id,
-                )
-                return True
-
-            elif user_id not in participants:
-                return False
-
-    @classmethod
-    async def replace_giveaway_winner(
-        cls, giveaway_id: int, guild_id: int, replaced_user_id: int
-    ) -> None:
-        async with cls.db_connection.acquire():
-            giveaway_data = await cls.get_giveaway_data(giveaway_id, guild_id)
-            new_random_winner = random.choice(giveaway_data["participants"])
-            await cls.db_connection.execute(
-                "UPDATE giveaways SET winners = array_replace(winners, $1, $2) WHERE id = $3 AND guild_id = $4",
-                replaced_user_id,
-                new_random_winner,
-                giveaway_id,
-                guild_id,
-            )
-            return new_random_winner
-
-    @classmethod
-    async def get_giveaway_data(cls, giveaway_id: int, guild_id: int) -> None:
-        async with cls.db_connection.acquire():
-            row = await cls.db_connection.fetchrow(
-                "SELECT * FROM giveaways WHERE id = $1 AND guild_id = $2",
-                giveaway_id,
-                guild_id,
-            )
-            return row
-
-    @classmethod
-    async def get_next_giveaway(cls) -> None:
-        async with cls.db_connection.acquire():
-            row = await cls.db_connection.fetchrow(
-                "SELECT * FROM giveaways WHERE end_date > $1 AND ended = FALSE ORDER BY end_date ASC",
-                discord.utils.utcnow().isoformat(),
-            )
-            return row
-
-    @classmethod
-    async def end_giveaway(cls, giveaway_id: int, guild_id: int) -> None:
-        async with cls.db_connection.acquire():
-            await cls.db_connection.execute(
-                "UPDATE giveaways SET ended = TRUE WHERE id = $1 AND guild_id = $2",
-                giveaway_id,
-                guild_id,
-            )
-
-    @classmethod
-    async def draw_giveaway_winners(cls, giveaway_id: int, guild_id: int) -> None:
-        async with cls.db_connection.acquire():
-            participants = await cls.db_connection.fetchval(
-                "SELECT participants FROM giveaways WHERE id = $1 AND guild_id = $2",
-                giveaway_id,
-                guild_id,
-            )
-            winneramount = await cls.db_connection.fetchval(
-                "SELECT winner_amount FROM giveaways WHERE id = $1 AND guild_id = $2",
-                giveaway_id,
-                guild_id,
-            )
-
-            winners = await cls.db_connection.fetchval(
-                "SELECT winners FROM giveaways WHERE id = $1 AND guild_id = $2",
-                giveaway_id,
-                guild_id,
-            )
-
-            if participants == "[]":
-                return False
-
-            if winners != "[]":
-                for winner in winners:
-                    await cls.db_connection.execute(
-                        "UPDATE giveaways SET winners = array_remove(winners, $1) WHERE id = $2 AND guild_id = $3",
-                        winner,
-                        giveaway_id,
-                        guild_id,
-                    )
-
-            if len(participants) > winneramount:
-                winners = random.sample(participants, winneramount)
-                for winner in winners:
-                    await cls.db_connection.execute(
-                        "UPDATE giveaways SET winners = array_append(winners, $1) WHERE id = $2 AND guild_id = $3",
-                        winner,
-                        giveaway_id,
-                        guild_id,
-                    )
-                return winners
-            elif len(participants) <= winneramount:
-                for participant in participants:
-                    await cls.db_connection.execute(
-                        "UPDATE giveaways SET winners = array_append(winners, $1) WHERE id = $2 AND guild_id = $3",
-                        participant,
-                        giveaway_id,
-                        guild_id,
-                    )
-                return participants
+            rows = await cls.db_connection.fetch("SELECT * FROM panels")
+            return [dict(row) for row in rows]
 
     @classmethod
     async def create_panel(
@@ -505,6 +457,7 @@ class DataManager:
         panel_description: str,
         panel_moderators: list[int],
     ) -> None:
+        await cls.guild_check(guild_id)
         async with cls.db_connection.acquire():
             await cls.db_connection.execute(
                 "INSERT INTO panels (id, channel_id, guild_id, limit_per_user, panel_title, panel_description, panel_moderators) VALUES ($1, $2, $3, $4, $5, $6, $7)",
@@ -518,319 +471,106 @@ class DataManager:
             )
 
     @classmethod
-    async def delete_panel(cls, panel_id: int, guild_id: int) -> None:
+    async def get_panel_data(cls, panel_id: int) -> None:
         async with cls.db_connection.acquire():
-            await cls.db_connection.execute(
-                "DELETE FROM panels WHERE id = $1 AND guild_id = $2", panel_id, guild_id
+            return await cls.db_connection.fetchrow(
+                "SELECT * FROM panels WHERE id = $1", panel_id
             )
 
     @classmethod
-    async def edit_panel(
-        cls, panel_id: int, guild_id: int, column: str, value: Any
-    ) -> None:
+    async def edit_panel_data(cls, panel_id: int, column: str, value: Any) -> None:
         async with cls.db_connection.acquire():
-            await cls.db_connection.execute(
-                f"UPDATE panels SET {column} = $1 WHERE id = $2 AND guild_id = $3",
-                value,
-                panel_id,
-                guild_id,
-            )
+            if column == "delete" and value == True:
+                return await cls.db_connection.execute(
+                    "DELETE FROM panels WHERE id = $1", panel_id
+                )
+            else:
+                return await cls.db_connection.execute(
+                    f"UPDATE panels SET {column} = $1 WHERE id = $2", value, panel_id
+                )
 
     @classmethod
-    async def edit_panel_moderators(
-        cls, panel_id: int, guild_id: int, panel_moderators: list[int]
-    ) -> None:
+    async def get_all_tickets(cls):
         async with cls.db_connection.acquire():
-            await cls.db_connection.execute(
-                "UPDATE panels SET panel_moderators = $1 WHERE id = $2 AND guild_id = $3",
-                panel_moderators,
-                panel_id,
-                guild_id,
-            )
-
-    @classmethod
-    async def get_panel_data(cls, panel_id: int, guild_id: int) -> None:
-        async with cls.db_connection.acquire():
-            row = await cls.db_connection.fetchrow(
-                "SELECT * FROM panels WHERE id = $1 AND guild_id = $2",
-                panel_id,
-                guild_id,
-            )
-            return row
-
-    @classmethod
-    async def get_all_panels(cls) -> None:
-        async with cls.db_connection.acquire():
-            rows = await cls.db_connection.fetch("SELECT * FROM panels")
-            all_panels = []
-
+            rows = await cls.db_connection.fetch("SELECT * FROM tickets")
+            all_tickets = []
             for row in rows:
-                all_panels.append(row)
-            return all_panels
+                if dict(row)["tickets"] is not None:
+                    tickets = json.loads(dict(row)["tickets"])
+                    for ticket_id, ticket_data in tickets.items():
+                        ticket_data["ticket_id"] = ticket_id
+                        all_tickets.append(ticket_data)
+            return all_tickets
 
     @classmethod
-    async def get_all_panel_ids(cls) -> None:
+    async def get_panel_tickets(cls, panel_id: int) -> None:
         async with cls.db_connection.acquire():
-            rows = await cls.db_connection.fetch("SELECT id FROM panels")
-            all_panel_ids = []
-
-            for row in rows:
-                all_panel_ids.append(row["id"])
-            return all_panel_ids
+            return await cls.db_connection.fetchrow(
+                "SELECT tickets FROM tickets WHERE panel_id = $1", panel_id
+            )
 
     @classmethod
     async def create_ticket(
-        cls,
-        panel_id: int,
-        guild_id: int,
-        ticket_id: int,
-        ticket_creator: int,
-        closed: bool = False,
+        cls, panel_id: int, ticket_id: int, ticket_creator: int
     ) -> None:
         async with cls.db_connection.acquire():
-            existing_tickets = await cls.db_connection.fetchval(
-                "SELECT tickets FROM panels WHERE id = $1 AND guild_id = $2",
-                panel_id,
-                guild_id,
-            )
-            new_ticket = {
-                "ticket_id": ticket_id,
-                "ticket_creator": ticket_creator,
-                "closed": closed,
-            }
-            if existing_tickets is None:
-                await cls.db_connection.execute(
-                    "UPDATE panels SET tickets = $1::jsonb WHERE id = $2 AND guild_id = $3",
-                    json.dumps([new_ticket]),
-                    panel_id,
-                    guild_id,
-                )
+            tickets = await cls.get_panel_tickets(panel_id)
+            if tickets is None:
+                tickets = {}
+            elif tickets["tickets"] is None:
+                tickets = {}
             else:
-                tickets_dict = json.loads(existing_tickets)
-                tickets_dict.append(new_ticket)
-                await cls.db_connection.execute(
-                    "UPDATE panels SET tickets = $1::jsonb WHERE id = $2 AND guild_id = $3",
-                    json.dumps(tickets_dict),
-                    panel_id,
-                    guild_id,
-                )
+                tickets = json.loads(tickets["tickets"])
+
+            tickets[ticket_id] = {"ticket_creator": ticket_creator, "closed": False}
+            await cls.db_connection.execute(
+                "UPDATE tickets SET tickets = $1 WHERE panel_id = $2",
+                json.dumps(tickets),
+                panel_id,
+            )
 
     @classmethod
-    async def open_ticket(cls, panel_id: int, ticket_id: int) -> None:
+    async def get_panel_id_by_ticket_id(cls, ticket_id: int):
         async with cls.db_connection.acquire():
-            existing_tickets = await cls.db_connection.fetchval(
-                "SELECT tickets FROM panels WHERE id = $1", panel_id
+            rows = await cls.db_connection.fetch("SELECT * FROM tickets")
+            for row in rows:
+                if dict(row)["tickets"] is not None:
+                    tickets = json.loads(dict(row)["tickets"])
+                    if str(ticket_id) in tickets:
+                        return dict(row)["panel_id"]
+            return None
+
+    @classmethod
+    async def get_ticket_data(cls, panel_id: int, ticket_id: int):
+        async with cls.db_connection.acquire():
+            tickets = await cls.db_connection.fetchval(
+                "SELECT tickets FROM tickets WHERE panel_id = $1", panel_id
             )
-            if existing_tickets:
-                tickets_dict = json.loads(existing_tickets)
-                for ticket in tickets_dict:
-                    if ticket["ticket_id"] == ticket_id:
-                        ticket["closed"] = False
-                        await cls.db_connection.execute(
-                            "UPDATE panels SET tickets = $1::jsonb WHERE id = $2",
-                            json.dumps(tickets_dict),
-                            panel_id,
-                        )
+            if tickets is not None:
+                tickets = json.loads(tickets)
+                if str(ticket_id) in tickets:
+                    ticket_data = tickets[str(ticket_id)]
+                else:
+                    ticket_data = {}
+            else:
+                ticket_data = {}
+            return ticket_data
 
     @classmethod
     async def close_ticket(cls, panel_id: int, ticket_id: int) -> None:
         async with cls.db_connection.acquire():
-            existing_tickets = await cls.db_connection.fetchval(
-                "SELECT tickets FROM panels WHERE id = $1", panel_id
+            tickets = await cls.db_connection.fetchval(
+                "SELECT tickets FROM tickets WHERE panel_id = $1", panel_id
             )
-            if existing_tickets:
-                tickets_dict = json.loads(existing_tickets)
-                for ticket in tickets_dict:
-                    if ticket["ticket_id"] == ticket_id:
-                        ticket["closed"] = True
-                        await cls.db_connection.execute(
-                            "UPDATE panels SET tickets = $1::jsonb WHERE id = $2",
-                            json.dumps(tickets_dict),
-                            panel_id,
-                        )
-
-    @classmethod
-    async def get_ticket(cls, ticket_id: int) -> None:
-        async with cls.db_connection.acquire():
-            rows = await cls.db_connection.fetch("SELECT tickets FROM panels")
-            for row in rows:
-                try:
-                    tickets_dict = json.loads(row["tickets"])
-                except TypeError:
-                    continue
-                for ticket in tickets_dict:
-                    if ticket["ticket_id"] == ticket_id:
-                        return ticket
-
-    @classmethod
-    async def get_all_tickets(cls) -> None:
-        async with cls.db_connection.acquire():
-            rows = await cls.db_connection.fetch("SELECT tickets FROM panels")
-            all_tickets = []
-
-            for row in rows:
-                tickets_dict = row["tickets"]
-                if tickets_dict is not None:
-                    tickets_dict = json.loads(tickets_dict)
-                    for ticket in tickets_dict:
-                        all_tickets.append(ticket)
-            return all_tickets
-
-    @classmethod
-    async def get_all_users(cls) -> None:
-        async with cls.db_connection.acquire():
-            rows = await cls.db_connection.fetch("SELECT id FROM users")
-            return [row["id"] for row in rows]
-
-    @classmethod
-    async def get_user_data(cls, user_id: int) -> None:
-        async with cls.db_connection.acquire():
-            if user_id not in await cls.get_all_users():
-                await cls.add_user_data(user_id)
-
-            row = await cls.db_connection.fetchrow(
-                "SELECT * FROM users WHERE id = $1", user_id
-            )
-            return row
-
-    @classmethod
-    async def add_user_data(cls, user_id: int) -> None:
-        async with cls.db_connection.acquire():
-            await cls.db_connection.execute(
-                "INSERT INTO users (id) VALUES ($1)", user_id
-            )
-
-    @classmethod
-    async def edit_user_data(cls, user_id: int, key: str, value: Any) -> None:
-        async with cls.db_connection.acquire():
-            if user_id not in await cls.get_all_users():
-                await cls.add_user_data(user_id)
-
-            await cls.db_connection.execute(
-                f"UPDATE users SET {key} = $1 WHERE id = $2", value, user_id
-            )
-
-    @classmethod
-    async def edit_user_mining_xp(cls, user_id: int, amount: int) -> None:
-        async with cls.db_connection.acquire():
-            if user_id not in await cls.get_all_users():
-                await cls.add_user_data(user_id)
-
-            await cls.db_connection.execute(
-                "UPDATE users SET mining_xp = $1 WHERE id = $2", amount, user_id
-            )
-
-    @classmethod
-    async def edit_user_inventory(cls, user_id: int, item: str, amount: int) -> None:
-        async with cls.db_connection.acquire():
-            if user_id not in await cls.get_all_users():
-                await cls.add_user_data(user_id)
-
-            inventory = await cls.db_connection.fetchval(
-                "SELECT inventory FROM users WHERE id = $1", user_id
-            )
-
-            if inventory is None:
-                await cls.db_connection.execute(
-                    "UPDATE users SET inventory = $1::jsonb WHERE id = $2",
-                    json.dumps({item: amount}),
-                    user_id,
-                )
-            else:
-                inventory_dict = json.loads(inventory)
-                if item not in inventory_dict:
-                    inventory_dict[item] = amount
+            if tickets is not None:
+                tickets = json.loads(tickets)
+                if str(ticket_id) in tickets:
+                    tickets[str(ticket_id)]["closed"] = True
                     await cls.db_connection.execute(
-                        "UPDATE users SET inventory = $1::jsonb WHERE id = $2",
-                        json.dumps(inventory_dict),
-                        user_id,
+                        "UPDATE tickets SET tickets = $1 WHERE panel_id = $2",
+                        json.dumps(tickets),
+                        panel_id,
                     )
-                else:
-                    inventory_dict[item] += amount
-
-                    await cls.db_connection.execute(
-                        "UPDATE users SET inventory = $1::jsonb WHERE id = $2",
-                        json.dumps(inventory_dict),
-                        user_id,
-                    )
-
-    @classmethod
-    async def add_cooldown(
-        cls, user_id: int, command_name: str, cooldown_seconds: int
-    ) -> None:
-        async with cls.db_connection.acquire():
-            if user_id not in await cls.get_all_users():
-                await cls.add_user_data(user_id)
-
-            cooldowns = await cls.db_connection.fetchval(
-                "SELECT cooldowns FROM users WHERE id = $1", user_id
-            )
-
-            end_time = discord.utils.utcnow() + datetime.timedelta(
-                seconds=cooldown_seconds
-            )
-            new_cooldown = {command_name: end_time.isoformat()}
-
-            if cooldowns is None:
-                await cls.db_connection.execute(
-                    "UPDATE users set cooldowns = $1::jsonb WHERE id = $2",
-                    json.dumps(new_cooldown),
-                    user_id,
-                )
-            else:
-                cooldown_dict = json.loads(cooldowns)
-                cooldown_dict.update(new_cooldown)
-
-                await cls.db_connection.execute(
-                    "UPDATE users SET cooldowns = $1::jsonb WHERE id = $2",
-                    json.dumps(cooldown_dict),
-                    user_id,
-                )
-
-    @classmethod
-    async def get_cooldown_end(cls, user_id: int, command_name: str) -> None:
-        async with cls.db_connection.acquire():
-            if user_id not in await cls.get_all_users():
-                await cls.add_user_data(user_id)
-
-            cooldowns = await cls.db_connection.fetchval(
-                "SELECT cooldowns FROM users WHERE id = $1", user_id
-            )
-
-            if cooldowns:
-                cooldown_dict = json.loads(cooldowns)
-                return cooldown_dict.get(command_name, None)
-
-    @classmethod
-    async def remove_cooldown(cls, user_id: int, command_name: str) -> None:
-        async with cls.db_connection.acquire():
-            if user_id not in await cls.get_all_users():
-                await cls.add_user_data(user_id)
-
-            cooldowns = await cls.db_connection.fetchval(
-                "SELECT cooldowns FROM users WHERE id = $1", user_id
-            )
-
-            if cooldowns:
-                cooldown_dict = json.loads(cooldowns)
-                if command_name in cooldown_dict:
-                    del cooldown_dict[command_name]
-
-                    await cls.db_connection.execute(
-                        "UPDATE users SET cooldowns = $1::jsonb WHERE id = $2",
-                        json.dumps(cooldown_dict),
-                        user_id,
-                    )
-
-    @classmethod
-    async def remove_all_cooldowns(cls, user_id: int) -> None:
-        async with cls.db_connection.acquire():
-            if user_id not in await cls.get_all_users():
-                await cls.add_user_data(user_id)
-
-            await cls.db_connection.execute(
-                "UPDATE users SET cooldowns = null WHERE id = $1", user_id
-            )
 
 
 async def main():

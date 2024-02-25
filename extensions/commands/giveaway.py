@@ -1,6 +1,7 @@
 import datetime
 from typing import Optional
 
+import random
 import discord
 from discord import app_commands
 from discord.ext import commands
@@ -121,9 +122,12 @@ class giveaway_leave_view(discord.ui.View):
     async def leave_giveaway(
         self, interaction: discord.Interaction, button: discord.ui.Button
     ):
-        if await DataManager.remove_giveaway_participant(
-            self.giveaway_id, interaction.user.id
-        ):
+        giveaway_data = await DataManager.get_giveaway_data(self.giveaway_id)
+        if interaction.user.id in giveaway_data["participants"]:
+            giveaway_data["participants"].remove(interaction.user.id)
+            await DataManager.edit_giveaway_data(
+                self.giveaway_id, "participants", giveaway_data["participants"]
+            )
             await interaction.response.edit_message(
                 content="You have successfully left the giveaway!", view=None
             )
@@ -148,30 +152,26 @@ class giveaway_views(discord.ui.View):
     async def join_giveaway(
         self, interaction: discord.Interaction, button: discord.ui.Button
     ):
-        if await DataManager.get_giveaway_data(
-            interaction.message.id, interaction.guild.id
-        ):
-            if await DataManager.add_giveaway_participant(
-                interaction.message.id, interaction.user.id
-            ):
-                await interaction.response.send_message(
-                    content="Successfully entered the giveaway!", ephemeral=True
-                )
-
-                self.bot.dispatch(
-                    "giveaway_join",
-                    interaction.message.id,
-                    interaction.guild.id,
-                )
-            else:
-                await interaction.response.send_message(
-                    content="You have already entered this giveaway!",
-                    ephemeral=True,
-                    view=giveaway_leave_view(interaction.message.id, self.bot),
-                )
+        giveaway_data = await DataManager.get_giveaway_data(interaction.message.id)
+        if interaction.user.id in giveaway_data["participants"]:
+            return await interaction.response.send_message(
+                content="You have already entered this giveaway!",
+                ephemeral=True,
+                view=giveaway_leave_view(interaction.message.id, self.bot),
+            )
         else:
+            giveaway_data["participants"].append(interaction.user.id)
+            await DataManager.edit_giveaway_data(
+                interaction.message.id, "participants", giveaway_data["participants"]
+            )
             await interaction.response.send_message(
-                content="Giveaway not found!", ephemeral=True
+                content="Successfully entered the giveaway!", ephemeral=True
+            )
+
+            self.bot.dispatch(
+                "giveaway_join",
+                interaction.message.id,
+                interaction.guild.id,
             )
 
     @discord.ui.button(
@@ -182,9 +182,7 @@ class giveaway_views(discord.ui.View):
     async def view_entrants(
         self, interaction: discord.Interaction, button: discord.ui.Button
     ):
-        giveaway_data = await DataManager.get_giveaway_data(
-            interaction.message.id, interaction.guild.id
-        )
+        giveaway_data = await DataManager.get_giveaway_data(interaction.message.id)
         if giveaway_data:
             if len(giveaway_data["participants"]) > 0:
                 embeds = []
@@ -236,20 +234,15 @@ class giveaway(commands.GroupCog):
         self, interaction: discord.Interaction, giveaway_id: str
     ) -> None:
         if giveaway_id.isnumeric():
-            if await DataManager.get_giveaway_data(
-                int(giveaway_id), interaction.guild.id
-            ):
-                giveaway_data = await DataManager.get_giveaway_data(
-                    int(giveaway_id), interaction.guild.id
-                )
+            if await DataManager.get_giveaway_data(int(giveaway_id)):
+                giveaway_data = await DataManager.get_giveaway_data(int(giveaway_id))
                 if giveaway_data["ended"]:
                     return await interaction.response.send_message(
                         f"Giveaway already ended!", ephemeral=True
                     )
-                await DataManager.end_giveaway(int(giveaway_id), interaction.guild.id)
-                await DataManager.edit_giveaway(
+                await DataManager.edit_giveaway_data(int(giveaway_id), "ended", True)
+                await DataManager.edit_giveaway_data(
                     int(giveaway_id),
-                    interaction.guild.id,
                     "end_date",
                     discord.utils.utcnow().isoformat(),
                 )
@@ -282,18 +275,12 @@ class giveaway(commands.GroupCog):
         user: Optional[discord.User],
     ) -> None:
         if giveaway_id.isnumeric():
-            if await DataManager.get_giveaway_data(
-                int(giveaway_id), interaction.guild.id
-            ):
-                giveaway_data = await DataManager.get_giveaway_data(
-                    int(giveaway_id), interaction.guild.id
-                )
+            if await DataManager.get_giveaway_data(int(giveaway_id)):
+                giveaway_data = await DataManager.get_giveaway_data(int(giveaway_id))
                 if giveaway_data["ended"]:
                     if user is None:
                         if len(giveaway_data["winners"]) > 0:
-                            await DataManager.draw_giveaway_winners(
-                                int(giveaway_id), interaction.guild.id
-                            )
+                            await DataManager.draw_giveaway_winners(int(giveaway_id))
                             await interaction.response.send_message(
                                 f"Giveaway rerolled!", ephemeral=True
                             )
@@ -308,9 +295,13 @@ class giveaway(commands.GroupCog):
                             )
                     else:
                         if user.id in giveaway_data["winners"]:
-                            new_winner = await DataManager.replace_giveaway_winner(
-                                int(giveaway_id), interaction.guild.id, user.id
+                            giveaway_data["winners"].remove(user.id)
+                            new_winner = random.choice(giveaway_data["participants"])
+                            giveaway_data["winners"].append(new_winner)
+                            await DataManager.edit_giveaway_data(
+                                giveaway_id, "winners", giveaway_data["winners"]
                             )
+
                             await interaction.response.send_message(
                                 f"Giveaway winner rerolled!", ephemeral=True
                             )

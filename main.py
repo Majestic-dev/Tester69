@@ -81,7 +81,7 @@ class bot(commands.Bot):
                     except discord.ext.commands.errors.ExtensionAlreadyLoaded:
                         await bot.reload_extension(extension_name)
         await bot.tree.sync()
-        
+
         self.add_view(giveaway_views(bot))
         self.add_view(panel_views(bot))
         tickets = await DataManager.get_all_tickets()
@@ -124,6 +124,7 @@ async def on_ready():
         activity=discord.Game(f"/help | https://discord.gg/VsDDf8YKBV"),
     )
 
+
 @bot.tree.error
 async def on_app_command_error(
     interaction: discord.Interaction, error: app_commands.AppCommandError
@@ -160,6 +161,7 @@ async def on_app_command_error(
 
     else:
         logging.error(f"An error occurred: {error}")
+
 
 @bot.event
 async def on_command_error(ctx: commands.Context, error: commands.CommandError):

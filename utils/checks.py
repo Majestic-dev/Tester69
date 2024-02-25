@@ -3,7 +3,10 @@ import datetime
 import json
 import discord
 
-async def cooldown_check(user_id, cooldown_message: str, command: str, cooldown_time: int):
+
+async def cooldown_check(
+    user_id, cooldown_message: str, command: str, cooldown_time: int
+):
     user_data = await DataManager.get_user_data(user_id)
     cooldowns = user_data["cooldowns"]
 
@@ -22,7 +25,7 @@ async def cooldown_check(user_id, cooldown_message: str, command: str, cooldown_
 
         if json.loads(cooldowns)[command] > discord.utils.utcnow().isoformat():
             raise cooldown_error(cooldown_message, timeLeft)
-        
+
         if json.loads(cooldowns)[command] < discord.utils.utcnow().isoformat():
             await DataManager.remove_cooldown(user_id, command)
             await DataManager.add_cooldown(user_id, command, cooldown_time)

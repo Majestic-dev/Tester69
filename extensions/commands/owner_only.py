@@ -19,7 +19,9 @@ class owner_only(commands.Cog):
         amount: int,
         member: Optional[discord.Member] = None,
     ):
-        user_data = await DataManager.get_user_data((member.id) if member else ctx.author.id)
+        user_data = await DataManager.get_user_data(
+            (member.id) if member else ctx.author.id
+        )
 
         if user_data["balance"] + amount > 92233720368547758071:
             return await ctx.reply(
@@ -30,55 +32,22 @@ class owner_only(commands.Cog):
                     colour=discord.Colour.red(),
                 )
             )
-        
-        await DataManager.edit_user_data(
-            (member.id) if member else ctx.author.id, "balance", user_data["balance"] + amount
-        )
-        return await ctx.reply(
-            embed=discord.Embed(
-                description=
-                    (f"<:white_checkmark:1096793014287995061> Added {amount} 🪙 ")
-                    +
-                    (f"to {member.mention}\'s bank. Their new balance is {user_data["balance"] + amount} 🪙"
-                    if member else
-                    f"to your bank. Your new balance is {user_data["balance"] + amount} 🪙"),
-                colour=discord.Colour.green(),
-            )
-        )
-        
-    @commands.command(
-        name="add_bank", description="Add set amount of 🪙 to your bank balance"
-    )
-    @commands.is_owner()
-    async def addbank(
-        self,
-        ctx,
-        amount: int,
-        member: Optional[discord.Member] = None,
-    ):
-        user_data = await DataManager.get_user_data((member.id) if member else ctx.author.id)
 
-        if user_data["bank"] + amount > 92233720368547758071:
-            return await ctx.reply(
-                embed=discord.Embed(
-                    description=(
-                        f"<:white_cross:1096791282023669860> That's too much! Please try lowering your needed amount"
-                    ),
-                    colour=discord.Colour.red(),
-                )
-            )
-        
         await DataManager.edit_user_data(
-            (member.id) if member else ctx.author.id, "bank", user_data["bank"] + amount
+            (member.id) if member else ctx.author.id,
+            "balance",
+            user_data["balance"] + amount,
         )
         return await ctx.reply(
             embed=discord.Embed(
-                description=
-                    (f"<:white_checkmark:1096793014287995061> Added {amount} 🪙 ")
-                    +
-                    (f"to {member.mention}\'s bank. Their new bank balance is {user_data["bank"] + amount} 🪙"
-                     if member else
-                     f"to your bank. Your new bank balance is {user_data["bank"] + amount} 🪙"),
+                description=(
+                    f"<:white_checkmark:1096793014287995061> Added {amount} 🪙 "
+                )
+                + (
+                    f"to {member.mention}'s bank. Their new balance is {user_data["balance"] + amount} 🪙"
+                    if member
+                    else f"to your bank. Your new balance is {user_data["balance"] + amount} 🪙"
+                ),
                 colour=discord.Colour.green(),
             )
         )
@@ -162,7 +131,7 @@ class owner_only(commands.Cog):
     ):
         if member == None:
             if command == "all":
-                await DataManager.remove_all_cooldowns(ctx.author.id)
+                await DataManager.remove_cooldown(ctx.author.id, "all")
                 return await ctx.reply(
                     embed=discord.Embed(
                         description=(
@@ -172,8 +141,8 @@ class owner_only(commands.Cog):
                     )
                 )
 
-            cooldowns = await DataManager.get_user_data(ctx.author.id)["cooldowns"]
-            if command not in cooldowns:
+            user_data = await DataManager.get_user_data(ctx.author.id)
+            if command not in user_data["cooldowns"]:
                 return await ctx.reply(
                     embed=discord.Embed(
                         description=(
@@ -196,7 +165,7 @@ class owner_only(commands.Cog):
 
         else:
             if command == "all":
-                await DataManager.remove_all_cooldowns(member.id)
+                await DataManager.remove_cooldown(member.id, "all")
                 return await ctx.reply(
                     embed=discord.Embed(
                         description=(
@@ -206,8 +175,8 @@ class owner_only(commands.Cog):
                     )
                 )
 
-            cooldowns = await DataManager.get_user_data(member.id)["cooldowns"]
-            if command not in cooldowns:
+            user_data = await DataManager.get_user_data(member.id)
+            if command not in user_data["cooldowns"]:
                 return await ctx.reply(
                     embed=discord.Embed(
                         description=(

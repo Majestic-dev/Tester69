@@ -5,6 +5,7 @@ from discord.ext import commands, tasks
 
 from utils import DataManager
 
+
 class cooldown_looper(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -12,7 +13,6 @@ class cooldown_looper(commands.Cog):
 
     async def on_ready(self):
         self.cooldown_loop.start()
-        
 
     @tasks.loop(seconds=5)
     async def cooldown_loop(self):
@@ -24,6 +24,7 @@ class cooldown_looper(commands.Cog):
                 for command in cooldowns:
                     if cooldowns[command] < discord.utils.utcnow().isoformat():
                         await DataManager.remove_cooldown(user, command)
+
 
 async def setup(bot):
     await bot.add_cog(cooldown_looper(bot))

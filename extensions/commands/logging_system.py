@@ -34,10 +34,10 @@ class logging(commands.GroupCog):
         blocked_words_channel: Optional[discord.TextChannel] = None,
     ):
         if blocked_words_channel == None:
-            data = await DataManager.get_guild_filtered_words(interaction.guild.id)
+            data = await DataManager.get_filter_data(interaction.guild.id)
             if data["channel_id"] != None:
-                await DataManager.edit_filtered_words_channel(
-                    interaction.guild.id, None
+                await DataManager.edit_filter_data(
+                    interaction.guild.id, "channel_id", None
                 )
 
             await interaction.response.send_message(
@@ -63,8 +63,8 @@ class logging(commands.GroupCog):
                 interaction.guild.id, "logs_channel_id", logging_channel.id
             )
 
-            await DataManager.edit_filtered_words_channel(
-                interaction.guild.id, blocked_words_channel.id
+            await DataManager.edit_filter_data(
+                interaction.guild.id, "channel_id", blocked_words_channel.id
             )
 
     @app_commands.command(name="disable", description="Disable logging for this server")
@@ -459,9 +459,7 @@ class logging(commands.GroupCog):
         if message.channel.type == discord.channel.ChannelType.private:
             return
 
-        filtered_words_data = await DataManager.get_guild_filtered_words(
-            message.guild.id
-        )
+        filtered_words_data = await DataManager.get_filter_data(message.guild.id)
         words_in_blacklist = [
             re.sub(r"\W+", " ", word.lower()).strip()
             for word in filtered_words_data["blacklisted_words"]
@@ -489,7 +487,7 @@ class logging(commands.GroupCog):
 
         guild_data = await DataManager.get_guild_data(after.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
-        filtered_words_data = await DataManager.get_guild_filtered_words(after.guild.id)
+        filtered_words_data = await DataManager.get_filter_data(after.guild.id)
         blocked_words_channel = self.bot.get_channel(filtered_words_data["channel_id"])
         content = after.content.lower()
 
@@ -598,9 +596,7 @@ class logging(commands.GroupCog):
 
         guild_data = await DataManager.get_guild_data(message.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
-        filtered_words_data = await DataManager.get_guild_filtered_words(
-            message.guild.id
-        )
+        filtered_words_data = await DataManager.get_filter_data(message.guild.id)
         blocked_words_channel = self.bot.get_channel(filtered_words_data["channel_id"])
 
         if message.author.bot and message.channel != logs_channel:
@@ -647,7 +643,10 @@ class logging(commands.GroupCog):
                 icon_url=message.author.display_avatar, name=message.author
             )
             await logs_channel.send(
-                embed=embed, file=discord.File(fp=buffer, filename=f"{message.author}({message.author.id}).txt")
+                embed=embed,
+                file=discord.File(
+                    fp=buffer, filename=f"{message.author}({message.author.id}).txt"
+                ),
             )
 
         if len(message.content) > 0:

@@ -208,7 +208,12 @@ class economy(commands.Cog):
         description="Grab a rifle from the shop and go hunting for some animals",
     )
     async def hunt(self, interaction: discord.Interaction):
-        if await cooldown_check(interaction.user.id, "<:white_cross:1096791282023669860> You already went hunting", "hunt", 600):
+        if await cooldown_check(
+            interaction.user.id,
+            "<:white_cross:1096791282023669860> You already went hunting",
+            "hunt",
+            600,
+        ):
             chances = []
             for item in DataManager.get("economy", "hunting items").values():
                 chances.append(item["chance"])
@@ -227,7 +232,9 @@ class economy(commands.Cog):
                 or "hunting rifle" not in user_data["inventory"]
                 or inventory["hunting rifle"] == 0
             ):
-                item_emoji = DataManager.get("economy", "items")["hunting rifle"]["emoji"]
+                item_emoji = DataManager.get("economy", "items")["hunting rifle"][
+                    "emoji"
+                ]
                 return await interaction.response.send_message(
                     embed=discord.Embed(
                         description=f"<:white_cross:1096791282023669860> You need a **{item_emoji} Hunting Rifle** to hunt some animals `/buy_item`",
@@ -249,7 +256,12 @@ class economy(commands.Cog):
         description="Grab a fishing pole from the shop and go fishing for some fish",
     )
     async def fish(self, interaction: discord.Interaction):
-        if await cooldown_check(interaction.user.id, "<:white_cross:1096791282023669860> You already went fishing", "fish", 600):
+        if await cooldown_check(
+            interaction.user.id,
+            "<:white_cross:1096791282023669860> You already went fishing",
+            "fish",
+            600,
+        ):
             chances = []
             for item in DataManager.get("economy", "fishing items").values():
                 chances.append(item["chance"])
@@ -268,7 +280,9 @@ class economy(commands.Cog):
                 or "fishing pole" not in user_data["inventory"]
                 or inventory["fishing pole"] == 0
             ):
-                item_emoji = DataManager.get("economy", "items")["fishing pole"]["emoji"]
+                item_emoji = DataManager.get("economy", "items")["fishing pole"][
+                    "emoji"
+                ]
                 return await interaction.response.send_message(
                     embed=discord.Embed(
                         description=f"<:white_cross:1096791282023669860> You need a **{item_emoji} Fishing Pole** to fish `/buy_item`",
@@ -454,7 +468,12 @@ class economy(commands.Cog):
     async def hourly(self, interaction: discord.Interaction):
         user_data = await DataManager.get_user_data(interaction.user.id)
 
-        if await cooldown_check(interaction.user.id, "<:white_cross:1096791282023669860> You already claimed your hourly coins", "hourly", 3600):
+        if await cooldown_check(
+            interaction.user.id,
+            "<:white_cross:1096791282023669860> You already claimed your hourly coins",
+            "hourly",
+            3600,
+        ):
             await DataManager.edit_user_data(
                 interaction.user.id, "balance", user_data["balance"] + 1000
             )
@@ -471,7 +490,12 @@ class economy(commands.Cog):
     async def daily(self, interaction: discord.Interaction):
         user_data = await DataManager.get_user_data(interaction.user.id)
 
-        if await cooldown_check(interaction.user.id, "<:white_cross:1096791282023669860> You already claimed your daily coins", "daily", 86400):
+        if await cooldown_check(
+            interaction.user.id,
+            "<:white_cross:1096791282023669860> You already claimed your daily coins",
+            "daily",
+            86400,
+        ):
             await DataManager.edit_user_data(
                 interaction.user.id, "balance", user_data["balance"] + 10000
             )
@@ -488,7 +512,12 @@ class economy(commands.Cog):
     async def weekly(self, interaction: discord.Interaction):
         user_data = await DataManager.get_user_data(interaction.user.id)
 
-        if await cooldown_check(interaction.user.id, "<:white_cross:1096791282023669860> You already claimed your weekly coins", "weekly", 604800):
+        if await cooldown_check(
+            interaction.user.id,
+            "<:white_cross:1096791282023669860> You already claimed your weekly coins",
+            "weekly",
+            604800,
+        ):
             await DataManager.edit_user_data(
                 interaction.user.id, "balance", user_data["balance"] + 25000
             )
@@ -504,8 +533,13 @@ class economy(commands.Cog):
     )
     async def monthly(self, interaction: discord.Interaction):
         user_data = await DataManager.get_user_data(interaction.user.id)
-        
-        if await cooldown_check(interaction.user.id, "<:white_cross:1096791282023669860> You already claimed your monthly coins", "monthly", 2592000):
+
+        if await cooldown_check(
+            interaction.user.id,
+            "<:white_cross:1096791282023669860> You already claimed your monthly coins",
+            "monthly",
+            2592000,
+        ):
             await DataManager.edit_user_data(
                 interaction.user.id, "balance", user_data["balance"] + 50000
             )
@@ -517,7 +551,7 @@ class economy(commands.Cog):
             )
 
     @app_commands.command(
-    name="inventory", description="Check the contents of your inventory"
+        name="inventory", description="Check the contents of your inventory"
     )
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.user.id))
     async def inventory(self, interaction: discord.Interaction):
@@ -545,7 +579,7 @@ class economy(commands.Cog):
         embeds = []
         for i in range(0, len(items), 10):
             inv_embed = discord.Embed(colour=discord.Colour.green())
-            for item, count in items[i:i+10]:
+            for item, count in items[i : i + 10]:
                 name = f"{DataManager.get('economy', 'items')[item.lower()]['emoji']} {item} - {count}"
                 inv_embed.add_field(
                     name=f"{name}",
@@ -553,7 +587,10 @@ class economy(commands.Cog):
                     inline=False,
                 )
             inv_embed.set_author(
-                name=interaction.user.name + "'s inventory" + f" page {i//10 + 1}/" + str(len(items)//10 + 1),
+                name=interaction.user.name
+                + "'s inventory"
+                + f" page {i//10 + 1}/"
+                + str(len(items) // 10 + 1),
                 icon_url=interaction.user.display_avatar,
             )
             embeds.append(inv_embed)
@@ -887,7 +924,8 @@ class economy(commands.Cog):
         economy_items = DataManager.get("economy", "items")
         for item_owned in json.loads(user_inv):
             whole_balance += (
-                economy_items[item.lower()]["sell price"] * json.loads(user_inv)[item_owned]
+                economy_items[item.lower()]["sell price"]
+                * json.loads(user_inv)[item_owned]
             )
 
         if user_inv is not None:
