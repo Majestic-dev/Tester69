@@ -353,7 +353,7 @@ class DataManager:
             )
 
             if not filterexists:
-                cls.add_filter_data(guild_id)
+                await cls.add_filter_data(guild_id)
 
     @classmethod
     async def get_filter_data(cls, guild_id: int) -> None:
@@ -510,9 +510,7 @@ class DataManager:
             )
 
     @classmethod
-    async def create_ticket(
-        cls, panel_id: int, ticket_id: int, ticket_creator: int
-    ) -> None:
+    async def create_ticket(cls, panel_id: int, ticket_id: int, ticket_creator: int) -> None:
         async with cls.db_connection.acquire():
             tickets = await cls.get_panel_tickets(panel_id)
             if tickets is None:
@@ -523,11 +521,20 @@ class DataManager:
                 tickets = json.loads(tickets["tickets"])
 
             tickets[ticket_id] = {"ticket_creator": ticket_creator, "closed": False}
-            await cls.db_connection.execute(
-                "UPDATE tickets SET tickets = $1 WHERE panel_id = $2",
-                json.dumps(tickets),
-                panel_id,
-            )
+
+            existing_panel = await cls.db_connection.fetchval("SELECT panel_id FROM tickets WHERE panel_id = $1", panel_id)
+            if existing_panel is None:
+                await cls.db_connection.execute(
+                    "INSERT INTO tickets (panel_id, tickets) VALUES ($1, $2)",
+                    panel_id,
+                    json.dumps(tickets),
+                )
+            else:
+                await cls.db_connection.execute(
+                    "UPDATE tickets SET tickets = $1 WHERE panel_id = $2",
+                    json.dumps(tickets),
+                    panel_id,
+                )
 
     @classmethod
     async def get_panel_id_by_ticket_id(cls, ticket_id: int):
@@ -575,7 +582,7 @@ class DataManager:
 
 async def main():
     await DataManager.initialise()
-
+    await DataManager.create_ticket(1, 1, 1)
 
 if __name__ == "__main__":
     asyncio.run(main())
