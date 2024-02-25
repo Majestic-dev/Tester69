@@ -208,7 +208,7 @@ class economy(commands.Cog):
         description="Grab a rifle from the shop and go hunting for some animals",
     )
     async def hunt(self, interaction: discord.Interaction):
-        if await cooldown_check(interaction.user.id, "hunt", 600):
+        if await cooldown_check(interaction.user.id, "<:white_cross:1096791282023669860> You already went hunting", "hunt", 600):
             chances = []
             for item in DataManager.get("economy", "hunting items").values():
                 chances.append(item["chance"])
@@ -249,7 +249,7 @@ class economy(commands.Cog):
         description="Grab a fishing pole from the shop and go fishing for some fish",
     )
     async def fish(self, interaction: discord.Interaction):
-        if await cooldown_check(interaction.user.id, "fish", 600):
+        if await cooldown_check(interaction.user.id, "<:white_cross:1096791282023669860> You already went fishing", "fish", 600):
             chances = []
             for item in DataManager.get("economy", "fishing items").values():
                 chances.append(item["chance"])
@@ -454,7 +454,7 @@ class economy(commands.Cog):
     async def hourly(self, interaction: discord.Interaction):
         user_data = await DataManager.get_user_data(interaction.user.id)
 
-        if await cooldown_check(interaction.user.id, "hourly", 3600):
+        if await cooldown_check(interaction.user.id, "<:white_cross:1096791282023669860> You already claimed your hourly coins", "hourly", 3600):
             await DataManager.edit_user_data(
                 interaction.user.id, "balance", user_data["balance"] + 1000
             )
@@ -471,7 +471,7 @@ class economy(commands.Cog):
     async def daily(self, interaction: discord.Interaction):
         user_data = await DataManager.get_user_data(interaction.user.id)
 
-        if await cooldown_check(interaction.user.id, "daily", 86400):
+        if await cooldown_check(interaction.user.id, "<:white_cross:1096791282023669860> You already claimed your daily coins", "daily", 86400):
             await DataManager.edit_user_data(
                 interaction.user.id, "balance", user_data["balance"] + 10000
             )
@@ -488,7 +488,7 @@ class economy(commands.Cog):
     async def weekly(self, interaction: discord.Interaction):
         user_data = await DataManager.get_user_data(interaction.user.id)
 
-        if await cooldown_check(interaction.user.id, "weekly", 604800):
+        if await cooldown_check(interaction.user.id, "<:white_cross:1096791282023669860> You already claimed your weekly coins", "weekly", 604800):
             await DataManager.edit_user_data(
                 interaction.user.id, "balance", user_data["balance"] + 25000
             )
@@ -505,7 +505,7 @@ class economy(commands.Cog):
     async def monthly(self, interaction: discord.Interaction):
         user_data = await DataManager.get_user_data(interaction.user.id)
         
-        if await cooldown_check(interaction.user.id, "monthly", 2592000):
+        if await cooldown_check(interaction.user.id, "<:white_cross:1096791282023669860> You already claimed your monthly coins", "monthly", 2592000):
             await DataManager.edit_user_data(
                 interaction.user.id, "balance", user_data["balance"] + 50000
             )
