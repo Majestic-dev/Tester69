@@ -1011,6 +1011,43 @@ class ticket(commands.GroupCog):
                     ),
                     ephemeral=True,
                 )
+            
+    @app_commands.command(name="reopen", description="Reopen a ticket")
+    @app_commands.guild_only()
+    @app_commands.checks.cooldown(1, 30, key=lambda i: (i.guild.id))
+    async def reopen_ticket(self, interaction: discord.Interaction):
+        all_tickets = await DataManager.get_all_tickets()
+        for ticket in all_tickets:
+            if interaction.channel.id == int(ticket["ticket_id"]):
+                panel_id = await DataManager.get_panel_id_by_ticket_id(
+                    interaction.channel.id
+                )
+                ticket = await DataManager.get_ticket_data(
+                    panel_id, interaction.channel.id
+                )
+                if not ticket["closed"]:
+                    return await interaction.response.send_message(
+                        embed=discord.Embed(
+                            title="Ticket Already Open!",
+                            description="This ticket has already been opened",
+                            colour=discord.Colour.red(),
+                        ),
+                        ephemeral=True,
+                    )
+                
+                elif ticket["closed"]:
+                    await interaction.response.defer()
+                    await DataManager.open_ticket(panel_id, interaction.channel.id)
+                    user = self.bot.get_user(ticket["ticket_creator"])
+                    await interaction.delete_original_response()
+                    await interaction.channel.add_user(user)
+                    await interaction.channel.send(
+                        embed=discord.Embed(
+                            title="Ticket Reopened",
+                            description=f"Ticket reopened by {interaction.user.mention}",
+                            colour=discord.Colour.green(),
+                        )
+                    )
 
     @app_commands.guild_only()
     @app_commands.checks.has_permissions(administrator=True)

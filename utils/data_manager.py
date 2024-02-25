@@ -579,10 +579,25 @@ class DataManager:
                         panel_id,
                     )
 
+    @classmethod
+    async def open_ticket(cls, panel_id: int, ticket_id: int) -> None:
+        async with cls.db_connection.acquire():
+            tickets = await cls.db_connection.fetchval(
+                "SELECT tickets FROM tickets WHERE panel_id = $1", panel_id
+            )
+            if tickets is not None:
+                tickets = json.loads(tickets)
+                if str(ticket_id) in tickets:
+                    tickets[str(ticket_id)]["closed"] = False
+                    await cls.db_connection.execute(
+                        "UPDATE tickets SET tickets = $1 WHERE panel_id = $2",
+                        json.dumps(tickets),
+                        panel_id,
+                    )
+
 
 async def main():
     await DataManager.initialise()
-    await DataManager.create_ticket(1, 1, 1)
 
 if __name__ == "__main__":
     asyncio.run(main())
