@@ -3,6 +3,7 @@ import logging
 import os
 import aiohttp
 import traceback
+import time
 
 import discord
 from discord import app_commands
@@ -14,7 +15,7 @@ from extensions.commands.ticket_system import (
     panel_views,
     ticket_views,
 )
-from utils import DataManager
+from utils import DataManager, cooldown_error
 
 DataManager.setup(
     [
@@ -132,12 +133,20 @@ async def on_app_command_error(
     if isinstance(error, app_commands.CommandOnCooldown):
         await interaction.edit_original_response(
             embed=discord.Embed(
-                description=f"<:white_cross:1096791282023669860> Wait {error.retry_after:.0f} seconds before using this command again.",
+                description=f"<:white_cross:1096791282023669860> You can use this command again <t:{int(time.time() + error.retry_after)}:R>",
                 colour=discord.Colour.red(),
             ),
         )
         await asyncio.sleep(error.retry_after)
         return await interaction.delete_original_response()
+
+    if isinstance(error.original, cooldown_error):
+        return await interaction.edit_original_response(
+            embed=discord.Embed(
+                description=f"{error.original.error_message}, try again <t:{int(time.time() + error.original.time_left)}:R>",
+                colour=discord.Colour.red(),
+            ),
+        )
 
     elif isinstance(error, app_commands.errors.MissingPermissions):
         return await interaction.edit_original_response(
