@@ -950,14 +950,14 @@ class ticket(commands.GroupCog):
     async def close_ticket(self, interaction: discord.Interaction):
         all_tickets = await DataManager.get_all_tickets()
         for ticket in all_tickets:
-            if interaction.channel.id == ticket["ticket_id"]:
+            if interaction.channel.id == int(ticket["ticket_id"]):
                 panel_id = await DataManager.get_panel_id_by_ticket_id(
                     interaction.channel.id
                 )
                 ticket = await DataManager.get_ticket_data(
                     panel_id, interaction.channel.id
                 )
-                if ticket["closed"] == True:
+                if ticket["closed"]:
                     return await interaction.response.send_message(
                         embed=discord.Embed(
                             title="Ticket Already Closed!",
@@ -967,7 +967,7 @@ class ticket(commands.GroupCog):
                         ephemeral=True,
                     )
 
-                elif ticket["closed"] == False:
+                elif not ticket["closed"]:
                     await interaction.response.defer()
                     panel_id = await DataManager.get_panel_id_by_ticket_id(
                         interaction.channel.id
