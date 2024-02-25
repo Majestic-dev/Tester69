@@ -130,7 +130,15 @@ async def on_app_command_error(
 ):
     await interaction.response.defer(ephemeral=True)
 
-    if isinstance(error, app_commands.CommandOnCooldown):
+    if isinstance(error, app_commands.errors.MissingPermissions):
+        return await interaction.edit_original_response(
+            embed=discord.Embed(
+                description="<:white_cross:1096791282023669860> You are missing the required permissions to use this command.",
+                colour=discord.Colour.red(),
+            ),
+        )
+
+    elif isinstance(error, app_commands.CommandOnCooldown):
         await interaction.edit_original_response(
             embed=discord.Embed(
                 description=f"<:white_cross:1096791282023669860> You can use this command again <t:{int(time.time() + error.retry_after)}:R>",
@@ -140,7 +148,7 @@ async def on_app_command_error(
         await asyncio.sleep(error.retry_after)
         return await interaction.delete_original_response()
 
-    if isinstance(error.original, cooldown_error):
+    elif isinstance(error.original, cooldown_error):
         await interaction.edit_original_response(
             embed=discord.Embed(
                 description=f"{error.original.error_message}, try again <t:{int(time.time() + error.original.time_left)}:R>",
@@ -149,14 +157,6 @@ async def on_app_command_error(
         )
         await asyncio.sleep(error.original.time_left)
         return await interaction.delete_original_response()
-
-    elif isinstance(error, app_commands.errors.MissingPermissions):
-        return await interaction.edit_original_response(
-            embed=discord.Embed(
-                description="<:white_cross:1096791282023669860> You are missing the required permissions to use this command.",
-                colour=discord.Colour.red(),
-            ),
-        )
 
     else:
         logging.error(f"An error occurred: {error}")
