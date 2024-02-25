@@ -24,7 +24,6 @@ class cooldown_looper(commands.Cog):
                 for command in cooldowns:
                     if cooldowns[command] < discord.utils.utcnow().isoformat():
                         await DataManager.remove_cooldown(user, command)
-                        print(f"Removed cooldown for {self.bot.fetch_user(user).name} for {command}")
 
 async def setup(bot):
     await bot.add_cog(cooldown_looper(bot))
