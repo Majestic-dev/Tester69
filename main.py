@@ -141,12 +141,14 @@ async def on_app_command_error(
         return await interaction.delete_original_response()
 
     if isinstance(error.original, cooldown_error):
-        return await interaction.edit_original_response(
+        await interaction.edit_original_response(
             embed=discord.Embed(
                 description=f"{error.original.error_message}, try again <t:{int(time.time() + error.original.time_left)}:R>",
                 colour=discord.Colour.red(),
             ),
         )
+        await asyncio.sleep(error.original.time_left)
+        return await interaction.delete_original_response()
 
     elif isinstance(error, app_commands.errors.MissingPermissions):
         return await interaction.edit_original_response(
