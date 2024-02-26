@@ -4,6 +4,63 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
+from utils import Paginator
+
+class server_views(discord.ui.View):
+    def __init__(self, bot):
+        super().__init__()
+        self.bot = bot
+
+    @discord.ui.button(
+        style=discord.ButtonStyle.primary,
+        label="View Roles",
+        emoji="👑"
+    )
+    async def view_roles(self, interaction: discord.Interaction, button: discord.ui.Button):
+        roles = interaction.guild.roles
+        roles = sorted(roles, key=lambda x: x.position, reverse=True)
+        role_list = "\n".join([f"{role.mention}" for role in roles if role.name != "@everyone"])
+        embed = discord.Embed(
+            title=f"{interaction.guild.name}'s Roles (Total: {len(roles) - 1})",
+            description=role_list,
+            colour=discord.Colour.blurple(),
+        )
+        await interaction.response.send_message(embed=embed, ephemeral=True)
+
+    @discord.ui.button(
+        style=discord.ButtonStyle.primary,
+        label="View Emojis",
+        emoji="😝"
+    )
+    async def view_emojis(self, interaction: discord.Interaction, button: discord.ui.Button):
+        emojis = interaction.guild.emojis
+        emoji_list = "\n".join([f"{emoji} - {emoji.name} ({emoji.id})" for emoji in emojis])
+        embed = discord.Embed(
+            title=f"{interaction.guild.name}'s Emojis (Total: {len(emojis)})",
+            description=emoji_list,
+            colour=discord.Colour.blurple(),
+        )
+        await interaction.response.send_message(embed=embed, ephemeral=True)
+
+    @discord.ui.button(
+        style=discord.ButtonStyle.primary,
+        label="View Members",
+        emoji="👥"
+    )
+    async def view_members(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer(ephemeral=True)
+        embeds = []
+        for i in range(0, len(interaction.guild.members), 10):
+            members = interaction.guild.members[i: i + 10]
+            member_list = "\n".join([f"{member.mention}" for member in members])
+            embed = discord.Embed(
+                title=f"{interaction.guild.name}'s Members (Total: {len(interaction.guild.members)}). Page {i // 10 + 1}/{len(interaction.guild.members) // 10 + 1}",
+                description=member_list,
+                colour=discord.Colour.blurple(),
+            )
+            embeds.append(embed)
+        
+        await Paginator.Simple(ephemeral=True).paginate(interaction, embeds)
 
 class server(commands.Cog):
     def __init__(self, bot):
@@ -30,11 +87,7 @@ class server(commands.Cog):
             f"* **Categories:** {len(guild.categories)}\n"
             f"* **Text Channels:** {len(guild.text_channels)}\n"
             f"* **Voice Channels:** {len(guild.voice_channels)}\n"
-            f"* **Members:** {guild.member_count}\n"
-            f"* **Roles:** {len(guild.roles)}\n"
-            f"* **Role List:** {', '.join([role.mention for role in guild.roles if role.name != '@everyone'])}\n"
-            f"* **Emojis:** {len(guild.emojis)}\n"
-            f"* **Emoji List:** {', '.join([f'<:{emoji.name}:{emoji.id}>' for emoji in guild.emojis if not emoji.animated])}\n {', '.join([f'<a:{emoji.name}:{emoji.id}>' for emoji in guild.emojis if emoji.animated])}\n",
+            f"* **Members:** {guild.member_count}\n",
             colour=discord.Colour.random(),
         )
 
@@ -42,7 +95,7 @@ class server(commands.Cog):
         embed.set_image(url=guild.banner)
         embed.set_author(name=guild.name, icon_url=guild.icon)
 
-        await interaction.response.send_message(embed=embed, ephemeral=ephemeral)
+        await interaction.response.send_message(embed=embed, ephemeral=ephemeral, view=server_views(self.bot))
 
     @app_commands.command(
         name="membercount", description="Get the member count of the server"
