@@ -257,11 +257,18 @@ class Paginator:
                 )
                 view.current_page_number.label = f"{self.initial_page + 1}/{len(pages)}"
 
-                await ctx.response.send_message(
-                    embed=pages[self.initial_page],
-                    view=view,
-                    ephemeral=self.ephemeral,
-                )
+                try:
+                    await ctx.response.send_message(
+                        embed=pages[self.initial_page],
+                        view=view,
+                        ephemeral=self.ephemeral,
+                    )
+                except discord.errors.InteractionResponded:
+                    await ctx.followup.send(
+                        ephemeral=self.ephemeral,
+                        embed=pages[self.initial_page],
+                        view=view
+                    )
 
                 view.response = await ctx.original_response()
 
