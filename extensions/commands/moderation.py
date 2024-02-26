@@ -185,7 +185,7 @@ class moderation(commands.Cog):
                     reason=reason,
                 )
 
-                if member.create_dm():
+                if await member.create_dm():
                     await member.dm_channel.send(
                         embed=discord.Embed(
                             description=f'You have been kicked from {interaction.guild.name} for "{reason}"',
