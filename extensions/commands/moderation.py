@@ -214,7 +214,7 @@ class moderation(commands.Cog):
     async def ban(
         self,
         interaction: discord.Interaction,
-        member: discord.Member,
+        member: discord.User,
         reason: str = "Unspecified",
     ):
         guild_data = await DataManager.get_guild_data(interaction.guild.id)
@@ -314,12 +314,13 @@ class moderation(commands.Cog):
         await interaction.response.defer()
         bans = [entry async for entry in interaction.guild.bans(limit=None)]
         for entry in bans:
-            if member.isdigit() and self.bot.get_user(int(member)):
+            if member.isdigit():
                 if any(entry.user.id == int(member) for entry in bans):
-                    await interaction.guild.unban(entry.user)
+                    user = await self.bot.fetch_user(int(member))
+                    await interaction.guild.unban(user)
                     return await interaction.edit_original_response(
                         embed=discord.Embed(
-                            description=f"<:white_checkmark:1096793014287995061> Successfully unbanned {entry.user.mention}",
+                            description=f"<:white_checkmark:1096793014287995061> Successfully unbanned {user.mention}",
                             colour=discord.Colour.green(),
                         )
                     )
