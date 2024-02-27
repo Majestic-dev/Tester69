@@ -208,6 +208,28 @@ class economy(commands.Cog):
         description="Grab a rifle from the shop and go hunting for some animals",
     )
     async def hunt(self, interaction: discord.Interaction):
+        user_data = await DataManager.get_user_data(interaction.user.id)
+        
+        if user_data["inventory"] is not None:
+                inventory = json.loads(user_data["inventory"])
+        else:
+            inventory = {}
+
+        if (
+            user_data["inventory"] is None
+            or "hunting rifle" not in user_data["inventory"]
+            or inventory["hunting rifle"] == 0
+        ):
+            item_emoji = DataManager.get("economy", "items")["hunting rifle"][
+                "emoji"
+            ]
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    description=f"<:white_cross:1096791282023669860> You need a **{item_emoji} Hunting Rifle** to hunt some animals `/buy_item`",
+                    colour=discord.Colour.red(),
+                )
+            )
+
         if await cooldown_check(
             interaction.user.id,
             "<:white_cross:1096791282023669860> You already went hunting",
@@ -221,26 +243,6 @@ class economy(commands.Cog):
             item_name = random.choices(items, weights=chances, k=1)
             item_emoji = DataManager.get("economy", "items")[item_name[0]]["emoji"]
             user_data = await DataManager.get_user_data(interaction.user.id)
-
-            if user_data["inventory"] is not None:
-                inventory = json.loads(user_data["inventory"])
-            else:
-                inventory = {}
-
-            if (
-                user_data["inventory"] is None
-                or "hunting rifle" not in user_data["inventory"]
-                or inventory["hunting rifle"] == 0
-            ):
-                item_emoji = DataManager.get("economy", "items")["hunting rifle"][
-                    "emoji"
-                ]
-                return await interaction.response.send_message(
-                    embed=discord.Embed(
-                        description=f"<:white_cross:1096791282023669860> You need a **{item_emoji} Hunting Rifle** to hunt some animals `/buy_item`",
-                        colour=discord.Colour.red(),
-                    )
-                )
 
             await DataManager.edit_user_inventory(interaction.user.id, item_name[0], 1)
 
@@ -256,6 +258,28 @@ class economy(commands.Cog):
         description="Grab a fishing pole from the shop and go fishing for some fish",
     )
     async def fish(self, interaction: discord.Interaction):
+        user_data = await DataManager.get_user_data(interaction.user.id)
+
+        if user_data["inventory"] is not None:
+            inventory = json.loads(user_data["inventory"])
+        else:
+            inventory = {}
+
+        if (
+            user_data["inventory"] is None
+            or "fishing pole" not in user_data["inventory"]
+            or inventory["fishing pole"] == 0
+        ):
+            item_emoji = DataManager.get("economy", "items")["fishing pole"][
+                "emoji"
+            ]
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    description=f"<:white_cross:1096791282023669860> You need a **{item_emoji} Fishing Pole** to fish `/buy_item`",
+                    colour=discord.Colour.red(),
+                )
+            )
+
         if await cooldown_check(
             interaction.user.id,
             "<:white_cross:1096791282023669860> You already went fishing",
@@ -268,27 +292,6 @@ class economy(commands.Cog):
             items = list(DataManager.get("economy", "fishing items").keys())
             item_name = random.choices(items, weights=chances, k=1)
             item_emoji = DataManager.get("economy", "items")[item_name[0]]["emoji"]
-            user_data = await DataManager.get_user_data(interaction.user.id)
-
-            if user_data["inventory"] is not None:
-                inventory = json.loads(user_data["inventory"])
-            else:
-                inventory = {}
-
-            if (
-                user_data["inventory"] is None
-                or "fishing pole" not in user_data["inventory"]
-                or inventory["fishing pole"] == 0
-            ):
-                item_emoji = DataManager.get("economy", "items")["fishing pole"][
-                    "emoji"
-                ]
-                return await interaction.response.send_message(
-                    embed=discord.Embed(
-                        description=f"<:white_cross:1096791282023669860> You need a **{item_emoji} Fishing Pole** to fish `/buy_item`",
-                        colour=discord.Colour.red(),
-                    )
-                )
 
             await DataManager.edit_user_inventory(interaction.user.id, item_name[0], 1)
 
