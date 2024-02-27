@@ -11,7 +11,7 @@ class giveaway_looper(commands.Cog):
         self.bot = bot
         self.giveawayloop.start()
 
-    @tasks.loop(seconds=10)
+    @tasks.loop(minutes=1)
     async def giveawayloop(self):
         async with DataManager.db_connection.acquire():
             ended_giveaways = await DataManager.db_connection.fetch(
