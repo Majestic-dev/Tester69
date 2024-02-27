@@ -314,13 +314,12 @@ class moderation(commands.Cog):
         await interaction.response.defer()
         bans = [entry async for entry in interaction.guild.bans(limit=None)]
         for entry in bans:
-            if member.isdigit():
+            if member.isdigit() and self.bot.get_user(int(member)):
                 if any(entry.user.id == int(member) for entry in bans):
-                    user = await self.bot.fetch_user(int(member))
-                    await interaction.guild.unban(user)
+                    await interaction.guild.unban(entry.user)
                     return await interaction.edit_original_response(
                         embed=discord.Embed(
-                            description=f"<:white_checkmark:1096793014287995061> Successfully unbanned {user.mention}",
+                            description=f"<:white_checkmark:1096793014287995061> Successfully unbanned {entry.user.mention}",
                             colour=discord.Colour.green(),
                         )
                     )
@@ -345,31 +344,24 @@ class moderation(commands.Cog):
                                 colour=discord.Colour.green(),
                             )
                         )
-                    else:
-                        return await interaction.edit_original_response(
-                            embed=discord.Embed(
-                                description=(
-                                    "<:white_cross:1096791282023669860> Could not find that user"
-                                )
-                                + (
-                                    f", did you mean any of these similar usernames?\n\n {'\n'.join([f"* {entry.user.mention} - {entry.user.id} - {entry.user.name}" for entry in bans if member in entry.user.name])}"
-                                    if len(
-                                        [
-                                            entry.user.name
-                                            for entry in bans
-                                            if member in entry.user.name
-                                        ]
-                                    )
-                                    > 0
-                                    else ""
-                                ),
-                                colour=discord.Colour.red(),
-                            )
-                        )
                 else:
                     return await interaction.edit_original_response(
                         embed=discord.Embed(
-                            description="<:white_cross:1096791282023669860> Could not find that user",
+                            description=(
+                                "<:white_cross:1096791282023669860> Could not find that user"
+                            )
+                            + (
+                                f", did you mean any of these similar usernames?\n\n {'\n'.join([f"* {entry.user.mention} - {entry.user.id} - {entry.user.name}" for entry in bans if member in entry.user.name])}"
+                                if len(
+                                    [
+                                        entry.user.name
+                                        for entry in bans
+                                        if member in entry.user.name
+                                    ]
+                                )
+                                > 0
+                                else ""
+                            ),
                             colour=discord.Colour.red(),
                         )
                     )
