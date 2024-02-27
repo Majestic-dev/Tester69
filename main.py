@@ -147,7 +147,10 @@ async def on_app_command_error(
             ),
         )
         await asyncio.sleep(error.retry_after)
-        return await interaction.delete_original_response()
+        try:
+            return await interaction.delete_original_response()
+        except:
+            pass
 
     elif isinstance(error.original, cooldown_error):
         await interaction.edit_original_response(
@@ -157,7 +160,10 @@ async def on_app_command_error(
             ),
         )
         await asyncio.sleep(error.original.time_left)
-        return await interaction.delete_original_response()
+        try:
+            return await interaction.delete_original_response()
+        except:
+            pass
 
     else:
         logging.error(f"An error occurred: {error}")
