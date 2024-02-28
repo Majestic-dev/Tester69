@@ -56,6 +56,32 @@ DataManager.setup(
                 },
             },
         ),
+        (
+            "data/mine/mines.json",
+            {
+                "example mine": {
+                    "resources": {
+                        "example resource": {
+                            "min": 1,
+                            "max": 2
+                        },
+                    },
+                },
+            },
+        ),
+        (
+            "data/mine/ores.json",
+            {
+                "ores": {
+                    "example ore": {
+                        "name": "Example Ore",
+                        "emoji": "Use a discord emoji here",
+                        "type": "Example type (e.g material, consumable, etc)",
+                        "xp": 0,
+                    },
+                },
+            },
+        ),
     ]
 )
 
