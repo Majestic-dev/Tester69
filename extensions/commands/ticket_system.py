@@ -623,6 +623,7 @@ class panel_views(discord.ui.View):
     async def create_ticket(
         self, interaction: discord.Interaction, button: discord.ui.Button
     ):
+        print(interaction.message.id)
         panel_data = await DataManager.get_panel_data(interaction.message.id)
         i = 0
         for thread in interaction.channel.threads:
@@ -633,6 +634,9 @@ class panel_views(discord.ui.View):
                     await asyncio.sleep(0.1)
                 except discord.errors.NotFound:
                     continue
+
+        print(panel_data)
+        print(panel_data["limit_per_user"])
 
         if i >= panel_data["limit_per_user"]:
             return await interaction.response.send_message(
@@ -949,105 +953,109 @@ class ticket(commands.GroupCog):
     @app_commands.checks.cooldown(1, 30, key=lambda i: (i.guild.id))
     async def close_ticket(self, interaction: discord.Interaction):
         all_tickets = await DataManager.get_all_tickets()
-        for ticket in all_tickets:
-            if interaction.channel.id == int(ticket["ticket_id"]):
-                panel_id = await DataManager.get_panel_id_by_ticket_id(
-                    interaction.channel.id
-                )
-                ticket = await DataManager.get_ticket_data(
-                    panel_id, interaction.channel.id
-                )
-                if ticket["closed"]:
-                    return await interaction.response.send_message(
-                        embed=discord.Embed(
-                            title="Ticket Already Closed!",
-                            description="This ticket has already been closed",
-                            colour=discord.Colour.red(),
-                        ),
-                        ephemeral=True,
-                    )
-
-                elif not ticket["closed"]:
-                    await interaction.response.defer()
-                    panel_id = await DataManager.get_panel_id_by_ticket_id(
-                        interaction.channel.id
-                    )
-                    await DataManager.close_ticket(panel_id, interaction.channel.id)
-                    ticket = await DataManager.get_ticket_data(
-                        panel_id, interaction.channel.id
-                    )
-                    panel_data = await DataManager.get_panel_data(panel_id)
-                    for user in await interaction.channel.fetch_members():
-                        member = interaction.guild.get_member(user.id)
-                        if member:
-                            if any(
-                                role.id in panel_data["panel_moderators"]
-                                for role in member.roles
-                            ):
-                                continue
-                            else:
-                                await interaction.channel.remove_user(member)
-                        else:
-                            continue
-
-                    await interaction.edit_original_response(
-                        embed=discord.Embed(
-                            title="Ticket Closed",
-                            description=f"Ticket closed by {interaction.user.mention}",
-                            colour=discord.Colour.red(),
-                        ),
-                        view=closed_ticket_views(
-                            self.bot,
-                            panel_id,
-                            ticket["ticket_creator"],
-                            interaction.channel.id,
-                        ),
-                    )
-            else:
+        if any(ticket['ticket_id'] == str(interaction.channel.id) for ticket in all_tickets):
+            panel_id = await DataManager.get_panel_id_by_ticket_id(
+                interaction.channel.id
+            )
+            ticket = await DataManager.get_ticket_data(
+                panel_id, interaction.channel.id
+            )
+            if ticket["closed"]:
                 return await interaction.response.send_message(
                     embed=discord.Embed(
-                        description="<:white_cross:1096791282023669860> This is not a ticket",
+                        description="<:white_cross:1096791282023669860> This ticket has already been closed",
                         colour=discord.Colour.red(),
                     ),
                     ephemeral=True,
                 )
+
+            elif not ticket["closed"]:
+                await interaction.response.defer()
+                panel_id = await DataManager.get_panel_id_by_ticket_id(
+                    interaction.channel.id
+                )
+                await DataManager.close_ticket(panel_id, interaction.channel.id)
+                ticket = await DataManager.get_ticket_data(
+                    panel_id, interaction.channel.id
+                )
+                panel_data = await DataManager.get_panel_data(panel_id)
+                for user in await interaction.channel.fetch_members():
+                    member = interaction.guild.get_member(user.id)
+                    if member:
+                        if any(
+                            role.id in panel_data["panel_moderators"]
+                            for role in member.roles
+                        ):
+                            continue
+                        else:
+                            await interaction.channel.remove_user(member)
+                    else:
+                        continue
+
+                await interaction.edit_original_response(
+                    embed=discord.Embed(
+                        title="Ticket Closed",
+                        description=f"Ticket closed by {interaction.user.mention}",
+                        colour=discord.Colour.red(),
+                    ),
+                    view=closed_ticket_views(
+                        self.bot,
+                        panel_id,
+                        ticket["ticket_creator"],
+                        interaction.channel.id,
+                    ),
+                )
+        else:
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    description="<:white_cross:1096791282023669860> This is not a ticket",
+                    colour=discord.Colour.red(),
+                ),
+                ephemeral=True,
+            )
             
     @app_commands.command(name="reopen", description="Reopen a ticket")
     @app_commands.guild_only()
     @app_commands.checks.cooldown(1, 30, key=lambda i: (i.guild.id))
     async def reopen_ticket(self, interaction: discord.Interaction):
         all_tickets = await DataManager.get_all_tickets()
-        for ticket in all_tickets:
-            if interaction.channel.id == int(ticket["ticket_id"]):
-                panel_id = await DataManager.get_panel_id_by_ticket_id(
-                    interaction.channel.id
+        if any(ticket['ticket_id'] == str(interaction.channel.id) for ticket in all_tickets):
+            panel_id = await DataManager.get_panel_id_by_ticket_id(
+                interaction.channel.id
+            )
+            ticket = await DataManager.get_ticket_data(
+                panel_id, interaction.channel.id
+            )
+            if not ticket["closed"]:
+                return await interaction.response.send_message(
+                    embed=discord.Embed(
+                        description="<:white_cross:1096791282023669860> This ticket is already open",
+                        colour=discord.Colour.red(),
+                    ),
+                    ephemeral=True,
                 )
-                ticket = await DataManager.get_ticket_data(
-                    panel_id, interaction.channel.id
+            
+            elif ticket["closed"]:
+                await interaction.response.defer()
+                await DataManager.open_ticket(panel_id, interaction.channel.id)
+                user = self.bot.get_user(ticket["ticket_creator"])
+                await interaction.delete_original_response()
+                await interaction.channel.add_user(user)
+                await interaction.channel.send(
+                    embed=discord.Embed(
+                        title="Ticket Reopened",
+                        description=f"Ticket reopened by {interaction.user.mention}",
+                        colour=discord.Colour.green(),
+                    )
                 )
-                if not ticket["closed"]:
-                    return await interaction.response.send_message(
-                        embed=discord.Embed(
-                            title="Ticket Already Open!",
-                            description="This ticket has already been opened",
-                            colour=discord.Colour.red(),
-                        ),
-                        ephemeral=True,
-                    )
-                
-                elif ticket["closed"]:
-                    await interaction.response.defer()
-                    await DataManager.open_ticket(panel_id, interaction.channel.id)
-                    user = self.bot.get_user(ticket["ticket_creator"])
-                    await interaction.delete_original_response()
-                    await interaction.channel.add_user(user)
-                    await interaction.channel.send(
-                        embed=discord.Embed(
-                            title="Ticket Reopened",
-                            description=f"Ticket reopened by {interaction.user.mention}",
-                            colour=discord.Colour.green(),
-                        )
-                    )
+        else:
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    description="<:white_cross:1096791282023669860> This is not a ticket",
+                    colour=discord.Colour.red(),
+                ),
+                ephemeral=True,
+            )
 
     @app_commands.guild_only()
     @app_commands.checks.has_permissions(administrator=True)
