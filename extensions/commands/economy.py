@@ -456,7 +456,7 @@ class economy(commands.Cog):
             else:
                 cash2 = int(robber_bank * percentage)
                 await DataManager.edit_user_data(
-                    interaction.user.id, "balance", robber_data["bank"] - cash2
+                    interaction.user.id, "bank", robber_data["bank"] - cash2
                 )
                 await interaction.response.send_message(
                     embed=discord.Embed(
