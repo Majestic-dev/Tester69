@@ -60,6 +60,10 @@ DataManager.setup(
             "data/mine/mines.json",
             {
                 "example mine": {
+                    "requiredLevel": 0,
+                    "mainOre": "example ore",
+                    "secondaryOre": "example ore 2",
+                    "emoji": "Use a discord emoji here",
                     "resources": {
                         "example resource": {
                             "min": 1,
