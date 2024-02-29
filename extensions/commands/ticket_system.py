@@ -623,7 +623,6 @@ class panel_views(discord.ui.View):
     async def create_ticket(
         self, interaction: discord.Interaction, button: discord.ui.Button
     ):
-        print(interaction.message.id)
         panel_data = await DataManager.get_panel_data(interaction.message.id)
         i = 0
         for thread in interaction.channel.threads:
@@ -634,9 +633,6 @@ class panel_views(discord.ui.View):
                     await asyncio.sleep(0.1)
                 except discord.errors.NotFound:
                     continue
-
-        print(panel_data)
-        print(panel_data["limit_per_user"])
 
         if i >= panel_data["limit_per_user"]:
             return await interaction.response.send_message(
