@@ -62,6 +62,11 @@ class mining_buttons(discord.ui.View):
             button.callback = self.create_callback(i)
             self.add_item(button)
 
+    def get_random_ore_pos(self):
+        unmined_ore_positions = [pos for pos in self.ore_positions if not self.children[pos-1].disabled]
+        if unmined_ore_positions:
+            return random.choice(unmined_ore_positions)
+
     def create_callback(self, i):
         async def callback(interaction: discord.Interaction):
             await interaction.response.defer()
@@ -69,6 +74,28 @@ class mining_buttons(discord.ui.View):
             button.disabled = True
 
             if not self.closed:
+                if i not in self.ore_positions:
+                    if random.randint(0, 100) > 95:
+                        random_position = self.get_random_ore_pos()
+                        if random_position is not None:
+                            random_button = self.children[random_position-1]
+                            random_button.disabled = True
+                            self.mined_ores += 1
+                            random_button.label = None
+                            random_button.emoji = self.ores[self.ore_positions[random_position]]["emoji"]
+
+                            xp = self.ores[self.ore_positions[random_position]]["xp"]
+                            self.gained_xp += xp
+
+                            ore = self.ore_positions[random_position]
+                            if ore in self.mined_items:
+                                self.mined_items[ore] += 1
+                            else:
+                                self.mined_items[ore] = 1
+                            await interaction.edit_original_response(view=self)
+                        else:
+                            await interaction.edit_original_response(view=self)
+                    
                 if i in self.ore_positions:
                     self.mined_ores += 1
                     button.label = None
