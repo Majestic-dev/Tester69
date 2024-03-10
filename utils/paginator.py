@@ -267,7 +267,7 @@ class Paginator:
                     await ctx.followup.send(
                         ephemeral=self.ephemeral,
                         embed=pages[self.initial_page],
-                        view=view
+                        view=view,
                     )
 
                 view.response = await ctx.original_response()

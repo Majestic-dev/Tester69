@@ -1,8 +1,10 @@
 import json
 import os
 
+
 def calculate_required_xp(level):
-    return ((level ** 2) + (level ** 2)) * 7
+    return ((level**2) + (level**2)) * 7
+
 
 def generate_levels(max_level):
     levels = {"levels": {}}
@@ -12,11 +14,13 @@ def generate_levels(max_level):
         levels["levels"][str(level)] = {"requiredXP": total_xp}
     return levels
 
+
 def write_levels_to_file(levels, filename):
-    with open(filename, 'w') as f:
+    with open(filename, "w") as f:
         json.dump(levels, f, indent=4)
 
+
 levels = generate_levels(50)
-filename = 'data/mine/levels.json'
+filename = "data/mine/levels.json"
 os.makedirs(os.path.dirname(filename), exist_ok=True)
 write_levels_to_file(levels, filename)

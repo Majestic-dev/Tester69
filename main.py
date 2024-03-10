@@ -65,10 +65,7 @@ DataManager.setup(
                     "secondaryOre": "example ore 2",
                     "emoji": "Use a discord emoji here",
                     "resources": {
-                        "example resource": {
-                            "min": 1,
-                            "max": 2
-                        },
+                        "example resource": {"min": 1, "max": 2},
                     },
                 },
             },

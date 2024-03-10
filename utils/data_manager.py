@@ -510,7 +510,9 @@ class DataManager:
             )
 
     @classmethod
-    async def create_ticket(cls, panel_id: int, ticket_id: int, ticket_creator: int) -> None:
+    async def create_ticket(
+        cls, panel_id: int, ticket_id: int, ticket_creator: int
+    ) -> None:
         async with cls.db_connection.acquire():
             tickets = await cls.get_panel_tickets(panel_id)
             if tickets is None:
@@ -522,7 +524,9 @@ class DataManager:
 
             tickets[ticket_id] = {"ticket_creator": ticket_creator, "closed": False}
 
-            existing_panel = await cls.db_connection.fetchval("SELECT panel_id FROM tickets WHERE panel_id = $1", panel_id)
+            existing_panel = await cls.db_connection.fetchval(
+                "SELECT panel_id FROM tickets WHERE panel_id = $1", panel_id
+            )
             if existing_panel is None:
                 await cls.db_connection.execute(
                     "INSERT INTO tickets (panel_id, tickets) VALUES ($1, $2)",
@@ -598,6 +602,7 @@ class DataManager:
 
 async def main():
     await DataManager.initialise()
+
 
 if __name__ == "__main__":
     asyncio.run(main())

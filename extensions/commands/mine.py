@@ -58,19 +58,23 @@ class mining_buttons(discord.ui.View):
 
         for i in range(1, 26):
             row = (i - 1) // 5
-            button = discord.ui.Button(style=discord.ButtonStyle.gray, label="⠀", row=row)
+            button = discord.ui.Button(
+                style=discord.ButtonStyle.gray, label="⠀", row=row
+            )
             button.callback = self.create_callback(i)
             self.add_item(button)
 
     def get_random_ore_pos(self):
-        unmined_ore_positions = [pos for pos in self.ore_positions if not self.children[pos-1].disabled]
+        unmined_ore_positions = [
+            pos for pos in self.ore_positions if not self.children[pos - 1].disabled
+        ]
         if unmined_ore_positions:
             return random.choice(unmined_ore_positions)
 
     def create_callback(self, i):
         async def callback(interaction: discord.Interaction):
             await interaction.response.defer()
-            button = self.children[i-1]
+            button = self.children[i - 1]
             button.disabled = True
 
             if not self.closed:
@@ -78,11 +82,13 @@ class mining_buttons(discord.ui.View):
                     if random.randint(0, 100) > 95:
                         random_position = self.get_random_ore_pos()
                         if random_position is not None:
-                            random_button = self.children[random_position-1]
+                            random_button = self.children[random_position - 1]
                             random_button.disabled = True
                             self.mined_ores += 1
                             random_button.label = None
-                            random_button.emoji = self.ores[self.ore_positions[random_position]]["emoji"]
+                            random_button.emoji = self.ores[
+                                self.ore_positions[random_position]
+                            ]["emoji"]
 
                             xp = self.ores[self.ore_positions[random_position]]["xp"]
                             self.gained_xp += xp
@@ -95,7 +101,7 @@ class mining_buttons(discord.ui.View):
                             await interaction.edit_original_response(view=self)
                         else:
                             await interaction.edit_original_response(view=self)
-                    
+
                 if i in self.ore_positions:
                     self.mined_ores += 1
                     button.label = None
@@ -143,7 +149,7 @@ class mining_buttons(discord.ui.View):
                             ),
                             view=None,
                         )
-                
+
                 if self.mined_ores == len(self.ore_positions):
                     await interaction.edit_original_response(
                         embed=discord.Embed(
@@ -167,7 +173,9 @@ class mining_buttons(discord.ui.View):
                         await DataManager.edit_user_inventory(
                             interaction.user.id, ore, quantity
                         )
+
         return callback
+
 
 class choose_mine(discord.ui.View):
     def __init__(self, bot):
@@ -179,13 +187,17 @@ class choose_mine(discord.ui.View):
             self.mines = json.load(f)
 
         for mine in self.mines:
-            button = discord.ui.Button(style=discord.ButtonStyle.green, label=mine, emoji=self.mines[mine]["emoji"])
+            button = discord.ui.Button(
+                style=discord.ButtonStyle.green,
+                label=mine,
+                emoji=self.mines[mine]["emoji"],
+            )
             button.callback = self.create_callback(mine)
             self.add_item(button)
 
     async def on_timeout(self) -> None:
         return await self.response.delete()
-    
+
     def create_callback(self, mine):
         async def callback(interaction: discord.Interaction):
             user_level = await find_user_level(interaction.user.id)
@@ -195,7 +207,7 @@ class choose_mine(discord.ui.View):
                     ephemeral=True,
                 )
                 return
-            
+
             view = mining_buttons(self.bot, mine)
             await interaction.response.edit_message(
                 embed=discord.Embed(
@@ -220,7 +232,7 @@ class mine(commands.GroupCog):
             interaction.user.id,
             "<:white_cross:1096791282023669860> You already went mining",
             "mine",
-            1800
+            1800,
         ):
             f = discord.File(
                 "data/mine/mining_assets/mine_background.jpg", filename="mining.jpg"
