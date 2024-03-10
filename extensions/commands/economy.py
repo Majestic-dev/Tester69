@@ -3,6 +3,7 @@ import random
 import string
 from typing import Optional
 
+import datetime
 import discord
 from discord import app_commands
 from discord.ext import commands
@@ -106,18 +107,103 @@ class leaderboard_dropdown_view(discord.ui.View):
         self.add_item(leaderboard_dropdown(bot=self.bot, interaction=interaction))
 
 
-def random_choice_from_dict(d):
-    total_chance = sum(item["chance"] for item in d.values())
-    rand = random.uniform(0, total_chance)
-    for item_name, item_data in d.items():
-        if rand < item_data["chance"]:
-            return item_name, item_data
-        rand -= item_data["chance"]
+async def calculate_remaining_xp(level: int, xp: int) -> str:
+    with open("data/mine/levels.json", "r") as f:
+        levels = json.load(f)["levels"]
+
+    required_xp = levels[str(level + 1)]["requiredXP"]
+    remaining_xp = required_xp - xp
+
+    return f"{required_xp-remaining_xp}/{required_xp}"
+
+
+async def find_user_level(user_id: int):
+    user_data = await DataManager.get_user_data(user_id)
+    if user_data["mining_xp"] == None:
+        return 0
+    levels = DataManager.get("levels", "levels")
+    for level in levels:
+        required_xp = levels[level]["requiredXP"]
+        if user_data["mining_xp"] < required_xp:
+            return int(level) - 1
+        elif user_data["mining_xp"] == required_xp:
+            return int(level)
+    return 50
 
 
 class economy(commands.Cog):
     def __init__(self, bot: commands.AutoShardedBot):
         self.bot = bot
+
+    @app_commands.command(name="profile", description="View an user's profile")
+    @app_commands.checks.cooldown(1, 10, key=lambda i: (i.user.id))
+    @app_commands.describe(
+        user="The user you want to check the profile of (yours if no user is provided)"
+    )
+    async def profile(
+        self, interaction: discord.Interaction, user: Optional[discord.User] = None
+    ):
+        if user == None:
+            user = interaction.user
+
+        user_data = await DataManager.get_user_data(user.id)
+        if user_data["inventory"] is not None:
+            inventory = json.loads(user_data["inventory"])
+        else:
+            inventory = {}
+
+        items = DataManager.get("economy", "items")
+        net = user_data["balance"] + user_data["bank"]
+
+        for item in inventory:
+            if item in items:
+                net += items[item]["sell price"] * inventory[item]
+
+        if user_data["cooldowns"] is not None:
+            cooldowns = json.loads(user_data["cooldowns"])
+        else:
+            cooldowns = {}
+
+        remaining_cooldowns = []
+
+        for cooldown in cooldowns:
+            if cooldowns[cooldown] > discord.utils.utcnow().isoformat():
+                end_date = datetime.datetime.strptime(
+                    cooldowns[cooldown], "%Y-%m-%dT%H:%M:%S.%f%z"
+                )
+                remaining_cooldowns.append(
+                    f"{cooldown.title()} - Ends {discord.utils.format_dt(end_date, style='R')}"
+                )
+
+        embed = discord.Embed(
+            title=f"{user}",
+            url="https://github.com/Majestic-dev/Tester69",
+        ).set_thumbnail(url=user.display_avatar)
+
+        level = await find_user_level(user.id)
+        remaining_xp = await calculate_remaining_xp(level, user_data["mining_xp"])
+
+        embed.add_field(
+            name="Mining Level",
+            value=f"Level: `{level}`\nExperience: `{remaining_xp}`",
+        )
+
+        embed.add_field(
+            name="Wealth",
+            value=f"Wallet: `{user_data['balance']} 🪙`\nBank: `{user_data['bank']} 🪙`\nNet: `{net} 🪙`",
+        )
+
+        embed.add_field(
+            name="Inventory",
+            value=f"Unique Items: `{len(inventory)}`\nTotal Items: `{sum(inventory.values())}`\nWorth: `{net - user_data['balance'] - user_data['bank']} 🪙`",
+        )
+
+        embed.add_field(
+            name="Cooldowns",
+            value=f"{"\n".join(remaining_cooldowns) if remaining_cooldowns else 'No active cooldowns'}",
+        )
+
+        await interaction.response.send_message(embed=embed)
 
     @app_commands.command(name="pay", description="Pay someone some 🪙")
     @app_commands.checks.cooldown(1, 600, key=lambda i: (i.user.id))
@@ -209,9 +295,9 @@ class economy(commands.Cog):
     )
     async def hunt(self, interaction: discord.Interaction):
         user_data = await DataManager.get_user_data(interaction.user.id)
-        
+
         if user_data["inventory"] is not None:
-                inventory = json.loads(user_data["inventory"])
+            inventory = json.loads(user_data["inventory"])
         else:
             inventory = {}
 
@@ -220,9 +306,7 @@ class economy(commands.Cog):
             or "hunting rifle" not in user_data["inventory"]
             or inventory["hunting rifle"] == 0
         ):
-            item_emoji = DataManager.get("economy", "items")["hunting rifle"][
-                "emoji"
-            ]
+            item_emoji = DataManager.get("economy", "items")["hunting rifle"]["emoji"]
             return await interaction.response.send_message(
                 embed=discord.Embed(
                     description=f"<:white_cross:1096791282023669860> You need a **{item_emoji} Hunting Rifle** to hunt some animals `/buy_item`",
@@ -270,9 +354,7 @@ class economy(commands.Cog):
             or "fishing pole" not in user_data["inventory"]
             or inventory["fishing pole"] == 0
         ):
-            item_emoji = DataManager.get("economy", "items")["fishing pole"][
-                "emoji"
-            ]
+            item_emoji = DataManager.get("economy", "items")["fishing pole"]["emoji"]
             return await interaction.response.send_message(
                 embed=discord.Embed(
                     description=f"<:white_cross:1096791282023669860> You need a **{item_emoji} Fishing Pole** to fish `/buy_item`",
