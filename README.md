@@ -100,9 +100,13 @@ python main.py
         * Added a giveaway system (including ending the giveaway immediately, rerolling the giveaway, etc.)
         * Added discord's logging, everything will be logged in the specified file
         * Refactored all the files and class names to be in snake_case
+        * Added a file for custom error throwing to get rid of a lot of code in cooldown handling
 
     - Server(management)
         * Added a ticket system with a panel that guides you through the setup
+
+    - Economy
+        * Added a new and unique mining system, which is fully customizeable through the JSON file
 
     - Database
         * Added a separate database for the giveaways
