@@ -249,19 +249,6 @@ class mine(commands.GroupCog):
             )
             view.response = await interaction.original_response()
 
-    @app_commands.command(name="level", description="Check your mining level")
-    @app_commands.checks.cooldown(1, 60, key=lambda i: (i.user.id))
-    async def mine_level(self, interaction: discord.Interaction):
-        level = await find_user_level(interaction.user.id)
-        await interaction.response.send_message(
-            embed=discord.Embed(
-                title="Mining Level",
-                description=f"Your current mining level is {level}",
-                colour=discord.Colour.from_rgb(139, 69, 19),
-            ).set_thumbnail(url=interaction.user.avatar.url),
-            ephemeral=True,
-        )
-
 
 async def setup(bot: commands.AutoShardedBot):
     await bot.add_cog(mine(bot))
