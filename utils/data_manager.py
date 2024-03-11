@@ -396,7 +396,7 @@ class DataManager:
         async with cls.db_connection.acquire():
             end_date = discord.utils.utcnow() + datetime.timedelta(minutes=minutes)
             await cls.db_connection.execute(
-                "INSERT INTO giveaways (id, guild_id, channel_id, end_date, winner_amount, prize, extra_notes, host_id) VALUES ($1, $2, $3, $4, $5, $6, $7)",
+                "INSERT INTO giveaways (id, guild_id, channel_id, end_date, winner_amount, prize, extra_notes, host_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
                 giveaway_id,
                 guild_id,
                 channel_id,
