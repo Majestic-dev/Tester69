@@ -27,21 +27,19 @@ class giveaway_looper(commands.Cog):
                     message = await channel.fetch_message(giveaway["id"])
                 except discord.NotFound:
                     return
-                winners = await DataManager.draw_giveaway_winners(giveaway["id"])
+                try:
+                    winners = await DataManager.draw_giveaway_winners(giveaway["id"])
+                except ValueError:
+                    await message.edit(
+                            view=None,
+                        )
+                    return await message.reply(
+                        f"Unfortunately, nobody entered the giveaway for the **{giveaway['prize']}**"
+                    )
+                
                 end_date = datetime.datetime.strptime(
                     giveaway["end_date"], "%Y-%m-%dT%H:%M:%S.%f%z"
                 )
-
-                if winners is False:
-                    if message:
-                        await message.edit(
-                            view=None,
-                        )
-                        return await message.reply(
-                            f"Unfortunately, nobody entered the giveaway for the **{giveaway['prize']}**"
-                        )
-                    else:
-                        return
 
                 if message:
                     await message.edit(
