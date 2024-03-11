@@ -153,13 +153,7 @@ class giveaway_views(discord.ui.View):
         self, interaction: discord.Interaction, button: discord.ui.Button
     ):
         giveaway_data = await DataManager.get_giveaway_data(interaction.message.id)
-        if interaction.user.id in giveaway_data["participants"]:
-            return await interaction.response.send_message(
-                content="You have already entered this giveaway!",
-                ephemeral=True,
-                view=giveaway_leave_view(interaction.message.id, self.bot),
-            )
-        else:
+        if giveaway_data["participants"] is None or interaction.user.id not in giveaway_data["participants"]:
             giveaway_data["participants"].append(interaction.user.id)
             await DataManager.edit_giveaway_data(
                 interaction.message.id, "participants", giveaway_data["participants"]
@@ -172,6 +166,12 @@ class giveaway_views(discord.ui.View):
                 "giveaway_join",
                 interaction.message.id,
                 interaction.guild.id,
+            )
+        elif interaction.user.id in giveaway_data["participants"]:
+            return await interaction.response.send_message(
+                content="You have already entered this giveaway!",
+                ephemeral=True,
+                view=giveaway_leave_view(interaction.message.id, self.bot),
             )
 
     @discord.ui.button(
