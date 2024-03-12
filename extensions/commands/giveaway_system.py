@@ -23,9 +23,12 @@ class giveaway_looper(commands.Cog):
             for giveaway in ended_giveaways:
                 await DataManager.edit_giveaway_data(giveaway["id"], "ended", True)
                 channel = self.bot.get_channel(giveaway["channel_id"])
-                try:
-                    message = await channel.fetch_message(giveaway["id"])
-                except discord.NotFound:
+                if channel is not None:
+                    try:
+                        message = await channel.fetch_message(giveaway["id"])
+                    except discord.errors.NotFound:
+                        return
+                else:
                     return
                 try:
                     winners = await DataManager.draw_giveaway_winners(giveaway["id"])
@@ -34,7 +37,7 @@ class giveaway_looper(commands.Cog):
                             view=None,
                         )
                     return await message.reply(
-                        f"Unfortunately, nobody entered the giveaway for the **{giveaway['prize']}**"
+                        f"Unfortunately, not enough people entered the giveaway for the **{giveaway['prize']}**"
                     )
                 
                 end_date = datetime.datetime.strptime(
