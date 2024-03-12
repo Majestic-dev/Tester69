@@ -63,7 +63,7 @@ class giveaway_looper(commands.Cog):
                                 else "Winners: No Winners"
                             ),
                         ).set_footer(
-                            text=f"`/giveaway reroll {giveaway['id']}` to reroll the giveaway winners",
+                            text=f'"/giveaway reroll {giveaway['id']}" to reroll the giveaway winners',
                         ),
                     )
                     if len(winners) > 0:
@@ -123,7 +123,7 @@ class giveaway_looper(commands.Cog):
                             else "Winners: No Winners"
                         ),
                     ).set_footer(
-                        text=f"`/giveaway reroll {next_giveaway['id']}` to reroll the giveaway winners"
+                        text=f'"/giveaway reroll {next_giveaway['id']}" to reroll the giveaway winners'
                     ),
                 )
                 if len(winners) > 0:
@@ -223,7 +223,7 @@ class giveaway_looper(commands.Cog):
                         if len(winners) > 0
                         else "Winners: No Winners"
                     ),
-                ),
+                ).set_footer(text=f'"/giveaway reroll {giveaway_id}" to reroll the giveaway winners'),
                 view=None,
             )
             if len(winners) > 0:
