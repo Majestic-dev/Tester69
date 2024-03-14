@@ -515,7 +515,10 @@ class logging(commands.GroupCog):
             any(word in content for word in words_in_blacklist)
             and blocked_words_channel != None
         ):
-            return await after.delete()
+            try:
+                return await after.delete()
+            except discord.errors.NotFound:
+                return
 
         edit = discord.Embed(
             description=f"**Message Edited in {before.channel.mention}** [Jump to Message]({before.jump_url})",
