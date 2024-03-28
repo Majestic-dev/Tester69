@@ -379,9 +379,40 @@ class server_management(commands.Cog):
     async def whitelist(
         self,
         interaction: discord.Interaction,
-        whitelist: discord.User | discord.Role,
         choice: app_commands.Choice[str],
+        whitelist: discord.User | discord.Role,
     ):
+        if isinstance(whitelist, discord.Role):
+            if whitelist >= interaction.user.top_role:
+                return await interaction.response.send_message(
+                    ephemeral=True,
+                    embed=discord.Embed(
+                        description=(f"<:white_cross:1096791282023669860> Could not ")
+                         + 
+                         ("add " if choice.value == "add" else "remove ")
+                         +
+                         (f"{whitelist.mention} role to the whitelist because it's higher than your highest role"),
+                        colour=discord.Colour.orange(),
+                    ),
+                )
+        elif isinstance(whitelist, discord.User | discord.Member):
+            user = interaction.guild.get_member(whitelist.id)
+            print(user.top_role)
+            if user.top_role >= interaction.user.top_role and user != interaction.user:
+                return await interaction.response.send_message(
+                    ephemeral=True,
+                    embed=discord.Embed(
+                        description=(f"<:white_cross:1096791282023669860> Could not ")
+                         + 
+                         ("add " if choice.value == "add" else "remove ")
+                         +
+                         (f"{whitelist.mention} to the whitelist because their highest role is higher than yours"),
+                        colour=discord.Colour.orange(),
+                    ),
+                )
+        else:
+            pass
+
         guild_filtered_words_data = await DataManager.get_filter_data(
             interaction.guild.id
         )
@@ -432,6 +463,48 @@ class server_management(commands.Cog):
                         colour=discord.Colour.green(),
                     ),
                 )
+
+    @app_commands.command(name="whitelist_list", description="List all whitelisted users and/or roles")
+    @app_commands.guild_only()
+    @app_commands.checks.has_permissions(administrator=True)
+    async def whitelist_list(self, interaction: discord.Interaction):
+        guild_filtered_words_data = await DataManager.get_filter_data(
+            interaction.guild.id
+        )
+        wlist = guild_filtered_words_data["whitelist"]
+
+        if wlist is None or len(wlist) == 0:
+            return await interaction.response.send_message(
+                embed=discord.Embed(
+                    description=f"<:white_cross:1096791282023669860> There are no whitelisted users or roles in this server",
+                    colour=discord.Colour.orange(),
+                )
+            )
+
+        role_list = []
+        user_list = []
+        
+        for i in wlist:
+            role = interaction.guild.get_role(i)
+            member = interaction.guild.get_member(i)
+            
+            if role:
+                role_list.insert(0, role)
+            elif member:
+                user_list.insert(0, member)
+        
+        role_list = sorted(role_list, key=lambda r: r.position, reverse=True)
+        user_list = sorted(user_list, key=lambda u: u.name, reverse=True)
+        
+        wlist = [r.mention for r in role_list] + [u.mention for u in user_list]
+
+        await interaction.response.send_message(
+            embed=discord.Embed(
+                description=f"Whitelisted users and/or roles in this server:\n\n{',\n'.join(wlist)}",
+                colour=discord.Colour.green(),
+            ),
+            ephemeral=True
+        )
 
 
 async def setup(bot):
