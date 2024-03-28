@@ -389,9 +389,9 @@ class server_management(commands.Cog):
                     embed=discord.Embed(
                         description=(f"<:white_cross:1096791282023669860> Could not ")
                          + 
-                         ("add " if choice.value == "add" else "remove ")
+                         (f"add {whitelist.mention} role to " if choice.value == "add" else f"remove {whitelist.mention} role from ")
                          +
-                         (f"{whitelist.mention} role to the whitelist because it's higher than your highest role"),
+                         ("the whitelist because it's higher than your highest role"),
                         colour=discord.Colour.orange(),
                     ),
                 )
@@ -404,9 +404,9 @@ class server_management(commands.Cog):
                     embed=discord.Embed(
                         description=(f"<:white_cross:1096791282023669860> Could not ")
                          + 
-                         ("add " if choice.value == "add" else "remove ")
+                         (f"add {whitelist.mention} to " if choice.value == "add" else f"remove {whitelist.mention} from ")
                          +
-                         (f"{whitelist.mention} to the whitelist because their highest role is higher than yours"),
+                         ("the whitelist because their highest role is higher than yours"),
                         colour=discord.Colour.orange(),
                     ),
                 )
