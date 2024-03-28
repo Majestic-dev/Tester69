@@ -476,7 +476,7 @@ class logging(commands.GroupCog):
         ):
             return
 
-        if any(word in content for word in words_in_blacklist):
+        if any(word in content for word in words_in_blacklist) and not (message.author.guild_permissions.manage_messages or message.author.guild_permissions.administrator):
             await message.delete()
 
     # Message Edit Logs
@@ -655,10 +655,13 @@ class logging(commands.GroupCog):
         if len(message.content) > 0:
             embed.add_field(name="**Content**", value=f"{message.content}")
         if any(word in content for word in words_in_blacklist):
-            embed.add_field(name="**Reason**", value="Blacklisted Word(s)")
-            embed.add_field(
-                name="**Detailed Reason**", value=f"`{'`, `'.join(bad_words_said)}`"
-            )
+            if not any(role.id in filtered_words_data["whitelist"] for role in message.author.roles):    
+                embed.add_field(name="**Reason**", value="Blacklisted Word(s)")
+                embed.add_field(
+                    name="**Detailed Reason**", value=f"`{'`, `'.join(bad_words_said)}`"
+                )
+            else:
+                pass
         if len(message.attachments) > 1:
             embed.add_field(
                 name="Attachments",
@@ -705,6 +708,7 @@ class logging(commands.GroupCog):
         if (
             any(word in content for word in words_in_blacklist)
             and blocked_words_channel != None
+            and not any(role.id in filtered_words_data["whitelist"] for role in message.author.roles)
         ):
             await blocked_words_channel.send(embed=embed)
         else:
