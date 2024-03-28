@@ -21,7 +21,7 @@ class leaderboard_dropdown(discord.ui.Select):
                 label="Cash",
                 value="cash",
                 description="Cash Balance Leaderboard",
-                emoji="💸",
+                emoji="💵",
             ),
             discord.SelectOption(
                 label="Bank",
@@ -272,7 +272,7 @@ class economy(commands.Cog):
                 embed=discord.Embed(
                     title=f"{interaction.user}'s Balance",
                     description=(
-                        f'**💸 Wallet:** {user_data["balance"]} 🪙\n**🏦 Bank:** {user_data["bank"]} 🪙'
+                        f'**💵 Wallet:** {user_data["balance"]} 🪙\n**🏦 Bank:** {user_data["bank"]} 🪙'
                     ),
                     colour=discord.Colour.green(),
                 )
@@ -283,7 +283,7 @@ class economy(commands.Cog):
                 embed=discord.Embed(
                     title=f"{user}'s Balance",
                     description=(
-                        f'**💸 Wallet:** {user_data["balance"]} 🪙\n**🏦 Bank:** {user_data["bank"]} 🪙'
+                        f'**💵 Wallet:** {user_data["balance"]} 🪙\n**🏦 Bank:** {user_data["bank"]} 🪙'
                     ),
                     colour=discord.Colour.green(),
                 )
@@ -800,7 +800,7 @@ class economy(commands.Cog):
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.user.id))
     @app_commands.choices(
         choices=[
-            app_commands.Choice(name="💸 Cash", value="cash"),
+            app_commands.Choice(name="💵 Cash", value="cash"),
             app_commands.Choice(name="🏦 Bank", value="bank"),
         ]
     )
