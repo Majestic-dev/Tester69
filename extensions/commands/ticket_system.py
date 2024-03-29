@@ -631,8 +631,10 @@ class panel_views(discord.ui.View):
                     await thread.fetch_member(interaction.user.id)
                     i += 1
                     await asyncio.sleep(0.1)
-                except discord.errors.NotFound:
+                except discord.NotFound:
                     continue
+
+        print(panel_data)
 
         if i >= panel_data["limit_per_user"]:
             return await interaction.response.send_message(
@@ -949,13 +951,13 @@ class ticket(commands.GroupCog):
     @app_commands.checks.cooldown(1, 30, key=lambda i: (i.guild.id))
     async def close_ticket(self, interaction: discord.Interaction):
         all_tickets = await DataManager.get_all_tickets()
-        if any(ticket['ticket_id'] == str(interaction.channel.id) for ticket in all_tickets):
+        if any(
+            ticket["ticket_id"] == str(interaction.channel.id) for ticket in all_tickets
+        ):
             panel_id = await DataManager.get_panel_id_by_ticket_id(
                 interaction.channel.id
             )
-            ticket = await DataManager.get_ticket_data(
-                panel_id, interaction.channel.id
-            )
+            ticket = await DataManager.get_ticket_data(panel_id, interaction.channel.id)
             if ticket["closed"]:
                 return await interaction.response.send_message(
                     embed=discord.Embed(
@@ -1009,19 +1011,19 @@ class ticket(commands.GroupCog):
                 ),
                 ephemeral=True,
             )
-            
+
     @app_commands.command(name="reopen", description="Reopen a ticket")
     @app_commands.guild_only()
     @app_commands.checks.cooldown(1, 30, key=lambda i: (i.guild.id))
     async def reopen_ticket(self, interaction: discord.Interaction):
         all_tickets = await DataManager.get_all_tickets()
-        if any(ticket['ticket_id'] == str(interaction.channel.id) for ticket in all_tickets):
+        if any(
+            ticket["ticket_id"] == str(interaction.channel.id) for ticket in all_tickets
+        ):
             panel_id = await DataManager.get_panel_id_by_ticket_id(
                 interaction.channel.id
             )
-            ticket = await DataManager.get_ticket_data(
-                panel_id, interaction.channel.id
-            )
+            ticket = await DataManager.get_ticket_data(panel_id, interaction.channel.id)
             if not ticket["closed"]:
                 return await interaction.response.send_message(
                     embed=discord.Embed(
@@ -1030,7 +1032,7 @@ class ticket(commands.GroupCog):
                     ),
                     ephemeral=True,
                 )
-            
+
             elif ticket["closed"]:
                 await interaction.response.defer()
                 await DataManager.open_ticket(panel_id, interaction.channel.id)
