@@ -464,10 +464,10 @@ class server_management(commands.Cog):
                     ),
                 )
 
-    @app_commands.command(name="whitelist_list", description="List all whitelisted users and/or roles")
+    @app_commands.command(name="list_whitelist", description="List all whitelisted users and/or roles")
     @app_commands.guild_only()
     @app_commands.checks.has_permissions(administrator=True)
-    async def whitelist_list(self, interaction: discord.Interaction):
+    async def list_whitelist(self, interaction: discord.Interaction):
         guild_filtered_words_data = await DataManager.get_filter_data(
             interaction.guild.id
         )
