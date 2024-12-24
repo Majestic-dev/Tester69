@@ -81,7 +81,7 @@ class giveaway_modal(discord.ui.Modal, title="Create a Giveaway"):
                         f"Entries: **0**\n"
                         f"Winners: **{winners}**",
                     ),
-                    view=giveaway_views(self.bot),
+                    view=GiveawayViews(self.bot),
                 )
 
                 await DataManager.register_giveaway(
@@ -132,7 +132,7 @@ class giveaway_leave_view(discord.ui.View):
             )
 
 
-class giveaway_views(discord.ui.View):
+class GiveawayViews(discord.ui.View):
     def __init__(self, bot):
         super().__init__(timeout=None)
         self.bot = bot
