@@ -10,7 +10,7 @@ from discord.ext import commands
 
 from typing import Tuple
 
-from utils import DataManager
+from utils import DataManager, cooldown_error
 
 from cogs.giveaway_system.giveaway_commands import GiveawayViews
 from cogs.ticket_system.ticket_system import (
@@ -19,7 +19,77 @@ from cogs.ticket_system.ticket_system import (
     ticket_views
 )
 
+DataManager.setup(
+    [
+        (
+            "data/config.json",
+            {
+                "token": None,
+                "postgres_user": None,
+                "postgres_password": None,
+                "postgres_database": None,
+                "giphy_key": None,
+                "unsplash_key": None,
+                "weather_api_key": None,
+            },
+        ),
+        (
+            "data/economy.json",
+            {
+                "items": {
+                    "Example Item": {
+                        "name": "Example Item",
+                        "description": "> This is an example item, not meant to be used",
+                        "type": "Example",
+                        "sell price": 0,
+                        "buy price": 0,
+                        "emoji": "Use a discord emoji here",
+                        "emoji_id": 0,
+                    },
+                },
+                "hunting items": {
+                    "Example Item": {"chance": 0},
+                },
+                "fishing items": {
+                    "Example Item": {"chance": 0},
+                },
+                "shop items": {
+                    "Example Item": {"price": 0},
+                },
+            },
+        ),
+        (
+            "data/mine/mines.json",
+            {
+                "example mine": {
+                    "requiredLevel": 0,
+                    "mainOre": "example ore",
+                    "secondaryOre": "example ore 2",
+                    "emoji": "Use a discord emoji here",
+                    "resources": {
+                        "example resource": {"min": 1, "max": 2},
+                    },
+                },
+            },
+        ),
+        (
+            "data/mine/ores.json",
+            {
+                "ores": {
+                    "example ore": {
+                        "name": "Example Ore",
+                        "emoji": "Use a discord emoji here",
+                        "type": "Example type (e.g material, consumable, etc)",
+                        "xp": 0,
+                    },
+                },
+            },
+        ),
+    ]
+)
+
 initial_extensions: Tuple[str, ...] = (
+    "cogs.economy",
     "cogs.giveaway_system",
     "cogs.logging_system",
     "cogs.misc_stuff",
@@ -46,7 +116,7 @@ class Bot(commands.Bot):
             if extension_name in bot.extensions:
                 await bot.unload_extension(extension_name)
             try:
-                    await bot.load_extension(extension_name)
+                await bot.load_extension(extension_name)
             except Exception as e:
                 print(f"Failed to load {extension_name}: {e}")
                 await bot.reload_extension(extension_name)
@@ -81,13 +151,6 @@ handler = logging.FileHandler(
     mode="w"
 )
 
-@bot.event
-async def on_ready() -> None:
-    await bot.change_presence(
-        status=discord.Status.online,
-        activity=discord.Game("https://discord.gg/VsDDf8YKBV")
-    )
-
 @bot.tree.error
 async def on_app_command_error(
     interaction: discord.Interaction, error: app_commands.AppCommandError
@@ -115,6 +178,22 @@ async def on_app_command_error(
         except:
             pass
 
+    elif isinstance(error.original, cooldown_error):
+        await interaction.edit_original_response(
+            embed=discord.Embed(
+                description=f"{error.original.error_message}, try again <t:{int(time.time() + error.original.time_left)}:R>",
+                colour=discord.Colour.red(),
+            ),
+        )
+        await asyncio.sleep(error.original.time_left)
+        try:
+            return await interaction.delete_original_response()
+        except:
+            pass
+
+    else:
+        logging.error(f"An error occurred: {error}")
+
 
 @bot.event
 async def on_command_error(ctx: commands.Context, error: commands.CommandError):
@@ -131,7 +210,6 @@ async def on_command_error(ctx: commands.Context, error: commands.CommandError):
                 colour=discord.Colour.red(),
             )
         )
-
 async def main():
     await DataManager.initialise()
     

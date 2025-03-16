@@ -7,7 +7,7 @@ from discord.ext import commands
 from utils import DataManager
 
 
-class logging(commands.GroupCog):
+class logging_cmds(commands.GroupCog):
     def __init__(self, bot):
         self.bot = bot
 

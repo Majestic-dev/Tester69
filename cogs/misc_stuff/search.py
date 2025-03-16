@@ -11,12 +11,12 @@ from discord import app_commands
 
 from utils import DataManager, Paginator
 
-class search(commands.GroupCog):
+class search(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
     
     @app_commands.command(
-        name="giphy", description="Search a gif by keyword from Giphy"
+        name="search_giphy", description="Search a gif by keyword from Giphy"
     )
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.user.id))
     @app_commands.describe(search="The keyword you want to search the Gif by")
@@ -62,7 +62,7 @@ class search(commands.GroupCog):
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
     @app_commands.command(
-        name="unsplash", description="Search an image by keyword from Unsplash"
+        name="search_unsplash", description="Search an image by keyword from Unsplash"
     )
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.user.id))
     @app_commands.describe(search="The keyword you want to search the image by")
@@ -112,7 +112,7 @@ class search(commands.GroupCog):
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
     @app_commands.command(
-        name="wikipedia", description="Get a definition from Wikipedia"
+        name="search_wikipedia", description="Get a definition from Wikipedia"
     )
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.user.id))
     @app_commands.describe(
@@ -146,7 +146,7 @@ class search(commands.GroupCog):
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
     @app_commands.command(
-        name="urban", description="Get a definition from Urban Dictionary"
+        name="search_urban", description="Get a definition from Urban Dictionary"
     )
     @app_commands.describe(
         search="The keyword you want to search the definition from The Urban Dictionary"
@@ -183,7 +183,7 @@ class search(commands.GroupCog):
 
         await Paginator.Simple().paginate(interaction, pages=embeds)
 
-    @app_commands.command(name="github", description="Get a user's GitHub profile")
+    @app_commands.command(name="search_github", description="Get a user's GitHub profile")
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.user.id))
     @app_commands.describe(
         search="The GitHub username you want to search the profile of"

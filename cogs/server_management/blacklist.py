@@ -5,12 +5,12 @@ from discord import app_commands
 
 from utils import DataManager
 
-class blacklist(commands.GroupCog):
+class blacklist(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
     @app_commands.command(
-        name="add_words",
+        name="blacklist_add_words",
         description="Add words to the blacklisted words list",
     )
     @app_commands.guild_only()
@@ -80,7 +80,7 @@ class blacklist(commands.GroupCog):
         ]
 
     @app_commands.command(
-        name="remove_word",
+        name="blacklist_remove_word",
         description="Remove a blacklisted word from the blacklisted words list.",
     )
     @app_commands.guild_only()
@@ -121,7 +121,7 @@ class blacklist(commands.GroupCog):
             )
 
     @app_commands.command(
-        name="list_words",
+        name="list_blacklisted_words",
         description="List all blacklisted words in this server",
     )
     @app_commands.guild_only()

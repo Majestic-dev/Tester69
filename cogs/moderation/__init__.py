@@ -7,4 +7,4 @@ class moderation(ban, kick, timeout, warning_system):
     """All commands related to moderation"""
 
 async def setup(bot):
-    await bot.add_cog(moderation)
+    await bot.add_cog(moderation(bot))

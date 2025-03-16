@@ -3,11 +3,11 @@ from discord import app_commands
 from discord.ext import commands
 
 
-class role(commands.GroupCog):
+class role(commands.Cog):
     def __init__(self, bot: commands.AutoShardedBot):
         self.bot = bot
 
-    @app_commands.command(name="info", description="Get information about a role")
+    @app_commands.command(name="role_info", description="Get information about a role")
     @app_commands.guild_only()
     @app_commands.checks.cooldown(1, 20, key=lambda i: (i.guild.id, i.user.id))
     @app_commands.describe(role="The role to get information about")
@@ -46,7 +46,7 @@ class role(commands.GroupCog):
 
         await interaction.response.send_message(embed=embed, ephemeral=ephemeral)
 
-    @app_commands.command(name="add", description="Add a role to the mentioned user")
+    @app_commands.command(name="add_role", description="Add a role to the mentioned user")
     @app_commands.guild_only()
     @app_commands.checks.has_permissions(manage_roles=True)
     @app_commands.checks.cooldown(1, 7, key=lambda i: (i.guild.id, i.user.id))
@@ -93,7 +93,7 @@ class role(commands.GroupCog):
         await user.add_roles(role)
 
     @app_commands.command(
-        name="remove", description="Remove a role from the mentioned user"
+        name="remove_role", description="Remove a role from the mentioned user"
     )
     @app_commands.guild_only()
     @app_commands.checks.has_permissions(manage_roles=True)

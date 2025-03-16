@@ -7,4 +7,4 @@ class misc_stuff(fun, misc, search, weather):
     """All commands that are related to miscallaneous stuff"""
 
 async def setup(bot):
-    await bot.add_cog(misc_stuff)
+    await bot.add_cog(misc_stuff(bot))

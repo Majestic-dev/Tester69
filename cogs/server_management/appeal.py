@@ -6,12 +6,12 @@ from discord import app_commands
 from utils import DataManager
 
 
-class appealing(commands.GroupCog):
+class appealing(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
     @app_commands.command(
-        name="set_link",
+        name="set_appeal_link",
         description="Set the appeal link that will be sent to users who get banned",
     )
     @app_commands.guild_only()
@@ -32,7 +32,7 @@ class appealing(commands.GroupCog):
         )
 
     @app_commands.command(
-        name="disable",
+        name="disable_appealing",
         description="Disable the appeal link that will be sent to users who get banned",
     )
     @app_commands.guild_only()
