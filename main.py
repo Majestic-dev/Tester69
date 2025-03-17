@@ -12,7 +12,7 @@ from typing import Tuple
 
 from utils import data_manager, cooldown_error
 
-from cogs.giveaway_system.giveaway_commands import GiveawayViews
+from cogs.giveaway_system.giveaway_commands import giveaway_views
 from cogs.ticket_system.ticket_system import (
     closed_ticket_views,
     panel_views,
@@ -122,7 +122,7 @@ class Bot(commands.Bot):
                 await bot.reload_extension(extension_name)
         await bot.tree.sync()
 
-        self.add_view(GiveawayViews(bot))
+        self.add_view(giveaway_views(bot))
         self.add_view(panel_views(bot))
         tickets = await data_manager.get_all_tickets()
         panels = await data_manager.get_all_panels()
