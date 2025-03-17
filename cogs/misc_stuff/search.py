@@ -28,6 +28,8 @@ class search(commands.Cog):
 
         if search != None:
             search.replace(" ", "+")
+        
+        print(DataManager.get("config", "giphy_key"))
 
         async with aiohttp.ClientSession() as session:
             try:
@@ -43,10 +45,15 @@ class search(commands.Cog):
                     )
                 ) as response:
                     data = json.loads(await response.text())
-                    gif_choice = random.randint(0, 9)
-                    embed.set_image(
-                        url=data["data"][gif_choice]["images"]["original"]["url"]
-                    )
+                    if search is not None:
+                        gif_choice = random.randint(0, 9)
+                        embed.set_image(
+                            url=data["data"][gif_choice]["images"]["original"]["url"]
+                        )
+                    else:
+                        embed.set_image(
+                            url=data["data"]["images"]["original"]["url"]
+                        )
             except IndexError:
                 response = await session.get(
                     f"https://api.giphy.com/v1/gifs/random?api_key="
@@ -58,56 +65,6 @@ class search(commands.Cog):
         embed.set_footer(
             icon_url=interaction.user.avatar,
             text=f"Requested by - {interaction.user} | Powered by Giphy API ❤️",
-        )
-        await interaction.response.send_message(embed=embed, ephemeral=True)
-
-    @app_commands.command(
-        name="search_unsplash", description="Search an image by keyword from Unsplash"
-    )
-    @app_commands.checks.cooldown(1, 10, key=lambda i: (i.user.id))
-    @app_commands.describe(search="The keyword you want to search the image by")
-    async def search_unsplash(
-        self, interaction: discord.Interaction, search: Optional[str]
-    ):
-        embed = discord.Embed(
-            title=(f"{search} Image" if search != None else "Random Image"),
-            colour=discord.Colour.green(),
-        )
-
-        if search != None:
-            search.replace(" ", "+")
-
-        async with aiohttp.ClientSession() as session:
-            try:
-                async with session.get(
-                    (
-                        f"https://api.unsplash.com/photos/random?client_id="
-                        + DataManager.get("config", "unsplash_key")
-                    )
-                    if search is None
-                    else (
-                        f"https://api.unsplash.com/search/photos?query={search}&client_id="
-                        + DataManager.get("config", "unsplash_key")
-                    )
-                ) as response:
-                    data = json.loads(await response.text())
-                    embed.set_image(url=data["urls"]["full"])
-
-                    data = json.loads(await response.text())
-                    image_choice = random.randint(0, 9)
-                    embed.set_image(url=data["results"][image_choice]["urls"]["full"])
-            except IndexError:
-                response = await session.get(
-                    f"https://api.unsplash.com/photos/random?client_id="
-                    + DataManager.get("config", "unsplash_key")
-                )
-                data = json.loads(await response.text())
-                embed.set_image(url=data["urls"]["full"])
-
-        await session.close()
-        embed.set_footer(
-            icon_url=interaction.user.avatar,
-            text=f"Requested by - {interaction.user} | Powered by Unsplash API ❤️",
         )
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
