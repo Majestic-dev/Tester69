@@ -2,7 +2,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from utils import DataManager, cooldown_check
+from utils import data_manager, cooldown_check
 
 
 class timed_claims(commands.Cog):
@@ -13,7 +13,7 @@ class timed_claims(commands.Cog):
         name="hourly", description="Gain 1000 🪙 every time you use this command"
     )
     async def hourly(self, interaction: discord.Interaction):
-        user_data = await DataManager.get_user_data(interaction.user.id)
+        user_data = await data_manager.get_user_data(interaction.user.id)
 
         if await cooldown_check(
             interaction.user.id,
@@ -21,7 +21,7 @@ class timed_claims(commands.Cog):
             "hourly",
             3600,
         ):
-            await DataManager.edit_user_data(
+            await data_manager.edit_user_data(
                 interaction.user.id, "balance", user_data["balance"] + 1000
             )
             await interaction.response.send_message(
@@ -35,7 +35,7 @@ class timed_claims(commands.Cog):
         name="daily", description="Gain 10000 🪙 every time you use this command"
     )
     async def daily(self, interaction: discord.Interaction):
-        user_data = await DataManager.get_user_data(interaction.user.id)
+        user_data = await data_manager.get_user_data(interaction.user.id)
 
         if await cooldown_check(
             interaction.user.id,
@@ -43,7 +43,7 @@ class timed_claims(commands.Cog):
             "daily",
             86400,
         ):
-            await DataManager.edit_user_data(
+            await data_manager.edit_user_data(
                 interaction.user.id, "balance", user_data["balance"] + 10000
             )
             await interaction.response.send_message(
@@ -57,7 +57,7 @@ class timed_claims(commands.Cog):
         name="weekly", description="Gain 25000 🪙 every time you use the command"
     )
     async def weekly(self, interaction: discord.Interaction):
-        user_data = await DataManager.get_user_data(interaction.user.id)
+        user_data = await data_manager.get_user_data(interaction.user.id)
 
         if await cooldown_check(
             interaction.user.id,
@@ -65,7 +65,7 @@ class timed_claims(commands.Cog):
             "weekly",
             604800,
         ):
-            await DataManager.edit_user_data(
+            await data_manager.edit_user_data(
                 interaction.user.id, "balance", user_data["balance"] + 25000
             )
             await interaction.response.send_message(
@@ -79,7 +79,7 @@ class timed_claims(commands.Cog):
         name="monthly", description="Gain 50000 🪙 every time you use the command"
     )
     async def monthly(self, interaction: discord.Interaction):
-        user_data = await DataManager.get_user_data(interaction.user.id)
+        user_data = await data_manager.get_user_data(interaction.user.id)
 
         if await cooldown_check(
             interaction.user.id,
@@ -87,7 +87,7 @@ class timed_claims(commands.Cog):
             "monthly",
             2592000,
         ):
-            await DataManager.edit_user_data(
+            await data_manager.edit_user_data(
                 interaction.user.id, "balance", user_data["balance"] + 50000
             )
             await interaction.response.send_message(

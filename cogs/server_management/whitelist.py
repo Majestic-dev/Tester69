@@ -3,7 +3,7 @@ from discord.ext import commands
 
 from discord import app_commands
 
-from utils import DataManager
+from utils import data_manager
 
 class whitelist(commands.Cog):
     def __init__(self, bot):
@@ -63,7 +63,7 @@ class whitelist(commands.Cog):
         else:
             pass
 
-        guild_filtered_words_data = await DataManager.get_filter_data(
+        guild_filtered_words_data = await data_manager.get_filter_data(
             interaction.guild.id
         )
         wlist = guild_filtered_words_data["whitelist"]
@@ -71,7 +71,7 @@ class whitelist(commands.Cog):
         if choice.value == "add":
             if wlist is None or whitelist.id not in wlist:
                 wlist.append(whitelist.id)
-                await DataManager.edit_filter_data(
+                await data_manager.edit_filter_data(
                     interaction.guild.id, "whitelist", wlist
                 )
                 await interaction.response.send_message(
@@ -103,7 +103,7 @@ class whitelist(commands.Cog):
 
             elif whitelist.id in wlist:
                 wlist.remove(whitelist.id)
-                await DataManager.edit_filter_data(
+                await data_manager.edit_filter_data(
                     interaction.guild.id, "whitelist", wlist
                 )
                 await interaction.response.send_message(
@@ -120,7 +120,7 @@ class whitelist(commands.Cog):
     @app_commands.guild_only()
     @app_commands.checks.has_permissions(administrator=True)
     async def list_whitelist(self, interaction: discord.Interaction):
-        guild_filtered_words_data = await DataManager.get_filter_data(
+        guild_filtered_words_data = await data_manager.get_filter_data(
             interaction.guild.id
         )
         wlist = guild_filtered_words_data["whitelist"]

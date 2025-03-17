@@ -3,7 +3,7 @@ from discord.ext import commands
 
 from discord import app_commands
 
-from utils import DataManager
+from utils import data_manager
 
 class blacklist(commands.Cog):
     def __init__(self, bot):
@@ -22,7 +22,7 @@ class blacklist(commands.Cog):
         self, interaction: discord.Interaction, blacklisted_words: str
     ):
         await interaction.response.defer(ephemeral=True)
-        filtered_words = await DataManager.get_filter_data(interaction.guild.id)
+        filtered_words = await data_manager.get_filter_data(interaction.guild.id)
         old_existing_words = filtered_words["blacklisted_words"]
         new_existing_words = old_existing_words.copy()
         words_not_added = []
@@ -34,7 +34,7 @@ class blacklist(commands.Cog):
             elif i.strip() not in old_existing_words:
                 new_existing_words.append(i.strip())
 
-        await DataManager.edit_filter_data(
+        await data_manager.edit_filter_data(
             interaction.guild.id, "blacklisted_words", new_existing_words
         )
 
@@ -70,7 +70,7 @@ class blacklist(commands.Cog):
     async def word_autocomplete(
         self, interaction: discord.Interaction, current: str
     ) -> list[app_commands.Choice[str]]:
-        filtered_words = await DataManager.get_filter_data(interaction.guild.id)
+        filtered_words = await data_manager.get_filter_data(interaction.guild.id)
         words_in_blacklist = filtered_words["blacklisted_words"]
 
         return [
@@ -92,7 +92,7 @@ class blacklist(commands.Cog):
     async def remove_blacklisted_word(
         self, interaction: discord.Interaction, blacklisted_word: str
     ):
-        filtered_words = await DataManager.get_filter_data(interaction.guild.id)
+        filtered_words = await data_manager.get_filter_data(interaction.guild.id)
         blacklisted_words = filtered_words["blacklisted_words"]
 
         if (
@@ -109,7 +109,7 @@ class blacklist(commands.Cog):
 
         elif blacklisted_word.lower() in blacklisted_words:
             blacklisted_words.remove(blacklisted_word.lower())
-            await DataManager.edit_filter_data(
+            await data_manager.edit_filter_data(
                 interaction.guild.id, "blacklisted_words", blacklisted_words
             )
             return await interaction.response.send_message(
@@ -127,7 +127,7 @@ class blacklist(commands.Cog):
     @app_commands.guild_only()
     @app_commands.checks.has_permissions(administrator=True)
     async def list_blacklisted_words(self, interaction: discord.Interaction):
-        filtered_words = await DataManager.get_filter_data(interaction.guild.id)
+        filtered_words = await data_manager.get_filter_data(interaction.guild.id)
         blacklisted_words = filtered_words["blacklisted_words"]
 
         if blacklisted_words is None or len(blacklisted_words) == 0:

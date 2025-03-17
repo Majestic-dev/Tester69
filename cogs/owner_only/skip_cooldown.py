@@ -3,7 +3,7 @@ from typing import Optional
 import discord
 from discord.ext import commands
 
-from utils import DataManager
+from utils import data_manager
 
 class skip_cooldown(commands.Cog):
     def __init__(self, bot):
@@ -16,7 +16,7 @@ class skip_cooldown(commands.Cog):
     ):
         if member == None:
             if command == "all":
-                await DataManager.remove_cooldown(ctx.author.id, "all")
+                await data_manager.remove_cooldown(ctx.author.id, "all")
                 return await ctx.reply(
                     embed=discord.Embed(
                         description=(
@@ -26,7 +26,7 @@ class skip_cooldown(commands.Cog):
                     )
                 )
 
-            user_data = await DataManager.get_user_data(ctx.author.id)
+            user_data = await data_manager.get_user_data(ctx.author.id)
             if command not in user_data["cooldowns"]:
                 return await ctx.reply(
                     embed=discord.Embed(
@@ -37,7 +37,7 @@ class skip_cooldown(commands.Cog):
                     )
                 )
 
-            await DataManager.remove_cooldown(ctx.author.id, command)
+            await data_manager.remove_cooldown(ctx.author.id, command)
 
             return await ctx.reply(
                 embed=discord.Embed(
@@ -50,7 +50,7 @@ class skip_cooldown(commands.Cog):
 
         else:
             if command == "all":
-                await DataManager.remove_cooldown(member.id, "all")
+                await data_manager.remove_cooldown(member.id, "all")
                 return await ctx.reply(
                     embed=discord.Embed(
                         description=(
@@ -60,7 +60,7 @@ class skip_cooldown(commands.Cog):
                     )
                 )
 
-            user_data = await DataManager.get_user_data(member.id)
+            user_data = await data_manager.get_user_data(member.id)
             if command not in user_data["cooldowns"]:
                 return await ctx.reply(
                     embed=discord.Embed(
@@ -71,7 +71,7 @@ class skip_cooldown(commands.Cog):
                     )
                 )
 
-            await DataManager.remove_cooldown(member.id, command)
+            await data_manager.remove_cooldown(member.id, command)
 
             return await ctx.reply(
                 embed=discord.Embed(

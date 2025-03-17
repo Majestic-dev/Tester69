@@ -6,7 +6,7 @@ import discord
 from discord.ext import commands
 from PIL import Image, UnidentifiedImageError
 
-from utils import DataManager
+from utils import data_manager
 
 
 class logging_listeners(commands.Cog):
@@ -16,7 +16,7 @@ class logging_listeners(commands.Cog):
     # Member Join Listener
     @commands.Cog.listener()
     async def on_member_join(self, member):
-        guild_data = await DataManager.get_guild_data(member.guild.id)
+        guild_data = await data_manager.get_guild_data(member.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
 
         if member.guild.get_member(member.id) == None:
@@ -41,7 +41,7 @@ class logging_listeners(commands.Cog):
     # Member Leave Listener
     @commands.Cog.listener()
     async def on_member_remove(self, member):
-        guild_data = await DataManager.get_guild_data(member.guild.id)
+        guild_data = await data_manager.get_guild_data(member.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
 
         if logs_channel == None:
@@ -65,7 +65,7 @@ class logging_listeners(commands.Cog):
         warner: discord.Member,
         reason: str,
     ):
-        guild_data = await DataManager.get_guild_data(guild.id)
+        guild_data = await data_manager.get_guild_data(guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
 
         if logs_channel == None:
@@ -91,7 +91,7 @@ class logging_listeners(commands.Cog):
         timedout_until: int,
         reason: str,
     ):
-        guild_data = await DataManager.get_guild_data(guild.id)
+        guild_data = await data_manager.get_guild_data(guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
 
         if logs_channel == None:
@@ -119,7 +119,7 @@ class logging_listeners(commands.Cog):
     async def on_kick(
         self, kicker: discord.User, guild: discord.Guild, user: discord.User
     ):
-        guild_data = await DataManager.get_guild_data(guild.id)
+        guild_data = await data_manager.get_guild_data(guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
 
         if logs_channel == None:
@@ -143,7 +143,7 @@ class logging_listeners(commands.Cog):
         banned: discord.User,
         reason: str,
     ):
-        guild_data = await DataManager.get_guild_data(guild.id)
+        guild_data = await data_manager.get_guild_data(guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
 
         if logs_channel == None:
@@ -161,7 +161,7 @@ class logging_listeners(commands.Cog):
     # Member Unban Listener
     @commands.Cog.listener()
     async def on_member_unban(self, guild, user):
-        guild_data = await DataManager.get_guild_data(guild.id)
+        guild_data = await data_manager.get_guild_data(guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
 
         if logs_channel == None:
@@ -179,7 +179,7 @@ class logging_listeners(commands.Cog):
     # Member Update Listener
     @commands.Cog.listener()
     async def on_member_update(self, before, after):
-        guild_data = await DataManager.get_guild_data(before.guild.id)
+        guild_data = await data_manager.get_guild_data(before.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
 
         if logs_channel == None:
@@ -231,7 +231,7 @@ class logging_listeners(commands.Cog):
     # Role Create Listener
     @commands.Cog.listener()
     async def on_guild_role_create(self, role):
-        guild_data = await DataManager.get_guild_data(role.guild.id)
+        guild_data = await data_manager.get_guild_data(role.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
 
         if logs_channel == None:
@@ -249,7 +249,7 @@ class logging_listeners(commands.Cog):
     # Role Delete Listener
     @commands.Cog.listener()
     async def on_guild_role_delete(self, role):
-        guild_data = await DataManager.get_guild_data(role.guild.id)
+        guild_data = await data_manager.get_guild_data(role.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
 
         if logs_channel == None:
@@ -267,7 +267,7 @@ class logging_listeners(commands.Cog):
     # Role Update Listener
     @commands.Cog.listener()
     async def on_guild_role_update(self, before, after):
-        guild_data = await DataManager.get_guild_data(before.guild.id)
+        guild_data = await data_manager.get_guild_data(before.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
 
         if logs_channel == None:
@@ -312,7 +312,7 @@ class logging_listeners(commands.Cog):
     # Voice Channel Listener
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
-        guild_data = await DataManager.get_guild_data(member.guild.id)
+        guild_data = await data_manager.get_guild_data(member.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
 
         if logs_channel == None:
@@ -377,7 +377,7 @@ class logging_listeners(commands.Cog):
         if message.channel.type == discord.channel.ChannelType.private:
             return
 
-        filtered_words_data = await DataManager.get_filter_data(message.guild.id)
+        filtered_words_data = await data_manager.get_filter_data(message.guild.id)
         words_in_blacklist = [
             re.sub(r"\W+", " ", word.lower()).strip()
             for word in filtered_words_data["blacklisted_words"]
@@ -406,9 +406,9 @@ class logging_listeners(commands.Cog):
         if before.channel.type == discord.channel.ChannelType.private:
             return
 
-        guild_data = await DataManager.get_guild_data(after.guild.id)
+        guild_data = await data_manager.get_guild_data(after.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
-        filtered_words_data = await DataManager.get_filter_data(after.guild.id)
+        filtered_words_data = await data_manager.get_filter_data(after.guild.id)
         blocked_words_channel = self.bot.get_channel(filtered_words_data["channel_id"])
         content = after.content.lower()
 
@@ -536,9 +536,9 @@ class logging_listeners(commands.Cog):
                 ),
             )
 
-        guild_data = await DataManager.get_guild_data(message.guild.id)
+        guild_data = await data_manager.get_guild_data(message.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
-        filtered_words_data = await DataManager.get_filter_data(message.guild.id)
+        filtered_words_data = await data_manager.get_filter_data(message.guild.id)
         blocked_words_channel = self.bot.get_channel(filtered_words_data["channel_id"])
 
         if message.author.bot and message.channel != logs_channel:
@@ -657,7 +657,7 @@ class logging_listeners(commands.Cog):
     # Channel Create Listener
     @commands.Cog.listener()
     async def on_guild_channel_create(self, channel):
-        guild_data = await DataManager.get_guild_data(channel.guild.id)
+        guild_data = await data_manager.get_guild_data(channel.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
 
         if logs_channel == None:
@@ -677,7 +677,7 @@ class logging_listeners(commands.Cog):
     # Channel Delete Listener
     @commands.Cog.listener()
     async def on_guild_channel_delete(self, channel):
-        guild_data = await DataManager.get_guild_data(channel.guild.id)
+        guild_data = await data_manager.get_guild_data(channel.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
 
         if logs_channel == None:

@@ -3,7 +3,7 @@ import datetime
 import discord
 from discord.ext import commands
 
-from utils import DataManager
+from utils import data_manager
 
 class giveaway_listeners(commands.Cog):
     def __init__(self, bot):
@@ -12,7 +12,7 @@ class giveaway_listeners(commands.Cog):
     # Giveaway Join Listener
     @commands.Cog.listener()
     async def on_giveaway_join(self, giveaway_id: int):
-        giveaway_data = await DataManager.get_giveaway_data(giveaway_id)
+        giveaway_data = await data_manager.get_giveaway_data(giveaway_id)
         channel = self.bot.get_channel(giveaway_data["channel_id"])
         message = await channel.fetch_message(giveaway_id)
         end_date = datetime.datetime.strptime(
@@ -40,7 +40,7 @@ class giveaway_listeners(commands.Cog):
     # Giveaway Leave Listener
     @commands.Cog.listener()
     async def on_giveaway_leave(self, giveaway_id: int):
-        giveaway_data = await DataManager.get_giveaway_data(giveaway_id)
+        giveaway_data = await data_manager.get_giveaway_data(giveaway_id)
         channel = self.bot.get_channel(giveaway_data["channel_id"])
         message = await channel.fetch_message(giveaway_id)
         end_date = datetime.datetime.strptime(
@@ -68,10 +68,10 @@ class giveaway_listeners(commands.Cog):
     # Manual Giveaway End Listener
     @commands.Cog.listener()
     async def on_manual_giveaway_end(self, giveaway_id: int):
-        giveaway_data = await DataManager.get_giveaway_data(giveaway_id)
+        giveaway_data = await data_manager.get_giveaway_data(giveaway_id)
         channel = self.bot.get_channel(giveaway_data["channel_id"])
         message = await channel.fetch_message(giveaway_id)
-        winners = await DataManager.draw_giveaway_winners(giveaway_id)
+        winners = await data_manager.draw_giveaway_winners(giveaway_id)
         end_date = datetime.datetime.strptime(
             giveaway_data["end_date"], "%Y-%m-%dT%H:%M:%S.%f%z"
         )
@@ -112,10 +112,10 @@ class giveaway_listeners(commands.Cog):
     # Manual Giveaway Reroll Listener
     @commands.Cog.listener()
     async def on_manual_giveaway_reroll(self, giveaway_id: int):
-        giveaway_data = await DataManager.get_giveaway_data(giveaway_id)
+        giveaway_data = await data_manager.get_giveaway_data(giveaway_id)
         channel = self.bot.get_channel(giveaway_data["channel_id"])
         message = await channel.fetch_message(giveaway_id)
-        winners = await DataManager.draw_giveaway_winners(giveaway_id)
+        winners = await data_manager.draw_giveaway_winners(giveaway_id)
         end_date = datetime.datetime.strptime(
             giveaway_data["end_date"], "%Y-%m-%dT%H:%M:%S.%f%z"
         )
@@ -156,7 +156,7 @@ class giveaway_listeners(commands.Cog):
     async def on_manual_giveaway_winner_reroll(
         self, giveaway_id: int, new_winner_id: int
     ):
-        giveaway_data = await DataManager.get_giveaway_data(giveaway_id)
+        giveaway_data = await data_manager.get_giveaway_data(giveaway_id)
         channel = self.bot.get_channel(giveaway_data["channel_id"])
         message = await channel.fetch_message(giveaway_id)
         end_date = datetime.datetime.strptime(

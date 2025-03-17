@@ -6,7 +6,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from utils import DataManager, Paginator
+from utils import data_manager, paginator
 
 
 async def calculate_remaining_xp(level: int, xp: int) -> str:
@@ -20,10 +20,10 @@ async def calculate_remaining_xp(level: int, xp: int) -> str:
 
 
 async def find_user_level(user_id: int):
-    user_data = await DataManager.get_user_data(user_id)
+    user_data = await data_manager.get_user_data(user_id)
     if user_data["mining_xp"] == None:
         return 0
-    levels = DataManager.get("levels", "levels")
+    levels = data_manager.get("levels", "levels")
     for level in levels:
         required_xp = levels[level]["requiredXP"]
         if user_data["mining_xp"] < required_xp:
@@ -47,13 +47,13 @@ class personal(commands.Cog):
         if user == None:
             user = interaction.user
 
-        user_data = await DataManager.get_user_data(user.id)
+        user_data = await data_manager.get_user_data(user.id)
         if user_data["inventory"] is not None:
             inventory = json.loads(user_data["inventory"])
         else:
             inventory = {}
 
-        items = DataManager.get("economy", "items")
+        items = data_manager.get("economy", "items")
         net = user_data["balance"] + user_data["bank"]
 
         for item in inventory:
@@ -111,7 +111,7 @@ class personal(commands.Cog):
     )
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.user.id))
     async def inventory(self, interaction: discord.Interaction):
-        user_data = await DataManager.get_user_data(interaction.user.id)
+        user_data = await data_manager.get_user_data(interaction.user.id)
 
         if user_data["inventory"] is None:
             return await interaction.response.send_message(
@@ -136,10 +136,10 @@ class personal(commands.Cog):
         for i in range(0, len(items), 10):
             inv_embed = discord.Embed(colour=discord.Colour.green())
             for item, count in items[i : i + 10]:
-                name = f"{DataManager.get('economy', 'items')[item.lower()]['emoji']} {item} - {count}"
+                name = f"{data_manager.get('economy', 'items')[item.lower()]['emoji']} {item} - {count}"
                 inv_embed.add_field(
                     name=f"{name}",
-                    value=f"{DataManager.get('economy', 'items')[item.lower()]['type']}",
+                    value=f"{data_manager.get('economy', 'items')[item.lower()]['type']}",
                     inline=False,
                 )
             inv_embed.set_author(
@@ -151,4 +151,4 @@ class personal(commands.Cog):
             )
             embeds.append(inv_embed)
 
-        await Paginator.Simple().paginate(interaction, embeds)
+        await paginator.Simple().paginate(interaction, embeds)

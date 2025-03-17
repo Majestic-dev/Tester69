@@ -10,7 +10,7 @@ from discord.ext import commands
 
 from typing import Tuple
 
-from utils import DataManager, cooldown_error
+from utils import data_manager, cooldown_error
 
 from cogs.giveaway_system.giveaway_commands import GiveawayViews
 from cogs.ticket_system.ticket_system import (
@@ -19,7 +19,7 @@ from cogs.ticket_system.ticket_system import (
     ticket_views
 )
 
-DataManager.setup(
+data_manager.setup(
     [
         (
             "data/config.json",
@@ -124,8 +124,8 @@ class Bot(commands.Bot):
 
         self.add_view(GiveawayViews(bot))
         self.add_view(panel_views(bot))
-        tickets = await DataManager.get_all_tickets()
-        panels = await DataManager.get_all_panels()
+        tickets = await data_manager.get_all_tickets()
+        panels = await data_manager.get_all_panels()
 
         try:
             for panel in panels:
@@ -211,10 +211,10 @@ async def on_command_error(ctx: commands.Context, error: commands.CommandError):
             )
         )
 async def main():
-    await DataManager.initialise()
+    await data_manager.initialise()
     
     discord.utils.setup_logging(handler=handler, level=logging.INFO)
-    await bot.start(DataManager.get("config", "token"))
+    await bot.start(data_manager.get("config", "token"))
 
 if __name__ == "__main__":
     asyncio.run(main())

@@ -4,7 +4,7 @@ from typing import Optional
 import discord
 from discord.ext import commands
 
-from utils import DataManager
+from utils import data_manager
 
 
 class add(commands.Cog):
@@ -19,7 +19,7 @@ class add(commands.Cog):
         amount: int,
         member: Optional[discord.Member] = None,
     ):
-        user_data = await DataManager.get_user_data(
+        user_data = await data_manager.get_user_data(
             (member.id) if member else ctx.author.id
         )
 
@@ -33,7 +33,7 @@ class add(commands.Cog):
                 )
             )
 
-        await DataManager.edit_user_data(
+        await data_manager.edit_user_data(
             (member.id) if member else ctx.author.id,
             "balance",
             user_data["balance"] + amount,
@@ -61,7 +61,7 @@ class add(commands.Cog):
         amount: Optional[int] = 1,
         member: Optional[discord.Member] = None,
     ):
-        items = DataManager.get("economy", "items")
+        items = data_manager.get("economy", "items")
         if item_name.lower() not in items:
             return await ctx.reply(
                 embed=discord.Embed(
@@ -75,7 +75,7 @@ class add(commands.Cog):
         if member == None:
             member = ctx.author
 
-        await DataManager.edit_user_inventory(member.id, item_name, amount)
+        await data_manager.edit_user_inventory(member.id, item_name, amount)
 
         if member == ctx.author:
             return await ctx.reply(

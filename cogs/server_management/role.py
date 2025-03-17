@@ -11,7 +11,7 @@ class role(commands.Cog):
     @app_commands.guild_only()
     @app_commands.checks.cooldown(1, 20, key=lambda i: (i.guild.id, i.user.id))
     @app_commands.describe(role="The role to get information about")
-    async def roleinfo(
+    async def role_info(
         self,
         interaction: discord.Interaction,
         role: discord.Role,

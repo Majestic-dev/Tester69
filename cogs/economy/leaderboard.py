@@ -2,7 +2,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from utils import DataManager
+from utils import data_manager
 
 
 class leaderboard_dropdown(discord.ui.Select):
@@ -42,9 +42,9 @@ class leaderboard_dropdown(discord.ui.Select):
             )
 
         if self.values[0] == "cash":
-            user_ids = await DataManager.get_all_users()
+            user_ids = await data_manager.get_all_users()
             users = {
-                user_id: await DataManager.get_user_data(user_id)
+                user_id: await data_manager.get_user_data(user_id)
                 for user_id in user_ids
             }
             top_10 = sorted(users, key=lambda k: users[k]["balance"], reverse=True)[:10]
@@ -68,9 +68,9 @@ class leaderboard_dropdown(discord.ui.Select):
             )
 
         elif self.values[0] == "bank":
-            user_ids = await DataManager.get_all_users()
+            user_ids = await data_manager.get_all_users()
             users = {
-                user_id: await DataManager.get_user_data(user_id)
+                user_id: await data_manager.get_user_data(user_id)
                 for user_id in user_ids
             }
             top_10 = sorted(users, key=lambda k: users[k]["bank"], reverse=True)[:10]
@@ -122,9 +122,9 @@ class leaderboard(commands.Cog):
         view = leaderboard_dropdown_view(bot=self.bot, interaction=interaction)
 
         if choices.value == "cash":
-            user_ids = await DataManager.get_all_users()
+            user_ids = await data_manager.get_all_users()
             users = {
-                user_id: await DataManager.get_user_data(user_id)
+                user_id: await data_manager.get_user_data(user_id)
                 for user_id in user_ids
             }
             top_10 = sorted(users, key=lambda k: users[k]["balance"], reverse=True)[:10]
@@ -144,9 +144,9 @@ class leaderboard(commands.Cog):
             await interaction.response.send_message(embed=lb_embed, view=view)
 
         elif choices.value == "bank":
-            user_ids = await DataManager.get_all_users()
+            user_ids = await data_manager.get_all_users()
             users = {
-                user_id: await DataManager.get_user_data(user_id)
+                user_id: await data_manager.get_user_data(user_id)
                 for user_id in user_ids
             }
             top_10 = sorted(users, key=lambda k: users[k]["bank"], reverse=True)[:10]

@@ -4,7 +4,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from utils import Paginator
+from utils import paginator
 
 
 class server_views(discord.ui.View):
@@ -65,19 +65,19 @@ class server_views(discord.ui.View):
             )
             embeds.append(embed)
 
-        await Paginator.Simple(ephemeral=True).paginate(interaction, embeds)
+        await paginator.Simple(ephemeral=True).paginate(interaction, embeds)
 
 
-class server(commands.Cog):
+class server(commands.GroupCog):
     def __init__(self, bot):
         self.bot = bot
 
     @app_commands.command(
-        name="serverinfo", description="Get information about the server"
+        name="info", description="Get information about the server"
     )
     @app_commands.guild_only()
     @app_commands.checks.cooldown(1, 20, key=lambda i: (i.guild.id, i.user.id))
-    async def serverinfo(
+    async def server_info(
         self, interaction: discord.Interaction, ephemeral: bool = True
     ):
         guild = interaction.guild
@@ -106,11 +106,11 @@ class server(commands.Cog):
         )
 
     @app_commands.command(
-        name="membercount", description="Get the member count of the server"
+        name="member_count", description="Get the member count of the server"
     )
     @app_commands.guild_only()
     @app_commands.checks.cooldown(1, 20, key=lambda i: (i.guild.id, i.user.id))
-    async def membercount(self, interaction: discord.Interaction):
+    async def member_count(self, interaction: discord.Interaction):
         guild = interaction.guild
         embed = discord.Embed(
             title=f"Member Count",
@@ -119,10 +119,10 @@ class server(commands.Cog):
         )
         await interaction.response.send_message(embed=embed)
 
-    @app_commands.command(name="servericon", description="Get the icon of the server")
+    @app_commands.command(name="icon", description="Get the icon of the server")
     @app_commands.guild_only()
     @app_commands.checks.cooldown(1, 20, key=lambda i: (i.guild.id, i.user.id))
-    async def servericon(
+    async def server_icon(
         self, interaction: discord.Interaction, ephemeral: bool = True
     ):
         if interaction.guild.icon is not None:
@@ -148,11 +148,11 @@ class server(commands.Cog):
             )
 
     @app_commands.command(
-        name="serverbanner", description="Get the banner of the current server"
+        name="banner", description="Get the banner of the current server"
     )
     @app_commands.guild_only()
     @app_commands.checks.cooldown(1, 20, key=lambda i: (i.guild.id, i.user.id))
-    async def serverbanner(
+    async def server_banner(
         self, interaction: discord.Interaction, ephemeral: bool = True
     ):
         if interaction.guild.banner is not None:
@@ -177,11 +177,11 @@ class server(commands.Cog):
                 ephemeral=True,
             )
 
-    @app_commands.command(name="userinfo", description="Get information about a user")
+    @app_commands.command(name="user_info", description="Get information about a user")
     @app_commands.guild_only()
     @app_commands.checks.cooldown(1, 20, key=lambda i: (i.guild.id, i.user.id))
     @app_commands.describe(user="The user to get information about")
-    async def userinfo(
+    async def user_info(
         self,
         interaction: discord.Interaction,
         user: Optional[discord.User] = None,
@@ -265,11 +265,11 @@ class server(commands.Cog):
         await interaction.response.send_message(embed=embed, ephemeral=ephemeral)
 
     @app_commands.command(
-        name="avatar", description="Get the avatar of an user or yourself"
+        name="user_avatar", description="Get the avatar of an user or yourself"
     )
     @app_commands.checks.cooldown(1, 20, key=lambda i: (i.guild.id, i.user.id))
     @app_commands.describe(user="The user to get the avatar of, defaults to yourself")
-    async def avatar(
+    async def user_avatar(
         self,
         interaction: discord.Interaction,
         user: Optional[discord.User] = None,
@@ -285,11 +285,11 @@ class server(commands.Cog):
         embed.set_image(url=user.avatar)
         await interaction.response.send_message(embed=embed, ephemeral=ephemeral)
 
-    @app_commands.command(name="info", description="Get information about a channel")
+    @app_commands.command(name="channel_info", description="Get information about a channel")
     @app_commands.guild_only()
     @app_commands.checks.cooldown(1, 20, key=lambda i: (i.guild.id, i.user.id))
     @app_commands.describe(channel="The channel to get information about")
-    async def channelinfo(
+    async def channel_info(
         self,
         interaction: discord.Interaction,
         channel: Optional[discord.TextChannel] = None,

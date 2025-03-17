@@ -3,7 +3,7 @@ from discord.ext import commands
 
 from discord import app_commands
 
-from utils import DataManager
+from utils import data_manager
 
 
 class appealing(commands.Cog):
@@ -21,7 +21,7 @@ class appealing(commands.Cog):
         appeal_link="The appeal link to set (sent to users who get banned)"
     )
     async def set_appeal_link(self, interaction: discord.Interaction, appeal_link: str):
-        await DataManager.edit_guild_data(
+        await data_manager.edit_guild_data(
             interaction.guild.id, "appeal_link", f"{appeal_link}"
         )
         await interaction.response.send_message(
@@ -39,7 +39,7 @@ class appealing(commands.Cog):
     @app_commands.checks.has_permissions(manage_guild=True)
     @app_commands.checks.cooldown(1, 600, key=lambda i: (i.guild.id, i.user.id))
     async def disable_appealing(self, interaction: discord.Interaction):
-        await DataManager.edit_guild_data(interaction.guild.id, "appeal_link", None)
+        await data_manager.edit_guild_data(interaction.guild.id, "appeal_link", None)
         await interaction.response.send_message(
             embed=discord.Embed(
                 description=f"<:white_checkmark:1096793014287995061> Disabled appealing",

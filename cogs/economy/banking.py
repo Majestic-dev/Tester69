@@ -4,7 +4,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from utils import DataManager
+from utils import data_manager
 
 class banking(commands.Cog):
     def __init__(self, bot):
@@ -36,7 +36,7 @@ class banking(commands.Cog):
                 )
             )
 
-        payer_data = await DataManager.get_user_data(interaction.user.id)
+        payer_data = await data_manager.get_user_data(interaction.user.id)
         if payer_data["balance"] < amount:
             return await interaction.response.send_message(
                 embed=discord.Embed(
@@ -45,16 +45,16 @@ class banking(commands.Cog):
                 )
             )
 
-        await DataManager.edit_user_data(
+        await data_manager.edit_user_data(
             interaction.user.id, "balance", payer_data["balance"] - amount
         )
 
-        receiver_data = await DataManager.get_user_data(user.id)
-        await DataManager.edit_user_data(
+        receiver_data = await data_manager.get_user_data(user.id)
+        await data_manager.edit_user_data(
             user.id, "balance", receiver_data["balance"] + amount
         )
 
-        payer_data = await DataManager.get_user_data(interaction.user.id)
+        payer_data = await data_manager.get_user_data(interaction.user.id)
 
         await interaction.response.send_message(
             embed=discord.Embed(
@@ -74,7 +74,7 @@ class banking(commands.Cog):
     ):
         await interaction.response.defer()
         if user == None:
-            user_data = await DataManager.get_user_data(interaction.user.id)
+            user_data = await data_manager.get_user_data(interaction.user.id)
             await interaction.edit_original_response(
                 embed=discord.Embed(
                     title=f"{interaction.user}'s Balance",
@@ -85,7 +85,7 @@ class banking(commands.Cog):
                 )
             )
         else:
-            user_data = await DataManager.get_user_data(user.id)
+            user_data = await data_manager.get_user_data(user.id)
             await interaction.edit_original_response(
                 embed=discord.Embed(
                     title=f"{user}'s Balance",
@@ -100,16 +100,16 @@ class banking(commands.Cog):
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.user.id))
     @app_commands.describe(amount="The amount of 🪙 you want to deposit")
     async def deposit(self, interaction: discord.Interaction, amount: str):
-        user_data = await DataManager.get_user_data(interaction.user.id)
+        user_data = await data_manager.get_user_data(interaction.user.id)
 
         if amount == "all":
             if user_data["balance"] != 0:
-                await DataManager.edit_user_data(
+                await data_manager.edit_user_data(
                     interaction.user.id,
                     "bank",
                     user_data["bank"] + user_data["balance"],
                 )
-                await DataManager.edit_user_data(
+                await data_manager.edit_user_data(
                     interaction.user.id,
                     "balance",
                     user_data["balance"] - user_data["balance"],
@@ -144,10 +144,10 @@ class banking(commands.Cog):
                 )
             )
 
-        await DataManager.edit_user_data(
+        await data_manager.edit_user_data(
             interaction.user.id, "balance", user_data["balance"] - int(amount)
         )
-        await DataManager.edit_user_data(
+        await data_manager.edit_user_data(
             interaction.user.id, "bank", user_data["bank"] + int(amount)
         )
 
@@ -162,13 +162,13 @@ class banking(commands.Cog):
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.user.id))
     @app_commands.describe(amount="The amount of 🪙 you want to withdraw")
     async def withdraw(self, interaction: discord.Interaction, amount: str):
-        user_data = await DataManager.get_user_data(interaction.user.id)
+        user_data = await data_manager.get_user_data(interaction.user.id)
 
         if amount == "all":
-            await DataManager.edit_user_data(
+            await data_manager.edit_user_data(
                 interaction.user.id, "balance", user_data["balance"] + user_data["bank"]
             )
-            await DataManager.edit_user_data(
+            await data_manager.edit_user_data(
                 interaction.user.id, "bank", user_data["bank"] - user_data["bank"]
             )
             return await interaction.response.send_message(
@@ -194,10 +194,10 @@ class banking(commands.Cog):
                 )
             )
 
-        await DataManager.edit_user_data(
+        await data_manager.edit_user_data(
             interaction.user.id, "bank", user_data["bank"] - int(amount)
         )
-        await DataManager.edit_user_data(
+        await data_manager.edit_user_data(
             interaction.user.id, "balance", user_data["balance"] + int(amount)
         )
 

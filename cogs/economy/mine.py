@@ -5,14 +5,14 @@ import asyncio
 import random
 import time
 import json
-from utils import DataManager, cooldown_check
+from utils import data_manager, cooldown_check
 
 
 async def find_user_level(user_id: int):
-    user_data = await DataManager.get_user_data(user_id)
+    user_data = await data_manager.get_user_data(user_id)
     if user_data["mining_xp"] == None:
         return 0
-    levels = DataManager.get("levels", "levels")
+    levels = data_manager.get("levels", "levels")
     for level in levels:
         required_xp = levels[level]["requiredXP"]
         if user_data["mining_xp"] < required_xp:
@@ -29,10 +29,10 @@ class mining_buttons(discord.ui.View):
         self.bot = bot
         self.response: discord.Message = None
         self.mine_name = mine
-        self.mine = DataManager.get("mines", mine)
+        self.mine = data_manager.get("mines", mine)
         self.max_ores: dict = {}
         self.ore_positions: dict = {}
-        self.ores = DataManager.get("ores", "ores")
+        self.ores = data_manager.get("ores", "ores")
         self.mined_ores = 0
         self.mined_items = {}
         self.gained_xp = 0
@@ -128,17 +128,17 @@ class mining_buttons(discord.ui.View):
                     if self.mined_ores == len(self.ore_positions):
                         pass
                     else:
-                        user_data = await DataManager.get_user_data(interaction.user.id)
+                        user_data = await data_manager.get_user_data(interaction.user.id)
                         mining_xp = user_data["mining_xp"]
                         if mining_xp == None:
                             mining_xp = 0
 
-                        await DataManager.edit_user_data(
+                        await data_manager.edit_user_data(
                             interaction.user.id, "mining_xp", mining_xp + self.gained_xp
                         )
 
                         for ore, quantity in self.mined_items.items():
-                            await DataManager.edit_user_inventory(
+                            await data_manager.edit_user_inventory(
                                 interaction.user.id, ore, quantity
                             )
 
@@ -159,17 +159,17 @@ class mining_buttons(discord.ui.View):
                         )
                     )
 
-                    user_data = await DataManager.get_user_data(interaction.user.id)
+                    user_data = await data_manager.get_user_data(interaction.user.id)
                     mining_xp = user_data["mining_xp"]
                     if mining_xp == None:
                         mining_xp = 0
 
-                    await DataManager.edit_user_data(
+                    await data_manager.edit_user_data(
                         interaction.user.id, "mining_xp", mining_xp + self.gained_xp
                     )
 
                     for ore, quantity in self.mined_items.items():
-                        await DataManager.edit_user_inventory(
+                        await data_manager.edit_user_inventory(
                             interaction.user.id, ore, quantity
                         )
 

@@ -5,7 +5,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from utils import DataManager, Paginator
+from utils import data_manager, paginator
 
 
 class item(commands.Cog):
@@ -15,7 +15,7 @@ class item(commands.Cog):
     async def item_autocomplete(
         self, interaction: discord.Interaction, current: str
     ) -> list[app_commands.Choice[str]]:
-        user_data = await DataManager.get_user_data(interaction.user.id)
+        user_data = await data_manager.get_user_data(interaction.user.id)
         items_in_inventory = json.loads(user_data["inventory"]).keys()
 
         return [
@@ -42,11 +42,11 @@ class item(commands.Cog):
                 )
             )
 
-        items = DataManager.get("economy", "items")
+        items = data_manager.get("economy", "items")
         if not items:
             print("where are the items gang")
 
-        user_data = await DataManager.get_user_data(interaction.user.id)
+        user_data = await data_manager.get_user_data(interaction.user.id)
 
         if user_data["inventory"] is not None and json.loads(user_data["inventory"]):
             user_inv = json.loads(user_data["inventory"])
@@ -81,12 +81,12 @@ class item(commands.Cog):
                 )
 
             price = item1["sell price"]
-            await DataManager.edit_user_data(
+            await data_manager.edit_user_data(
                 interaction.user.id,
                 "balance",
                 user_data["balance"] + (int(amount) * price),
             )
-            await DataManager.edit_user_inventory(
+            await data_manager.edit_user_inventory(
                 interaction.user.id, item, -int(amount)
             )
 
@@ -107,7 +107,7 @@ class item(commands.Cog):
     @app_commands.command(name="shop", description="View the shop to buy various items")
     @app_commands.checks.cooldown(1, 15, key=lambda i: (i.user.id))
     async def shop(self, interaction: discord.Interaction):
-        user_data = await DataManager.get_user_data(interaction.user.id)
+        user_data = await data_manager.get_user_data(interaction.user.id)
 
         embeds = []
 
@@ -115,7 +115,7 @@ class item(commands.Cog):
             title="Shop", colour=discord.Colour.from_rgb(43, 45, 49)
         )
 
-        for item in DataManager.get("economy", "items"):
+        for item in data_manager.get("economy", "items"):
             if len(cur_embed.fields) >= 8:
                 embeds.append(cur_embed)
 
@@ -124,9 +124,9 @@ class item(commands.Cog):
                     colour=discord.Colour.green(),
                 )
 
-            price = DataManager.get("economy", "items")[item]["buy price"]
-            description = DataManager.get("economy", "items")[item]["description"]
-            emoji = DataManager.get("economy", "items")[item]["emoji"]
+            price = data_manager.get("economy", "items")[item]["buy price"]
+            description = data_manager.get("economy", "items")[item]["description"]
+            emoji = data_manager.get("economy", "items")[item]["emoji"]
 
             if price != 0:
                 if user_data["inventory"] is not None:
@@ -148,12 +148,12 @@ class item(commands.Cog):
 
         embeds.append(cur_embed)
 
-        await Paginator.Simple().paginate(interaction, embeds)
+        await paginator.Simple().paginate(interaction, embeds)
 
     async def item_autocomplete(
         self, interaction: discord.Interaction, current: str
     ) -> list[app_commands.Choice[str]]:
-        shop_items = DataManager.get("economy", "shop items").keys()
+        shop_items = data_manager.get("economy", "shop items").keys()
 
         return [
             app_commands.Choice(name=item, value=item)
@@ -179,7 +179,7 @@ class item(commands.Cog):
                 )
             )
 
-        shop_items = DataManager.get("economy", "shop items")
+        shop_items = data_manager.get("economy", "shop items")
 
         if item.lower() in shop_items:
             price = shop_items[item.lower()]["price"]
@@ -190,8 +190,8 @@ class item(commands.Cog):
                     colour=discord.Colour.red(),
                 )
             )
-        user_data = await DataManager.get_user_data(interaction.user.id)
-        economy_items = DataManager.get("economy", "items")
+        user_data = await data_manager.get_user_data(interaction.user.id)
+        economy_items = data_manager.get("economy", "items")
 
         if (int(amount) * price) > user_data["balance"]:
             return await interaction.response.send_message(
@@ -201,7 +201,7 @@ class item(commands.Cog):
                 )
             )
 
-        if item.lower() not in DataManager.get("economy", "shop items"):
+        if item.lower() not in data_manager.get("economy", "shop items"):
             return await interaction.response.send_message(
                 embed=discord.Embed(
                     description="<:white_cross:1096791282023669860> Can't buy that item, because it doesn't exist",
@@ -209,10 +209,10 @@ class item(commands.Cog):
                 )
             )
 
-        await DataManager.edit_user_data(
+        await data_manager.edit_user_data(
             interaction.user.id, "balance", user_data["balance"] - (int(amount) * price)
         )
-        await DataManager.edit_user_inventory(
+        await data_manager.edit_user_inventory(
             interaction.user.id, item.lower(), +int(amount)
         )
         await interaction.response.send_message(
@@ -230,7 +230,7 @@ class item(commands.Cog):
     async def items_autocomplete(
         self, interaction: discord.Interaction, current: str
     ) -> list[app_commands.Choice[str]]:
-        items = DataManager.get("economy", "items").keys()
+        items = data_manager.get("economy", "items").keys()
 
         return [
             app_commands.Choice(name=item, value=item)
@@ -243,7 +243,7 @@ class item(commands.Cog):
     @app_commands.checks.cooldown(1, 15, key=lambda i: (i.user.id))
     @app_commands.describe(item="The item you want to view")
     async def item_info(self, interaction: discord.Interaction, item: str):
-        if item not in DataManager.get("economy", "items"):
+        if item not in data_manager.get("economy", "items"):
             return await interaction.response.send_message(
                 embed=discord.Embed(
                     description="<:white_cross:1096791282023669860> Can't find that item, because it doesn't exist",
@@ -251,12 +251,12 @@ class item(commands.Cog):
                 )
             )
 
-        user_data = await DataManager.get_user_data(interaction.user.id)
-        item1 = DataManager.get("economy", "items")[item.lower()]
+        user_data = await data_manager.get_user_data(interaction.user.id)
+        item1 = data_manager.get("economy", "items")[item.lower()]
         emoji = self.bot.get_emoji(item1["emoji_id"])
         whole_balance = user_data["balance"] + user_data["bank"]
         user_inv = user_data["inventory"]
-        economy_items = DataManager.get("economy", "items")
+        economy_items = data_manager.get("economy", "items")
         for item_owned in json.loads(user_inv):
             whole_balance += (
                 economy_items[item.lower()]["sell price"]

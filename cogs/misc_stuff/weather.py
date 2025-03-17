@@ -7,7 +7,7 @@ from discord.ext import commands
 
 from discord import app_commands
 
-from utils import DataManager
+from utils import data_manager
 
 class weather(commands.Cog):
     def __init__(self, bot):
@@ -21,14 +21,14 @@ class weather(commands.Cog):
             try:
                 async with session.get(
                     f"http://api.openweathermap.org/geo/1.0/direct?q={search}&limit=1&appid="
-                    + DataManager.get("config", "weather_api_key")
+                    + data_manager.get("config", "weather_api_key")
                 ) as location:
                     lat = json.loads(await location.text())[0]["lat"]
                     lon = json.loads(await location.text())[0]["lon"]
 
                 async with session.get(
                     f"http://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid="
-                    + DataManager.get("config", "weather_api_key")
+                    + data_manager.get("config", "weather_api_key")
                 ) as response:
                     data = json.loads(await response.text())
                     embed = discord.Embed(
@@ -71,14 +71,14 @@ class weather(commands.Cog):
             try:
                 async with session.get(
                     f"http://api.openweathermap.org/geo/1.0/direct?q={search}&limit=1&appid="
-                    + DataManager.get("config", "weather_api_key")
+                    + data_manager.get("config", "weather_api_key")
                 ) as location:
                     lat = json.loads(await location.text())[0]["lat"]
                     lon = json.loads(await location.text())[0]["lon"]
 
                 async with session.get(
                     f"http://api.openweathermap.org/data/2.5/forecast?lat={lat}&lon={lon}&appid="
-                    + DataManager.get("config", "weather_api_key")
+                    + data_manager.get("config", "weather_api_key")
                 ) as response:
                     data = json.loads(await response.text())
                     embed = discord.Embed(

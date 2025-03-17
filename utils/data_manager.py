@@ -10,7 +10,7 @@ import asyncpg
 import discord
 
 
-class DataManager:
+class data_manager:
     __data: dict[str, str] = {}
     initialised = False
 
@@ -40,13 +40,13 @@ class DataManager:
                         print(f"Failed to load {file}")
                         print(f"File content: {f.read()}")
 
-        DataManager.initialised = True
+        data_manager.initialised = True
 
         cls.db_connection = await asyncpg.create_pool(
-            user=DataManager.get("config", "postgres_user"),
+            user=data_manager.get("config", "postgres_user"),
             host="127.0.0.1",
-            password=DataManager.get("config", "postgres_password"),
-            database=DataManager.get("config", "postgres_database"),
+            password=data_manager.get("config", "postgres_password"),
+            database=data_manager.get("config", "postgres_database"),
         )
 
         await cls.db_connection.execute(
@@ -604,7 +604,7 @@ class DataManager:
 
 
 async def main():
-    await DataManager.initialise()
+    await data_manager.initialise()
 
 
 if __name__ == "__main__":

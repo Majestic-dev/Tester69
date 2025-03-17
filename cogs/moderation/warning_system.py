@@ -2,7 +2,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from utils import DataManager
+from utils import data_manager
 
 
 class warning_system(commands.Cog):
@@ -47,7 +47,7 @@ class warning_system(commands.Cog):
                 )
             )
 
-        await DataManager.register_warning(
+        await data_manager.register_warning(
             interaction.guild.id,
             user.id,
             f"{reason} - Warned by {interaction.user.name}",
@@ -76,7 +76,7 @@ class warning_system(commands.Cog):
         uuid="The UUID of the warning to delete, use the `/warnings <user>` command to get the UUID",
     )
     async def delwarn(self, interaction: discord.Interaction, uuid: str):
-        delwarn = await DataManager.delete_warning(interaction.guild.id, uuid)
+        delwarn = await data_manager.delete_warning(interaction.guild.id, uuid)
 
         if delwarn == True:
             return await interaction.response.send_message(
@@ -103,7 +103,7 @@ class warning_system(commands.Cog):
         member="The member to get the warnings of",
     )
     async def warnings(self, interaction: discord.Interaction, member: discord.Member):
-        warnings = await DataManager.get_user_warnings(interaction.guild.id, member.id)
+        warnings = await data_manager.get_user_warnings(interaction.guild.id, member.id)
 
         if warnings is None or len(warnings) == 0:
             return await interaction.response.send_message(

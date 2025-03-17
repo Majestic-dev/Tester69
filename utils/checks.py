@@ -1,4 +1,4 @@
-from . import DataManager, cooldown_error
+from . import data_manager, cooldown_error
 import datetime
 import json
 import discord
@@ -7,11 +7,11 @@ import discord
 async def cooldown_check(
     user_id, cooldown_message: str, command: str, cooldown_time: int
 ):
-    user_data = await DataManager.get_user_data(user_id)
+    user_data = await data_manager.get_user_data(user_id)
     cooldowns = user_data["cooldowns"]
 
     if cooldowns is None or command not in cooldowns:
-        await DataManager.add_cooldown(user_id, command, cooldown_time)
+        await data_manager.add_cooldown(user_id, command, cooldown_time)
         return True
 
     elif command in cooldowns:
@@ -27,6 +27,6 @@ async def cooldown_check(
             raise cooldown_error(cooldown_message, timeLeft)
 
         if json.loads(cooldowns)[command] < discord.utils.utcnow().isoformat():
-            await DataManager.remove_cooldown(user_id, command)
-            await DataManager.add_cooldown(user_id, command, cooldown_time)
+            await data_manager.remove_cooldown(user_id, command)
+            await data_manager.add_cooldown(user_id, command, cooldown_time)
             return True

@@ -9,7 +9,7 @@ from discord.ext import commands
 
 from discord import app_commands
 
-from utils import DataManager, Paginator
+from utils import data_manager, paginator
 
 class search(commands.Cog):
     def __init__(self, bot):
@@ -29,19 +29,19 @@ class search(commands.Cog):
         if search != None:
             search.replace(" ", "+")
         
-        print(DataManager.get("config", "giphy_key"))
+        print(data_manager.get("config", "giphy_key"))
 
         async with aiohttp.ClientSession() as session:
             try:
                 async with session.get(
                     (
                         f"https://api.giphy.com/v1/gifs/random?api_key="
-                        + DataManager.get("config", "giphy_key")
+                        + data_manager.get("config", "giphy_key")
                     )
                     if search is None
                     else (
                         f"http://api.giphy.com/v1/gifs/search?q={search}&api_key="
-                        + DataManager.get("config", "giphy_key")
+                        + data_manager.get("config", "giphy_key")
                     )
                 ) as response:
                     data = json.loads(await response.text())
@@ -57,7 +57,7 @@ class search(commands.Cog):
             except IndexError:
                 response = await session.get(
                     f"https://api.giphy.com/v1/gifs/random?api_key="
-                    + DataManager.get("config", "giphy_key")
+                    + data_manager.get("config", "giphy_key")
                 )
                 data = json.loads(await response.text())
                 embed.set_image(url=data["data"]["images"]["original"]["url"])
@@ -138,7 +138,7 @@ class search(commands.Cog):
                             colour=discord.Colour.red(),
                         )
 
-        await Paginator.Simple().paginate(interaction, pages=embeds)
+        await paginator.Simple().paginate(interaction, pages=embeds)
 
     @app_commands.command(name="search_github", description="Get a user's GitHub profile")
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.user.id))

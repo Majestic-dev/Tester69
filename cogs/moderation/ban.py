@@ -4,7 +4,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from utils import DataManager
+from utils import data_manager
 
 
 class ban(commands.Cog):
@@ -25,7 +25,7 @@ class ban(commands.Cog):
         member: discord.User,
         reason: str = "Unspecified",
     ):
-        guild_data = await DataManager.get_guild_data(interaction.guild.id)
+        guild_data = await data_manager.get_guild_data(interaction.guild.id)
         appeal_link = guild_data["appeal_link"]
 
         if member.id == interaction.user.id:

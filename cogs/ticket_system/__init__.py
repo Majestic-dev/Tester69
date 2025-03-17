@@ -1,7 +1,7 @@
-from .ticket_system import ticket
+from .ticket_system import ticket_system
 
-class Ticket(ticket):
+class ticket(ticket_system):
     """All commands and functions related to the ticketing system"""
 
 async def setup(bot):
-    await bot.add_cog(Ticket(bot))
+    await bot.add_cog(ticket(bot))

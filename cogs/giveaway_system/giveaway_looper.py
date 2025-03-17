@@ -3,7 +3,7 @@ import datetime
 import discord
 from discord.ext import commands, tasks
 
-from utils import DataManager
+from utils import data_manager
 
 class giveaway_looper(commands.Cog):
     def __init__(self, bot):
@@ -12,15 +12,15 @@ class giveaway_looper(commands.Cog):
 
     @tasks.loop(minutes=1)
     async def giveawayloop(self):
-        async with DataManager.db_connection.acquire():
-            ended_giveaways = await DataManager.db_connection.fetch(
+        async with data_manager.db_connection.acquire():
+            ended_giveaways = await data_manager.db_connection.fetch(
                 "SELECT * FROM giveaways WHERE end_date < $1 AND ended = FALSE",
                 discord.utils.utcnow().isoformat(),
             )
             ended_giveaways = [dict(giveaway) for giveaway in ended_giveaways]
 
             for giveaway in ended_giveaways:
-                await DataManager.edit_giveaway_data(giveaway["id"], "ended", True)
+                await data_manager.edit_giveaway_data(giveaway["id"], "ended", True)
                 channel = self.bot.get_channel(giveaway["channel_id"])
                 if channel is not None:
                     try:
@@ -30,7 +30,7 @@ class giveaway_looper(commands.Cog):
                 else:
                     return
                 try:
-                    winners = await DataManager.draw_giveaway_winners(giveaway["id"])
+                    winners = await data_manager.draw_giveaway_winners(giveaway["id"])
                 except ValueError:
                     await message.edit(
                         view=None,
@@ -76,7 +76,7 @@ class giveaway_looper(commands.Cog):
                 else:
                     return
 
-        next_giveaway = await DataManager.db_connection.fetchrow(
+        next_giveaway = await data_manager.db_connection.fetchrow(
             "SELECT * FROM giveaways WHERE end_date > $1 AND ended = FALSE ORDER BY end_date ASC LIMIT 1",
             discord.utils.utcnow().isoformat(),
         )
@@ -86,8 +86,8 @@ class giveaway_looper(commands.Cog):
         elif discord.utils.utcnow().isoformat() >= next_giveaway["end_date"]:
             channel = self.bot.get_channel(next_giveaway["channel_id"])
             message = await channel.fetch_message(next_giveaway["id"])
-            await DataManager.edit_giveaway_data(next_giveaway["id"], "ended", True)
-            winners = await DataManager.draw_giveaway_winners(next_giveaway["id"])
+            await data_manager.edit_giveaway_data(next_giveaway["id"], "ended", True)
+            winners = await data_manager.draw_giveaway_winners(next_giveaway["id"])
             end_date = datetime.datetime.strptime(
                 next_giveaway["end_date"], "%Y-%m-%dT%H:%M:%S.%f%z"
             )

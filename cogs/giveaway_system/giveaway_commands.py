@@ -6,7 +6,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from utils import DataManager, Paginator
+from utils import data_manager, paginator
 
 
 class giveaway_modal(discord.ui.Modal, title="Create a Giveaway"):
@@ -81,10 +81,10 @@ class giveaway_modal(discord.ui.Modal, title="Create a Giveaway"):
                         f"Entries: **0**\n"
                         f"Winners: **{winners}**",
                     ),
-                    view=GiveawayViews(self.bot),
+                    view=giveaway_views(self.bot),
                 )
 
-                await DataManager.register_giveaway(
+                await data_manager.register_giveaway(
                     message.id,
                     interaction.guild.id,
                     interaction.channel.id,
@@ -115,10 +115,10 @@ class giveaway_leave_view(discord.ui.View):
     async def leave_giveaway(
         self, interaction: discord.Interaction, button: discord.ui.Button
     ):
-        giveaway_data = await DataManager.get_giveaway_data(self.giveaway_id)
+        giveaway_data = await data_manager.get_giveaway_data(self.giveaway_id)
         if interaction.user.id in giveaway_data["participants"]:
             giveaway_data["participants"].remove(interaction.user.id)
-            await DataManager.edit_giveaway_data(
+            await data_manager.edit_giveaway_data(
                 self.giveaway_id, "participants", giveaway_data["participants"]
             )
             await interaction.response.edit_message(
@@ -132,7 +132,7 @@ class giveaway_leave_view(discord.ui.View):
             )
 
 
-class GiveawayViews(discord.ui.View):
+class giveaway_views(discord.ui.View):
     def __init__(self, bot):
         super().__init__(timeout=None)
         self.bot = bot
@@ -145,13 +145,13 @@ class GiveawayViews(discord.ui.View):
     async def join_giveaway(
         self, interaction: discord.Interaction, button: discord.ui.Button
     ):
-        giveaway_data = await DataManager.get_giveaway_data(interaction.message.id)
+        giveaway_data = await data_manager.get_giveaway_data(interaction.message.id)
         if (
             giveaway_data["participants"] is None
             or interaction.user.id not in giveaway_data["participants"]
         ):
             giveaway_data["participants"].append(interaction.user.id)
-            await DataManager.edit_giveaway_data(
+            await data_manager.edit_giveaway_data(
                 interaction.message.id, "participants", giveaway_data["participants"]
             )
             await interaction.response.send_message(
@@ -177,7 +177,7 @@ class GiveawayViews(discord.ui.View):
     async def view_entrants(
         self, interaction: discord.Interaction, button: discord.ui.Button
     ):
-        giveaway_data = await DataManager.get_giveaway_data(interaction.message.id)
+        giveaway_data = await data_manager.get_giveaway_data(interaction.message.id)
         if giveaway_data:
             if len(giveaway_data["participants"]) > 0:
                 embeds = []
@@ -195,7 +195,7 @@ class GiveawayViews(discord.ui.View):
                         embeds.append(embed)
                         page_participants = []
                 if embeds:
-                    await Paginator.Simple(ephemeral=True).paginate(interaction, embeds)
+                    await paginator.Simple(ephemeral=True).paginate(interaction, embeds)
             else:
                 await interaction.response.send_message(
                     content="No entrants yet!", ephemeral=True
@@ -228,14 +228,14 @@ class giveaway(commands.GroupCog):
         self, interaction: discord.Interaction, giveaway_id: str
     ) -> None:
         if giveaway_id.isnumeric():
-            if await DataManager.get_giveaway_data(int(giveaway_id)):
-                giveaway_data = await DataManager.get_giveaway_data(int(giveaway_id))
+            if await data_manager.get_giveaway_data(int(giveaway_id)):
+                giveaway_data = await data_manager.get_giveaway_data(int(giveaway_id))
                 if giveaway_data["ended"]:
                     return await interaction.response.send_message(
                         f"Giveaway already ended!", ephemeral=True
                     )
-                await DataManager.edit_giveaway_data(int(giveaway_id), "ended", True)
-                await DataManager.edit_giveaway_data(
+                await data_manager.edit_giveaway_data(int(giveaway_id), "ended", True)
+                await data_manager.edit_giveaway_data(
                     int(giveaway_id),
                     "end_date",
                     discord.utils.utcnow().isoformat(),
@@ -269,12 +269,12 @@ class giveaway(commands.GroupCog):
         user: Optional[discord.User],
     ) -> None:
         if giveaway_id.isnumeric():
-            if await DataManager.get_giveaway_data(int(giveaway_id)):
-                giveaway_data = await DataManager.get_giveaway_data(int(giveaway_id))
+            if await data_manager.get_giveaway_data(int(giveaway_id)):
+                giveaway_data = await data_manager.get_giveaway_data(int(giveaway_id))
                 if giveaway_data["ended"]:
                     if user is None:
                         if len(giveaway_data["winners"]) > 0:
-                            await DataManager.draw_giveaway_winners(int(giveaway_id))
+                            await data_manager.draw_giveaway_winners(int(giveaway_id))
                             await interaction.response.send_message(
                                 f"Giveaway rerolled!", ephemeral=True
                             )
@@ -291,7 +291,7 @@ class giveaway(commands.GroupCog):
                             participants = list(giveaway_data["participants"])
                             new_winner = random.choice(participants)
                             giveaway_data["winners"].append(new_winner)
-                            await DataManager.edit_giveaway_data(
+                            await data_manager.edit_giveaway_data(
                                 giveaway_id, "winners", giveaway_data["winners"]
                             )
 

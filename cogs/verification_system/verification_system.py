@@ -8,7 +8,7 @@ from discord import app_commands
 from discord.ext import commands
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
-from utils import DataManager
+from utils import data_manager
 
 
 class verification(commands.GroupCog):
@@ -69,13 +69,13 @@ class verification(commands.GroupCog):
     @app_commands.guild_only()
     @app_commands.checks.has_permissions(administrator=True)
     async def disable_verification(self, interaction: discord.Interaction):
-        verification_channel = await DataManager.get_guild_data(interaction.guild.id)[
+        verification_channel = await data_manager.get_guild_data(interaction.guild.id)[
             "verification_channel_id"
         ]
-        verification_logs_channel = await DataManager.get_guild_data(
+        verification_logs_channel = await data_manager.get_guild_data(
             interaction.guild.id
         )["verification_logs_channel_id"]
-        unverified_role = await DataManager.get_guild_data(interaction.guild.id)[
+        unverified_role = await data_manager.get_guild_data(interaction.guild.id)[
             "unverified_role_id"
         ]
 
@@ -98,13 +98,13 @@ class verification(commands.GroupCog):
             )
         )
 
-        await DataManager.edit_guild_data(
+        await data_manager.edit_guild_data(
             interaction.guild.id, "verification_channel_id", None
         )
-        await DataManager.edit_guild_data(
+        await data_manager.edit_guild_data(
             interaction.guild.id, "verification_logs_channel_id", None
         )
-        await DataManager.edit_guild_data(
+        await data_manager.edit_guild_data(
             interaction.guild.id, "unverified_role_id", None
         )
 
@@ -146,15 +146,15 @@ class verification(commands.GroupCog):
         )
         await interaction.response.send_message(embed=verification)
 
-        await DataManager.edit_guild_data(
+        await data_manager.edit_guild_data(
             interaction.guild.id, "verification_channel_id", verification_channel.id
         )
-        await DataManager.edit_guild_data(
+        await data_manager.edit_guild_data(
             interaction.guild.id,
             "verification_logs_channel_id",
             verification_logs_channel.id,
         )
-        await DataManager.edit_guild_data(
+        await data_manager.edit_guild_data(
             interaction.guild.id, "unverified_role_id", unverified_role.id
         )
 
@@ -162,7 +162,7 @@ class verification(commands.GroupCog):
     async def on_member_join(self, member: discord.Member):
         if member.bot:
             return
-        guild_data = await DataManager.get_guild_data(member.guild.id)
+        guild_data = await data_manager.get_guild_data(member.guild.id)
         welcome_message = guild_data["welcome_message"]
         verification_channel = guild_data["verification_channel_id"]
         verification_logs_channel = guild_data["verification_logs_channel_id"]

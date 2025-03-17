@@ -237,8 +237,8 @@ class paginator_buttons(discord.ui.View):
         )
 
 
-class Paginator:
-    class Simple:
+class paginator:
+    class simple:
         def __init__(
             self, timeout: int = 60, initial_page: int = 0, ephemeral: bool = False
         ):
