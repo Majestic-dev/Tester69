@@ -246,3 +246,6 @@ class mine(commands.Cog):
                 view=view,
             )
             view.response = await interaction.original_response()
+
+async def setup(bot: commands.AutoShardedBot):
+    await bot.add_cog(mine(bot))

@@ -129,3 +129,6 @@ class warning_system(commands.Cog):
         else:
             e.set_author(name=member.name, icon_url=member.avatar.url)
         await interaction.response.send_message(embed=e)
+
+async def setup(bot: commands.AutoShardedBot):
+    await bot.add_cog(warning_system(bot))

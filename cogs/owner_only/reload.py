@@ -10,15 +10,16 @@ class reload_cogs(commands.Cog):
     @commands.command(name="reload", description="Reload the cogs in the bot")
     @commands.is_owner()
     async def reload(self, ctx):
-        for folder in os.listdir("cogs"):
-            extension_name = f"cogs.{folder}"
-            if extension_name in self.bot.extensions:
-                await self.bot.unload_extension(extension_name)
-            try:
-                    await self.bot.load_extension(extension_name)
-            except Exception as e:
-                print(f"Failed to load {extension_name}: {e}")
-                await self.bot.reload_extension(extension_name)
+        for root, _, files in os.walk("cogs"):
+            for file in files:
+                if not file.endswith(".py"):
+                    continue
+
+                ext_name = os.path.join(root, file[:-3]).replace(os.sep, ".")
+                
+                if (ext_name) in self.bot.extensions:
+                    await self.bot.unload_extension(ext_name)
+                    await self.bot.load_extension(ext_name)
 
         await ctx.reply(
             embed=discord.Embed(
@@ -27,3 +28,6 @@ class reload_cogs(commands.Cog):
             )
         )
         return await self.bot.tree.sync()
+    
+async def setup(bot: commands.AutoShardedBot):
+    await bot.add_cog(reload_cogs(bot))

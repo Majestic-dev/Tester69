@@ -81,4 +81,6 @@ class skip_cooldown(commands.Cog):
                     colour=discord.Colour.green(),
                 )
             )
-    
+        
+async def setup(bot: commands.AutoShardedBot):
+    await bot.add_cog(skip_cooldown(bot))

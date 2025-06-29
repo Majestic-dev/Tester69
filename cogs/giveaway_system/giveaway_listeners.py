@@ -184,3 +184,6 @@ class giveaway_listeners(commands.Cog):
             )
         else:
             return
+        
+async def setup(bot: commands.AutoShardedBot):
+    await bot.add_cog(giveaway_listeners(bot))

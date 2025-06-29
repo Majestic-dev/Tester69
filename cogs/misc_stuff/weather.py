@@ -104,3 +104,6 @@ class weather(commands.Cog):
                 embed.description = "<:white_cross:1096791282023669860> Couldn't find a location with that name"
 
         await interaction.response.send_message(embed=embed, ephemeral=True)
+
+async def setup(bot: commands.AutoShardedBot):
+    await bot.add_cog(weather(bot))

@@ -71,3 +71,6 @@ class misc(commands.Cog):
         await interaction.response.send_message(
             content="https://github.com/Majestic-dev/Tester69/tree/main", ephemeral=True
         )
+
+async def setup(bot: commands.AutoShardedBot):
+    await bot.add_cog(misc(bot))

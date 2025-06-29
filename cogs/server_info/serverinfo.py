@@ -106,11 +106,11 @@ class server(commands.GroupCog):
         )
 
     @app_commands.command(
-        name="member_count", description="Get the member count of the server"
+        name="membercount", description="Get the member count of the server"
     )
     @app_commands.guild_only()
     @app_commands.checks.cooldown(1, 20, key=lambda i: (i.guild.id, i.user.id))
-    async def member_count(self, interaction: discord.Interaction):
+    async def membercount(self, interaction: discord.Interaction):
         guild = interaction.guild
         embed = discord.Embed(
             title=f"Member Count",
@@ -312,3 +312,6 @@ class server(commands.GroupCog):
         embed.set_thumbnail(url=channel.guild.icon)
 
         await interaction.response.send_message(embed=embed, ephemeral=ephemeral)
+
+async def setup(bot: commands.AutoShardedBot):
+    await bot.add_cog(server(bot))

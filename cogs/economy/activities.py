@@ -177,3 +177,6 @@ class activities(commands.Cog):
                         colour=discord.Colour.red(),
                     )
                 )
+
+async def setup(bot: commands.AutoShardedBot):
+    await bot.add_cog(activities(bot))

@@ -152,3 +152,6 @@ class personal(commands.Cog):
             embeds.append(inv_embed)
 
         await paginator.Simple().paginate(interaction, embeds)
+
+async def setup(bot: commands.AutoShardedBot):
+    await bot.add_cog(personal(bot))

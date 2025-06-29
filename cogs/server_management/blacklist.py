@@ -5,12 +5,12 @@ from discord import app_commands
 
 from utils import data_manager
 
-class blacklist(commands.Cog):
+class blacklist(commands.GroupCog):
     def __init__(self, bot):
         self.bot = bot
 
     @app_commands.command(
-        name="blacklist_add_words",
+        name="add_words",
         description="Add words to the blacklisted words list",
     )
     @app_commands.guild_only()
@@ -80,7 +80,7 @@ class blacklist(commands.Cog):
         ]
 
     @app_commands.command(
-        name="blacklist_remove_word",
+        name="remove_word",
         description="Remove a blacklisted word from the blacklisted words list.",
     )
     @app_commands.guild_only()
@@ -121,7 +121,7 @@ class blacklist(commands.Cog):
             )
 
     @app_commands.command(
-        name="list_blacklisted_words",
+        name="list_words",
         description="List all blacklisted words in this server",
     )
     @app_commands.guild_only()
@@ -140,8 +140,11 @@ class blacklist(commands.Cog):
 
         await interaction.response.send_message(
             embed=discord.Embed(
-                description=f"Blacklisted words in this server:\n\n{',\n'.join(blacklisted_words)}",
+                description="Blacklisted words in this server:\n\n" + f"`{', '.join(blacklisted_words)}`",
                 colour=discord.Colour.green(),
             ),
             ephemeral=True,
         )
+
+async def setup(bot: commands.AutoShardedBot):
+    await bot.add_cog(blacklist(bot))

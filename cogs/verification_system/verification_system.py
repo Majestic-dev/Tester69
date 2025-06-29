@@ -330,5 +330,5 @@ class verification(commands.GroupCog):
         return await member.kick()
 
 
-async def setup(bot):
+async def setup(bot: commands.AutoShardedBot):
     await bot.add_cog(verification(bot))

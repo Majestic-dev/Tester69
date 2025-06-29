@@ -164,3 +164,6 @@ class leaderboard(commands.Cog):
 
             lb_embed.set_author(name="Bank Leaderboard", icon_url=self.bot.user.avatar)
             await interaction.response.send_message(embed=lb_embed, view=view)
+
+async def setup(bot: commands.AutoShardedBot):
+    await bot.add_cog(leaderboard(bot))

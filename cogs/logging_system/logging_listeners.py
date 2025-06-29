@@ -692,3 +692,6 @@ class logging_listeners(commands.Cog):
         embed.set_author(name=channel.guild.name, icon_url=channel.guild.icon)
 
         await logs_channel.send(embed=embed)
+
+async def setup(bot: commands.AutoShardedBot):
+    await bot.add_cog(logging_listeners(bot))

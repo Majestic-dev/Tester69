@@ -124,3 +124,6 @@ class timeout(commands.Cog):
                     colour=discord.Colour.orange(),
                 )
             )
+
+async def setup(bot: commands.AutoShardedBot):
+    await bot.add_cog(timeout(bot))

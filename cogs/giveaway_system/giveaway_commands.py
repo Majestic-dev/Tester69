@@ -319,3 +319,6 @@ class giveaway(commands.GroupCog):
             await interaction.response.send_message(
                 f"Invalid giveaway ID!", ephemeral=True
             )
+
+async def setup(bot: commands.AutoShardedBot):
+    await bot.add_cog(giveaway(bot))

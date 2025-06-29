@@ -157,3 +157,6 @@ class whitelist(commands.Cog):
             ),
             ephemeral=True,
         )
+
+async def setup(bot: commands.AutoShardedBot):
+    await bot.add_cog(whitelist(bot))

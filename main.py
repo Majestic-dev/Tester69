@@ -88,19 +88,6 @@ data_manager.setup(
     ]
 )
 
-initial_extensions: Tuple[str, ...] = (
-    "cogs.economy",
-    "cogs.giveaway_system",
-    "cogs.logging_system",
-    "cogs.misc_stuff",
-    "cogs.moderation",
-    "cogs.owner_only",
-    "cogs.server_info",
-    "cogs.server_management",
-    "cogs.ticket_system",
-    "cogs.verification_system"
-)
-
 class Bot(commands.Bot):
     def __init__(self) -> None:
         intents = discord.Intents.all()
@@ -111,15 +98,12 @@ class Bot(commands.Bot):
         )
 
     async def setup_hook(self) -> None:
-        for folder in os.listdir("cogs"):
-            extension_name = f"cogs.{folder}"
-            if extension_name in bot.extensions:
-                await bot.unload_extension(extension_name)
-            try:
-                await bot.load_extension(extension_name)
-            except Exception as e:
-                print(f"Failed to load {extension_name}: {e}")
-                await bot.reload_extension(extension_name)
+        for root, _, files in os.walk("cogs"):
+            for file in files:
+                if not file.endswith(".py"):
+                    continue
+
+                await self.load_extension(os.path.join(root, file[:-3]).replace(os.sep, "."))
         await bot.tree.sync()
 
         self.add_view(giveaway_views(bot))

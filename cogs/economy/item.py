@@ -8,7 +8,7 @@ from discord.ext import commands
 from utils import data_manager, paginator
 
 
-class item(commands.Cog):
+class item(commands.GroupCog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -300,3 +300,6 @@ class item(commands.Cog):
         embed.set_thumbnail(url=emoji.url)
 
         await interaction.response.send_message(embed=embed)
+
+async def setup(bot: commands.AutoShardedBot):
+    await bot.add_cog(item(bot))

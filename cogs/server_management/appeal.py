@@ -6,7 +6,7 @@ from discord import app_commands
 from utils import data_manager
 
 
-class appealing(commands.Cog):
+class appealing(commands.GroupCog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -46,3 +46,6 @@ class appealing(commands.Cog):
                 colour=discord.Colour.green(),
             )
         )
+
+async def setup(bot: commands.AutoShardedBot):
+    await bot.add_cog(appealing(bot))

@@ -43,3 +43,6 @@ class slowmode(commands.Cog):
                 colour=discord.Colour.green(),
             )
         )
+
+async def setup(bot: commands.AutoShardedBot):
+    await bot.add_cog(slowmode(bot))

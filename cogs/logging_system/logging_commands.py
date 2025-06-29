@@ -89,3 +89,6 @@ class logging_cmds(commands.GroupCog):
                     colour=discord.Colour.red(),
                 ),
             )
+        
+async def setup(bot: commands.AutoShardedBot):
+    await bot.add_cog(logging_cmds(bot))

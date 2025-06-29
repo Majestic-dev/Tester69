@@ -11,12 +11,12 @@ from discord import app_commands
 
 from utils import data_manager, paginator
 
-class search(commands.Cog):
+class search(commands.GroupCog):
     def __init__(self, bot):
         self.bot = bot
     
     @app_commands.command(
-        name="search_giphy", description="Search a gif by keyword from Giphy"
+        name="giphy", description="Search a gif by keyword from Giphy"
     )
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.user.id))
     @app_commands.describe(search="The keyword you want to search the Gif by")
@@ -69,7 +69,7 @@ class search(commands.Cog):
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
     @app_commands.command(
-        name="search_wikipedia", description="Get a definition from Wikipedia"
+        name="wikipedia", description="Get a definition from Wikipedia"
     )
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.user.id))
     @app_commands.describe(
@@ -103,7 +103,7 @@ class search(commands.Cog):
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
     @app_commands.command(
-        name="search_urban", description="Get a definition from Urban Dictionary"
+        name="urban", description="Get a definition from Urban Dictionary"
     )
     @app_commands.describe(
         search="The keyword you want to search the definition from The Urban Dictionary"
@@ -140,7 +140,7 @@ class search(commands.Cog):
 
         await paginator.Simple().paginate(interaction, pages=embeds)
 
-    @app_commands.command(name="search_github", description="Get a user's GitHub profile")
+    @app_commands.command(name="github", description="Get a user's GitHub profile")
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.user.id))
     @app_commands.describe(
         search="The GitHub username you want to search the profile of"
@@ -171,3 +171,6 @@ class search(commands.Cog):
                 embed.description = "<:white_cross:1096791282023669860> Couldn't find a GitHub user with that name"
 
         await interaction.response.send_message(embed=embed, ephemeral=True)
+
+async def setup(bot: commands.AutoShardedBot):
+    await bot.add_cog(search(bot))

@@ -907,7 +907,7 @@ class panel_edit_views(discord.ui.View):
             )
 
 
-class ticket_system(commands.Cog):
+class ticket_system(commands.GroupCog):
     def __init__(self, bot):
         self.bot = bot
         self.ctx_menu = app_commands.ContextMenu(
@@ -950,7 +950,7 @@ class ticket_system(commands.Cog):
             [],
         )
 
-    @app_commands.command(name="close_ticket", description="Close a ticket")
+    @app_commands.command(name="close", description="Close a ticket")
     @app_commands.guild_only()
     @app_commands.checks.cooldown(1, 30, key=lambda i: (i.guild.id))
     async def close_ticket(self, interaction: discord.Interaction):
@@ -1016,7 +1016,7 @@ class ticket_system(commands.Cog):
                 ephemeral=True,
             )
 
-    @app_commands.command(name="reopen_ticket", description="Reopen a ticket")
+    @app_commands.command(name="reopen", description="Reopen a ticket")
     @app_commands.guild_only()
     @app_commands.checks.cooldown(1, 30, key=lambda i: (i.guild.id))
     async def reopen_ticket(self, interaction: discord.Interaction):
@@ -1099,3 +1099,6 @@ class ticket_system(commands.Cog):
                     colour=discord.Colour.red(),
                 )
             )
+        
+async def setup(bot: commands.AutoShardedBot):
+    await bot.add_cog(ticket_system(bot))

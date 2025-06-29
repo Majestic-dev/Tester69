@@ -61,3 +61,6 @@ class fun(commands.Cog):
             ),
             ephemeral=True,
         )
+
+async def setup(bot: commands.AutoShardedBot):
+    await bot.add_cog(fun(bot))

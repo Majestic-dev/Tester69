@@ -137,3 +137,6 @@ class giveaway_looper(commands.Cog):
                 return
         else:
             return
+
+async def setup(bot: commands.AutoShardedBot):
+    await bot.add_cog(giveaway_looper(bot))
