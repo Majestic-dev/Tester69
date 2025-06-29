@@ -238,7 +238,7 @@ class item(commands.GroupCog):
             if item.lower().startswith(current.lower()) or len(current) < 1
         ]
 
-    @app_commands.command(name="item_info", description="View the description of an item")
+    @app_commands.command(name="info", description="View the description of an item")
     @app_commands.autocomplete(item=items_autocomplete)
     @app_commands.checks.cooldown(1, 15, key=lambda i: (i.user.id))
     @app_commands.describe(item="The item you want to view")
