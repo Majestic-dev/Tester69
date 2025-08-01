@@ -42,12 +42,15 @@ class data_manager:
 
         data_manager.initialised = True
 
-        cls.db_connection = await asyncpg.create_pool(
-            user=data_manager.get("config", "postgres_user"),
-            host="127.0.0.1",
-            password=data_manager.get("config", "postgres_password"),
-            database=data_manager.get("config", "postgres_database"),
-        )
+        try:
+            cls.db_connection = await asyncpg.create_pool(
+                user=data_manager.get("config", "postgres_user"),
+                host="127.0.0.1",
+                password=data_manager.get("config", "postgres_password"),
+                database=data_manager.get("config", "postgres_database"),
+            )
+        except:
+            quit("Please configure the config.json (data/config.json) file to run the bot.")
 
         await cls.db_connection.execute(
             """CREATE TABLE IF NOT EXISTS users (
