@@ -5,6 +5,7 @@ import asyncio
 import random
 import time
 import json
+
 from utils import data_manager, cooldown_check
 
 
@@ -143,7 +144,7 @@ class mining_buttons(discord.ui.View):
                             )
 
                         f = [discord.File(
-                            "data/mine/mining_assets/collapsing_mine.png", filename="collapsing_mine.png"
+                            "assets/collapsing_mine.png", filename="collapsing_mine.png"
                         )]
                         await interaction.edit_original_response(
                             attachments=f,
@@ -151,7 +152,7 @@ class mining_buttons(discord.ui.View):
                                 title="The mine crumbles down!",
                                 description=f"As the {self.mine_name} crumbles down, you are forced to leave.",
                                 colour=discord.Colour.from_rgb(139, 69, 19),
-                            ),
+                            ).set_image(url="attachment://collapsing_mine.png"),
                             view=None
                         )
 
@@ -240,7 +241,7 @@ class mine(commands.Cog):
             1800,
         ):
             f = discord.File(
-                "data/mine/mining_assets/mine_background.jpg", filename="mining.jpg"
+                "assets/mine_background.jpg", filename="mining.jpg"
             )
             view = choose_mine(self.bot)
             await interaction.response.send_message(
@@ -248,7 +249,7 @@ class mine(commands.Cog):
                 embed=discord.Embed(
                     description="Welcome to the mines, here you are able to mine for various resources, and later smelt them down to craft various items with them.",
                     colour=discord.Colour.from_rgb(139, 69, 19),
-                ).set_image(url="attachment://mining.png"),
+                ).set_image(url="attachment://mining.jpg"),
                 view=view,
             )
             view.response = await interaction.original_response()
