@@ -8,8 +8,6 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from typing import Tuple
-
 from utils import data_manager, cooldown_error
 
 from cogs.giveaway_system.giveaway_commands import giveaway_views
