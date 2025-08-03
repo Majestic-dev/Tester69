@@ -10,9 +10,10 @@ from utils import data_manager, paginator
 
 
 class giveaway_modal(discord.ui.Modal, title="Create a Giveaway"):
-    def __init__(self, bot) -> None:
+    def __init__(self, bot, host: discord.User) -> None:
         super().__init__()
         self.bot = bot
+        self.host = host
 
     def time_to_minutes(self, time: str) -> None:
         no_numbers = "".join([i for i in time if not i.isdigit()]).strip()
@@ -77,7 +78,7 @@ class giveaway_modal(discord.ui.Modal, title="Create a Giveaway"):
                             else ""
                         )
                         + f"Ends: {discord.utils.format_dt(end_date, style='R')} ({discord.utils.format_dt(end_date, style='F')})\n"
-                        f"Hosted by: {interaction.user.mention}\n"
+                        f"Hosted by: {self.host.mention}\n"
                         f"Entries: **0**\n"
                         f"Winners: **{winners}**",
                     ),
@@ -92,7 +93,7 @@ class giveaway_modal(discord.ui.Modal, title="Create a Giveaway"):
                     winners,
                     self.prize.value,
                     self.description.value,
-                    interaction.user.id,
+                    self.host.id,
                 )
 
             else:
@@ -213,11 +214,15 @@ class giveaway(commands.GroupCog):
     @app_commands.guild_only()
     @app_commands.checks.has_permissions(manage_guild=True)
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id))
+    @app_commands.describe(host="Host of the giveaway (leave blank if you are the host)")
     async def giveaway_create(
         self,
         interaction: discord.Interaction,
+        host: Optional[discord.User] = None
     ) -> None:
-        await interaction.response.send_modal(giveaway_modal(self.bot))
+        if host == None:
+            host = interaction.user
+        await interaction.response.send_modal(giveaway_modal(self.bot, host))
 
     @app_commands.command(name="end", description="End a giveaway by the ID")
     @app_commands.guild_only()
@@ -234,6 +239,15 @@ class giveaway(commands.GroupCog):
                     return await interaction.response.send_message(
                         f"Giveaway already ended!", ephemeral=True
                     )
+                if len(giveaway_data["participants"]) < giveaway_data["winner_amount"]:
+                    if giveaway_data["winner_amount"] > 1:
+                        return await interaction.response.send_message(
+                            f"There are not enough participants to select winners!", ephemeral=True
+                        )
+                    else:
+                        return await interaction.response.send_message(
+                            f"There are not enough participants to select a winner!", ephemeral=True
+                        )
                 await data_manager.edit_giveaway_data(int(giveaway_id), "ended", True)
                 await data_manager.edit_giveaway_data(
                     int(giveaway_id),
