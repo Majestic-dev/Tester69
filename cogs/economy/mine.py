@@ -121,7 +121,7 @@ class mining_buttons(discord.ui.View):
                 if not self.button_clicked:
                     self.button_clicked = True
 
-                    await asyncio.sleep(17)
+                    await asyncio.sleep(10)
                     self.closed = True
 
 
@@ -142,12 +142,17 @@ class mining_buttons(discord.ui.View):
                                 interaction.user.id, ore, quantity
                             )
 
-                        return await interaction.edit_original_response(
+                        f = [discord.File(
+                            "data/mine/mining_assets/collapsing_mine.png", filename="collapsing_mine.png"
+                        )]
+                        await interaction.edit_original_response(
+                            attachments=f,
                             embed=discord.Embed(
                                 title="The mine crumbles down!",
                                 description=f"As the {self.mine_name} crumbles down, you are forced to leave.",
                                 colour=discord.Colour.from_rgb(139, 69, 19),
-                            )
+                            ),
+                            view=None
                         )
 
                 if self.mined_ores == len(self.ore_positions):
@@ -156,7 +161,8 @@ class mining_buttons(discord.ui.View):
                             title="You have mined all the ores!",
                             description="You have mined all the ores in the mine, you are forced to leave.",
                             colour=discord.Colour.from_rgb(139, 69, 19),
-                        )
+                        ),
+                        view=None
                     )
 
                     user_data = await data_manager.get_user_data(interaction.user.id)
@@ -234,7 +240,7 @@ class mine(commands.Cog):
             1800,
         ):
             f = discord.File(
-                "data/mine/mining_assets/mine_background.png", filename="mining.png"
+                "data/mine/mining_assets/mine_background.jpg", filename="mining.jpg"
             )
             view = choose_mine(self.bot)
             await interaction.response.send_message(
