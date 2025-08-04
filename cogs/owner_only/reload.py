@@ -1,15 +1,18 @@
 import os
 import discord
 
+from discord import app_commands
 from discord.ext import commands
+
+from utils import is_owner
 
 class reload_cogs(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name="reload", description="Reload the cogs in the bot")
-    @commands.is_owner()
-    async def reload(self, ctx):
+    @app_commands.command(name="reload", description="Reload the cogs in the bot")
+    @app_commands.check(is_owner)
+    async def reload(self, interaction: discord.Interaction):
         for root, _, files in os.walk("cogs"):
             for file in files:
                 if not file.endswith(".py"):
@@ -21,7 +24,7 @@ class reload_cogs(commands.Cog):
                     await self.bot.unload_extension(ext_name)
                     await self.bot.load_extension(ext_name)
 
-        await ctx.reply(
+        await interaction.response.send_message(
             embed=discord.Embed(
                 description="<:white_checkmark:1096793014287995061> Reloaded all cogs",
                 colour=discord.Colour.green(),

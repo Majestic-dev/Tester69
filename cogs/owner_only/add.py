@@ -1,30 +1,35 @@
-import os
 from typing import Optional
 
 import discord
+
+from discord import app_commands
 from discord.ext import commands
 
-from utils import data_manager
+from utils import data_manager, is_owner
 
 
 class add(commands.Cog):
     def __init__(self, bot: commands.AutoShardedBot):
         self.bot = bot
 
-    @commands.command(name="add_balance", description="Add set amount of 🪙 to your balance")
-    @commands.is_owner()
+    @app_commands.command(name="add_balance", description="Add set amount of 🪙 to your balance")
+    @app_commands.check(is_owner)
+    @app_commands.describe(
+        amount="The amount you want to add to someone's balance",
+        member="The user whose balance you want to add to"
+    )
     async def add_balance(
         self,
-        ctx: commands.Context,
+        interaction: discord.Interaction,
         amount: int,
         member: Optional[discord.Member] = None,
     ):
         user_data = await data_manager.get_user_data(
-            (member.id) if member else ctx.author.id
+            (member.id) if member else interaction.user.id
         )
 
         if user_data["balance"] + amount > 92233720368547758071:
-            return await ctx.reply(
+            return await interaction.response.send_message(
                 embed=discord.Embed(
                     description=(
                         f"<:white_cross:1096791282023669860> That's too much! Please try lowering your needed amount"
@@ -34,11 +39,11 @@ class add(commands.Cog):
             )
 
         await data_manager.edit_user_data(
-            (member.id) if member else ctx.author.id,
+            (member.id) if member else interaction.user.id,
             "balance",
             user_data["balance"] + amount,
         )
-        return await ctx.reply(
+        return await interaction.response.send_message(
             embed=discord.Embed(
                 description=(
                     f"<:white_checkmark:1096793014287995061> Added {amount} 🪙 "
@@ -52,18 +57,23 @@ class add(commands.Cog):
             )
         )
     
-    @commands.command(name="add_item", description="Add an item to your inventory")
-    @commands.is_owner()
+    @app_commands.command(name="add_item", description="Add an item to your inventory")
+    @app_commands.check(is_owner)
+    @app_commands.describe(
+        item_name="The item to add to the inventory",
+        amount="Amount of the item to add to the inventory",
+        member="The user whose inventory to add the item in to"
+    )
     async def add_item(
         self,
-        ctx,
+        interaction: discord.Interaction,
         item_name: str,
         amount: Optional[int] = 1,
         member: Optional[discord.Member] = None,
     ):
         items = data_manager.get("economy", "items")
         if item_name.lower() not in items:
-            return await ctx.reply(
+            return await interaction.response.send_message(
                 embed=discord.Embed(
                     description=(
                         f"<:white_cross:1096791282023669860> {item_name} does not exist"
@@ -73,15 +83,15 @@ class add(commands.Cog):
             )
 
         if member == None:
-            member = ctx.author
+            member = interaction.user
 
         await data_manager.edit_user_inventory(member.id, item_name, amount)
 
-        if member == ctx.author:
-            return await ctx.reply(
+        if member == interaction.user:
+            return await interaction.response.send_message(
                 embed=discord.Embed(
                     description=("<:white_checkmark:1096793014287995061> ")
-                    + ("Added " if amount > 1 else "Removed ")
+                    + ("Added " if amount >= 1 else "Removed ")
                     + (f"{abs(amount)} {items[item_name.lower()]["emoji"]} {item_name}")
                     + ("s to your inventory" if amount > 1 else " to your inventory"),
                     colour=discord.Colour.green(),
@@ -89,7 +99,7 @@ class add(commands.Cog):
             )
 
         else:
-            return await ctx.reply(
+            return await interaction.response.send_message(
                 embed=discord.Embed(
                     description=("<:white_checkmark:1096793014287995061>")
                     + ("Added " if amount >= 1 else "Removed ")

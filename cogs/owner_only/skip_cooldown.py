@@ -1,23 +1,25 @@
 from typing import Optional
 
 import discord
+
+from discord import app_commands
 from discord.ext import commands
 
-from utils import data_manager
+from utils import data_manager, is_owner
 
 class skip_cooldown(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name="skipcooldown", description="Skip the cooldown of a command")
-    @commands.is_owner()
+    @app_commands.command(name="skipcooldown", description="Skip the cooldown of a command")
+    @app_commands.check(is_owner)
     async def skipcooldown(
-        self, ctx, command: str, member: Optional[discord.Member] = None
+        self, interaction: discord.Interaction, command: str, member: Optional[discord.Member] = None
     ):
         if member == None:
             if command == "all":
-                await data_manager.remove_cooldown(ctx.author.id, "all")
-                return await ctx.reply(
+                await data_manager.remove_cooldown(interaction.user.id, "all")
+                return await interaction.response.send_message(
                     embed=discord.Embed(
                         description=(
                             f"<:white_checkmark:1096793014287995061> Skipped all cooldowns"
@@ -26,9 +28,9 @@ class skip_cooldown(commands.Cog):
                     )
                 )
 
-            user_data = await data_manager.get_user_data(ctx.author.id)
+            user_data = await data_manager.get_user_data(interaction.user.id)
             if command not in user_data["cooldowns"]:
-                return await ctx.reply(
+                return await interaction.response.send_message(
                     embed=discord.Embed(
                         description=(
                             f"<:white_cross:1096791282023669860> {command} command is not on cooldown or does not exist"
@@ -37,9 +39,9 @@ class skip_cooldown(commands.Cog):
                     )
                 )
 
-            await data_manager.remove_cooldown(ctx.author.id, command)
+            await data_manager.remove_cooldown(interaction.user.id, command)
 
-            return await ctx.reply(
+            return await interaction.response.send_message(
                 embed=discord.Embed(
                     description=(
                         f"<:white_checkmark:1096793014287995061> Skipped cooldown for {command} command"
@@ -51,7 +53,7 @@ class skip_cooldown(commands.Cog):
         else:
             if command == "all":
                 await data_manager.remove_cooldown(member.id, "all")
-                return await ctx.reply(
+                return await interaction.response.send_message(
                     embed=discord.Embed(
                         description=(
                             f"<:white_checkmark:1096793014287995061> Skipped all cooldowns for {member.mention}"
@@ -62,7 +64,7 @@ class skip_cooldown(commands.Cog):
 
             user_data = await data_manager.get_user_data(member.id)
             if command not in user_data["cooldowns"]:
-                return await ctx.reply(
+                return await interaction.response.send_message(
                     embed=discord.Embed(
                         description=(
                             f"<:white_cross:1096791282023669860> {command} command is not on cooldown or does not exist"
@@ -73,7 +75,7 @@ class skip_cooldown(commands.Cog):
 
             await data_manager.remove_cooldown(member.id, command)
 
-            return await ctx.reply(
+            return await interaction.response.send_message(
                 embed=discord.Embed(
                     description=(
                         f"<:white_checkmark:1096793014287995061> Skipped cooldown for {command} command for {member.name}"
