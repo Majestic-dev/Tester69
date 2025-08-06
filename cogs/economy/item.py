@@ -5,7 +5,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from utils import data_manager, paginator
+from utils import data_manager, paginator, UserData
 
 
 class item(commands.GroupCog):
@@ -15,7 +15,7 @@ class item(commands.GroupCog):
     async def item_autocomplete(
         self, interaction: discord.Interaction, current: str
     ) -> list[app_commands.Choice[str]]:
-        user_data = await data_manager.get_user_data(interaction.user.id)
+        user_data: UserData = await data_manager.get_user_data(interaction.user.id)
         items_in_inventory = json.loads(user_data["inventory"]).keys()
 
         return [
@@ -46,7 +46,7 @@ class item(commands.GroupCog):
         if not items:
             print("where are the items gang")
 
-        user_data = await data_manager.get_user_data(interaction.user.id)
+        user_data: UserData = await data_manager.get_user_data(interaction.user.id)
 
         if user_data["inventory"] is not None and json.loads(user_data["inventory"]):
             user_inv = json.loads(user_data["inventory"])
@@ -107,7 +107,7 @@ class item(commands.GroupCog):
     @app_commands.command(name="shop", description="View the shop to buy various items")
     @app_commands.checks.cooldown(1, 15, key=lambda i: (i.user.id))
     async def shop(self, interaction: discord.Interaction):
-        user_data = await data_manager.get_user_data(interaction.user.id)
+        user_data: UserData = await data_manager.get_user_data(interaction.user.id)
 
         embeds = []
 
@@ -124,9 +124,11 @@ class item(commands.GroupCog):
                     colour=discord.Colour.green(),
                 )
 
-            price = data_manager.get("economy", "items")[item]["buy price"]
-            description = data_manager.get("economy", "items")[item]["description"]
-            emoji = data_manager.get("economy", "items")[item]["emoji"]
+            items = data_manager.get("economy", "items")
+
+            price = items[item]["buy price"]
+            description = items[item]["description"]
+            emoji = items[item]["emoji"]
 
             if price != 0:
                 if user_data["inventory"] is not None:
@@ -190,7 +192,7 @@ class item(commands.GroupCog):
                     colour=discord.Colour.red(),
                 )
             )
-        user_data = await data_manager.get_user_data(interaction.user.id)
+        user_data: UserData = await data_manager.get_user_data(interaction.user.id)
         economy_items = data_manager.get("economy", "items")
 
         if (int(amount) * price) > user_data["balance"]:
@@ -251,7 +253,7 @@ class item(commands.GroupCog):
                 )
             )
 
-        user_data = await data_manager.get_user_data(interaction.user.id)
+        user_data: UserData = await data_manager.get_user_data(interaction.user.id)
         item1 = data_manager.get("economy", "items")[item.lower()]
         emoji = self.bot.get_emoji(item1["emoji_id"])
         whole_balance = user_data["balance"] + user_data["bank"]

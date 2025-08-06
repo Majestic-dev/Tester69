@@ -5,7 +5,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from utils import data_manager
+from utils import data_manager, PanelData
 
 
 class send_transcript_dropdown(discord.ui.ChannelSelect):
@@ -109,7 +109,7 @@ class create_role_dropdown(discord.ui.RoleSelect):
 
     async def callback(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
-        panel_data = await data_manager.get_panel_data(self.message.id)
+        panel_data: PanelData = await data_manager.get_panel_data(self.message.id)
         await self.message.edit(
             embed=discord.Embed(
                 title=f"{panel_data['panel_title']}",
@@ -248,7 +248,7 @@ class channel_dropdown(discord.ui.ChannelSelect):
 
     async def callback(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
-        panel_data = await data_manager.get_panel_data(self.interaction.message.id)
+        panel_data: PanelData = await data_manager.get_panel_data(self.interaction.message.id)
         channel = self.interaction.guild.get_channel(int(interaction.data["values"][0]))
         panel = await channel.send(
             embed=discord.Embed(
@@ -321,7 +321,7 @@ class create_panel_edit_modal(discord.ui.Modal, title="Edit Panel"):
         if self.limitPerUser.value.isnumeric():
             await interaction.response.defer()
             message = await interaction.original_response()
-            panel_data = await data_manager.get_panel_data(message.id)
+            panel_data: PanelData = await data_manager.get_panel_data(message.id)
             panel_moderators = [
                 f"<@&{role_id}>" for role_id in panel_data["panel_moderators"]
             ]
@@ -445,7 +445,7 @@ class create_ticket_modal(discord.ui.Modal, title="Create a Ticket"):
     )
 
     async def on_submit(self, interaction: discord.Interaction):
-        panel_data = await data_manager.get_panel_data(self.panel_id)
+        panel_data: PanelData = await data_manager.get_panel_data(self.panel_id)
         ticket = await interaction.channel.create_thread(
             name=f"ticket-{interaction.user.name}",
         )
@@ -563,7 +563,7 @@ class ticket_views(discord.ui.View):
         elif ticket["closed"] == False:
             await interaction.response.defer()
             await data_manager.close_ticket(self.panel_id, interaction.channel.id)
-            panel_data = await data_manager.get_panel_data(self.panel_id)
+            panel_data: PanelData = await data_manager.get_panel_data(self.panel_id)
             for user in await interaction.channel.fetch_members():
                 member = interaction.guild.get_member(user.id)
                 if member:
@@ -618,7 +618,7 @@ class panel_views(discord.ui.View):
     async def create_ticket(
         self, interaction: discord.Interaction, button: discord.ui.Button
     ):
-        panel_data = await data_manager.get_panel_data(interaction.message.id)
+        panel_data: PanelData = await data_manager.get_panel_data(interaction.message.id)
 
         if panel_data == None:
             return await interaction.response.send_message(
@@ -756,7 +756,7 @@ class panel_creation_views(discord.ui.View):
                 ),
                 ephemeral=True,
             )
-        panel_data = await data_manager.get_panel_data(interaction.message.id)
+        panel_data: PanelData = await data_manager.get_panel_data(interaction.message.id)
         if panel_data["panel_moderators"]:
             await interaction.message.delete()
             await interaction.response.send_message(
@@ -829,7 +829,7 @@ class panel_edit_views(discord.ui.View):
     async def edit_panel(
         self, interaction: discord.Interaction, button: discord.ui.Button
     ):
-        panel_data = await data_manager.get_panel_data(self.panel_id)
+        panel_data: PanelData = await data_manager.get_panel_data(self.panel_id)
         await interaction.response.send_modal(
             edit_panel_edit_modal(
                 self.bot,
@@ -867,7 +867,7 @@ class panel_edit_views(discord.ui.View):
     async def submit_panel(
         self, interaction: discord.Interaction, button: discord.ui.Button
     ):
-        panel_data = await data_manager.get_panel_data(self.panel_id)
+        panel_data: PanelData = await data_manager.get_panel_data(self.panel_id)
         channel = self.bot.get_channel(interaction.channel.id)
         message = await channel.fetch_message(self.panel_id)
         await data_manager.edit_panel_data(
@@ -980,7 +980,7 @@ class ticket_system(commands.GroupCog):
                 ticket = await data_manager.get_ticket_data(
                     panel_id, interaction.channel.id
                 )
-                panel_data = await data_manager.get_panel_data(panel_id)
+                panel_data: PanelData = await data_manager.get_panel_data(panel_id)
                 for user in await interaction.channel.fetch_members():
                     member = interaction.guild.get_member(user.id)
                     if member:

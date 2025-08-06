@@ -3,7 +3,7 @@ from discord.ext import commands
 
 from discord import app_commands
 
-from utils import data_manager
+from utils import data_manager, FilteredWordsData
 
 class whitelist(commands.Cog):
     def __init__(self, bot):
@@ -63,7 +63,7 @@ class whitelist(commands.Cog):
         else:
             pass
 
-        guild_filtered_words_data = await data_manager.get_filter_data(
+        guild_filtered_words_data: FilteredWordsData = await data_manager.get_filter_data(
             interaction.guild.id
         )
         wlist = guild_filtered_words_data["whitelist"]
@@ -120,7 +120,7 @@ class whitelist(commands.Cog):
     @app_commands.guild_only()
     @app_commands.checks.has_permissions(administrator=True)
     async def list_whitelist(self, interaction: discord.Interaction):
-        guild_filtered_words_data = await data_manager.get_filter_data(
+        guild_filtered_words_data: FilteredWordsData = await data_manager.get_filter_data(
             interaction.guild.id
         )
         wlist = guild_filtered_words_data["whitelist"]

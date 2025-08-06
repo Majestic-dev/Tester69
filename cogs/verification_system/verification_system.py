@@ -8,7 +8,7 @@ from discord import app_commands
 from discord.ext import commands
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
-from utils import data_manager
+from utils import data_manager, GuildData
 
 
 class verification(commands.GroupCog):
@@ -69,20 +69,21 @@ class verification(commands.GroupCog):
     @app_commands.guild_only()
     @app_commands.checks.has_permissions(administrator=True)
     async def disable_verification(self, interaction: discord.Interaction):
-        verification_channel = await data_manager.get_guild_data(interaction.guild.id)[
+        guild_data: GuildData = await data_manager.get_guild_data(interaction.guild.id)
+        verification_channel: GuildData = await data_manager.get_guild_data(interaction.guild.id)[
             "verification_channel_id"
         ]
-        verification_logs_channel = await data_manager.get_guild_data(
+        verification_logs_channel: GuildData = await data_manager.get_guild_data(
             interaction.guild.id
         )["verification_logs_channel_id"]
-        unverified_role = await data_manager.get_guild_data(interaction.guild.id)[
+        unverified_role: GuildData = await data_manager.get_guild_data(interaction.guild.id)[
             "unverified_role_id"
         ]
 
         if (
-            verification_channel
-            and verification_logs_channel
-            and unverified_role == ("disabled")
+            guild_data["verification_channel_id"]
+            and guild_data["verification_logs_channel_id"]
+            and guild_data["unverified_role_id"] == ("disabled")
         ):
             return await interaction.response.send_message(
                 embed=discord.Embed(
@@ -162,7 +163,7 @@ class verification(commands.GroupCog):
     async def on_member_join(self, member: discord.Member):
         if member.bot:
             return
-        guild_data = await data_manager.get_guild_data(member.guild.id)
+        guild_data: GuildData = await data_manager.get_guild_data(member.guild.id)
         welcome_message = guild_data["welcome_message"]
         verification_channel = guild_data["verification_channel_id"]
         verification_logs_channel = guild_data["verification_logs_channel_id"]

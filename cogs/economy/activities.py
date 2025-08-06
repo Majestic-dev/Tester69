@@ -5,7 +5,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from utils import data_manager, cooldown_check
+from utils import data_manager, cooldown_check, UserData
 
 
 class activities(commands.Cog):
@@ -17,7 +17,7 @@ class activities(commands.Cog):
         description="Grab a rifle from the shop and go hunting for some animals",
     )
     async def hunt(self, interaction: discord.Interaction):
-        user_data = await data_manager.get_user_data(interaction.user.id)
+        user_data: UserData = await data_manager.get_user_data(interaction.user.id)
 
         if user_data["inventory"] is not None:
             inventory = json.loads(user_data["inventory"])
@@ -49,7 +49,7 @@ class activities(commands.Cog):
             items = list(data_manager.get("economy", "hunting items").keys())
             item_name = random.choices(items, weights=chances, k=1)
             item_emoji = data_manager.get("economy", "items")[item_name[0]]["emoji"]
-            user_data = await data_manager.get_user_data(interaction.user.id)
+            user_data: UserData = await data_manager.get_user_data(interaction.user.id)
 
             await data_manager.edit_user_inventory(interaction.user.id, item_name[0], 1)
 
@@ -65,7 +65,7 @@ class activities(commands.Cog):
         description="Grab a fishing pole from the shop and go fishing for some fish",
     )
     async def fish(self, interaction: discord.Interaction):
-        user_data = await data_manager.get_user_data(interaction.user.id)
+        user_data: UserData = await data_manager.get_user_data(interaction.user.id)
 
         if user_data["inventory"] is not None:
             inventory = json.loads(user_data["inventory"])
@@ -113,10 +113,10 @@ class activities(commands.Cog):
     @app_commands.checks.cooldown(1, 3600, key=lambda i: (i.user.id))
     @app_commands.describe(user="The user you want to rob")
     async def rob(self, interaction: discord.Interaction, user: discord.User):
-        robber_data = await data_manager.get_user_data(interaction.user.id)
+        robber_data: UserData = await data_manager.get_user_data(interaction.user.id)
         robber_balance = robber_data["balance"]
         robber_bank = robber_data["bank"]
-        victim_data = await data_manager.get_user_data(user.id)
+        victim_data: UserData = await data_manager.get_user_data(user.id)
         victim_balance = victim_data["balance"]
 
         if interaction.user.id == user.id:

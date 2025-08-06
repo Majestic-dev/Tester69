@@ -5,7 +5,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from utils import data_manager, is_owner
+from utils import data_manager, is_owner, UserData
 
 
 class add(commands.Cog):
@@ -24,7 +24,7 @@ class add(commands.Cog):
         amount: int,
         member: Optional[discord.Member] = None,
     ):
-        user_data = await data_manager.get_user_data(
+        user_data: UserData = await data_manager.get_user_data(
             (member.id) if member else interaction.user.id
         )
 
@@ -57,8 +57,20 @@ class add(commands.Cog):
             )
         )
     
+    async def items_autocomplete(
+            self, interaction: discord.Interaction, current: str
+    ) -> list[app_commands.Choice[str]]:
+        items = data_manager.get("economy", "items").keys()
+
+        return [
+            app_commands.Choice(name=item, value=item)
+            for item in items
+            if item.lower().startswith(current.lower()) or len(current) < 1
+        ]
+    
     @app_commands.command(name="add_item", description="Add an item to your inventory")
     @app_commands.check(is_owner)
+    @app_commands.autocomplete(item_name=items_autocomplete)
     @app_commands.describe(
         item_name="The item to add to the inventory",
         amount="Amount of the item to add to the inventory",

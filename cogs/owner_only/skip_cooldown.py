@@ -5,7 +5,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from utils import data_manager, is_owner
+from utils import data_manager, is_owner, UserData
 
 class skip_cooldown(commands.Cog):
     def __init__(self, bot):
@@ -28,7 +28,7 @@ class skip_cooldown(commands.Cog):
                     )
                 )
 
-            user_data = await data_manager.get_user_data(interaction.user.id)
+            user_data: UserData = await data_manager.get_user_data(interaction.user.id)
             if command not in user_data["cooldowns"]:
                 return await interaction.response.send_message(
                     embed=discord.Embed(
@@ -62,7 +62,7 @@ class skip_cooldown(commands.Cog):
                     )
                 )
 
-            user_data = await data_manager.get_user_data(member.id)
+            user_data: UserData = await data_manager.get_user_data(member.id)
             if command not in user_data["cooldowns"]:
                 return await interaction.response.send_message(
                     embed=discord.Embed(

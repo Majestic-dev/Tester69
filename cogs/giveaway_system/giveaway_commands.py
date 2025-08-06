@@ -6,7 +6,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from utils import data_manager, paginator
+from utils import data_manager, paginator, GiveawayData
 
 
 class giveaway_modal(discord.ui.Modal, title="Create a Giveaway"):
@@ -116,7 +116,7 @@ class giveaway_leave_view(discord.ui.View):
     async def leave_giveaway(
         self, interaction: discord.Interaction, button: discord.ui.Button
     ):
-        giveaway_data = await data_manager.get_giveaway_data(self.giveaway_id)
+        giveaway_data: GiveawayData = await data_manager.get_giveaway_data(self.giveaway_id)
         if interaction.user.id in giveaway_data["participants"]:
             giveaway_data["participants"].remove(interaction.user.id)
             await data_manager.edit_giveaway_data(
@@ -146,7 +146,7 @@ class giveaway_views(discord.ui.View):
     async def join_giveaway(
         self, interaction: discord.Interaction, button: discord.ui.Button
     ):
-        giveaway_data = await data_manager.get_giveaway_data(interaction.message.id)
+        giveaway_data: GiveawayData = await data_manager.get_giveaway_data(interaction.message.id)
         if (
             giveaway_data["participants"] is None
             or interaction.user.id not in giveaway_data["participants"]
@@ -178,7 +178,7 @@ class giveaway_views(discord.ui.View):
     async def view_entrants(
         self, interaction: discord.Interaction, button: discord.ui.Button
     ):
-        giveaway_data = await data_manager.get_giveaway_data(interaction.message.id)
+        giveaway_data: GiveawayData = await data_manager.get_giveaway_data(interaction.message.id)
         if giveaway_data:
             if len(giveaway_data["participants"]) > 0:
                 embeds = []
@@ -234,7 +234,7 @@ class giveaway(commands.GroupCog):
     ) -> None:
         if giveaway_id.isnumeric():
             if await data_manager.get_giveaway_data(int(giveaway_id)):
-                giveaway_data = await data_manager.get_giveaway_data(int(giveaway_id))
+                giveaway_data: GiveawayData = await data_manager.get_giveaway_data(int(giveaway_id))
                 if giveaway_data["ended"]:
                     return await interaction.response.send_message(
                         f"Giveaway already ended!", ephemeral=True
@@ -284,7 +284,7 @@ class giveaway(commands.GroupCog):
     ) -> None:
         if giveaway_id.isnumeric():
             if await data_manager.get_giveaway_data(int(giveaway_id)):
-                giveaway_data = await data_manager.get_giveaway_data(int(giveaway_id))
+                giveaway_data: GiveawayData = await data_manager.get_giveaway_data(int(giveaway_id))
                 if giveaway_data["ended"]:
                     if user is None:
                         if len(giveaway_data["winners"]) > 0:

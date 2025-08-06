@@ -6,7 +6,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from utils import data_manager, paginator
+from utils import data_manager, paginator, UserData
 
 
 async def calculate_remaining_xp(level: int, xp: int) -> str:
@@ -20,7 +20,7 @@ async def calculate_remaining_xp(level: int, xp: int) -> str:
 
 
 async def find_user_level(user_id: int):
-    user_data = await data_manager.get_user_data(user_id)
+    user_data: UserData = await data_manager.get_user_data(user_id)
     if user_data["mining_xp"] == None:
         return 0
     levels = data_manager.get("levels", "levels")
@@ -47,7 +47,7 @@ class personal(commands.Cog):
         if user == None:
             user = interaction.user
 
-        user_data = await data_manager.get_user_data(user.id)
+        user_data: UserData = await data_manager.get_user_data(user.id)
         if user_data["inventory"] is not None:
             inventory = json.loads(user_data["inventory"])
         else:
@@ -111,7 +111,7 @@ class personal(commands.Cog):
     )
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.user.id))
     async def inventory(self, interaction: discord.Interaction):
-        user_data = await data_manager.get_user_data(interaction.user.id)
+        user_data: UserData = await data_manager.get_user_data(interaction.user.id)
 
         if user_data["inventory"] is None:
             return await interaction.response.send_message(

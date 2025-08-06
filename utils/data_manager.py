@@ -4,10 +4,56 @@ import json
 import os
 import random
 import uuid
-from typing import Any
+from typing import Any, TypedDict
 
 import asyncpg
 import discord
+
+class UserData(TypedDict):
+    id: int
+    inventory: dict[str, int]
+    cooldowns: dict[str, datetime.datetime]
+    balance: int
+    bank: int
+    mining_xp: int
+
+class GuildData(TypedDict):
+    id: int
+    unverified_role_id: int
+    verification_channel_id: int
+    verification_logs_channel_id: int
+    logs_channel_id: int
+    appeal_link: str
+    welcome_message: str
+    warned_users: dict
+
+class FilteredWordsData(TypedDict):
+    guild_id: int
+    channel_id: int
+    blacklisted_words: list[str]
+    whitelist: list[int]
+
+class GiveawayData(TypedDict):
+    id: int
+    guild_id: int
+    channel_id: int
+    end_date: str
+    winner_amount: int
+    prize: str
+    extra_notes: str
+    host_id: int
+    participants: list[int]
+    winners: list[int]
+    ended: bool
+
+class PanelData(TypedDict):
+    id: int
+    channel_id: int
+    guild_id: int
+    limit_per_user: int
+    panel_title: str
+    panel_description: str
+    panel_moderators: list[int]
 
 
 class data_manager:
@@ -174,13 +220,13 @@ class data_manager:
             )
 
     @classmethod
-    async def get_all_users(cls) -> None:
+    async def get_all_users(cls) -> list:
         async with cls.db_connection.acquire():
             rows = await cls.db_connection.fetch("SELECT id FROM users")
             return [row["id"] for row in rows]
 
     @classmethod
-    async def get_user_data(cls, user_id: int) -> None:
+    async def get_user_data(cls, user_id: int) -> list[UserData]:
         await cls.user_check(user_id)
         async with cls.db_connection.acquire():
             return await cls.db_connection.fetchrow(
@@ -276,8 +322,7 @@ class data_manager:
             if not guildexists:
                 await cls.add_guild_data(cls, guild_id)
 
-    classmethod
-
+    @classmethod
     async def add_guild_data(cls, guild_id: int) -> None:
         async with cls.db_connection.acquire():
             await cls.db_connection.execute(
@@ -285,7 +330,7 @@ class data_manager:
             )
 
     @classmethod
-    async def get_guild_data(cls, guild_id: int) -> None:
+    async def get_guild_data(cls, guild_id: int) -> list[GuildData]:
         await cls.guild_check(guild_id)
         async with cls.db_connection.acquire():
             return await cls.db_connection.fetchrow(
@@ -337,7 +382,7 @@ class data_manager:
                         return False
 
     @classmethod
-    async def get_user_warnings(cls, guild_id: int, user_id: int) -> None:
+    async def get_user_warnings(cls, guild_id: int, user_id: int) -> list:
         await cls.guild_check(guild_id)
         async with cls.db_connection.acquire():
             guild_data = await cls.get_guild_data(guild_id)
@@ -348,7 +393,7 @@ class data_manager:
                 return warned_users.get(str(user_id), [])
 
     @classmethod
-    async def filter_check(cls, guild_id: int) -> None:
+    async def filter_check(cls, guild_id: int) -> Any:
         await cls.guild_check(guild_id)
         async with cls.db_connection.acquire():
             filterexists = await cls.db_connection.fetchrow(
@@ -359,7 +404,7 @@ class data_manager:
                 await cls.add_filter_data(guild_id)
 
     @classmethod
-    async def get_filter_data(cls, guild_id: int) -> None:
+    async def get_filter_data(cls, guild_id: int) -> list[FilteredWordsData]:
         await cls.filter_check(guild_id)
         async with cls.db_connection.acquire():
             return await cls.db_connection.fetchrow(
@@ -411,7 +456,7 @@ class data_manager:
             )
 
     @classmethod
-    async def get_giveaway_data(cls, giveaway_id: int) -> None:
+    async def get_giveaway_data(cls, giveaway_id: int) -> list[GiveawayData]:
         async with cls.db_connection.acquire():
             return await cls.db_connection.fetchrow(
                 "SELECT * FROM giveaways WHERE id = $1", giveaway_id
@@ -477,7 +522,7 @@ class data_manager:
             )
 
     @classmethod
-    async def get_panel_data(cls, panel_id: int) -> None:
+    async def get_panel_data(cls, panel_id: int) -> list[PanelData]:
         async with cls.db_connection.acquire():
             return await cls.db_connection.fetchrow(
                 "SELECT * FROM panels WHERE id = $1", panel_id
@@ -496,7 +541,7 @@ class data_manager:
                 )
 
     @classmethod
-    async def get_all_tickets(cls):
+    async def get_all_tickets(cls) -> list:
         async with cls.db_connection.acquire():
             rows = await cls.db_connection.fetch("SELECT * FROM tickets")
             all_tickets = []
@@ -509,7 +554,7 @@ class data_manager:
             return all_tickets
 
     @classmethod
-    async def get_panel_tickets(cls, panel_id: int) -> None:
+    async def get_panel_tickets(cls, panel_id: int) -> Any:
         async with cls.db_connection.acquire():
             return await cls.db_connection.fetchrow(
                 "SELECT tickets FROM tickets WHERE panel_id = $1", panel_id
@@ -547,7 +592,7 @@ class data_manager:
                 )
 
     @classmethod
-    async def get_panel_id_by_ticket_id(cls, ticket_id: int):
+    async def get_panel_id_by_ticket_id(cls, ticket_id: int) -> int | None:
         async with cls.db_connection.acquire():
             rows = await cls.db_connection.fetch("SELECT * FROM tickets")
             for row in rows:
@@ -558,7 +603,7 @@ class data_manager:
             return None
 
     @classmethod
-    async def get_ticket_data(cls, panel_id: int, ticket_id: int):
+    async def get_ticket_data(cls, panel_id: int, ticket_id: int) -> dict:
         async with cls.db_connection.acquire():
             tickets = await cls.db_connection.fetchval(
                 "SELECT tickets FROM tickets WHERE panel_id = $1", panel_id
@@ -608,7 +653,6 @@ class data_manager:
 
 async def main():
     await data_manager.initialise()
-
 
 if __name__ == "__main__":
     asyncio.run(main())

@@ -4,7 +4,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from utils import data_manager
+from utils import data_manager, FilteredWordsData, GuildData
 
 
 class logging_cmds(commands.GroupCog):
@@ -29,7 +29,7 @@ class logging_cmds(commands.GroupCog):
         blocked_words_channel: Optional[discord.TextChannel] = None,
     ):
         if blocked_words_channel == None:
-            data = await data_manager.get_filter_data(interaction.guild.id)
+            data: FilteredWordsData = await data_manager.get_filter_data(interaction.guild.id)
             if data["channel_id"] != None:
                 await data_manager.edit_filter_data(
                     interaction.guild.id, "channel_id", None
@@ -65,7 +65,7 @@ class logging_cmds(commands.GroupCog):
     @app_commands.command(name="disable", description="Disable logging for this server")
     @app_commands.checks.has_permissions(administrator=True)
     async def disable_logs(self, interaction: discord.Interaction):
-        guild_data = await data_manager.get_guild_data(interaction.guild.id)
+        guild_data: GuildData = await data_manager.get_guild_data(interaction.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
 
         if logs_channel == None:

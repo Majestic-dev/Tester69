@@ -6,11 +6,11 @@ import random
 import time
 import json
 
-from utils import data_manager, cooldown_check
+from utils import data_manager, cooldown_check, UserData
 
 
 async def find_user_level(user_id: int):
-    user_data = await data_manager.get_user_data(user_id)
+    user_data: UserData = await data_manager.get_user_data(user_id)
     if user_data["mining_xp"] == None:
         return 0
     levels = data_manager.get("levels", "levels")
@@ -129,7 +129,7 @@ class mining_buttons(discord.ui.View):
                     if self.mined_ores == len(self.ore_positions):
                         pass
                     else:
-                        user_data = await data_manager.get_user_data(interaction.user.id)
+                        user_data: UserData = await data_manager.get_user_data(interaction.user.id)
                         mining_xp = user_data["mining_xp"]
                         if mining_xp == None:
                             mining_xp = 0
@@ -166,7 +166,7 @@ class mining_buttons(discord.ui.View):
                         view=None
                     )
 
-                    user_data = await data_manager.get_user_data(interaction.user.id)
+                    user_data: UserData = await data_manager.get_user_data(interaction.user.id)
                     mining_xp = user_data["mining_xp"]
                     if mining_xp == None:
                         mining_xp = 0
