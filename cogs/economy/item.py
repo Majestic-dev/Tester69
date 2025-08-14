@@ -234,11 +234,13 @@ class item(commands.GroupCog):
     ) -> list[app_commands.Choice[str]]:
         items = data_manager.get("economy", "items").keys()
 
-        return [
+        item_list = [
             app_commands.Choice(name=item, value=item)
             for item in items
             if item.lower().startswith(current.lower()) or len(current) < 1
         ]
+
+        return item_list[0:25]
 
     @app_commands.command(name="info", description="View the description of an item")
     @app_commands.autocomplete(item=items_autocomplete)

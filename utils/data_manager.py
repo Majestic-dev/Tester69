@@ -322,7 +322,6 @@ class data_manager:
             if not guildexists:
                 await cls.add_guild_data(cls, guild_id)
 
-    @classmethod
     async def add_guild_data(cls, guild_id: int) -> None:
         async with cls.db_connection.acquire():
             await cls.db_connection.execute(
