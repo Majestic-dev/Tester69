@@ -18,13 +18,15 @@ class item(commands.GroupCog):
         user_data: UserData = await data_manager.get_user_data(interaction.user.id)
         items_in_inventory = json.loads(user_data["inventory"]).keys()
 
-        return [
+        item_list = [
             app_commands.Choice(name=item, value=item)
             for item in items_in_inventory
             if item.lower().startswith(current.lower())
             or len(current) < 1
             and user_data["inventory"][item] > 0
         ]
+
+        return item_list[0:25]
 
     @app_commands.command(name="sell", description="Sell your loot for 🪙")
     @app_commands.autocomplete(item=item_autocomplete)

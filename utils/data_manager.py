@@ -16,6 +16,7 @@ class UserData(TypedDict):
     balance: int
     bank: int
     mining_xp: int
+    crafting: dict
 
 class GuildData(TypedDict):
     id: int
@@ -105,7 +106,8 @@ class data_manager:
                 cooldowns JSONB,
                 balance bigint DEFAULT 0,
                 bank bigint DEFAULT 0,
-                mining_xp bigint DEFAULT 0
+                mining_xp bigint DEFAULT 0,
+                crafting JSONB DEFAULT '{}'::jsonb
             );"""
         )
 

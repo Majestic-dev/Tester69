@@ -57,6 +57,17 @@ data_manager.setup(
             },
         ),
         (
+            "data/crafting_recipes.json",
+            {
+                "recipes": {
+                    "Example Item": {
+                        "Example resource": 1,
+                        "Example resource 2": 2
+                    }
+                }
+            }
+        ),
+        (
             "data/mine/mines.json",
             {
                 "example mine": {
