@@ -55,7 +55,7 @@ class craftingview(discord.ui.View):
             return await interaction.response.send_message(
                 embed=discord.Embed(
                     title="Error",
-                    description="You are not the executor of this panel",
+                    description="You are not the executor of this command",
                     colour=discord.Colour.red(),
                 ),
                 ephemeral=True,
@@ -120,7 +120,7 @@ class craftingview(discord.ui.View):
             return await interaction.response.send_message(
                 embed=discord.Embed(
                     title="Error",
-                    description="You are not the executor of this panel",
+                    description="You are not the executor of this command",
                     colour=discord.Colour.red(),
                 ),
                 ephemeral=True,
