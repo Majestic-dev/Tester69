@@ -180,6 +180,7 @@ class crafting(commands.Cog):
                     crafting_data.pop(item)
 
                 await data_manager.edit_user_data(user_id, "crafting", json.dumps(crafting_data))
+                await data_manager.edit_user_inventory(user_id, item, 1)
 
     @app_commands.command(name="craft", description="Craft an item")
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.user.id))
