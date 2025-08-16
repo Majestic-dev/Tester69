@@ -56,6 +56,11 @@ class PanelData(TypedDict):
     panel_description: str
     panel_moderators: list[int]
 
+class CraftingData(TypedDict):
+    user_id: int
+    item: str
+    end_date: str
+
 
 class data_manager:
     __data: dict[str, str] = {}
@@ -165,6 +170,14 @@ class data_manager:
             """CREATE TABLE IF NOT EXISTS tickets (
                 panel_id bigint PRIMARY KEY,
                 tickets JSONB
+            );"""
+        )
+
+        await cls.db_connection.execute(
+            """CREATE TABLE IF NOT EXISTS crafting (
+                user_id bigint PRIMARY KEY,
+                item TEXT,
+                end_date TEXT
             );"""
         )
 
@@ -651,6 +664,46 @@ class data_manager:
                         panel_id,
                     )
 
+    @classmethod
+    async def crafting_check(cls, user_id: int) -> None:
+        async with cls.db_connection.acquire():
+            craftingexists = await cls.db_connection.fetchval(
+                "SELECT EXISTS (SELECT 1 FROM crafting WHERE user_id = $1)", user_id
+            )
+
+            if not craftingexists:
+                await cls.add_crafting_data(cls, user_id)
+            
+    async def add_crafting_data(cls, user_id: int) -> None:
+        async with cls.db_connection.acquire():
+            await cls.db_connection.execute(
+                "INSERT INTO crafting (user_id) VALUES ($1)", user_id
+            )
+
+    @classmethod
+    async def add_crafting(cls, user_id: int, item: str, minutes: int) -> None:
+        await cls.crafting_check(user_id)
+        async with cls.db_connection.acquire():
+            end_date = discord.utils.utcnow() + datetime.timedelta(minutes=minutes)
+            await cls.db_connection.execute(
+                "UPDATE crafting SET item = $1, end_date = $2 WHERE user_id = $3", item, end_date.isoformat(), user_id
+            )
+        
+    @classmethod
+    async def delete_crafting(cls, user_id: int) -> None:
+        await cls.crafting_check(user_id)
+        async with cls.db_connection.acquire():
+            await cls.db_connection.execute(
+                "UPDATE crafting SET item = NULL, end_date = NULL WHERE user_id = $1", user_id
+            )
+    
+    @classmethod
+    async def get_user_crafting(cls, user_id: int) -> list[CraftingData]:
+        await cls.crafting_check(user_id)
+        async with cls.db_connection.acquire():
+            return await cls.db_connection.fetchrow(
+                "SELECT * FROM crafting WHERE user_id = $1", user_id
+            )
 
 async def main():
     await data_manager.initialise()

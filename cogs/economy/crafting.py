@@ -1,13 +1,11 @@
 import discord
 import json
 import datetime
-from datetime import timezone
-
 
 from discord import app_commands
 from discord.ext import commands, tasks
 
-from utils import data_manager, UserData
+from utils import data_manager, UserData, CraftingData
 
 
 craftable_items = data_manager.get("crafting_recipes", "recipes")
@@ -63,20 +61,19 @@ class craftingview(discord.ui.View):
         
         await interaction.response.defer(ephemeral=True)
         user_data: UserData = await data_manager.get_user_data(interaction.user.id)
+        user_crafting: CraftingData = await data_manager.get_user_crafting(interaction.user.id)
         inv = json.loads(user_data["inventory"])
-        user_crafting = json.loads(user_data["crafting"])
+        now = discord.utils.utcnow().isoformat()
 
-        if bool(user_crafting) is False:
+        if user_crafting["end_date"] == None:
             if await can_craft(inv=inv, recipe=craftable_items[self.selected_item]):
                 for item in craftable_items[self.selected_item]:
                     inv[item] -= craftable_items[self.selected_item][item]
 
                 await data_manager.edit_user_data(interaction.user.id, "inventory", json.dumps(inv))
-                end_time = discord.utils.utcnow() + datetime.timedelta(minutes=items[self.selected_item]["crafting_time"])
-                crafting_data = {}
-                crafting_data[self.selected_item] = end_time.isoformat()
+                minutes = items[self.selected_item]["crafting_time"]
 
-                await data_manager.edit_user_data(interaction.user.id, "crafting", json.dumps(crafting_data))
+                await data_manager.add_crafting(interaction.user.id, self.selected_item, minutes)
 
                 await interaction.followup.send(
                     content=f"You started crafting a {self.selected_item}!",
@@ -103,11 +100,11 @@ class craftingview(discord.ui.View):
                     ephemeral=True
                 )
             
-        elif bool(user_crafting) is True:
-            key = list((user_crafting).keys())[0]
-            end_date = discord.utils.format_dt(datetime.datetime.fromisoformat((user_crafting)[key]), style="R")
+        elif user_crafting["end_date"] > now:
+            item = user_crafting["item"]
+            end_date = discord.utils.format_dt(datetime.datetime.fromisoformat(user_crafting["end_date"]), style="R")
             return await interaction.followup.send(
-                content=f"You are currently crafting a {items[key]["emoji"]}`{key}` which will be finished {end_date}",
+                content=f"You are currently crafting a {items[item]["emoji"]}`{item}` which will be finished {end_date}",
                 ephemeral=True
             )
 
@@ -160,27 +157,16 @@ class crafting(commands.Cog):
     @tasks.loop(minutes=1)
     async def craftingloop(self):
         async with data_manager.db_connection.acquire():
-            users = await data_manager.db_connection.fetch(
-                "SELECT id, crafting FROM users WHERE crafting IS NOT NULL"
+            ended_craftings = await data_manager.db_connection.fetch(
+                "SELECT * FROM crafting WHERE end_date < $1",
+                discord.utils.utcnow().isoformat()
             )
+            ended_craftings = [dict(craft) for craft in ended_craftings]
 
-            now = datetime.datetime.now(timezone.utc)
-
-            for user in users:
-                user_id = user["id"]
-                crafting_data = json.loads(user["crafting"])
-
-                to_remove = [item for item, iso_time in crafting_data.items() 
-                         if now >= datetime.datetime.fromisoformat(iso_time)]
-                
-                if not to_remove:
-                    continue
-
-                for item in to_remove:
-                    crafting_data.pop(item)
-
-                await data_manager.edit_user_data(user_id, "crafting", json.dumps(crafting_data))
-                await data_manager.edit_user_inventory(user_id, item, 1)
+            for craft in ended_craftings:
+                user_crafting = await data_manager.get_user_crafting(craft["user_id"])
+                await data_manager.delete_crafting(craft["user_id"])
+                await data_manager.edit_user_inventory(craft["user_id"], user_crafting["item"], 1)
 
     @app_commands.command(name="craft", description="Craft an item")
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.user.id))
