@@ -104,6 +104,8 @@ python main.py
 
     - Economy
         * Added a new and unique mining system, which is fully customizeable through the JSON file
+        * Added a new crafting system inspired by dank memer, which is fully customizeable through JSON files
+        * Added a new forging system, which is fully customizeable through JSON files
 
     - Database
         * Added a separate database for the giveaways
@@ -112,12 +114,3 @@ python main.py
     - Paginator
         * Stopped using the old paginator and created my own one
         * Paginator consists of 5 buttons, where the middle button acts as a "stop" or a "jump to page" button
-
-# TODO
-
-## V1.3 Focused On Reworking Some Systems
-
-- [x] Add a Giveaway system
-- [x] Add a ticket system
-- [x] Create my own paginator
-- [ ] Rework the Economy system to be more fun and interactive
