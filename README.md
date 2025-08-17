@@ -91,7 +91,7 @@ python main.py
     - Database
         * Migrated from a JSON database (if you call it a one) to PostgreSQL (asyncpg)
 
-## v1.3
+## v2.0
 
     - Miscallaneous
         * Added a giveaway system (including ending the giveaway immediately, rerolling the giveaway, etc.)
