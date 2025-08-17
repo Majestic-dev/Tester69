@@ -97,7 +97,7 @@ class data_manager:
         try:
             cls.db_connection = await asyncpg.create_pool(
                 user=data_manager.get("config", "postgres_user"),
-                host="127.0.0.1",
+                host=data_manager.get("config", "postgres_host"),
                 password=data_manager.get("config", "postgres_password"),
                 database=data_manager.get("config", "postgres_database"),
             )
