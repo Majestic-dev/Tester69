@@ -111,8 +111,7 @@ class data_manager:
                 cooldowns JSONB,
                 balance bigint DEFAULT 0,
                 bank bigint DEFAULT 0,
-                mining_xp bigint DEFAULT 0,
-                crafting JSONB DEFAULT '{}'::jsonb
+                mining_xp bigint DEFAULT 0
             );"""
         )
 
