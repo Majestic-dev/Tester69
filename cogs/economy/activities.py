@@ -32,7 +32,7 @@ class activities(commands.Cog):
             item_emoji = data_manager.get("economy", "items")["hunting rifle"]["emoji"]
             return await interaction.response.send_message(
                 embed=discord.Embed(
-                    description=f"<:white_cross:1096791282023669860> You need a **{item_emoji} Hunting Rifle** to hunt some animals `/buy_item`",
+                    description=f"<:white_cross:1096791282023669860> You need a **{item_emoji} Hunting Rifle** to hunt some animals `/item buy`",
                     colour=discord.Colour.red(),
                 )
             )
@@ -80,7 +80,7 @@ class activities(commands.Cog):
             item_emoji = data_manager.get("economy", "items")["fishing pole"]["emoji"]
             return await interaction.response.send_message(
                 embed=discord.Embed(
-                    description=f"<:white_cross:1096791282023669860> You need a **{item_emoji} Fishing Pole** to fish `/buy_item`",
+                    description=f"<:white_cross:1096791282023669860> You need a **{item_emoji} Fishing Pole** to fish `/item buy`",
                     colour=discord.Colour.red(),
                 )
             )
