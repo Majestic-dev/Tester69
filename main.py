@@ -43,6 +43,8 @@ data_manager.setup(
                         "buy price": 0,
                         "emoji": "Use a discord emoji here",
                         "emoji_id": 0,
+                        "crafting_time": 1, # How many minutes to craft this item (Not a required field)
+                        "smelting_time": 1 # How many minutes to forge this item (Not a mandatory field)
                     },
                 },
                 "hunting items": {
@@ -57,7 +59,18 @@ data_manager.setup(
             },
         ),
         (
-            "data/crafting_recipes.json",
+            "data/recipes/crafting_recipes.json",
+            {
+                "recipes": {
+                    "Example Item": {
+                        "Example resource": 1,
+                        "Example resource 2": 2
+                    }
+                }
+            }
+        ),
+        (
+            "data/recipes/forging_recipes.json",
             {
                 "recipes": {
                     "Example Item": {

@@ -61,6 +61,10 @@ class CraftingData(TypedDict):
     item: str
     end_date: str
 
+class ForgingData(TypedDict):
+    user_id: int
+    item: str
+    end_date: str
 
 class data_manager:
     __data: dict[str, str] = {}
@@ -174,6 +178,14 @@ class data_manager:
 
         await cls.db_connection.execute(
             """CREATE TABLE IF NOT EXISTS crafting (
+                user_id bigint PRIMARY KEY,
+                item TEXT,
+                end_date TEXT
+            );"""
+        )
+
+        await cls.db_connection.execute(
+            """CREATE TABLE IF NOT EXISTS forging (
                 user_id bigint PRIMARY KEY,
                 item TEXT,
                 end_date TEXT
@@ -702,6 +714,47 @@ class data_manager:
         async with cls.db_connection.acquire():
             return await cls.db_connection.fetchrow(
                 "SELECT * FROM crafting WHERE user_id = $1", user_id
+            )
+        
+    @classmethod
+    async def forging_check(cls, user_id: int) -> None:
+        async with cls.db_connection.acquire():
+            craftingexists = await cls.db_connection.fetchval(
+                "SELECT EXISTS (SELECT 1 FROM forging WHERE user_id = $1)", user_id
+            )
+
+            if not craftingexists:
+                await cls.add_forging_data(cls, user_id)
+            
+    async def add_forging_data(cls, user_id: int) -> None:
+        async with cls.db_connection.acquire():
+            await cls.db_connection.execute(
+                "INSERT INTO forging (user_id) VALUES ($1)", user_id
+            )
+
+    @classmethod
+    async def add_forging(cls, user_id: int, item: str, minutes: int) -> None:
+        await cls.forging_check(user_id)
+        async with cls.db_connection.acquire():
+            end_date = discord.utils.utcnow() + datetime.timedelta(minutes=minutes)
+            await cls.db_connection.execute(
+                "UPDATE forging SET item = $1, end_date = $2 WHERE user_id = $3", item, end_date.isoformat(), user_id
+            )
+        
+    @classmethod
+    async def delete_forging(cls, user_id: int) -> None:
+        await cls.forging_check(user_id)
+        async with cls.db_connection.acquire():
+            await cls.db_connection.execute(
+                "UPDATE forging SET item = NULL, end_date = NULL WHERE user_id = $1", user_id
+            )
+    
+    @classmethod
+    async def get_user_forging(cls, user_id: int) -> list[ForgingData]:
+        await cls.forging_check(user_id)
+        async with cls.db_connection.acquire():
+            return await cls.db_connection.fetchrow(
+                "SELECT * FROM forging WHERE user_id = $1", user_id
             )
 
 async def main():
