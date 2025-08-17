@@ -5,6 +5,7 @@ from discord.ext import commands
 
 from utils import data_manager, GiveawayData
 
+
 class giveaway_listeners(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -184,6 +185,7 @@ class giveaway_listeners(commands.Cog):
             )
         else:
             return
-        
+
+
 async def setup(bot: commands.AutoShardedBot):
     await bot.add_cog(giveaway_listeners(bot))

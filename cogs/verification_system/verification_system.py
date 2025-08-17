@@ -70,15 +70,15 @@ class verification(commands.GroupCog):
     @app_commands.checks.has_permissions(administrator=True)
     async def disable_verification(self, interaction: discord.Interaction):
         guild_data: GuildData = await data_manager.get_guild_data(interaction.guild.id)
-        verification_channel: GuildData = await data_manager.get_guild_data(interaction.guild.id)[
-            "verification_channel_id"
-        ]
+        verification_channel: GuildData = await data_manager.get_guild_data(
+            interaction.guild.id
+        )["verification_channel_id"]
         verification_logs_channel: GuildData = await data_manager.get_guild_data(
             interaction.guild.id
         )["verification_logs_channel_id"]
-        unverified_role: GuildData = await data_manager.get_guild_data(interaction.guild.id)[
-            "unverified_role_id"
-        ]
+        unverified_role: GuildData = await data_manager.get_guild_data(
+            interaction.guild.id
+        )["unverified_role_id"]
 
         if (
             guild_data["verification_channel_id"]

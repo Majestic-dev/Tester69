@@ -116,7 +116,9 @@ class giveaway_leave_view(discord.ui.View):
     async def leave_giveaway(
         self, interaction: discord.Interaction, button: discord.ui.Button
     ):
-        giveaway_data: GiveawayData = await data_manager.get_giveaway_data(self.giveaway_id)
+        giveaway_data: GiveawayData = await data_manager.get_giveaway_data(
+            self.giveaway_id
+        )
         if interaction.user.id in giveaway_data["participants"]:
             giveaway_data["participants"].remove(interaction.user.id)
             await data_manager.edit_giveaway_data(
@@ -146,7 +148,9 @@ class giveaway_views(discord.ui.View):
     async def join_giveaway(
         self, interaction: discord.Interaction, button: discord.ui.Button
     ):
-        giveaway_data: GiveawayData = await data_manager.get_giveaway_data(interaction.message.id)
+        giveaway_data: GiveawayData = await data_manager.get_giveaway_data(
+            interaction.message.id
+        )
         if (
             giveaway_data["participants"] is None
             or interaction.user.id not in giveaway_data["participants"]
@@ -159,10 +163,7 @@ class giveaway_views(discord.ui.View):
                 content="Successfully entered the giveaway!", ephemeral=True
             )
 
-            self.bot.dispatch(
-                "giveaway_join",
-                interaction.message.id
-            )
+            self.bot.dispatch("giveaway_join", interaction.message.id)
         elif interaction.user.id in giveaway_data["participants"]:
             return await interaction.response.send_message(
                 content="You have already entered this giveaway!",
@@ -178,7 +179,9 @@ class giveaway_views(discord.ui.View):
     async def view_entrants(
         self, interaction: discord.Interaction, button: discord.ui.Button
     ):
-        giveaway_data: GiveawayData = await data_manager.get_giveaway_data(interaction.message.id)
+        giveaway_data: GiveawayData = await data_manager.get_giveaway_data(
+            interaction.message.id
+        )
         if giveaway_data:
             if len(giveaway_data["participants"]) > 0:
                 embeds = []
@@ -206,6 +209,7 @@ class giveaway_views(discord.ui.View):
                 content="Giveaway not found!", ephemeral=True
             )
 
+
 class giveaway(commands.GroupCog):
     def __init__(self, bot):
         self.bot = bot
@@ -214,11 +218,11 @@ class giveaway(commands.GroupCog):
     @app_commands.guild_only()
     @app_commands.checks.has_permissions(manage_guild=True)
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.guild.id))
-    @app_commands.describe(host="Host of the giveaway (leave blank if you are the host)")
+    @app_commands.describe(
+        host="Host of the giveaway (leave blank if you are the host)"
+    )
     async def giveaway_create(
-        self,
-        interaction: discord.Interaction,
-        host: Optional[discord.User] = None
+        self, interaction: discord.Interaction, host: Optional[discord.User] = None
     ) -> None:
         if host == None:
             host = interaction.user
@@ -234,7 +238,9 @@ class giveaway(commands.GroupCog):
     ) -> None:
         if giveaway_id.isnumeric():
             if await data_manager.get_giveaway_data(int(giveaway_id)):
-                giveaway_data: GiveawayData = await data_manager.get_giveaway_data(int(giveaway_id))
+                giveaway_data: GiveawayData = await data_manager.get_giveaway_data(
+                    int(giveaway_id)
+                )
                 if giveaway_data["ended"]:
                     return await interaction.response.send_message(
                         f"Giveaway already ended!", ephemeral=True
@@ -242,11 +248,13 @@ class giveaway(commands.GroupCog):
                 if len(giveaway_data["participants"]) < giveaway_data["winner_amount"]:
                     if giveaway_data["winner_amount"] > 1:
                         return await interaction.response.send_message(
-                            f"There are not enough participants to select winners!", ephemeral=True
+                            f"There are not enough participants to select winners!",
+                            ephemeral=True,
                         )
                     else:
                         return await interaction.response.send_message(
-                            f"There are not enough participants to select a winner!", ephemeral=True
+                            f"There are not enough participants to select a winner!",
+                            ephemeral=True,
                         )
                 await data_manager.edit_giveaway_data(int(giveaway_id), "ended", True)
                 await data_manager.edit_giveaway_data(
@@ -254,9 +262,7 @@ class giveaway(commands.GroupCog):
                     "end_date",
                     discord.utils.utcnow().isoformat(),
                 )
-                self.bot.dispatch(
-                    "manual_giveaway_end", int(giveaway_id)
-                )
+                self.bot.dispatch("manual_giveaway_end", int(giveaway_id))
                 await interaction.response.send_message(
                     f"Giveaway ended!", ephemeral=True
                 )
@@ -284,7 +290,9 @@ class giveaway(commands.GroupCog):
     ) -> None:
         if giveaway_id.isnumeric():
             if await data_manager.get_giveaway_data(int(giveaway_id)):
-                giveaway_data: GiveawayData = await data_manager.get_giveaway_data(int(giveaway_id))
+                giveaway_data: GiveawayData = await data_manager.get_giveaway_data(
+                    int(giveaway_id)
+                )
                 if giveaway_data["ended"]:
                     if user is None:
                         if len(giveaway_data["winners"]) > 0:
@@ -333,6 +341,7 @@ class giveaway(commands.GroupCog):
             await interaction.response.send_message(
                 f"Invalid giveaway ID!", ephemeral=True
             )
+
 
 async def setup(bot: commands.AutoShardedBot):
     await bot.add_cog(giveaway(bot))

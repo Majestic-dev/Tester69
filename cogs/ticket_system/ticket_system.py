@@ -248,7 +248,9 @@ class channel_dropdown(discord.ui.ChannelSelect):
 
     async def callback(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
-        panel_data: PanelData = await data_manager.get_panel_data(self.interaction.message.id)
+        panel_data: PanelData = await data_manager.get_panel_data(
+            self.interaction.message.id
+        )
         channel = self.interaction.guild.get_channel(int(interaction.data["values"][0]))
         panel = await channel.send(
             embed=discord.Embed(
@@ -498,7 +500,7 @@ class closed_ticket_views(discord.ui.View):
                 description=f"Ticket reopened by {interaction.user.mention}",
                 colour=discord.Colour.green(),
             ),
-            view=ticket_views(self.bot, self.panel_id, self.user_id)
+            view=ticket_views(self.bot, self.panel_id, self.user_id),
         )
 
     @discord.ui.button(
@@ -618,7 +620,9 @@ class panel_views(discord.ui.View):
     async def create_ticket(
         self, interaction: discord.Interaction, button: discord.ui.Button
     ):
-        panel_data: PanelData = await data_manager.get_panel_data(interaction.message.id)
+        panel_data: PanelData = await data_manager.get_panel_data(
+            interaction.message.id
+        )
 
         if panel_data == None:
             return await interaction.response.send_message(
@@ -756,7 +760,9 @@ class panel_creation_views(discord.ui.View):
                 ),
                 ephemeral=True,
             )
-        panel_data: PanelData = await data_manager.get_panel_data(interaction.message.id)
+        panel_data: PanelData = await data_manager.get_panel_data(
+            interaction.message.id
+        )
         if panel_data["panel_moderators"]:
             await interaction.message.delete()
             await interaction.response.send_message(
@@ -961,7 +967,9 @@ class ticket_system(commands.GroupCog):
             panel_id = await data_manager.get_panel_id_by_ticket_id(
                 interaction.channel.id
             )
-            ticket = await data_manager.get_ticket_data(panel_id, interaction.channel.id)
+            ticket = await data_manager.get_ticket_data(
+                panel_id, interaction.channel.id
+            )
             if ticket["closed"]:
                 return await interaction.response.send_message(
                     embed=discord.Embed(
@@ -1027,7 +1035,9 @@ class ticket_system(commands.GroupCog):
             panel_id = await data_manager.get_panel_id_by_ticket_id(
                 interaction.channel.id
             )
-            ticket = await data_manager.get_ticket_data(panel_id, interaction.channel.id)
+            ticket = await data_manager.get_ticket_data(
+                panel_id, interaction.channel.id
+            )
             if not ticket["closed"]:
                 return await interaction.response.send_message(
                     embed=discord.Embed(
@@ -1049,7 +1059,7 @@ class ticket_system(commands.GroupCog):
                         description=f"Ticket reopened by {interaction.user.mention}",
                         colour=discord.Colour.green(),
                     ),
-                    view=ticket_views(self.bot, panel_id, ticket["ticket_creator"])
+                    view=ticket_views(self.bot, panel_id, ticket["ticket_creator"]),
                 )
         else:
             return await interaction.response.send_message(
@@ -1099,6 +1109,7 @@ class ticket_system(commands.GroupCog):
                     colour=discord.Colour.red(),
                 )
             )
-        
+
+
 async def setup(bot: commands.AutoShardedBot):
     await bot.add_cog(ticket_system(bot))

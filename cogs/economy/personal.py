@@ -16,7 +16,7 @@ async def calculate_remaining_xp(level: int, xp: int) -> str:
     required_xp = levels[str(level + 1)]["requiredXP"]
     remaining_xp = required_xp - xp
 
-    return f"{required_xp-remaining_xp}/{required_xp}"
+    return f"{required_xp - remaining_xp}/{required_xp}"
 
 
 async def find_user_level(user_id: int):
@@ -31,6 +31,7 @@ async def find_user_level(user_id: int):
         elif user_data["mining_xp"] == required_xp:
             return int(level)
     return 50
+
 
 class personal(commands.Cog):
     def __init__(self, bot):
@@ -101,11 +102,11 @@ class personal(commands.Cog):
 
         embed.add_field(
             name="Cooldowns",
-            value=f"{"\n".join(remaining_cooldowns) if remaining_cooldowns else 'No active cooldowns'}",
+            value=f"{'\n'.join(remaining_cooldowns) if remaining_cooldowns else 'No active cooldowns'}",
         )
 
         await interaction.response.send_message(embed=embed)
-    
+
     @app_commands.command(
         name="inventory", description="Check the contents of your inventory"
     )
@@ -145,13 +146,14 @@ class personal(commands.Cog):
             inv_embed.set_author(
                 name=interaction.user.name
                 + "'s inventory"
-                + f" page {i//10 + 1}/"
+                + f" page {i // 10 + 1}/"
                 + str(len(items) // 10 + 1),
                 icon_url=interaction.user.display_avatar,
             )
             embeds.append(inv_embed)
 
         await paginator.Simple().paginate(interaction, embeds)
+
 
 async def setup(bot: commands.AutoShardedBot):
     await bot.add_cog(personal(bot))

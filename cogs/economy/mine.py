@@ -125,11 +125,12 @@ class mining_buttons(discord.ui.View):
                     await asyncio.sleep(10)
                     self.closed = True
 
-
                     if self.mined_ores == len(self.ore_positions):
                         pass
                     else:
-                        user_data: UserData = await data_manager.get_user_data(interaction.user.id)
+                        user_data: UserData = await data_manager.get_user_data(
+                            interaction.user.id
+                        )
                         mining_xp = user_data["mining_xp"]
                         if mining_xp == None:
                             mining_xp = 0
@@ -143,9 +144,12 @@ class mining_buttons(discord.ui.View):
                                 interaction.user.id, ore, quantity
                             )
 
-                        f = [discord.File(
-                            "assets/collapsing_mine.png", filename="collapsing_mine.png"
-                        )]
+                        f = [
+                            discord.File(
+                                "assets/collapsing_mine.png",
+                                filename="collapsing_mine.png",
+                            )
+                        ]
                         await interaction.edit_original_response(
                             attachments=f,
                             embed=discord.Embed(
@@ -153,7 +157,7 @@ class mining_buttons(discord.ui.View):
                                 description=f"As the {self.mine_name} crumbles down, you are forced to leave.",
                                 colour=discord.Colour.from_rgb(139, 69, 19),
                             ).set_image(url="attachment://collapsing_mine.png"),
-                            view=None
+                            view=None,
                         )
 
                 if self.mined_ores == len(self.ore_positions):
@@ -163,10 +167,12 @@ class mining_buttons(discord.ui.View):
                             description="You have mined all the ores in the mine, you are forced to leave.",
                             colour=discord.Colour.from_rgb(139, 69, 19),
                         ),
-                        view=None
+                        view=None,
                     )
 
-                    user_data: UserData = await data_manager.get_user_data(interaction.user.id)
+                    user_data: UserData = await data_manager.get_user_data(
+                        interaction.user.id
+                    )
                     mining_xp = user_data["mining_xp"]
                     if mining_xp == None:
                         mining_xp = 0
@@ -217,7 +223,7 @@ class choose_mine(discord.ui.View):
             view = mining_buttons(self.bot, mine)
             await interaction.response.edit_message(
                 embed=discord.Embed(
-                    description=f"You have entered the {mine}, here you can find mostly {self.mines[mine]["mainOre"]}, but maybe some {self.mines[mine]['secondaryOre']} as well.",
+                    description=f"You have entered the {mine}, here you can find mostly {self.mines[mine]['mainOre']}, but maybe some {self.mines[mine]['secondaryOre']} as well.",
                     colour=discord.Colour.from_rgb(139, 69, 19),
                 ),
                 attachments=[],
@@ -240,9 +246,7 @@ class mine(commands.Cog):
             "mine",
             1800,
         ):
-            f = discord.File(
-                "assets/mine_background.jpg", filename="mining.jpg"
-            )
+            f = discord.File("assets/mine_background.jpg", filename="mining.jpg")
             view = choose_mine(self.bot)
             await interaction.response.send_message(
                 file=f,
@@ -253,6 +257,7 @@ class mine(commands.Cog):
                 view=view,
             )
             view.response = await interaction.original_response()
+
 
 async def setup(bot: commands.AutoShardedBot):
     await bot.add_cog(mine(bot))

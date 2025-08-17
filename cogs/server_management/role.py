@@ -140,5 +140,6 @@ class role(commands.GroupCog):
         )
         await user.remove_roles(role)
 
+
 async def setup(bot: commands.AutoShardedBot):
     await bot.add_cog(role(bot))

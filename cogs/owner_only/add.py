@@ -12,11 +12,13 @@ class add(commands.Cog):
     def __init__(self, bot: commands.AutoShardedBot):
         self.bot = bot
 
-    @app_commands.command(name="add_balance", description="Add set amount of 🪙 to your balance")
+    @app_commands.command(
+        name="add_balance", description="Add set amount of 🪙 to your balance"
+    )
     @app_commands.check(is_owner)
     @app_commands.describe(
         amount="The amount you want to add to someone's balance",
-        member="The user whose balance you want to add to"
+        member="The user whose balance you want to add to",
     )
     async def add_balance(
         self,
@@ -49,16 +51,16 @@ class add(commands.Cog):
                     f"<:white_checkmark:1096793014287995061> Added {amount} 🪙 "
                 )
                 + (
-                    f"to {member.mention}'s bank. Their new balance is {user_data["balance"] + amount} 🪙"
+                    f"to {member.mention}'s bank. Their new balance is {user_data['balance'] + amount} 🪙"
                     if member
-                    else f"to your bank. Your new balance is {user_data["balance"] + amount} 🪙"
+                    else f"to your bank. Your new balance is {user_data['balance'] + amount} 🪙"
                 ),
                 colour=discord.Colour.green(),
             )
         )
-    
+
     async def items_autocomplete(
-            self, interaction: discord.Interaction, current: str
+        self, interaction: discord.Interaction, current: str
     ) -> list[app_commands.Choice[str]]:
         items = data_manager.get("economy", "items").keys()
 
@@ -67,14 +69,14 @@ class add(commands.Cog):
             for item in items
             if item.lower().startswith(current.lower()) or len(current) < 1
         ]
-    
+
     @app_commands.command(name="add_item", description="Add an item to your inventory")
     @app_commands.check(is_owner)
     @app_commands.autocomplete(item_name=items_autocomplete)
     @app_commands.describe(
         item_name="The item to add to the inventory",
         amount="Amount of the item to add to the inventory",
-        member="The user whose inventory to add the item in to"
+        member="The user whose inventory to add the item in to",
     )
     async def add_item(
         self,
@@ -104,7 +106,7 @@ class add(commands.Cog):
                 embed=discord.Embed(
                     description=("<:white_checkmark:1096793014287995061> ")
                     + ("Added " if amount >= 1 else "Removed ")
-                    + (f"{abs(amount)} {items[item_name.lower()]["emoji"]} {item_name}")
+                    + (f"{abs(amount)} {items[item_name.lower()]['emoji']} {item_name}")
                     + ("s to your inventory" if amount > 1 else " to your inventory"),
                     colour=discord.Colour.green(),
                 )
@@ -115,7 +117,7 @@ class add(commands.Cog):
                 embed=discord.Embed(
                     description=("<:white_checkmark:1096793014287995061>")
                     + ("Added " if amount >= 1 else "Removed ")
-                    + (f"{abs(amount)} {items[item_name.lower()]["emoji"]} {item_name}")
+                    + (f"{abs(amount)} {items[item_name.lower()]['emoji']} {item_name}")
                     + (
                         f"s to {member.mention}'s inventory"
                         if amount > 1
@@ -124,6 +126,7 @@ class add(commands.Cog):
                     colour=discord.Colour.green(),
                 )
             )
-        
+
+
 async def setup(bot: commands.AutoShardedBot):
     await bot.add_cog(add(bot))

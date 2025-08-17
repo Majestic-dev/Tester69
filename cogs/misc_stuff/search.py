@@ -11,10 +11,11 @@ from discord import app_commands
 
 from utils import data_manager, paginator
 
+
 class search(commands.GroupCog):
     def __init__(self, bot):
         self.bot = bot
-    
+
     @app_commands.command(
         name="giphy", description="Search a gif by keyword from Giphy"
     )
@@ -28,7 +29,7 @@ class search(commands.GroupCog):
 
         if search != None:
             search.replace(" ", "+")
-        
+
         print(data_manager.get("config", "giphy_key"))
 
         async with aiohttp.ClientSession() as session:
@@ -51,9 +52,7 @@ class search(commands.GroupCog):
                             url=data["data"][gif_choice]["images"]["original"]["url"]
                         )
                     else:
-                        embed.set_image(
-                            url=data["data"]["images"]["original"]["url"]
-                        )
+                        embed.set_image(url=data["data"]["images"]["original"]["url"])
             except IndexError:
                 response = await session.get(
                     f"https://api.giphy.com/v1/gifs/random?api_key="
@@ -171,6 +170,7 @@ class search(commands.GroupCog):
                 embed.description = "<:white_cross:1096791282023669860> Couldn't find a GitHub user with that name"
 
         await interaction.response.send_message(embed=embed, ephemeral=True)
+
 
 async def setup(bot: commands.AutoShardedBot):
     await bot.add_cog(search(bot))

@@ -178,5 +178,6 @@ class activities(commands.Cog):
                     )
                 )
 
+
 async def setup(bot: commands.AutoShardedBot):
     await bot.add_cog(activities(bot))

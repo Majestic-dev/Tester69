@@ -14,7 +14,7 @@ from cogs.giveaway_system.giveaway_commands import giveaway_views
 from cogs.ticket_system.ticket_system import (
     closed_ticket_views,
     panel_views,
-    ticket_views
+    ticket_views,
 )
 
 data_manager.setup(
@@ -43,8 +43,8 @@ data_manager.setup(
                         "buy price": 0,
                         "emoji": "Use a discord emoji here",
                         "emoji_id": 0,
-                        "crafting_time": 1, # How many minutes to craft this item (Not a required field)
-                        "smelting_time": 1 # How many minutes to forge this item (Not a mandatory field)
+                        "crafting_time": 1,  # How many minutes to craft this item (Not a required field)
+                        "smelting_time": 1,  # How many minutes to forge this item (Not a mandatory field)
                     },
                 },
                 "hunting items": {
@@ -62,23 +62,17 @@ data_manager.setup(
             "data/recipes/crafting_recipes.json",
             {
                 "recipes": {
-                    "Example Item": {
-                        "Example resource": 1,
-                        "Example resource 2": 2
-                    }
+                    "Example Item": {"Example resource": 1, "Example resource 2": 2}
                 }
-            }
+            },
         ),
         (
             "data/recipes/forging_recipes.json",
             {
                 "recipes": {
-                    "Example Item": {
-                        "Example resource": 1,
-                        "Example resource 2": 2
-                    }
+                    "Example Item": {"Example resource": 1, "Example resource 2": 2}
                 }
-            }
+            },
         ),
         (
             "data/mine/mines.json",
@@ -110,13 +104,12 @@ data_manager.setup(
     ]
 )
 
+
 class Bot(commands.Bot):
     def __init__(self) -> None:
         intents = discord.Intents.all()
         super().__init__(
-            command_prefix="'",
-            owner_id=705435835306213418,
-            intents=intents
+            command_prefix="'", owner_id=705435835306213418, intents=intents
         )
 
     async def setup_hook(self) -> None:
@@ -125,7 +118,9 @@ class Bot(commands.Bot):
                 if not file.endswith(".py"):
                     continue
 
-                await self.load_extension(os.path.join(root, file[:-3]).replace(os.sep, "."))
+                await self.load_extension(
+                    os.path.join(root, file[:-3]).replace(os.sep, ".")
+                )
         await bot.tree.sync()
 
         self.add_view(giveaway_views(bot))
@@ -150,12 +145,10 @@ class Bot(commands.Bot):
         except Exception as e:
             print(e)
 
+
 bot = Bot()
-handler = logging.FileHandler(
-    filename="data/discord.log",
-    encoding="utf-8",
-    mode="w"
-)
+handler = logging.FileHandler(filename="data/discord.log", encoding="utf-8", mode="w")
+
 
 @bot.tree.error
 async def on_app_command_error(
@@ -216,12 +209,14 @@ async def on_command_error(ctx: commands.Context, error: commands.CommandError):
                 colour=discord.Colour.red(),
             )
         )
+
+
 async def main():
     await data_manager.initialise()
-    
+
     discord.utils.setup_logging(handler=handler, level=logging.INFO)
     await bot.start(data_manager.get("config", "token"))
 
+
 if __name__ == "__main__":
     asyncio.run(main())
-    

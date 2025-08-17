@@ -5,6 +5,7 @@ from discord.ext import commands
 
 from discord import app_commands
 
+
 class slowmode(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -43,6 +44,7 @@ class slowmode(commands.Cog):
                 colour=discord.Colour.green(),
             )
         )
+
 
 async def setup(bot: commands.AutoShardedBot):
     await bot.add_cog(slowmode(bot))

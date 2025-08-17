@@ -6,10 +6,10 @@ from discord.ext import commands
 
 from utils import data_manager, UserData
 
+
 class banking(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-
 
     @app_commands.command(name="pay", description="Pay someone some 🪙")
     @app_commands.checks.cooldown(1, 600, key=lambda i: (i.user.id))
@@ -58,11 +58,10 @@ class banking(commands.Cog):
 
         await interaction.response.send_message(
             embed=discord.Embed(
-                description=f'<:white_checkmark:1096793014287995061> Paid {user.mention} {amount} 🪙. Your new balance is {payer_data["balance"]} 🪙',
+                description=f"<:white_checkmark:1096793014287995061> Paid {user.mention} {amount} 🪙. Your new balance is {payer_data['balance']} 🪙",
                 colour=discord.Colour.green(),
             )
         )
-
 
     @app_commands.command(name="balance", description="Check your 🪙 balance")
     @app_commands.checks.cooldown(1, 20, key=lambda i: (i.user.id))
@@ -79,7 +78,7 @@ class banking(commands.Cog):
                 embed=discord.Embed(
                     title=f"{interaction.user}'s Balance",
                     description=(
-                        f'**💵 Wallet:** {user_data["balance"]} 🪙\n**🏦 Bank:** {user_data["bank"]} 🪙'
+                        f"**💵 Wallet:** {user_data['balance']} 🪙\n**🏦 Bank:** {user_data['bank']} 🪙"
                     ),
                     colour=discord.Colour.green(),
                 )
@@ -90,7 +89,7 @@ class banking(commands.Cog):
                 embed=discord.Embed(
                     title=f"{user}'s Balance",
                     description=(
-                        f'**💵 Wallet:** {user_data["balance"]} 🪙\n**🏦 Bank:** {user_data["bank"]} 🪙'
+                        f"**💵 Wallet:** {user_data['balance']} 🪙\n**🏦 Bank:** {user_data['bank']} 🪙"
                     ),
                     colour=discord.Colour.green(),
                 )
@@ -207,6 +206,7 @@ class banking(commands.Cog):
                 colour=discord.Colour.green(),
             )
         )
+
 
 async def setup(bot: commands.AutoShardedBot):
     await bot.add_cog(banking(bot))

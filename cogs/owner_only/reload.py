@@ -6,6 +6,7 @@ from discord.ext import commands
 
 from utils import is_owner
 
+
 class reload_cogs(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -19,7 +20,7 @@ class reload_cogs(commands.Cog):
                     continue
 
                 ext_name = os.path.join(root, file[:-3]).replace(os.sep, ".")
-                
+
                 if (ext_name) in self.bot.extensions:
                     await self.bot.unload_extension(ext_name)
                     await self.bot.load_extension(ext_name)
@@ -31,6 +32,7 @@ class reload_cogs(commands.Cog):
             )
         )
         return await self.bot.tree.sync()
-    
+
+
 async def setup(bot: commands.AutoShardedBot):
     await bot.add_cog(reload_cogs(bot))

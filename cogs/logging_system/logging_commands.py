@@ -29,7 +29,9 @@ class logging_cmds(commands.GroupCog):
         blocked_words_channel: Optional[discord.TextChannel] = None,
     ):
         if blocked_words_channel == None:
-            data: FilteredWordsData = await data_manager.get_filter_data(interaction.guild.id)
+            data: FilteredWordsData = await data_manager.get_filter_data(
+                interaction.guild.id
+            )
             if data["channel_id"] != None:
                 await data_manager.edit_filter_data(
                     interaction.guild.id, "channel_id", None
@@ -89,6 +91,7 @@ class logging_cmds(commands.GroupCog):
                     colour=discord.Colour.red(),
                 ),
             )
-        
+
+
 async def setup(bot: commands.AutoShardedBot):
     await bot.add_cog(logging_cmds(bot))

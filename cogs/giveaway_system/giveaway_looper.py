@@ -5,6 +5,7 @@ from discord.ext import commands, tasks
 
 from utils import data_manager
 
+
 class giveaway_looper(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -62,7 +63,7 @@ class giveaway_looper(commands.Cog):
                                 else "Winners: No Winners"
                             ),
                         ).set_footer(
-                            text=f'"/giveaway reroll {giveaway['id']}" to reroll the giveaway winners',
+                            text=f'"/giveaway reroll {giveaway["id"]}" to reroll the giveaway winners',
                         ),
                     )
                     if len(winners) > 0:
@@ -122,7 +123,7 @@ class giveaway_looper(commands.Cog):
                             else "Winners: No Winners"
                         ),
                     ).set_footer(
-                        text=f'"/giveaway reroll {next_giveaway['id']}" to reroll the giveaway winners'
+                        text=f'"/giveaway reroll {next_giveaway["id"]}" to reroll the giveaway winners'
                     ),
                 )
                 if len(winners) > 0:
@@ -137,6 +138,7 @@ class giveaway_looper(commands.Cog):
                 return
         else:
             return
+
 
 async def setup(bot: commands.AutoShardedBot):
     await bot.add_cog(giveaway_looper(bot))

@@ -97,5 +97,6 @@ class timed_claims(commands.Cog):
                 )
             )
 
+
 async def setup(bot: commands.AutoShardedBot):
     await bot.add_cog(timed_claims(bot))

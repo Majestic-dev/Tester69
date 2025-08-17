@@ -7,14 +7,20 @@ from discord.ext import commands
 
 from utils import data_manager, is_owner, UserData
 
+
 class skip_cooldown(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @app_commands.command(name="skipcooldown", description="Skip the cooldown of a command")
+    @app_commands.command(
+        name="skipcooldown", description="Skip the cooldown of a command"
+    )
     @app_commands.check(is_owner)
     async def skipcooldown(
-        self, interaction: discord.Interaction, command: str, member: Optional[discord.Member] = None
+        self,
+        interaction: discord.Interaction,
+        command: str,
+        member: Optional[discord.Member] = None,
     ):
         if member == None:
             if command == "all":
@@ -83,6 +89,7 @@ class skip_cooldown(commands.Cog):
                     colour=discord.Colour.green(),
                 )
             )
-        
+
+
 async def setup(bot: commands.AutoShardedBot):
     await bot.add_cog(skip_cooldown(bot))

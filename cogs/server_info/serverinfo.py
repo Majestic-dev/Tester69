@@ -72,9 +72,7 @@ class server(commands.GroupCog):
     def __init__(self, bot):
         self.bot = bot
 
-    @app_commands.command(
-        name="info", description="Get information about the server"
-    )
+    @app_commands.command(name="info", description="Get information about the server")
     @app_commands.guild_only()
     @app_commands.checks.cooldown(1, 20, key=lambda i: (i.guild.id, i.user.id))
     async def server_info(
@@ -285,7 +283,9 @@ class server(commands.GroupCog):
         embed.set_image(url=user.avatar)
         await interaction.response.send_message(embed=embed, ephemeral=ephemeral)
 
-    @app_commands.command(name="channel_info", description="Get information about a channel")
+    @app_commands.command(
+        name="channel_info", description="Get information about a channel"
+    )
     @app_commands.guild_only()
     @app_commands.checks.cooldown(1, 20, key=lambda i: (i.guild.id, i.user.id))
     @app_commands.describe(channel="The channel to get information about")
@@ -312,6 +312,7 @@ class server(commands.GroupCog):
         embed.set_thumbnail(url=channel.guild.icon)
 
         await interaction.response.send_message(embed=embed, ephemeral=ephemeral)
+
 
 async def setup(bot: commands.AutoShardedBot):
     await bot.add_cog(server(bot))

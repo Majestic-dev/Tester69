@@ -31,7 +31,6 @@ async def cooldown_check(
             await data_manager.add_cooldown(user_id, command, cooldown_time)
             return True
 
-async def is_owner(
-    interaction: discord.Interaction
-):
+
+async def is_owner(interaction: discord.Interaction):
     return interaction.user.id == 705435835306213418

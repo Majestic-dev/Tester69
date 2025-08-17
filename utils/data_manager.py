@@ -9,6 +9,7 @@ from typing import Any, TypedDict
 import asyncpg
 import discord
 
+
 class UserData(TypedDict):
     id: int
     inventory: dict[str, int]
@@ -17,6 +18,7 @@ class UserData(TypedDict):
     bank: int
     mining_xp: int
     crafting: dict
+
 
 class GuildData(TypedDict):
     id: int
@@ -28,11 +30,13 @@ class GuildData(TypedDict):
     welcome_message: str
     warned_users: dict
 
+
 class FilteredWordsData(TypedDict):
     guild_id: int
     channel_id: int
     blacklisted_words: list[str]
     whitelist: list[int]
+
 
 class GiveawayData(TypedDict):
     id: int
@@ -47,6 +51,7 @@ class GiveawayData(TypedDict):
     winners: list[int]
     ended: bool
 
+
 class PanelData(TypedDict):
     id: int
     channel_id: int
@@ -56,15 +61,18 @@ class PanelData(TypedDict):
     panel_description: str
     panel_moderators: list[int]
 
+
 class CraftingData(TypedDict):
     user_id: int
     item: str
     end_date: str
 
+
 class ForgingData(TypedDict):
     user_id: int
     item: str
     end_date: str
+
 
 class data_manager:
     __data: dict[str, str] = {}
@@ -106,7 +114,9 @@ class data_manager:
                 database=data_manager.get("config", "postgres_database"),
             )
         except:
-            quit("Please configure the config.json (data/config.json) file to run the bot.")
+            quit(
+                "Please configure the config.json (data/config.json) file to run the bot."
+            )
 
         await cls.db_connection.execute(
             """CREATE TABLE IF NOT EXISTS users (
@@ -684,7 +694,7 @@ class data_manager:
 
             if not craftingexists:
                 await cls.add_crafting_data(cls, user_id)
-            
+
     async def add_crafting_data(cls, user_id: int) -> None:
         async with cls.db_connection.acquire():
             await cls.db_connection.execute(
@@ -697,17 +707,21 @@ class data_manager:
         async with cls.db_connection.acquire():
             end_date = discord.utils.utcnow() + datetime.timedelta(minutes=minutes)
             await cls.db_connection.execute(
-                "UPDATE crafting SET item = $1, end_date = $2 WHERE user_id = $3", item, end_date.isoformat(), user_id
+                "UPDATE crafting SET item = $1, end_date = $2 WHERE user_id = $3",
+                item,
+                end_date.isoformat(),
+                user_id,
             )
-        
+
     @classmethod
     async def delete_crafting(cls, user_id: int) -> None:
         await cls.crafting_check(user_id)
         async with cls.db_connection.acquire():
             await cls.db_connection.execute(
-                "UPDATE crafting SET item = NULL, end_date = NULL WHERE user_id = $1", user_id
+                "UPDATE crafting SET item = NULL, end_date = NULL WHERE user_id = $1",
+                user_id,
             )
-    
+
     @classmethod
     async def get_user_crafting(cls, user_id: int) -> list[CraftingData]:
         await cls.crafting_check(user_id)
@@ -715,7 +729,7 @@ class data_manager:
             return await cls.db_connection.fetchrow(
                 "SELECT * FROM crafting WHERE user_id = $1", user_id
             )
-        
+
     @classmethod
     async def forging_check(cls, user_id: int) -> None:
         async with cls.db_connection.acquire():
@@ -725,7 +739,7 @@ class data_manager:
 
             if not craftingexists:
                 await cls.add_forging_data(cls, user_id)
-            
+
     async def add_forging_data(cls, user_id: int) -> None:
         async with cls.db_connection.acquire():
             await cls.db_connection.execute(
@@ -738,17 +752,21 @@ class data_manager:
         async with cls.db_connection.acquire():
             end_date = discord.utils.utcnow() + datetime.timedelta(minutes=minutes)
             await cls.db_connection.execute(
-                "UPDATE forging SET item = $1, end_date = $2 WHERE user_id = $3", item, end_date.isoformat(), user_id
+                "UPDATE forging SET item = $1, end_date = $2 WHERE user_id = $3",
+                item,
+                end_date.isoformat(),
+                user_id,
             )
-        
+
     @classmethod
     async def delete_forging(cls, user_id: int) -> None:
         await cls.forging_check(user_id)
         async with cls.db_connection.acquire():
             await cls.db_connection.execute(
-                "UPDATE forging SET item = NULL, end_date = NULL WHERE user_id = $1", user_id
+                "UPDATE forging SET item = NULL, end_date = NULL WHERE user_id = $1",
+                user_id,
             )
-    
+
     @classmethod
     async def get_user_forging(cls, user_id: int) -> list[ForgingData]:
         await cls.forging_check(user_id)
@@ -757,8 +775,10 @@ class data_manager:
                 "SELECT * FROM forging WHERE user_id = $1", user_id
             )
 
+
 async def main():
     await data_manager.initialise()
+
 
 if __name__ == "__main__":
     asyncio.run(main())

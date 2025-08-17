@@ -377,7 +377,9 @@ class logging_listeners(commands.Cog):
         if message.channel.type == discord.channel.ChannelType.private:
             return
 
-        filtered_words_data: FilteredWordsData = await data_manager.get_filter_data(message.guild.id)
+        filtered_words_data: FilteredWordsData = await data_manager.get_filter_data(
+            message.guild.id
+        )
         words_in_blacklist = [
             re.sub(r"\W+", " ", word.lower()).strip()
             for word in filtered_words_data["blacklisted_words"]
@@ -408,7 +410,9 @@ class logging_listeners(commands.Cog):
 
         guild_data: GuildData = await data_manager.get_guild_data(after.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
-        filtered_words_data: FilteredWordsData = await data_manager.get_filter_data(after.guild.id)
+        filtered_words_data: FilteredWordsData = await data_manager.get_filter_data(
+            after.guild.id
+        )
         blocked_words_channel = self.bot.get_channel(filtered_words_data["channel_id"])
         content = after.content.lower()
 
@@ -538,7 +542,9 @@ class logging_listeners(commands.Cog):
 
         guild_data: GuildData = await data_manager.get_guild_data(message.guild.id)
         logs_channel = self.bot.get_channel(guild_data["logs_channel_id"])
-        filtered_words_data: FilteredWordsData = await data_manager.get_filter_data(message.guild.id)
+        filtered_words_data: FilteredWordsData = await data_manager.get_filter_data(
+            message.guild.id
+        )
         blocked_words_channel = self.bot.get_channel(filtered_words_data["channel_id"])
 
         if message.author.bot and message.channel != logs_channel:
@@ -692,6 +698,7 @@ class logging_listeners(commands.Cog):
         embed.set_author(name=channel.guild.name, icon_url=channel.guild.icon)
 
         await logs_channel.send(embed=embed)
+
 
 async def setup(bot: commands.AutoShardedBot):
     await bot.add_cog(logging_listeners(bot))

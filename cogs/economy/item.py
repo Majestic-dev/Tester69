@@ -221,7 +221,7 @@ class item(commands.GroupCog):
         )
         await interaction.response.send_message(
             embed=discord.Embed(
-                description=f"{interaction.user.mention} Bought {amount} **{economy_items[item.lower()]["emoji"]} {string.capwords(item.lower())}** and paid **{(int(amount) * price)}** 🪙",
+                description=f"{interaction.user.mention} Bought {amount} **{economy_items[item.lower()]['emoji']} {string.capwords(item.lower())}** and paid **{(int(amount) * price)}** 🪙",
                 colour=discord.Colour.from_rgb(43, 45, 49),
             )
             .set_author(
@@ -306,6 +306,7 @@ class item(commands.GroupCog):
         embed.set_thumbnail(url=emoji.url)
 
         await interaction.response.send_message(embed=embed)
+
 
 async def setup(bot: commands.AutoShardedBot):
     await bot.add_cog(item(bot))
