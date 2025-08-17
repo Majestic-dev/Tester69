@@ -107,10 +107,6 @@ python main.py
         * Added a new crafting system inspired by dank memer, which is fully customizeable through JSON files
         * Added a new forging system, which is fully customizeable through JSON files
 
-    - Database
-        * Added a separate database for the giveaways
-        * Added a function to create a database backup
-
     - Paginator
         * Stopped using the old paginator and created my own one
         * Paginator consists of 5 buttons, where the middle button acts as a "stop" or a "jump to page" button
