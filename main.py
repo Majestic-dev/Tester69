@@ -26,8 +26,6 @@ data_manager.setup(
                 "postgres_user": None,
                 "postgres_password": None,
                 "postgres_database": None,
-                "giphy_key": None,
-                "unsplash_key": None,
                 "weather_api_key": None,
             },
         ),

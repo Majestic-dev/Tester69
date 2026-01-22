@@ -17,57 +17,6 @@ class search(commands.GroupCog):
         self.bot = bot
 
     @app_commands.command(
-        name="giphy", description="Search a gif by keyword from Giphy"
-    )
-    @app_commands.checks.cooldown(1, 10, key=lambda i: (i.user.id))
-    @app_commands.describe(search="The keyword you want to search the Gif by")
-    async def search_gif(self, interaction: discord.Interaction, search: Optional[str]):
-        embed = discord.Embed(
-            title=(f"{search} Gif" if search != None else "Random Gif"),
-            colour=discord.Colour.green(),
-        )
-
-        if search != None:
-            search.replace(" ", "+")
-
-        print(data_manager.get("config", "giphy_key"))
-
-        async with aiohttp.ClientSession() as session:
-            try:
-                async with session.get(
-                    (
-                        f"https://api.giphy.com/v1/gifs/random?api_key="
-                        + data_manager.get("config", "giphy_key")
-                    )
-                    if search is None
-                    else (
-                        f"http://api.giphy.com/v1/gifs/search?q={search}&api_key="
-                        + data_manager.get("config", "giphy_key")
-                    )
-                ) as response:
-                    data = json.loads(await response.text())
-                    if search is not None:
-                        gif_choice = random.randint(0, 9)
-                        embed.set_image(
-                            url=data["data"][gif_choice]["images"]["original"]["url"]
-                        )
-                    else:
-                        embed.set_image(url=data["data"]["images"]["original"]["url"])
-            except IndexError:
-                response = await session.get(
-                    f"https://api.giphy.com/v1/gifs/random?api_key="
-                    + data_manager.get("config", "giphy_key")
-                )
-                data = json.loads(await response.text())
-                embed.set_image(url=data["data"]["images"]["original"]["url"])
-
-        embed.set_footer(
-            icon_url=interaction.user.avatar,
-            text=f"Requested by - {interaction.user} | Powered by Giphy API ❤️",
-        )
-        await interaction.response.send_message(embed=embed, ephemeral=True)
-
-    @app_commands.command(
         name="wikipedia", description="Get a definition from Wikipedia"
     )
     @app_commands.checks.cooldown(1, 10, key=lambda i: (i.user.id))
