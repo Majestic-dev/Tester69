@@ -25,8 +25,7 @@ data_manager.setup(
                 "token": None,
                 "postgres_user": None,
                 "postgres_password": None,
-                "postgres_database": None,
-                "weather_api_key": None,
+                "postgres_database": None
             },
         ),
         (
